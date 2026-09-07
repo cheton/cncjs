@@ -15,9 +15,10 @@
 - 其餘 server-state hooks 放在各 widget 的 `queries.js`；跨 widget 的 G-code HTTP mutation 放 `src/app/queries/gcode.js`，保留既有 API transport 與 payload。
 - 既有 Redux、controller、PubSub 維持即時機器狀態唯一來源，不把位置串流／run/pause/jog 改成輪詢或 queryFn。
 - `src/app/pages/Workspace/WidgetUIProvider.jsx` 以 widgetId 管理 fullscreen，並訂閱 config 中的 minimized；WidgetHost 傳 controlled chrome props，Workspace toolbar 直接 dispatch。Axes/Tool/Autolevel/Visualizer 的 domain state 各自保留，不做萬用 widget reducer。
-- Widget shell 是 domain composition，允許保留 `Widget.Header` 等結構；Buttons/Dropdown/Modal/GridSystem 等通用元件的最終 consumers 必須直接依賴 Tonic。
+- Widget shell 是 domain composition，允許保留 `Widget.Header` 等結構；Buttons/Dropdown/Modal/GridSystem 等通用元件的最終 consumers 必須直接依賴 Tonic。唯一待實證的 Button 例外是 CNCjs 色票／語意：若實際整合驗收證明 Tonic theme 與 style props 無法維持既有 CNCjs Button 表現，可在 `src/app/components/Button` 建立薄的 domain Button。它必須由 Tonic Button 實作、只封裝已驗證的 CNCjs token/語意，不能 re-export、包裝或保留 `react-bootstrap-buttons`。
 - Font Awesome 是現有圖示資產，不是本輪要淘汰的 UI component library；保留 `@fortawesome/*` 與既有 glyph，避免把視覺資產替換混入 class/query/widget 架構重構。只有新增的 Tonic control 已有一對一圖示且不改語意時可就地採用 Tonic icon。全面圖示統一另開工作。
 - `styled-components` 不符合此 repo 的 Stylus 慣例。每個被本輪觸及的 styled component 改成 Tonic style props 或 colocated Stylus；W3 要求 `src/app` 零 `styled-components` imports，確認最後 consumer 清空後才移除套件。
+- Bootstrap 系列不是相容性例外：所有直接 Bootstrap runtime package、CSS import 與本地 re-export 都必須由受支援的 Tonic UI primitives 取代。現有已確認的直接 package 是 `react-bootstrap-buttons`；F1 記錄 lockfile/consumer 基線，W3 以 package manifest、import graph 與功能驗收確認清零。這不排除上列以 Tonic 實作的 CNCjs domain Button。僅名稱包含 `bootstrap` 的 CNCjs saga 不屬於 UI library，不可誤刪。
 - `portal.jsx` 現在建立額外 React root，但 GlobalProvider 使用模組級 queryClient，cache 已共用。此輪先修正 createRoot import 並驗證共享 client；不強迫改造全域 modal orchestration。Tonic Portal 自動處理 modal DOM portal，不能誤以為 PortalManager 會繼承另一個 React root 的 widget context。
 
 ## 不可破壞的行為

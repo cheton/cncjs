@@ -2,11 +2,11 @@
 
 ## 現況
 
-- Mode: **plan_only / paused**。使用者目前授權 review 與更新計畫；沒有授權本次開始 migration implementation。
-- 執行角色已指定：Terra main loop + Luna implementation subagent，最多一個活躍 worker。Terra 唯一維護 task state 並 review；沿用 EXECUTION，不導入另一套 loop state。尚未派工。
-- Effort：Terra high；Luna high/max 依 EXECUTION 的 task matrix；需要獨立技術判斷時可派唯讀 Sol medium。尚未派 worker/advisor，沒有新增 blocker。
+- Mode: **implementation paused at F1 checkpoint**。使用者於 2026-09-07 授權開始第一階段，並要求在合適的 F1 checkpoint 停止；不可自動開始 H1。
+- 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 Luna high worker 已結束，主控已完成獨立 diff／命令 review。
+- F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline；尚未完成受控後端 session 下的 Workspace、Administration/Macros、light/dark 和 modal flows，因此保持 in_progress，不是 blocker 或 completed。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。
-- [STATUS](STATUS.md)：所有 implementation tasks 為 todo；active task none，下一個可執行為 F1。
+- [STATUS](STATUS.md)：F1 為 in_progress；其餘 implementation tasks 為 todo。F1 的開始 HEAD `21c288dc`，開始時工作樹乾淨；目前有未提交 F1 source/docs/artifact diff，必須保留。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
 - 計畫更新前觀察 HEAD e09a642c，工作樹乾淨；本次只有 docs 變更，接手時重新檢查實際 HEAD/diff。

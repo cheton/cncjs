@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: none
-- Main: gpt-5.6-terra / high；worker: gpt-5.6-luna / high 或 max（依 EXECUTION）；advisor: gpt-5.6-sol / medium（按需唯讀）。active subagent: none；concurrency: 1。角色已授權，implementation 仍 paused。
-- Next eligible task: F1（僅在獲得執行授權後）
+- Active task: F1
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（F1 Luna worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者於 2026-09-07 明確授權執行，範圍限 F1，並要求在第一階段合適 checkpoint 停止。
+- Next eligible task: F1（in_progress；完成後才為 H1）
 - Current blockers: none；一般未完成依賴仍是 todo，不是 blocking。
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
@@ -19,7 +19,7 @@
 
 | ID | Plan / deliverable | Depends on | Status | Owner / updated | Evidence / blocker |
 | --- | --- | --- | --- | --- | --- |
-| F1 | [環境與既有行為](01-foundation.md) | — | todo | — | — |
+| F1 | [環境與既有行為](01-foundation.md) | — | in_progress | root session / 2026-09-07T12:13:00+08:00 | Versions/immutable install/lint/build pass; login screenshot saved. Remaining: controlled backend/login session for Workspace/Admin/theme/modal flows; Jest assertions pass but runner has open handles. |
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | todo | — | — |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |

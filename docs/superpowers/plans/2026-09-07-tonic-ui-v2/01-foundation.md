@@ -27,7 +27,7 @@
 
 **Files:** `package.json`, `yarn.lock`, `AGENTS.md`, `src/app/index.jsx`, `src/app/lib/portal.jsx`；建立本目錄 `execution-log.md`。
 
-- [ ] 執行以下命令並記錄實際版本、錯誤及 exit code；build/test 不通過時先分辨既有問題與本輪修改。
+- [x] 執行以下命令並記錄實際版本、錯誤及 exit code；build/test 不通過時先分辨既有問題與本輪修改。
 
 ```bash
 git status --short
@@ -39,11 +39,11 @@ yarn test --runInBand
 yarn build
 ```
 
-- [ ] 記錄 lockfile 實際解析為 React/react-dom `18.3.1`、Tonic React/hooks/icons `2.15.0` / `2.2.1` / `2.1.3`、React Query `4.44.0`。保留 package.json 既有 semver ranges；只把 React Query 從 devDependencies 移至 dependencies，不順便改套件 pinning policy。`yarn install` 更新 lock，再以 `yarn install --immutable` 驗證。
-- [ ] `src/app/index.jsx` 與 `src/app/lib/portal.jsx` 都用 `import { createRoot } from 'react-dom/client'`，取代從 react-dom namespace 取 createRoot；不改 render/provider 結構。
-- [ ] 更新 AGENTS.md 失真的 React/Router 資訊；不更動其他工作規範。
-- [ ] `yarn dev` 後量測 login、Workspace、Administration/Macros、Appearance light/dark、自訂 modal 的現有行為；截圖與錯誤清單存執行紀錄指定位置。
-- [ ] 再跑 `yarn build`；交付依賴 diff 與基線紀錄。
+- [x] 記錄 lockfile 實際解析為 React/react-dom `18.3.1`、Tonic React/hooks/icons `2.15.0` / `2.2.1` / `2.1.3`、React Query `4.44.0`。保留 package.json 既有 semver ranges；只把 React Query 從 devDependencies 移至 dependencies，不順便改套件 pinning policy。`yarn install` 更新 lock，再以 `yarn install --immutable` 驗證。
+- [x] `src/app/index.jsx` 與 `src/app/lib/portal.jsx` 都用 `import { createRoot } from 'react-dom/client'`，取代從 react-dom namespace 取 createRoot；不改 render/provider 結構。
+- [x] 更新 AGENTS.md 失真的 React/Router 資訊；不更動其他工作規範。
+- [ ] Linux／CI 以 `WEBPACK_DEV_SERVER_HOST=127.0.0.1` 啟動 dev server，並用 headless Chrome（Playwright 或 agent-browser）量測 login、Workspace、Administration/Macros、Appearance light/dark、自訂 modal 的現有行為；macOS headed browser 只作可選人工複核。截圖與錯誤清單存執行紀錄指定位置。若 headless Chrome、local bind 或 browser runner 缺失，記具名環境 blocker 與解阻條件，不能跳過並宣稱 browser 通過。
+- [x] 再跑 `yarn build`；交付依賴 diff 與基線紀錄。
 
 **Gate:** 版本可重現；若尚有阻止啟動的既有錯誤，先做獨立修復 task 並記錄，不能讓後續 UI task 在無可驗證基線下開始。
 

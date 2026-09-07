@@ -45,7 +45,7 @@
 
 **Modify:** `package.json`, `yarn.lock`, `src/app/styles/vendor.styl`、失去 consumers 的各 component styles。僅在 packaging 顯示需要時更動 `src/package.json`；不能盲目把前端套件塞進 server runtime manifest。
 
-- [ ] 確認全部 Buttons consumers 清空後 `yarn remove react-bootstrap-buttons`，刪其 CSS import 和 override.styl。若 Q2 尚未移除無 consumers 的 XState，在本 task 移除。
+- [ ] 確認全部 Buttons consumers 清空後 `yarn remove react-bootstrap-buttons`，刪其 CSS import 和 override.styl。Bootstrap UI package 不可保留相容性例外；以 manifest、import graph 與既有 Button 功能驗收確認沒有直接 Bootstrap runtime package、CSS import 或本地 re-export。若整合驗收證明 CNCjs 色票／語意必須保留，可保留 `src/app/components/Button`，但它必須直接使用 Tonic Button，且不可轉接 Bootstrap API。名稱含 `bootstrap` 的 CNCjs saga 不屬於 UI library。若 Q2 尚未移除無 consumers 的 XState，在本 task 移除。
 - [ ] 用 `yarn why <package>` 與全 src imports 判斷 `rc-trigger`、`uncontrollable`、`react-facebook-loading`、`react-animate-height`、`react-datepicker`、`react-select`、`react-infinite-tree` 等是否因本輪失去最後使用者；只刪這些確定被替代的 direct dependencies。第三方仍需的 transitive package 不強行 resolutions 到零。
 - [ ] 保留 @trendmicro/babel-config / eslint-config-trendmicro；目標是 UI packages，不是 npm scope 名稱清洗。
 - [ ] 以下命令作首輪負向掃描，另外以 AST／import resolution 檢查 alias inheritance、relative re-exports；rg 不能證明全部。
