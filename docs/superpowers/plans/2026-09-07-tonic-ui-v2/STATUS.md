@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: H2（H1 completed）
+- Active task: H3（H2 completed）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: H2（F1 and H1 are complete）
+- Next eligible task: H3（F1, H1, and H2 are complete）
 - Current blockers: none for the completed session-host work. Browser/frontend regression remains unrun.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
@@ -23,7 +23,7 @@
 | FIX-001 | 移除 file-based session | — | completed | root session / 2026-09-07T13:40:00+08:00 | App-level middleware/direct deps removed; no-cookie signin test passes. |
 | FIX-002 | 吸收 webappengine host 並移除 dependency | FIX-001 | completed | root session / 2026-09-07T13:40:00+08:00 | Local host preserves static/server routes and HTTP `ready`/`error`; focused host/app tests pass; `yarn why` finds no webappengine/session-file-store/express-session path. |
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
-| H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
+| H2 | [providers tests](details/01a-test-harness.md) | H1 | completed | root session / 2026-09-07T14:35:00+08:00 | `17033b7a`; each render gets a new QueryClient, Tonic provider smoke tests cover Button/theme/shared client/dispose cleanup. Fresh focused and frontend suite: 4/4 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |
 | BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | todo | — | — |
 | R0 | [原版 baseline](09-regression-gates.md) | BR0 | todo | — | — |
