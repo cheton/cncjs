@@ -28,8 +28,8 @@ const formatDuration = (start, finish) => {
   ].join(':');
 };
 
-const formatISODateTime = (time) => {
-  return time > 0 ? format(time / 1000, 'YYYY-MM-dd HH:mm:ss') : '–';
+export const formatISODateTime = (time) => {
+  return time > 0 ? format(time, 'yyyy-MM-dd HH:mm:ss') : '–';
 };
 
 const formatElapsedTime = (elapsedTime) => {
