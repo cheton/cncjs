@@ -5,7 +5,7 @@
 - Mode: **implementation paused after F1/FIX-002**。使用者要求第一階段先停下；F1-B01 / FIX-001-B02 已由 app-level cleanup 與本機 host 吸收解除。
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; browser/frontend regression remains pending.
-- 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。
+- 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。
 - [STATUS](STATUS.md)：F1 為 blocking；其餘 implementation tasks 為 todo。F1 的開始 HEAD `21c288dc`；目前只有本次 blocker checkpoint 的未提交 docs diff，完成後可 local commit。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。

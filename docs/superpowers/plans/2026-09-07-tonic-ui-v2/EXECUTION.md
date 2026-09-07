@@ -23,9 +23,17 @@
 | Luna worker | 在指定 files/contract 內實作、跑測試、回報 diff 與證據；不自行改架構、擴大範圍、標 completed、派更多 subagents 或 commit |
 | Sol medium advisor（按需） | 對具體技術問題做獨立、唯讀判斷；回傳來源證據、選項與建議，不改 source/ledger、不派工；Terra 負責採納與整合 |
 
+### Hard rule — browser verification ownership
+
+所有 browser tests、browser regression、screenshot、accessible snapshot，以及 Playwright／browser runner 操作，**必須**由 `gpt-5.6-luna`、`reasoning_effort: "medium"` 執行。此規則覆蓋本文件其他 Luna effort 預設與 task matrix。
+
+- 主控只可提供 bounded brief、審核實際 evidence、更新 `STATUS.md`／`HANDOFF.md`／`execution-log.md`，不得自行執行 browser 操作或改派其他模型。
+- 若 Luna medium 不可用，browser gate 保持 `in_progress` 或記錄具名 blocker；不得以主控、Terra、Sol 或其他 model 代跑並宣稱已驗證。
+- 每個 browser worker brief 與 execution log 必須記錄此 hard rule 與實際 `model`／`reasoning_effort`。
+
 ### Model / reasoning effort
 
-主控使用 **Terra high**。Luna 依以下表格使用 **high 或 max**；Sol 固定 **medium**。這是本專案依風險制定的派工預設，不代表模型能力排名，也不能用更高 effort 取代 regression evidence。
+主控使用 **Terra high**。除 browser hard rule 外，Luna 依以下表格使用 **high 或 max**；Sol 固定 **medium**。這是本專案依風險制定的派工預設，不代表模型能力排名，也不能用更高 effort 取代 regression evidence。
 
 | 工作類型 | Luna effort | 選擇理由 / 升級條件 |
 | --- | --- | --- |
@@ -41,7 +49,7 @@
 
 | Effort | Task IDs |
 | --- | --- |
-| Luna high | F1, H1, H2, BR0, B0, U2, Q2-cleanup, G2, S3, A3a, P0, P3, P6, W3 |
+| Luna high | F1, H1, H2, BR0, B0, U2, Q2-cleanup, G2, S3, A3a, P0, P3, P6, W3（browser 子步驟改依 browser hard rule） |
 | Luna max | H3, R0, D1, D2, D3, D4, R1, R2, U3, B1, M1, M2, M3, G1, G3, G4, G5, G6, G7, T1, T2, T3, C1, C2, C3, C4, S1, S2, S4, A1b, A2, A3b, R3, V1, E1, E2, E3, E4, R4, R5, W1, P1, P2, P4, P5, B3, R6 |
 
 high 任務是依 contract 已固定的前提分類：例如 S3 依 S1/S2，A3a 依既定 Probe 合約；G3 雖小仍涉及 CNC command，預設 max。R0/R3/R6 的 oracle 與量測判讀交 max；BR0 只負責依已定 procedure 建環境。Q2-cleanup 若發現額外 XState consumer，先交 Terra 判斷，不能直接刪除。
@@ -93,7 +101,7 @@ Unresolved decision / decision owner: none 或具體問題及 Terra/Sol 分工�
 
 同一未解問題不無限輪流換模型。沿既有兩次失敗修正門檻由 Terra 診斷；Sol 建議也不能通過 gate 時，記錄剩餘假設與具體 blocker，不用忽略測試或更新 golden 消除失敗。
 
-派工參數：Luna 使用 `model: "gpt-5.6-luna"`、`reasoning_effort: "high"` 或 `"max"`；Sol 使用 `model: "gpt-5.6-sol"`、`reasoning_effort: "medium"`，兩者使用 `fork_turns: "none"` 和完整 bounded brief。main session 選 `gpt-5.6-terra` / high。若 host 不支援指定 model/effort，明確記錄限制，不聲稱已套用。
+派工參數：browser hard rule 的 Luna 使用 `model: "gpt-5.6-luna"`、`reasoning_effort: "medium"`；其餘 Luna 使用 `"high"` 或 `"max"`。Sol 使用 `model: "gpt-5.6-sol"`、`reasoning_effort: "medium"`，兩者使用 `fork_turns: "none"` 和完整 bounded brief。main session 選 `gpt-5.6-terra` / high。若 host 不支援指定 model/effort，明確記錄限制，不聲稱已套用。
 
 Sol 判斷期間讓 Luna 在 checkpoint 暫停，避免同一問題邊修改邊 review；預設同時最多一個活躍 subagent（Luna worker 或 Sol advisor）。Terra 保持唯一 ledger writer。worker brief 與 log 增加 `model / reasoning_effort / selection reason / advisor decision`；handoff 記錄未決問題及下次所需 effort。
 
