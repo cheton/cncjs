@@ -1,14 +1,14 @@
 # Migration task status
 
-更新日期：2026-09-07。執行模式：**plan_only / paused**。目前沒有 migration task 正在執行；計畫文件完成不代表實作完成。恢復 implementation 需要使用者明確要求執行。
+更新日期：2026-09-07。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: none（FIX-002 completed; first phase can pause here）
+- Active task: H2（H1 completed）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: H1（F1 and FIX-001/FIX-002 are complete; implementation remains paused by user request）
+- Next eligible task: H2（F1 and H1 are complete）
 - Current blockers: none for the completed session-host work. Browser/frontend regression remains unrun.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
@@ -22,7 +22,7 @@
 | F1 | [環境與既有行為](01-foundation.md) | — | completed | root session / 2026-09-07T13:40:00+08:00 | Session-path blocker resolved by removing both app-level and outer-host file sessions; focused tests pass. Browser/frontend regression remains pending. |
 | FIX-001 | 移除 file-based session | — | completed | root session / 2026-09-07T13:40:00+08:00 | App-level middleware/direct deps removed; no-cookie signin test passes. |
 | FIX-002 | 吸收 webappengine host 並移除 dependency | FIX-001 | completed | root session / 2026-09-07T13:40:00+08:00 | Local host preserves static/server routes and HTTP `ready`/`error`; focused host/app tests pass; `yarn why` finds no webappengine/session-file-store/express-session path. |
-| H1 | [frontend config](details/01a-test-harness.md) | F1 | todo | — | — |
+| H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |
 | BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | todo | — | — |
