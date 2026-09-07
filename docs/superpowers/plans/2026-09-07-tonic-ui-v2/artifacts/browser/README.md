@@ -44,9 +44,11 @@ Artifacts:
 - `workspace-1440x900.png` — full-page screenshot
 - `macros-modal-snapshot.yml`, `macro-modal.png` — New Macro dialog
 - `theme-dark-snapshot.yml`, `theme-light-snapshot.yml`, `theme-light.png` — theme checks
+- `br0-final-workspace.png` — fresh authenticated Workspace screenshot
+- `br0-final-768x900.png`, `br0-final-768-snapshot.txt` — fresh narrow viewport evidence
+- `br0-final-console.log` — fresh console/network evidence
+- `port-selection/` — fresh selector open, `/tmp/ttyGRBL` selection, and Grbl connection evidence
 
-Remaining BR0 coverage: authenticated workspace accessibility snapshot,
-serial connection and Run/Pause/Resume/Stop/jog/disconnect commands, large
-fixture load, and the 768×900 viewport remain to be exercised. The clean
-browser session reached the sign-in screen; the temporary fixture account was
-not accepted after the backend restart, so no credentials or token were saved.
+Remaining BR0 coverage: Run/Pause/Resume/Stop/jog/disconnect commands and
+large fixture load remain unverified. The selector and initial Grbl connection
+are now verified in `port-selection/`; no credentials or token were saved.

@@ -9,7 +9,7 @@
 - Active task: BR0（browser baseline in progress）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
 - Next eligible task: BR0（complete connection, fixture, viewport, and first-run coverage）
-- Current blockers: BR0 browser interaction is not yet verified end-to-end. `yarn dev` now starts backend, frontend, and `/tmp/ttyGRBL`; anonymous sign-in also responds. Fresh bundled-Chromium retries reached the dev services but did not produce a valid authenticated workspace snapshot or Connection command assertions before the runner was stopped. System Chrome channel remains unsupported for screenshots.
+- Current blockers: BR0 browser interaction is not yet verified end-to-end. User-reported OMP/GLM-5.3-flash verification and fresh bundled-Chromium evidence confirm `yarn dev`, anonymous Workspace, selector open, `/tmp/ttyGRBL` selection, and initial Grbl connection. Run/Pause/Resume/Stop/jog/disconnect commands and large fixture load remain pending. System Chrome channel remains unsupported for screenshots.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
 
@@ -25,7 +25,7 @@
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | completed | root session / 2026-09-07T14:35:00+08:00 | `17033b7a`; each render gets a new QueryClient, Tonic provider smoke tests cover Button/theme/shared client/dispose cleanup. Fresh focused and frontend suite: 4/4 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | completed | root session / 2026-09-07T14:45:00+08:00 | `fcaf92f9`; exact deferred utility with resolve/reject tests. Fresh focused test and frontend suite: 6/6 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
-| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-07T20:15:00+08:00 | `183b42b6` verified `yarn dev` starts backend, frontend, simulator, and `/tmp/ttyGRBL`; anonymous `/api/signin` responds. Existing Workspace/Macros/theme artifacts remain valid. Fresh browser retries did not capture valid authenticated workspace/Connection assertions; large fixture, 768×900, and command flow remain pending. Do not use system Chrome channel for screenshots. |
+| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-07T20:40:00+08:00 | `183b42b6` plus fresh `port-selection/` evidence: `yarn dev` starts backend, frontend, simulator, `/tmp/ttyGRBL`; selector opens, shows manufacturer `Grbl Simulator`, selects `/tmp/ttyGRBL`, and auto-connects Grbl at 115200 with state `Idle`. Workspace/768×900/console artifacts remain captured. Run/Pause/Resume/Stop/jog/disconnect and large fixture remain pending. Do not use system Chrome channel for screenshots. |
 | R0 | [原版 baseline](09-regression-gates.md) | BR0 | todo | — | — |
 | D1 | [chrome 純資料](details/02a-widget-state.md) | R0 | todo | — | — |
 | D2 | [Provider](details/02a-widget-state.md) | D1 | todo | — | — |
