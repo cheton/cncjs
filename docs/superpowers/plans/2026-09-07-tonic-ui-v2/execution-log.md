@@ -99,3 +99,13 @@ Evidence: `artifacts/browser/br0-complete-flow/` confirms anonymous Workspace at
 Blocker: fresh `yarn dev` compiled, but backend port 8000 and frontend port 8080 were already owned by pre-existing PIDs `3202712` and `3202685`; the fresh backend exited `EADDRINUSE`, so the browser reached the wrong existing lifecycle and had no `/tmp/ttyGRBL` option. The worker stopped only its own children and did not touch those PIDs. `/tmp/ttyGRBL` and its temporary profile were removed.
 
 Remaining: select `/tmp/ttyGRBL`, upload small fixture in the same fresh lifecycle, Run/Pause/Resume/Stop, disconnect, 768px final state, 100,000-line fixture, and 5,000-node watch tree. BR0 remains `in_progress`.
+
+## BR0 date-fns v4 blocker — 2026-09-08T00:30:00+08:00
+
+Task / session / timestamp: BR0 / Luna medium browser worker plus root fix / `2026-09-08T00:30:00+08:00`.
+
+Browser evidence from the pending-flow attempt loaded the small fixture, then showed a React runtime overlay from `src/app/widgets/GCode/GCodeStats.jsx`: `RangeError: Use \`yyyy\` instead of \`YYYY\``. The existing helper also divided the millisecond timestamp by `1000`, which produced an incorrect 1970 date with `date-fns@4.1.0`.
+
+TDD fix: `src/app/widgets/GCode/__tests__/GCodeStats.test.js` was written first and failed; `GCodeStats.jsx` now uses the `yyyy` token and passes the millisecond timestamp unchanged. The focused test and full frontend suite pass: 5 suites / 9 tests. Local commit: `776b707c`.
+
+The browser worker was stopped before post-fix rerun evidence was produced. BR0 therefore remains `in_progress`; pending workflow, disconnect, 768px, large fixture, and watch-tree coverage are not claimed. Generated `.playwright-mcp/` and incomplete pending-flow artifacts were removed. Next exact step: release externally owned ports 8000/8080, run the fixed dev bundle, and delegate only the affected browser cases to Luna medium.

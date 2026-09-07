@@ -1,6 +1,6 @@
 # Migration task status
 
-更新日期：2026-09-07。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-08。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
@@ -9,9 +9,9 @@
 - Active task: BR0（browser baseline in progress）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
 - Next eligible task: BR0（complete connection, fixture, viewport, and first-run coverage）
-- Current blockers: BR0 browser interaction is not yet verified end-to-end. The G-code parser type error found during BR0 is fixed and has a frontend regression test; a Playwright CLI retry uploads the small fixture without that error or a React overlay. A Luna medium retry now dismisses the Linux headless WebGL portal with its targeted `OK`, but its fresh backend could not bind because pre-existing PIDs own ports 8000/8080; it did not stop those processes. Run/Pause/Resume/Stop/jog/disconnect and large fixture load remain pending. System Chrome channel remains unsupported for screenshots.
+- Current blockers: BR0 browser interaction is not yet verified end-to-end. The G-code parser type error and the date-fns v4 `YYYY`/timestamp error found during BR0 are fixed with frontend regression tests (`776b707c`). A Playwright CLI retry uploads the small fixture without the parser error or a React overlay. A Luna medium retry dismisses the Linux headless WebGL portal with its targeted `OK`, but a fresh backend could not bind because pre-existing PIDs own ports 8000/8080; it did not stop those processes. Run/Pause/Resume/Stop/jog/disconnect and large fixture load remain pending. System Chrome channel remains unsupported for screenshots.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
-- Validation: app/frontend/browser/simulator regression 尚未執行。
+- Validation: frontend focused regression passes (5 suites / 9 tests); full BR0 browser/simulator regression remains incomplete.
 
 ## Task ledger
 
@@ -25,7 +25,7 @@
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | completed | root session / 2026-09-07T14:35:00+08:00 | `17033b7a`; each render gets a new QueryClient, Tonic provider smoke tests cover Button/theme/shared client/dispose cleanup. Fresh focused and frontend suite: 4/4 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | completed | root session / 2026-09-07T14:45:00+08:00 | `fcaf92f9`; exact deferred utility with resolve/reject tests. Fresh focused test and frontend suite: 6/6 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
-| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-07T23:05:00+08:00 | `183b42b6` plus `port-selection/` evidence verify simulator startup, selector, `/tmp/ttyGRBL`, and initial Grbl connection. `artifacts/browser/br0-playwright-cli/` verifies the fixed small upload has no `str.split`/React overlay. Luna medium `br0-complete-flow/` verifies targeted WebGL modal dismissal, but a pre-existing listener on 8000/8080 caused `EADDRINUSE`; no foreign process was stopped. Run/Pause/Resume/Stop/jog/disconnect and fixed large fixtures remain pending. Do not use system Chrome channel for screenshots. |
+| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-08T00:30:00+08:00 | `183b42b6` plus `port-selection/` evidence verify simulator startup, selector, `/tmp/ttyGRBL`, and initial Grbl connection. `artifacts/browser/br0-playwright-cli/` verifies the fixed small upload has no parser/React overlay. A Luna medium run exposed and root fixed the date-fns v4 G-code stats error in `776b707c`; no post-fix browser pass evidence exists yet. `br0-complete-flow/` verifies targeted WebGL modal dismissal, but a pre-existing listener on 8000/8080 caused `EADDRINUSE`; no foreign process was stopped. Run/Pause/Resume/Stop/jog/disconnect and fixed large fixtures remain pending. Do not use system Chrome channel for screenshots. |
 | R0 | [原版 baseline](09-regression-gates.md) | BR0 | todo | — | — |
 | D1 | [chrome 純資料](details/02a-widget-state.md) | R0 | todo | — | — |
 | D2 | [Provider](details/02a-widget-state.md) | D1 | todo | — | — |
@@ -126,6 +126,15 @@
 - Required unblock action / owner: use Playwright's bundled Chromium for BR0; keep system Chrome channel failure recorded as an environment limitation.
 - Next check condition: bundled Chromium captures a snapshot and screenshot at `http://127.0.0.1:8080` after `yarn build-dev` and the prescribed server/app startup.
 - Unaffected eligible tasks: non-browser unit tasks remain eligible only where their dependency graph allows them; BR0/R0 browser baseline cannot proceed.
+
+### BR0-B04 — date-fns v4 G-code stats formatting (resolved)
+
+- Observed failure + exact command / exit code: Luna medium browser run loaded the small fixture, then showed a React runtime overlay with `RangeError: Use \`yyyy\` instead of \`YYYY\`` from `GCodeStats.jsx`; the browser run could not continue to workflow controls.
+- Cause / evidence path: `src/app/widgets/GCode/GCodeStats.jsx` used the pre-v4 `YYYY` token and divided a millisecond timestamp by `1000` before calling `date-fns@4.1.0` `format()`.
+- Attempts and results: added a failing frontend test first; changed the token to `yyyy` and passed the millisecond timestamp unchanged. `yarn test:frontend src/app/widgets/GCode/__tests__/GCodeStats.test.js --runInBand` and the full frontend suite pass; commit `776b707c`.
+- Required unblock action / owner: rerun only the affected BR0 pending browser cases against the fixed dev bundle using Luna medium.
+- Next check condition: no GCodeStats runtime overlay after loading the small fixture; Run/Pause/Resume/Stop and disconnect controls can be exercised in the same fresh lifecycle.
+- Unaffected eligible tasks: none for BR0; existing port 8000/8080 ownership remains a separate blocker.
 
 新增格式：
 
