@@ -5,7 +5,7 @@
 CNC machine controller — Node.js/Express backend + React frontend communicating over Socket.IO.
 
 **Stack:**
-- Frontend: React 15.6 (class components), Redux, React Router 4, Stylus, Three.js (visualizer)
+- Frontend: React 18.3.1 (class components), Redux, React Router 6.3, Stylus, Three.js (visualizer)
 - Backend: Node.js ≥18, Express 4, Socket.IO 2
 - Build: Webpack 5, Babel 7, Yarn
 
