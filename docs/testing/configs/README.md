@@ -13,11 +13,17 @@ browser and simulator tests.
 For the full development stack, start it with:
 
 ```bash
-CONFIG_PATH=/tmp/cncjs-browser-test.cncrc yarn dev
+CONFIG_PATH=/tmp/cncjs-browser-test.cncrc \
+SUPPRESS_WEBGL_WARNING=1 \
+yarn dev
 ```
 
 `scripts/start-server-dev.sh` reads this variable and passes it only to the
 backend as `--config`. Webpack does not receive or expose the path.
+
+`SUPPRESS_WEBGL_WARNING=1` is a development-only browser-test option. It keeps
+the WebGL-unavailable fallback disabled state but skips the warning modal.
+Production builds force this value to `0`.
 
 Never commit a machine-specific `~/.cncrc`, access token, password, or private
 watch-directory contents. Update this reference when a test needs a new shared

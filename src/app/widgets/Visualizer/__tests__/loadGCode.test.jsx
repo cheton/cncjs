@@ -26,7 +26,7 @@ jest.mock('@app/lib/controller', () => ({
 
 global.TextEncoder = require('util').TextEncoder;
 
-const { VisualizerWidget } = require('../index');
+const { VisualizerWidgetClass } = require('../index');
 
 describe('VisualizerWidget G-code loading', () => {
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('VisualizerWidget G-code loading', () => {
   });
 
   test('passes the file name and G-code string to the visualizer', () => {
-    const widget = new VisualizerWidget({ widgetId: 'visualizer' });
+    const widget = new VisualizerWidgetClass({ widgetId: 'visualizer' });
     const bbox = {
       min: { x: 0, y: 0, z: 0 },
       max: { x: 10, y: 10, z: 0 },

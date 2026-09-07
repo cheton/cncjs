@@ -55,6 +55,7 @@ import Notifications from './Notifications';
 import Loading from './Loading';
 import Rendering from './Rendering';
 import WatchDirectory from './WatchDirectory';
+import { isWebGLWarningSuppressed } from './webglWarning';
 import {
   CAMERA_MODE_PAN,
   CAMERA_MODE_ROTATE,
@@ -183,7 +184,7 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   );
 }
 
-export class VisualizerWidget extends Component {
+class VisualizerWidget extends Component {
   static propTypes = {
     widgetId: PropTypes.string.isRequired
   };
@@ -484,7 +485,9 @@ export class VisualizerWidget extends Component {
     },
     toggle3DView: () => {
       if (!WebGL.isWebGLAvailable() && this.state.disabled) {
-        displayWebGLErrorMessage();
+        if (!isWebGLWarningSuppressed()) {
+          displayWebGLErrorMessage();
+        }
         return;
       }
 
@@ -885,7 +888,9 @@ export class VisualizerWidget extends Component {
     );
 
     if (!WebGL.isWebGLAvailable() && !this.state.disabled) {
-      displayWebGLErrorMessage();
+      if (!isWebGLWarningSuppressed()) {
+        displayWebGLErrorMessage();
+      }
 
       setTimeout(() => {
         this.setState((state) => ({
@@ -1174,4 +1179,5 @@ export class VisualizerWidget extends Component {
   }
 }
 
+export { VisualizerWidget as VisualizerWidgetClass };
 export default VisualizerWidget;

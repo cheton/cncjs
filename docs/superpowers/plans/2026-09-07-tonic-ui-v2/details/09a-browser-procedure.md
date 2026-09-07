@@ -7,10 +7,10 @@
 **Create at execution:** `src/app/test/fixtures/browser/`、本計畫 `artifacts/browser/README.md` 與 baseline 結果。fixture 只含合成 G-code/config，browser credentials/storage state 不提交。
 
 1. `yarn build-dev`。browser/simulator tests 的唯一 config reference 是 [`docs/testing/configs/browser-test.cncrc`](../../../../testing/configs/browser-test.cncrc)。不要加入 `users` 欄位，使用 anonymous sign-in contract，預期直接進入 Workspace。每次執行先把 reference 複製到唯一 `/tmp` path，再建立 `/tmp/cncjs-browser-watch` 的合成 fixtures；不可直接以 repo 內 reference 作 active config，因為 CNCjs 可能寫回 state。確認 `ports` 包含 `[{path:'/tmp/ttyGRBL',manufacturer:'Grbl Simulator'}]`。記錄實際 setup 步驟與 route，但不記密碼/token。
-2. 從 repository root 以 temporary config 執行 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc yarn dev`。`scripts/start-server-dev.sh` 讀取這個 variable 並只傳給 backend `--config`；Webpack 不讀取或暴露此 path。此命令會在同一個 lifecycle 啟動 Grbl simulator、frontend dev server 與 CNCjs backend；不要另外啟動 `start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。記 session/PID、port 與日誌位置。
+2. 從 repository root 以 temporary config 執行 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev`。`scripts/start-server-dev.sh` 讀取 `CONFIG_PATH` 並只傳給 backend `--config`；webpack development config 讀取 `SUPPRESS_WEBGL_WARNING`，Webpack 不讀取或暴露 config path。此命令會在同一個 lifecycle 啟動 Grbl simulator、frontend dev server 與 CNCjs backend；不要另外啟動 `start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。記 session/PID、port 與日誌位置。
 
 ```bash
-CONFIG_PATH=/tmp/cncjs-browser-test.cncrc yarn dev
+CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev
 ```
 
 bridge 需要 `socat`。缺少依賴、占用 port、auth/setup 或 WebGL 啟動失敗時記 named blocker；不可跳過並宣稱 browser 通過。路徑中的 config/watch fixtures 需在啟動前從受版本控制的合成內容建立。首輪將成功命令/版本記入 artifacts README，後續照同版本重跑。
