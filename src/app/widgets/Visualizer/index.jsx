@@ -183,7 +183,7 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   );
 }
 
-class VisualizerWidget extends Component {
+export class VisualizerWidget extends Component {
   static propTypes = {
     widgetId: PropTypes.string.isRequired
   };
@@ -333,7 +333,7 @@ class VisualizerWidget extends Component {
         }
 
         setTimeout(() => {
-          this.visualizer.load(content, ({ bbox }) => {
+          this.visualizer.load(name, content, ({ bbox }) => {
             // Set gcode bounding box
             controller.context = {
               ...controller.context,

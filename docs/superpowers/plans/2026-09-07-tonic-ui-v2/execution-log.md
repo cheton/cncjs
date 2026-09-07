@@ -73,3 +73,19 @@ Post-cleanup dependency tracing found `src/server/index.js` starts `webappengine
 - git diff --check：通過。source/package/lock 無本次修改。
 - 修正 Tonic Slider 不存在、native Select 相容性限制；補 controller command oracle、browser setup/fixtures/instrumentation 與 persistent handoff。
 - 下一步：依使用者後續明確執行授權，從 STATUS 的 F1 開始；目前仍 plan_only / paused。
+
+## BR0 G-code upload diagnosis — 2026-09-07T22:43:05+08:00
+
+Task / session / timestamp: BR0 / root session / 2026-09-07T22:43:05+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `4274ec95` / prior BR0 artifacts only. Luna medium workers were used for browser-only work, per current user direction. The first fresh command-flow run confirmed anonymous Workspace, `/tmp/ttyGRBL`, Grbl 115200/Idle, and captured both viewports; its small upload then threw `TypeError: str.split is not a function` from `gcode-parser`.
+
+Cause / fix: `src/app/widgets/Visualizer/Visualizer.jsx` defines `load(name, gcode, callback)`, while `VisualizerWidget.actions.loadGCode()` called it as `load(content, callback)`. The callback was therefore parsed as G-code. `src/app/widgets/Visualizer/__tests__/loadGCode.test.jsx` was written first; its RED failure exposed the missing named test seam, then the real action asserted the three arguments. The minimal fix exports the existing class for that test and calls `load(name, content, callback)`.
+
+Command / exit code / tested working tree: `yarn test:frontend src/app/widgets/Visualizer/__tests__/loadGCode.test.jsx --runInBand` exit 0 (1/1); `yarn test:frontend --runInBand` exit 0 (3 suites, 7 tests). Node emitted existing `DEP0040 punycode` warnings.
+
+Browser recheck: `artifacts/browser/br0-playwright-cli/` uses bundled Chromium CLI and records a small-fixture upload with `hasSplitError: false` and `hasReactOverlay: false`. It also records the remaining procedure failure: Linux headless WebGL modal was present, but automation clicked the disabled `Close G-code file` control instead of the modal portal `OK`; its overlay intercepted the Connection selector. No Run/Pause/Resume/Stop, disconnect, jog, 100,000-line fixture, or 5,000-node tree claim is made. The stopped worker left `/tmp/ttyGRBL`; root removed that exact generated symlink after confirming ports 8000/8080 were closed.
+
+Artifacts: `artifacts/browser/br0-command-flow/` retains the original failure evidence; `artifacts/browser/br0-playwright-cli/` retains the fixed upload evidence. The transient MCP-profile-only retry was removed as an unnecessary intermediate artifact.
+
+Next exact step and expected result: launch a fresh bundled-Chromium CLI session, target the portal's visible `OK` button within the WebGL modal before interacting with the Connection widget, then select `/tmp/ttyGRBL`, upload the small fixture, and verify enabled workflow/disconnect before simulator-only Run/Pause/Resume/Stop.
