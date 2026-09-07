@@ -3,6 +3,9 @@
 # Start Grbl Simulator with Serial Bridge for cncjs
 # This script starts both the TCP server and the serial bridge
 
+# Run from the script's directory so grbl-server.js / serial-bridge.js resolve
+# regardless of where the script is invoked from
+cd "$(dirname "$0")"
 SERIAL_PATH="/tmp/ttyGRBL"
 
 # Find an available port using Node.js
@@ -10,7 +13,7 @@ PORT=$(node -e "
 const net = require('net');
 const server = net.createServer();
 server.listen(0, () => {
-    console.log(server.address().port);
+    console.log(String(server.address().port));
     server.close();
 });
 ")
