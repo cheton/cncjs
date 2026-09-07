@@ -44,6 +44,10 @@ User decision: remove file-based sessions instead of adding a session-path overr
 
 FIX-001 evidence: the no-cookie integration test was red on the original app (`connect.sid` response cookie) and is green after direct middleware removal: `yarn test --runInBand src/server/__tests__/app.test.js` exit 0, 1/1 pass. Full lint, immutable install, and production build were run after the production changes (exit 0; pre-existing warnings only). Source/manifest cleanup removes `express-session`, `session-file-store`, `rimraf`, and `.cncjs-sessions` from CNCjs app-level code; `cookie-parser` remains intentionally out of scope.
 
+## FIX-002 — 2026-09-07T13:20:00+08:00
+
+User authorized absorbing `/home/cheton/Code/cncjs/webappengine`. Local `src/server/lib/webappengine.js` now preserves route mounting, static/proxy routes, HTTP `ready`/`error` events, and the server object passed to Socket.IO without file-session creation. `yarn jest src/server/lib/__tests__/webappengine.test.js src/server/__tests__/app.test.js --runInBand --coverage=false` passed with loopback permission; ESLint, `yarn lint`, `timeout 120s yarn build`, and `git diff --check` passed; `yarn why` found no webappengine/session-file-store/express-session path. Status: completed; first phase paused.
+
 ## FIX-001-B02 — 2026-09-07T13:05:00+08:00
 
 Post-cleanup dependency tracing found `src/server/index.js` starts `webappengine`. Its `src/app/app.standalone.js:155-166` unconditionally deletes/recreates `./sessions` and installs its own file session store. `yarn why express-session` and `yarn why session-file-store` resolve only to `webappengine@1.2.0`. The direct app test does not exercise this outer host. Status: FIX-001 `in_progress` -> `blocking`; retain the verified direct-cleanup diff, but do not claim full server file sessions are removed. Required next task needs explicit authority to replace or upgrade the webappengine host while preserving route mounting/proxy/static behavior and the server supplied to Socket.IO.

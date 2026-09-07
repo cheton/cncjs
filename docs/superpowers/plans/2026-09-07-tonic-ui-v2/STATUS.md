@@ -6,10 +6,10 @@
 
 ## Current checkpoint
 
-- Active task: none
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（FIX-001 Luna worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者已授權移除 file-based session；完整 server host 的 transitive session implementation 尚待決策。
-- Next eligible task: none（FIX-001 blocking；F1-B01 未解）
-- Current blockers: F1-B01 / FIX-001-B02；一般未完成依賴仍是 todo，不是 blocking。
+- Active task: none（FIX-002 completed; first phase can pause here）
+- Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
+- Next eligible task: H1（F1 and FIX-001/FIX-002 are complete; implementation remains paused by user request）
+- Current blockers: none for the completed session-host work. Browser/frontend regression remains unrun.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
 
@@ -19,8 +19,9 @@
 
 | ID | Plan / deliverable | Depends on | Status | Owner / updated | Evidence / blocker |
 | --- | --- | --- | --- | --- | --- |
-| F1 | [環境與既有行為](01-foundation.md) | — | blocking | root session / 2026-09-07T12:30:00+08:00 | F1-B01: server unconditionally deletes/recreates user-owned session directory; no safe temporary session-path override. |
-| FIX-001 | 移除 file-based session | — | blocking | root session / 2026-09-07T13:05:00+08:00 | App-level middleware and direct deps removed/tested, but server host `webappengine` unconditionally creates `./sessions` via its own transitive file store (FIX-001-B02). |
+| F1 | [環境與既有行為](01-foundation.md) | — | completed | root session / 2026-09-07T13:40:00+08:00 | Session-path blocker resolved by removing both app-level and outer-host file sessions; focused tests pass. Browser/frontend regression remains pending. |
+| FIX-001 | 移除 file-based session | — | completed | root session / 2026-09-07T13:40:00+08:00 | App-level middleware/direct deps removed; no-cookie signin test passes. |
+| FIX-002 | 吸收 webappengine host 並移除 dependency | FIX-001 | completed | root session / 2026-09-07T13:40:00+08:00 | Local host preserves static/server routes and HTTP `ready`/`error`; focused host/app tests pass; `yarn why` finds no webappengine/session-file-store/express-session path. |
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | todo | — | — |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |
