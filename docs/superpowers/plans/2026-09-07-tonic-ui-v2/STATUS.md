@@ -7,9 +7,9 @@
 ## Current checkpoint
 
 - Active task: none
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（F1 session-baseline worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者於 2026-09-07 明確授權執行第一階段；F1 現正等待安全 session-path 決策。
-- Next eligible task: none（F1 blocking；H1 依賴 F1）
-- Current blockers: F1-B01；一般未完成依賴仍是 todo，不是 blocking。
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（FIX-001 Luna worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者已授權移除 file-based session；完整 server host 的 transitive session implementation 尚待決策。
+- Next eligible task: none（FIX-001 blocking；F1-B01 未解）
+- Current blockers: F1-B01 / FIX-001-B02；一般未完成依賴仍是 todo，不是 blocking。
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
 
@@ -20,6 +20,7 @@
 | ID | Plan / deliverable | Depends on | Status | Owner / updated | Evidence / blocker |
 | --- | --- | --- | --- | --- | --- |
 | F1 | [環境與既有行為](01-foundation.md) | — | blocking | root session / 2026-09-07T12:30:00+08:00 | F1-B01: server unconditionally deletes/recreates user-owned session directory; no safe temporary session-path override. |
+| FIX-001 | 移除 file-based session | — | blocking | root session / 2026-09-07T13:05:00+08:00 | App-level middleware and direct deps removed/tested, but server host `webappengine` unconditionally creates `./sessions` via its own transitive file store (FIX-001-B02). |
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | todo | — | — |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |
@@ -106,6 +107,15 @@
 - Required unblock action / owner: user decides whether to authorize a narrowly scoped, supported session-path configuration for controlled test runs; implementation owner then adds and verifies that interface.
 - Next check condition: a supported session path can point to `/tmp` without repurposing `HOME`; restart F1 browser baseline with the temporary config and session directory.
 - Unaffected eligible tasks: none; H1 depends on F1.
+
+### FIX-001-B02 — webappengine outer file session
+
+- Observed failure + exact command / exit code: source inspection after direct cleanup; no server start run, exit N/A.
+- Cause / evidence path: `src/server/index.js:236` starts `webappengine`; `node_modules/webappengine/src/app/app.standalone.js:155-166` removes/recreates `./sessions` and registers its own `express-session` + `session-file-store`. `yarn why` identifies this as the remaining dependency path.
+- Attempts and results: direct app middleware/manifest cleanup completed with a real `/api/signin` no-`Set-Cookie` test; it does not govern the outer host created by `webappengine`.
+- Required unblock action / owner: user authorizes a scoped replacement or upgrade of the `webappengine` host that preserves CNCjs route mounting, proxy/static behavior, and the HTTP server passed to Socket.IO, but does not add session middleware.
+- Next check condition: a full `createServer()` integration test starts without creating `sessions` and preserves JWT HTTP/Socket.IO behavior.
+- Unaffected eligible tasks: none; full browser F1 baseline needs the server host.
 
 新增格式：
 

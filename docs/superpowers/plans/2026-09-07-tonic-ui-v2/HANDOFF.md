@@ -2,9 +2,9 @@
 
 ## 現況
 
-- Mode: **implementation paused: F1-B01 blocking**。使用者於 2026-09-07 授權開始第一階段；不可自動開始 H1。
+- Mode: **implementation paused: F1-B01 / FIX-001-B02 blocking**。使用者於 2026-09-07 授權開始第一階段；不可自動開始 H1。
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
-- F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline；受控 backend session 無法安全啟動，因現有 server 會無條件刪除／重建使用者的 `/home/cheton/.cncjs-sessions`，且沒有 session-path override。詳見 STATUS 的 F1-B01；等待使用者是否授權新增狹義的受控 session-path 設定。
+- F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 已移除 CNCjs app-level session store 並以 no-cookie signin test 驗證；但完整 server host `webappengine` 仍無條件建立 `./sessions`。詳見 STATUS 的 F1-B01／FIX-001-B02；等待使用者是否授權替換或升級此 host，不能把 direct cleanup 誤報為完整 file-session 移除。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。
 - [STATUS](STATUS.md)：F1 為 blocking；其餘 implementation tasks 為 todo。F1 的開始 HEAD `21c288dc`；目前只有本次 blocker checkpoint 的未提交 docs diff，完成後可 local commit。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。

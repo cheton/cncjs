@@ -38,6 +38,16 @@ Observed blocker: before starting any process, source review found `src/server/c
 
 Status transition: F1 `in_progress` -> `blocking` (F1-B01). Required unblock action: user authorization to add a narrowly scoped, supported session-path override for controlled test runs, without repurposing `HOME`; then use `/tmp` path and replay the remaining browser baseline. H1 cannot begin until F1 is unblocked and completed.
 
+## FIX-001 start — 2026-09-07T12:42:00+08:00
+
+User decision: remove file-based sessions instead of adding a session-path override. Root-cause evidence: file session setup is the only `express-session`/`session-file-store` use; `req.session.id` is only the verbose Morgan request ID. HTTP protected routes and Socket.IO handshake use JWT. Worker selection: `gpt-5.6-luna` high because removal is local with a fixed JWT contract; no new state ownership or timing behavior. TDD oracle: a real temporary Express app's `/api/signin` response must issue a JWT token without `Set-Cookie`; the pre-fix session middleware should make this test fail.
+
+FIX-001 evidence: the no-cookie integration test was red on the original app (`connect.sid` response cookie) and is green after direct middleware removal: `yarn test --runInBand src/server/__tests__/app.test.js` exit 0, 1/1 pass. Full lint, immutable install, and production build were run after the production changes (exit 0; pre-existing warnings only). Source/manifest cleanup removes `express-session`, `session-file-store`, `rimraf`, and `.cncjs-sessions` from CNCjs app-level code; `cookie-parser` remains intentionally out of scope.
+
+## FIX-001-B02 — 2026-09-07T13:05:00+08:00
+
+Post-cleanup dependency tracing found `src/server/index.js` starts `webappengine`. Its `src/app/app.standalone.js:155-166` unconditionally deletes/recreates `./sessions` and installs its own file session store. `yarn why express-session` and `yarn why session-file-store` resolve only to `webappengine@1.2.0`. The direct app test does not exercise this outer host. Status: FIX-001 `in_progress` -> `blocking`; retain the verified direct-cleanup diff, but do not claim full server file sessions are removed. Required next task needs explicit authority to replace or upgrade the webappengine host while preserving route mounting/proxy/static behavior and the server supplied to Socket.IO.
+
 ## Dispatch dimensions — 2026-09-07
 
 依使用者確認，補充合約明確度、狀態/時序、影響範圍、驗證能力四個派工維度；以子任務選 effort，worker brief 記選擇理由，失敗先分類再決定升級。沿用現有 matrix/ledger，不新增狀態。只更新文件，尚未派工或執行 migration。
