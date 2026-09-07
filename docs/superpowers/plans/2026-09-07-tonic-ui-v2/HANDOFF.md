@@ -9,6 +9,17 @@
 - [STATUS](STATUS.md)：F1 為 blocking；其餘 implementation tasks 為 todo。F1 的開始 HEAD `21c288dc`；目前只有本次 blocker checkpoint 的未提交 docs diff，完成後可 local commit。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
+
+## Hard rules / current execution rules
+
+接手 session 必須先讀本節，再讀 [EXECUTION](EXECUTION.md) 的完整規則。
+
+1. **Browser ownership:** 所有 browser tests、browser regression、screenshots、accessible snapshots 與 browser runner 操作，必須由 `gpt-5.6-luna` / `medium` 執行。主控不得代跑或改派模型；只負責 bounded brief、evidence review 與 ledger。Luna medium 不可用時，browser gate 留在 `in_progress` 或記具名 blocker。
+2. **Browser environment:** 使用 Playwright bundled Chromium，不用 system Chrome screenshot channel。Linux/headless 的 `WebGL Error Message` modal 只在出現時關閉；必須定位 portal 內 enabled `OK`，不能以廣泛 `Close` locator 誤點 disabled `Close G-code file`。
+3. **Test config:** browser/simulator tests 唯一的受版本控制 config reference 是 [`docs/testing/configs/browser-test.cncrc`](../../../testing/configs/browser-test.cncrc)。它沒有 `users`，使用 anonymous sign-in；先複製到唯一 `/tmp` runtime path，然後以 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc yarn dev` 啟動。`scripts/start-server-dev.sh` 只把此 variable 傳給 backend `--config`；Webpack 不讀取它。不得以 repo 內檔案或使用者的 `~/.cncrc` 作 active config，也不可提交 token、password、machine-specific config 或 private watch contents。
+4. **Simulator:** 從 repo root 只執行 `yarn dev`；它會啟動 simulator、frontend 與 backend。不要另跑 `grbl-simulator/start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。browser test 結束只停止自己啟動的程序，確認 ports 8000/8080 與 `/tmp/ttyGRBL` 已清理。
+5. **Scope and state:** `STATUS.md` 是唯一 task ledger，只有主控能改 STATUS/HANDOFF/execution-log/plan checkboxes。沒有可重跑 evidence 的 browser gate 不得標 completed；不以 chat 或 worker 自評取代 evidence。可建立 local commits；不得自行 push。
+6. **Migration intent:** 淘汰不支援 React 16–18 的舊 runtime library，特別是 Bootstrap family。CNCjs Button 只有在整合證據顯示 Tonic 無法保留必要 domain 色票/語意時，才可做成薄的 Tonic-based `src/app/components/Button`；不可保留或 re-export `react-bootstrap-buttons`。
 - 計畫更新前觀察 HEAD e09a642c，工作樹乾淨；本次只有 docs 變更，接手時重新檢查實際 HEAD/diff。
 
 ## 最新 review 結論

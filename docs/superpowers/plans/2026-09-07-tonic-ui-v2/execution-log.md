@@ -89,3 +89,13 @@ Browser recheck: `artifacts/browser/br0-playwright-cli/` uses bundled Chromium C
 Artifacts: `artifacts/browser/br0-command-flow/` retains the original failure evidence; `artifacts/browser/br0-playwright-cli/` retains the fixed upload evidence. The transient MCP-profile-only retry was removed as an unnecessary intermediate artifact.
 
 Next exact step and expected result: launch a fresh bundled-Chromium CLI session, target the portal's visible `OK` button within the WebGL modal before interacting with the Connection widget, then select `/tmp/ttyGRBL`, upload the small fixture, and verify enabled workflow/disconnect before simulator-only Run/Pause/Resume/Stop.
+
+## BR0 targeted WebGL retry — 2026-09-07T23:05:00+08:00
+
+Task / session / timestamp: BR0 / `gpt-5.6-luna` medium browser worker / 2026-09-07T23:05:00+08:00.
+
+Evidence: `artifacts/browser/br0-complete-flow/` confirms anonymous Workspace at 1440×900 and that the Linux WebGL modal was dismissed through its targeted portal `OK` before Connection interaction. The worker did not use a broad close locator and did not jog.
+
+Blocker: fresh `yarn dev` compiled, but backend port 8000 and frontend port 8080 were already owned by pre-existing PIDs `3202712` and `3202685`; the fresh backend exited `EADDRINUSE`, so the browser reached the wrong existing lifecycle and had no `/tmp/ttyGRBL` option. The worker stopped only its own children and did not touch those PIDs. `/tmp/ttyGRBL` and its temporary profile were removed.
+
+Remaining: select `/tmp/ttyGRBL`, upload small fixture in the same fresh lifecycle, Run/Pause/Resume/Stop, disconnect, 768px final state, 100,000-line fixture, and 5,000-node watch tree. BR0 remains `in_progress`.
