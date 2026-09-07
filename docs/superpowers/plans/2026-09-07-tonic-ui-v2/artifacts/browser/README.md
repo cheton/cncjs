@@ -39,14 +39,12 @@ Observed baseline:
 Artifacts:
 
 - `commands.md` — exact setup and browser commands
-- `first-run-login-snapshot.yml` — first-run sign-in screen after a clean browser session
-- `workspace-console.log` — browser console output
-- `workspace-1440x900.png` — full-page screenshot
+- `br0-final-workspace.png` — authenticated Workspace screenshot
 - `macros-modal-snapshot.yml`, `macro-modal.png` — New Macro dialog
 - `theme-dark-snapshot.yml`, `theme-light-snapshot.yml`, `theme-light.png` — theme checks
 - `br0-final-workspace.png` — fresh authenticated Workspace screenshot
 - `br0-final-768x900.png`, `br0-final-768-snapshot.txt` — fresh narrow viewport evidence
-- `br0-final-console.log` — fresh console/network evidence
+- `port-selection/03-console.log` — fresh console/network evidence
 - `port-selection/` — fresh selector open, `/tmp/ttyGRBL` selection, and Grbl connection evidence
 
 Remaining BR0 coverage: Run/Pause/Resume/Stop/jog/disconnect commands and

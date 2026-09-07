@@ -11,7 +11,7 @@ WEBPACK_DEV_SERVER_HOST=127.0.0.1 PROXY_TARGET=http://127.0.0.1:8000 \
   yarn start-app-dev --port 8080
 playwright cli -s=cncjs-br0 open http://127.0.0.1:8080 --browser chromium
 playwright cli -s=cncjs-br0 snapshot
-playwright cli -s=cncjs-br0 screenshot --filename workspace-1440x900.png --full-page
+playwright cli -s=cncjs-br0 screenshot --filename br0-final-workspace.png --full-page
 ```
 
 The simulator, bridge, backend, and app were started in separate terminal
