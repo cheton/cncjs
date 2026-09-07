@@ -63,7 +63,7 @@ echo ""
 cleanup() {
     echo ""
     echo "Stopping services..."
-    kill $CONCURRENRLY_PID 2>/dev/null
+    kill $CONCURRENTLY_PID 2>/dev/null
     rm -f $SERIAL_PATH
     echo "✓ Stopped"
     exit 0

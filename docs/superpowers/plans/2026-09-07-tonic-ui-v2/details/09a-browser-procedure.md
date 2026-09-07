@@ -6,14 +6,11 @@
 
 **Create at execution:** `src/app/test/fixtures/browser/`、本計畫 `artifacts/browser/README.md` 與 baseline 結果。fixture 只含合成 G-code/config，browser credentials/storage state 不提交。
 
-1. `yarn build-dev`。建立獨立測試 `.cncrc`，用明確 `--config`，不改使用者的 `~/.cncrc`。包含 `ports: [{path:'/tmp/ttyCNCjsMigration',manufacturer:'Grbl Simulator'}]`；watch directory 指向合成 fixture 目錄。以既有 first-run/sign-in UI 建立測試 session；記錄實際 setup 步驟與 route，但不記密碼/token。
-2. 在各自的 terminal session 啟動下列程序。記 session/PID、port 與日誌位置，不使用會改共用 ~/.cncrc 的快捷腳本。
+1. `yarn build-dev`。使用目前使用者的 `~/.cncrc`；不要加入 `users` 欄位，使用 anonymous sign-in contract，預期直接進入 Workspace。確認 `ports` 包含 `[{path:'/tmp/ttyGRBL',manufacturer:'Grbl Simulator'}]`，watch directory 指向合成 fixture 目錄。記錄實際 setup 步驟與 route，但不記密碼/token。
+2. 從 repository root 執行 `yarn dev`。此命令會在同一個 lifecycle 啟動 Grbl simulator、frontend dev server 與 CNCjs backend；不要另外啟動 `start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。記 session/PID、port 與日誌位置。
 
 ```bash
-node grbl-simulator/grbl-server.js 8888
-node grbl-simulator/serial-bridge.js 8888 /tmp/ttyCNCjsMigration
-NODE_ENV=development ./bin/cncjs --host 127.0.0.1 --port 8000 --config /tmp/cncjs-migration.cncrc --watch-directory /tmp/cncjs-migration-watch
-WEBPACK_DEV_SERVER_HOST=127.0.0.1 PROXY_TARGET=http://127.0.0.1:8000 yarn start-app-dev --port 8080
+yarn dev
 ```
 
 bridge 需要 `socat`。缺少依賴、占用 port、auth/setup 或 WebGL 啟動失敗時記 named blocker；不可跳過並宣稱 browser 通過。路徑中的 config/watch fixtures 需在啟動前從受版本控制的合成內容建立。首輪將成功命令/版本記入 artifacts README，後續照同版本重跑。
