@@ -9,7 +9,7 @@
 - Active task: BR0（blocked: browser runner missing）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
 - Next eligible task: BR0（install a browser runner first）
-- Current blockers: BR0 has global Playwright 1.62.1 and can open Chrome 152.0.7977.64 plus capture an accessibility snapshot, but both Playwright screenshot paths fail on `Page.captureScreenshot`. Browser/frontend regression remains unrun.
+- Current blockers: none for the BR0 runner. Global Playwright 1.62.1 with bundled Chromium can capture accessibility snapshots and screenshots; system Chrome channel remains unsupported for screenshots. CNCjs browser baseline is still unrun.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
 
@@ -25,7 +25,7 @@
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | completed | root session / 2026-09-07T14:35:00+08:00 | `17033b7a`; each render gets a new QueryClient, Tonic provider smoke tests cover Button/theme/shared client/dispose cleanup. Fresh focused and frontend suite: 4/4 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | completed | root session / 2026-09-07T14:45:00+08:00 | `fcaf92f9`; exact deferred utility with resolve/reject tests. Fresh focused test and frontend suite: 6/6 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
-| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | blocked | root session / 2026-09-07T19:10:00+08:00 | Global Playwright 1.62.1 opens Chrome 152.0.7977.64 and captures a snapshot, but `playwright cli screenshot` and `playwright screenshot --channel chrome` both fail on `Page.captureScreenshot`. Use a compatible browser/runner pair, then resume from `yarn build-dev`. |
+| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-07T19:20:00+08:00 | Global Playwright 1.62.1 bundled Chromium smoke passed: `playwright screenshot -b chromium about:blank /tmp/cncjs-playwright-br0.png`, 4,254-byte PNG. Resume from `yarn build-dev`; do not use system Chrome channel for screenshots. |
 | R0 | [原版 baseline](09-regression-gates.md) | BR0 | todo | — | — |
 | D1 | [chrome 純資料](details/02a-widget-state.md) | R0 | todo | — | — |
 | D2 | [Provider](details/02a-widget-state.md) | D1 | todo | — | — |
@@ -118,13 +118,13 @@
 - Next check condition: a full `createServer()` integration test starts without creating `sessions` and preserves JWT HTTP/Socket.IO behavior.
 - Unaffected eligible tasks: none; full browser F1 baseline needs the server host.
 
-### BR0-B03 — browser screenshot protocol unavailable
+### BR0-B03 — browser screenshot protocol unavailable (resolved for bundled Chromium)
 
-- Observed failure + exact command / exit code: global `playwright cli -s=cncjs-br0-smoke open about:blank --browser chrome` and `snapshot` succeed, but `screenshot --filename /tmp/cncjs-playwright-smoke.png --full-page` fails with `Protocol error (Page.captureScreenshot): Unable to capture screenshot`; standard `playwright screenshot --channel chrome about:blank /tmp/cncjs-playwright-standard-smoke.png` fails identically.
+- Observed failure + exact command / exit code: system Chrome channel screenshot failed with `Protocol error (Page.captureScreenshot): Unable to capture screenshot`; bundled Chromium now passes.
 - Cause / evidence path: the installed global Playwright 1.62.1 can control Chrome 152.0.7977.64 enough for navigation/snapshot, but the screenshot CDP command is unavailable in this browser/runner pair.
-- Attempts and results: Chrome opens with the global Playwright CLI and creates an accessibility snapshot; both independent screenshot entry points reproduce the same failure.
-- Required unblock action / owner: provide a compatible browser/Playwright pair (prefer Playwright's matching bundled Chromium or a compatible Chrome channel); do not add a second E2E framework.
-- Next check condition: the same global Playwright command captures a non-empty PNG after opening `about:blank`, then can capture a snapshot and screenshot at `http://127.0.0.1:8080`.
+- Attempts and results: `playwright screenshot -b chromium about:blank /tmp/cncjs-playwright-br0.png` succeeded with a 4,254-byte PNG.
+- Required unblock action / owner: use Playwright's bundled Chromium for BR0; keep system Chrome channel failure recorded as an environment limitation.
+- Next check condition: bundled Chromium captures a snapshot and screenshot at `http://127.0.0.1:8080` after `yarn build-dev` and the prescribed server/app startup.
 - Unaffected eligible tasks: non-browser unit tasks remain eligible only where their dependency graph allows them; BR0/R0 browser baseline cannot proceed.
 
 新增格式：
