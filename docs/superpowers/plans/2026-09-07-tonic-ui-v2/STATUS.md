@@ -6,10 +6,10 @@
 
 ## Current checkpoint
 
-- Active task: F1
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（F1 Luna worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者於 2026-09-07 明確授權執行，範圍限 F1，並要求在第一階段合適 checkpoint 停止。
-- Next eligible task: F1（in_progress；完成後才為 H1）
-- Current blockers: none；一般未完成依賴仍是 todo，不是 blocking。
+- Active task: none
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（F1 session-baseline worker 已結束）；advisor: gpt-5.6-sol / medium（按需唯讀）。使用者於 2026-09-07 明確授權執行第一階段；F1 現正等待安全 session-path 決策。
+- Next eligible task: none（F1 blocking；H1 依賴 F1）
+- Current blockers: F1-B01；一般未完成依賴仍是 todo，不是 blocking。
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: app/frontend/browser/simulator regression 尚未執行。
 
@@ -19,7 +19,7 @@
 
 | ID | Plan / deliverable | Depends on | Status | Owner / updated | Evidence / blocker |
 | --- | --- | --- | --- | --- | --- |
-| F1 | [環境與既有行為](01-foundation.md) | — | in_progress | root session / 2026-09-07T12:13:00+08:00 | Versions/immutable install/lint/build pass; login screenshot saved. Remaining: controlled backend/login session for Workspace/Admin/theme/modal flows; Jest assertions pass but runner has open handles. |
+| F1 | [環境與既有行為](01-foundation.md) | — | blocking | root session / 2026-09-07T12:30:00+08:00 | F1-B01: server unconditionally deletes/recreates user-owned session directory; no safe temporary session-path override. |
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | todo | — | — |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | todo | — | — |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | todo | — | — |
@@ -98,7 +98,16 @@
 
 ## Blocker records
 
-目前無。新增格式：
+### F1-B01 — controlled backend session path
+
+- Observed failure + exact command / exit code: required backend command not run (N/A) after source review showed it would execute `rimraf.sync('/home/cheton/.cncjs-sessions')` then `fs.mkdirSync()` during startup.
+- Cause / evidence path: `src/server/config/settings.base.js:70-72` resolves session storage from `HOME`; `src/server/app.js:192-196` unconditionally removes and recreates it. The CLI has no session-path option and the temporary `--config` does not override this settings value.
+- Attempts and results: confirmed a temporary `--config` can isolate `.cncrc`; read-only check confirmed `/home/cheton/.cncjs-sessions` exists. Did not set `HOME`, start the backend, or alter user-owned state.
+- Required unblock action / owner: user decides whether to authorize a narrowly scoped, supported session-path configuration for controlled test runs; implementation owner then adds and verifies that interface.
+- Next check condition: a supported session path can point to `/tmp` without repurposing `HOME`; restart F1 browser baseline with the temporary config and session directory.
+- Unaffected eligible tasks: none; H1 depends on F1.
+
+新增格式：
 
 - Blocker ID / task:
 - Observed failure + exact command / exit code:

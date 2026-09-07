@@ -28,6 +28,16 @@ Browser evidence: local dev server bound successfully only with local-bind permi
 
 Remaining untested paths: a controlled backend/config/test-login session is required to measure Workspace, Administration/Macros, light/dark theme switching, and a custom modal without using user data. Determine and document that fixture/session setup, then resume F1 from that point. Separately, diagnose Jest open handles before relying on clean test-run exit as a later gate. Do not start H1 until F1 has its required browser-flow baseline or an explicit plan change.
 
+## F1 resumed — 2026-09-07T12:23:00+08:00
+
+Worker selection: F1 controlled browser baseline / `gpt-5.6-luna` high / the server's no-enabled-users sign-in contract is explicit, while session-write behavior must be observed. Use a temporary `--config` file with no users; do not create credentials, write `~/.cncrc`, or modify source/ledger. Stop and report if session middleware writes user-owned state.
+
+## F1-B01 — 2026-09-07T12:30:00+08:00
+
+Observed blocker: before starting any process, source review found `src/server/config/settings.base.js:70-72` sets the session directory to `/home/cheton/.cncjs-sessions` from `HOME`, and `src/server/app.js:192-196` unconditionally runs `rimraf.sync(path)` and `fs.mkdirSync(path)`. The backend CLI lacks a session-path option; temporary `--config` only isolates the rcfile. Read-only check confirmed that user-owned directory exists. No backend/frontend process, temporary runtime directory, user credential, config, or session state was created or changed.
+
+Status transition: F1 `in_progress` -> `blocking` (F1-B01). Required unblock action: user authorization to add a narrowly scoped, supported session-path override for controlled test runs, without repurposing `HOME`; then use `/tmp` path and replay the remaining browser baseline. H1 cannot begin until F1 is unblocked and completed.
+
 ## Dispatch dimensions — 2026-09-07
 
 依使用者確認，補充合約明確度、狀態/時序、影響範圍、驗證能力四個派工維度；以子任務選 effort，worker brief 記選擇理由，失敗先分類再決定升級。沿用現有 matrix/ledger，不新增狀態。只更新文件，尚未派工或執行 migration。
