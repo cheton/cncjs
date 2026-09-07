@@ -20,6 +20,7 @@
 4. **Simulator:** 從 repo root 只執行 `yarn dev`；它會啟動 simulator、frontend 與 backend。不要另跑 `grbl-simulator/start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。browser test 結束只停止自己啟動的程序，確認 ports 8000/8080 與 `/tmp/ttyGRBL` 已清理。
 5. **Scope and state:** `STATUS.md` 是唯一 task ledger，只有主控能改 STATUS/HANDOFF/execution-log/plan checkboxes。沒有可重跑 evidence 的 browser gate 不得標 completed；不以 chat 或 worker 自評取代 evidence。可建立 local commits；不得自行 push。
 6. **Migration intent:** 淘汰不支援 React 16–18 的舊 runtime library，特別是 Bootstrap family。CNCjs Button 只有在整合證據顯示 Tonic 無法保留必要 domain 色票/語意時，才可做成薄的 Tonic-based `src/app/components/Button`；不可保留或 re-export `react-bootstrap-buttons`。
+7. **Build verification:** 本地不要執行 `yarn build-prod`；production build 由 CI 把關。需要驗證 development server 或 browser flow 時，直接執行 `yarn dev`。
 - 計畫更新前觀察 HEAD e09a642c，工作樹乾淨；本次只有 docs 變更，接手時重新檢查實際 HEAD/diff。
 
 ## 最新 review 結論
