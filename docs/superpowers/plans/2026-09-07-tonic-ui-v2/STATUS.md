@@ -35,7 +35,7 @@
 | R2 | [Workspace 驗收](09-regression-gates.md) | D4 | todo | — | — |
 | U2 | [primitives pilot](02-shared-ui.md) | R1, R2 | todo | — | — |
 | U3 | [overlay/form 合約](02-shared-ui.md) | U2 | todo | — | — |
-| B0 | [HTTP import baseline](details/03b-query-boundaries.md) | H3 | todo | — | — |
+| B0 | [HTTP import baseline](details/03b-query-boundaries.md) | H3 | completed | root session / 2026-09-07T18:55:00+08:00 | `query-boundary-baseline.md`; direct imports classified by endpoint, operation, owner task, and explicit exceptions. Static audit only; no transport or browser behavior run. |
 | B1 | [session boundary](details/03b-query-boundaries.md) | B0, U3 | todo | — | — |
 | M1 | [Macro query](details/03a-query-contract.md) | B0, U3 | todo | — | — |
 | M2 | [Macro mutation](details/03a-query-contract.md) | M1 | todo | — | — |
