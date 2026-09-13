@@ -22,7 +22,7 @@
 
 本文件不是收尾才跑：**F2 後立即做 R0；D3/D4 前建立 R1/R2；E1 前建立 R3。** R4/R5 與重構同批完成；R6 是合併/交付 gate。所有「通過」必須附實際執行紀錄，本輪規劃尚未執行 app regression tests。
 
-先以 [09a BR0](details/09a-browser-procedure.md) 固定啟動環境/fixtures，再完成 R0。R1/R2 在 D3/D4 前建立案例，D4 後才驗收 completed；R4/R5 同理。此為 test-first 時序，不要求新架構測試在原版全綠，不形成依賴循環。進度以 [STATUS](STATUS.md) 為準。
+先以 [09a BR0](details/09a-browser-procedure.md) 固定啟動環境/fixtures，再完成 R0。若 BR0 依 [STATUS](STATUS.md) 被明確 waived，R0 可先完成非 browser characterization，但必須把缺失 browser evidence 記為 carry-forward；R6 仍必須補齊相同流程，不能以 waiver 當作通過。R1/R2 在 D3/D4 前建立案例，D4 後才驗收 completed；R4/R5 同理。此為 test-first 時序，不要求新架構測試在原版全綠，不形成依賴循環。進度以 [STATUS](STATUS.md) 為準。
 
 ## Task R0：原版基準與已知差異清單
 

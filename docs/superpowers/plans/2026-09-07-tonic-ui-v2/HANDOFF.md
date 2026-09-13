@@ -2,11 +2,11 @@
 
 ## 現況
 
-- Mode: **implementation paused after F1/FIX-002**。使用者要求第一階段先停下；F1-B01 / FIX-001-B02 已由 app-level cleanup 與本機 host 吸收解除。
+- Mode: **implementation continuing with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。現有 evidence 證明 connection、small upload、Run/Pause/Resume；Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
-- F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; browser/frontend regression remains pending.
-- 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。
-- [STATUS](STATUS.md)：F1 為 blocking；其餘 implementation tasks 為 todo。F1 的開始 HEAD `21c288dc`；目前只有本次 blocker checkpoint 的未提交 docs diff，完成後可 local commit。
+- F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
+- 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。此 session 已依規則派 Luna medium，並使用已授權的 bind 環境。
+- [STATUS](STATUS.md)：BR0 為 waived；R0 可依 H3 繼續，browser gaps 依 waiver 延後至 R6。F1 的開始 HEAD `21c288dc`；本次 BR0 resume 開始於 `62ea82ca`，目前有 checkpoint docs、durable artifacts、synthetic fixtures 與 `Connection.jsx` selector patch 未提交；BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
 
@@ -21,13 +21,15 @@
 5. **Scope and state:** `STATUS.md` 是唯一 task ledger，只有主控能改 STATUS/HANDOFF/execution-log/plan checkboxes。沒有可重跑 evidence 的 browser gate 不得標 completed；不以 chat 或 worker 自評取代 evidence。可建立 local commits；不得自行 push。
 6. **Migration intent:** 淘汰不支援 React 16–18 的舊 runtime library，特別是 Bootstrap family。CNCjs Button 只有在整合證據顯示 Tonic 無法保留必要 domain 色票/語意時，才可做成薄的 Tonic-based `src/app/components/Button`；不可保留或 re-export `react-bootstrap-buttons`。
 7. **Build verification:** 本地不要執行 `yarn build-prod`；production build 由 CI 把關。需要驗證 development server 或 browser flow 時，直接執行 `yarn dev`。
-- 計畫更新前觀察 HEAD e09a642c，工作樹乾淨；本次只有 docs 變更，接手時重新檢查實際 HEAD/diff。
+- 計畫更新前觀察 HEAD e09a642c，工作樹乾淨；本次 BR0 resume 已重新核對 HEAD `62ea82ca` 與工作樹，並增加 checkpoint docs、durable BR0 artifacts 與 synthetic fixtures；BR0-B05 解阻後 lifecycle 成功，BR0-B06 已由 191850 run 解決，但 BR0-B07/B08 的 retries 未能達到剩餘 gates，baseline 仍未全數完成。
 
 ## 最新 review 結論
 
-已補持久 ledger、父子 task 對應、避免 regression gate 循環依賴、browser procedure，以及 widget/controller contract 補充。修正不存在的 Tonic Slider；rc-slider 暫留。Tonic Select 是 native select，自訂 option/search 不可直接降級。react-datepicker 掃描未找到 src/app consumer，W3 再全 repo 複核。
+已補持久 ledger、父子 task 對應、避免 regression gate 循環依賴、browser procedure，以及 widget/controller contract 補充。修正不存在的 Tonic Slider；rc-slider 暫留。Tonic Select 是 native select，自訂 option/search 不可直接降級；後續可另立 task 評估 Tonic `MenuButton/MenuList/MenuItem` domain selector，但必須先驗證 keyboard/focus、selected value、disabled、ARIA/i18n 與 custom metadata/callback 等價。react-datepicker 掃描未找到 src/app consumer，W3 再全 repo 複核。
 
-未宣稱 build/test/browser 通過。目前只有先前只讀 geometry-baseline.json；F1/H1–H3/R0 必須取得可重跑實證。詳細案例仍要在各 task 的 source baseline 上寫成 tests；不能把計畫範例當成已執行測試。
+本次解阻前 `yarn build-dev` 通過；本次 source patch 後 `yarn build` 與 `yarn eslint` 通過，完整 Jest 為 508 passed / 1 個既有 `SocketConnection ECONNRESET` failure（依使用者要求排除）。BR0-B05 已由 `brew install socat`（exit 0）與使用者授權的 port bind 環境解除，fresh `yarn dev` lifecycle exit 0。BR0 依使用者明確 waiver 不阻擋 R0；未驗證的 browser gates 仍必須在 R6 補跑，不能宣稱 BR0/R0 browser 通過。
+
+最近 browser review：React Select 的 port entry 可由既有 visible parent/control 加 keyboard／exact visible text 操作；`#react-select-2-input` 是 hidden dummy input，`role=option` 也不是穩定角色。本次已補 `data-test` 與固定 id/class selectors 以降低測試耦合，但後續 Luna medium browser verification 因 worker 不可用未執行；BR0-B07/B08 已保留 durable evidence，BR0 依 waiver 不阻擋目前 implementation，缺口延後至 R6。
 
 ## 恢復 prompt
 
@@ -35,7 +37,7 @@
 請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md 與 AGENTS.md，核對 git status/HEAD。
-優先恢復 in_progress；若 blocking 先判斷解阻條件，否則選 Depends on 都 completed 的 todo。
+優先恢復 in_progress；若有 waived dependency，依 STATUS 的 waiver scope 繼續指定的下游 task；其他 blocking 先判斷解阻條件，否則選 Depends on 都 completed 的 todo。
 目前若尚未開始，執行 F1。不要重做 completed task，也不要只靠 checkbox 判斷測試通過。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。

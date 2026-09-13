@@ -1,17 +1,25 @@
 # Migration task status
 
-更新日期：2026-09-08。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-13。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: BR0（browser baseline in progress）
-- Main: current root session（非 Terra；此限制已記錄）；worker: none；advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: BR0（complete connection, fixture, viewport, and first-run coverage）
-- Current blockers: BR0 browser interaction is not yet verified end-to-end. The G-code parser type error and the date-fns v4 `YYYY`/timestamp error found during BR0 are fixed with frontend regression tests (`776b707c`). A Playwright CLI retry uploads the small fixture without the parser error or a React overlay. A Luna medium retry dismisses the Linux headless WebGL portal with its targeted `OK`, but a fresh backend could not bind because pre-existing PIDs own ports 8000/8080; it did not stop those processes. Run/Pause/Resume/Stop/jog/disconnect and large fixture load remain pending. System Chrome channel remains unsupported for screenshots.
+- Active task: R0（BR0 waived by explicit user direction; browser gaps deferred to R6）
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / medium, `McClintock`); advisor: gpt-5.6-sol / medium（按需唯讀）。
+- Next eligible task: R0（建立可用的原版 source/unit characterization；browser 未驗證項目明確列為 deferred）
+- Current blockers: BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
-- Validation: frontend focused regression passes (5 suites / 9 tests); full BR0 browser/simulator regression remains incomplete.
+- Validation: `yarn build-dev` and `yarn build` pass; `yarn eslint` exits 0 with existing warnings; `yarn test --runInBand` reports 508 passed and one pre-existing `SocketConnection` `ECONNRESET` failure, excluded per user direction. The latest prescribed `yarn dev` lifecycle exited 0 after worker cleanup, with simulator, frontend, backend, and `/tmp/ttyGRBL` confirmed. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
+
+## Explicit waiver
+
+- Decision: 2026-09-13，使用者明確要求不要卡在 BR0，允許後續 implementation 繼續。
+- Scope: `BR0` 改為 `waived`；`R0` 直接依賴 `H3` 開始。此 waiver 不宣稱 BR0 browser gates 通過，也不改寫既有 blocker/evidence。
+- Deferred evidence: Stop、jog press/release、disconnect、100,000-line fixture、5,000-node watch tree、768×900/1440×900 browser captures，以及 `Connection.jsx` 新 selector 的 browser verification。
+- Risk / final gate: R0 需把未驗證項目列為 carry-forward；R6 必須補齊等價 browser/performance evidence，W3 前不得保留未解的 browser gap。
+- Future UI option: `react-select` 暫不在本次 waiver 中替換；後續可依 `00-design.md` 評估 Tonic `MenuButton/MenuList/MenuItem` domain selector，先證明 keyboard、focus、selected value、disabled、ARIA/i18n 與既有 metadata/callback contract 等價。
 
 ## Task ledger
 
@@ -25,8 +33,8 @@
 | H1 | [frontend config](details/01a-test-harness.md) | F1 | completed | root session / 2026-09-07T14:25:00+08:00 | `9478abf0`; isolated jsdom config, script, exact dependencies, and mocks. Fresh checks: frontend discovery (0 H1 tests), Node/simulator discovery (18 suites), immutable install, ESLint (0 errors; 17 existing warnings), diff check. Independent review approved. |
 | H2 | [providers tests](details/01a-test-harness.md) | H1 | completed | root session / 2026-09-07T14:35:00+08:00 | `17033b7a`; each render gets a new QueryClient, Tonic provider smoke tests cover Button/theme/shared client/dispose cleanup. Fresh focused and frontend suite: 4/4 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
 | H3 | [lifecycle 工具](details/01a-test-harness.md) | H2 | completed | root session / 2026-09-07T14:45:00+08:00 | `fcaf92f9`; exact deferred utility with resolve/reject tests. Fresh focused test and frontend suite: 6/6 pass; Node `DEP0040` warning remains pre-existing. Independent review approved. |
-| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | in_progress | root session / 2026-09-08T00:30:00+08:00 | `183b42b6` plus `port-selection/` evidence verify simulator startup, selector, `/tmp/ttyGRBL`, and initial Grbl connection. `artifacts/browser/br0-playwright-cli/` verifies the fixed small upload has no parser/React overlay. A Luna medium run exposed and root fixed the date-fns v4 G-code stats error in `776b707c`; no post-fix browser pass evidence exists yet. `br0-complete-flow/` verifies targeted WebGL modal dismissal, but a pre-existing listener on 8000/8080 caused `EADDRINUSE`; no foreign process was stopped. Run/Pause/Resume/Stop/jog/disconnect and fixed large fixtures remain pending. Do not use system Chrome channel for screenshots. |
-| R0 | [原版 baseline](09-regression-gates.md) | BR0 | todo | — | — |
+| BR0 | [可重跑 browser baseline](details/09a-browser-procedure.md) | H3 | waived | root session / 2026-09-13T20:20:00+08:00 | Explicit user waiver. `artifacts/browser/br0-20260913-191850/` proves connection, small upload, and Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and new selector browser evidence remain unverified and are deferred to R6. |
+| R0 | [原版 baseline](09-regression-gates.md) | H3 (BR0 waived) | todo | — | Proceed with non-browser characterization; record BR0's missing browser evidence as carry-forward. |
 | D1 | [chrome 純資料](details/02a-widget-state.md) | R0 | todo | — | — |
 | D2 | [Provider](details/02a-widget-state.md) | D1 | todo | — | — |
 | D3 | [16 shells 接線](details/02a-widget-state.md) | D2 | todo | — | — |
@@ -135,6 +143,46 @@
 - Required unblock action / owner: rerun only the affected BR0 pending browser cases against the fixed dev bundle using Luna medium.
 - Next check condition: no GCodeStats runtime overlay after loading the small fixture; Run/Pause/Resume/Stop and disconnect controls can be exercised in the same fresh lifecycle.
 - Unaffected eligible tasks: none for BR0; existing port 8000/8080 ownership remains a separate blocker.
+
+### BR0-B05 — simulator bridge and bind environment
+
+- Resolution checkpoint: 2026-09-13T18:58:21+08:00 — user authorized the required environment changes; `brew install socat` exited 0, `/opt/homebrew/bin/socat` reports version 1.8.1.3, and ports 8000/8080 are free. BR0 is resumed for a fresh Luna-medium lifecycle; retain the historical failure evidence below.
+
+- Observed failure + exact command / exit code: `yarn build-dev` exited 0. `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` exited 1 in the sandbox with `socat is not installed` and `listen EPERM` for `0.0.0.0:8000` / `0.0.0.0:8080`; an elevated retry exited 1 with the same missing-`socat` failure.
+- Cause / evidence path: `grbl-simulator/start-with-cncjs.sh` requires `command -v socat` before creating `/tmp/ttyGRBL`; `scripts/start-server-dev.sh` and webpack dev server require the configured backend/frontend binds. The durable evidence is `artifacts/browser/br0-20260913-184213/README.md`, `commands.md`, and `results.json`.
+- Attempts and results: the worker used the exact repository-root `yarn dev` lifecycle, did not start a separate simulator, created the synthetic fixtures and copied the anonymous config to `/tmp`, then stopped only its own failed lifecycle. No browser runner was invoked. Cleanup found no listeners on 8000/8080 and no `/tmp/ttyGRBL`.
+- Required unblock action / owner: provide `socat` in the execution environment and an execution context permitted to bind the required 8000/8080 addresses; environment owner or user supplies that capability, then rerun BR0 with Luna medium.
+- Next check condition: `command -v socat` returns an executable; the exact `CONFIG_PATH=... SUPPRESS_WEBGL_WARNING=1 yarn dev` lifecycle stays up with simulator, frontend, and backend listeners; `/tmp/ttyGRBL` exists; then run the remaining bundled-Chromium browser cases.
+- Unaffected eligible tasks: no downstream baseline or UI migration task may claim BR0/R0 browser evidence; existing completed unit/static tasks remain unchanged.
+
+### BR0-B06 — browser runner timeout after port selection
+
+- Resolution checkpoint: 2026-09-13T19:31:37+08:00 — `br0-20260913-191850` used direct bundled Chromium with action-level handling; React Select and the post-selection connection flow completed. The remaining failure is fixture timing (`Stop` became disabled after the short program completed), not browser-runner availability. BR0 remains in progress for the missing gates.
+
+- Observed failure + exact command / exit code: fresh Playwright Chromium reached the anonymous Workspace, selected `/tmp/ttyGRBL`, emitted `selected`, then the browser command exceeded its 30-second limit with no exit code. The exact `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` lifecycle exited 0 after graceful worker cleanup.
+- Cause / evidence path: simulator/backend/frontend were healthy and the page had no new page errors; the browser runner/session timed out during the post-selection connection interaction. `agent.browsers.list()` returned no available in-app browser instances, the default Playwright launch lacked its expected headless-shell executable, and the explicit installed Chrome for Testing fallback reached the page. Evidence: `artifacts/browser/br0-20260913-185821/README.md`, `commands.md`, `results.json`, and `workspace-1440x900.png`.
+- Attempts and results: server ports and `/tmp/ttyGRBL` were confirmed; anonymous Workspace and port selection were captured. The worker stopped only its own lifecycle. No browser retry was made after the timeout, and no connection or workflow result is claimed.
+- Required unblock action / owner: resolved for the connection portion by `br0-20260913-191850`; remaining gates need a separate long-fixture run with action-level timeout handling. Do not use system Chrome screenshots or bypass the post-selection connection assertion.
+- Next check condition: a fresh run uses the proven visible-parent/keyboard React Select interaction, then completes the remaining BR0 cases and cleanup.
+- Unaffected eligible tasks: BR0 and dependent R0 remain incomplete; existing completed unit/static tasks remain unchanged.
+
+### BR0-B07 — browser backend unavailable on a remaining-gates retry
+
+- Observed failure + exact command / exit code: the Luna medium retry initialized the prescribed `yarn dev` lifecycle and then reported `agent.browsers.list() = []`; no browser gates ran. Lifecycle cleanup completed with ports 8000/8080 and `/tmp/ttyGRBL` absent.
+- Cause / evidence path: the browser runtime had no available backend in that worker session. Durable evidence: `artifacts/browser/br0-20260913-193330/README.md`, `commands.md`, and `results.json`.
+- Attempts and results: config/watch setup and lifecycle compilation succeeded; the worker correctly made no browser claims and made no source changes. A prior same-date Luna run had already demonstrated direct bundled Chromium availability, so this is a retry-surface limitation rather than a product finding.
+- Required unblock action / owner: provide a functioning Luna browser surface or use the already proven direct bundled Playwright fallback; do not mark BR0 complete from lifecycle-only evidence.
+- Next check condition: bundled Chromium produces durable assertions for the missing Stop/jog/disconnect/large/watch cases, with cleanup checks.
+- Unaffected eligible tasks: completed tasks remain unchanged; BR0/R0 remain incomplete.
+
+### BR0-B08 — React Select test locator does not target the existing visible control
+
+- Observed failure + exact command / exit code: `br0-20260913-193707` timed out after 8 seconds using `getByRole('option')` for `/tmp/ttyGRBL`; `br0-20260913-194320-30867` timed out after 15 seconds clicking `#react-select-2-input`, which resolves to a hidden readonly `css-*-dummyInput`. Neither run reached downstream gates.
+- Cause / evidence path: the port entry is rendered by `react-select` as a generic visible option surface, while the input id is an invisible dummy input. Existing `artifacts/browser/port-selection/02-open-menu.txt` shows the visible entry, and `br0-20260913-191850/README.md` proves selection through the visible parent/keyboard path. This is a test locator mismatch; no product defect or missing `data-test` requirement is established.
+- Attempts and results: both fresh prescribed lifecycles compiled and cleaned successfully; both workers used bundled Chromium and made no source changes. Durable failure evidence is in `br0-20260913-193707/` and `br0-20260913-194320-30867/`.
+- Required unblock action / owner: rerun with the proven visible parent/control plus `ArrowDown`/`Enter` or exact visible text locator, then exercise the missing gates. Add a `data-test` hook only if that proven DOM interaction is independently shown insufficient.
+- Next check condition: one bounded Luna medium run reaches a connected `Close` state without using `getByRole('option')` or clicking the hidden dummy input, then records Stop/jog/disconnect/large/watch assertions.
+- Unaffected eligible tasks: completed unit/static tasks remain unchanged; BR0 and dependent R0 remain incomplete.
 
 新增格式：
 

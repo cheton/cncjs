@@ -10,8 +10,11 @@
 | in_progress | 已領取，含 coding、test、review、正常暫停 | completed / blocking / todo |
 | blocking | 已遇到具體阻礙，無法完成此 task；須有 blocker record | in_progress（解阻後） |
 | completed | 所有 task gates 通過、證據與交接已寫入 | in_progress（新 regression 或 contract 變更重新打開） |
+| waived | 使用者明確接受未完成 gate 的風險；不代表測試或證據通過 | in_progress（撤銷 waiver 後） |
 
 使用者提到的「blocking」在此指 task **被阻塞**；造成其他 task 無法開始的關係由 Depends on 欄表示。無權限執行的 plan_only 暫停是專案模式，不把全部 tasks 標 blocking。
+
+使用者明確授權時，可將特定 gate 記為 `waived` 並讓明確指定的下游 task 繼續。waiver 必須在 `STATUS.md`、`HANDOFF.md` 與 execution log 記錄 scope、未完成 evidence、接受的風險與重新驗證位置；不得把 waived 當成 completed，也不得讓它繞過最終交付 gate。
 
 ## Terra main loop / Luna worker
 

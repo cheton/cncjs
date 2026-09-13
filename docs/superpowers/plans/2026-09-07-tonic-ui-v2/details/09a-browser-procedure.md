@@ -2,7 +2,7 @@
 
 ## Task BR0：原版執行環境與 fixtures
 
-**Prerequisite:** H3。本 task 在 R0 前建立環境及 baseline；R6 在遷移後重跑相同步驟。尚未執行，不代表環境已通過。
+**Prerequisite:** H3。本 task 在 R0 前建立環境及 baseline；若 STATUS 明確記錄 BR0 waived，R0 可先繼續，但 R6 仍須在遷移後重跑相同步驟。部分 evidence 不代表環境已完整通過。
 
 **Create at execution:** `src/app/test/fixtures/browser/`、本計畫 `artifacts/browser/README.md` 與 baseline 結果。fixture 只含合成 G-code/config，browser credentials/storage state 不提交。
 

@@ -52,7 +52,7 @@ Tonic Modal 2.15 的 `autoFocus/ensureFocus/closeOnEsc/closeOnInteractOutside` �
 
 | 現有套件 | 本輪決策 | 實作位置／完成條件 |
 | --- | --- | --- |
-| `react-select` | 簡單選項以 Tonic `Select/Option` 取代 | Tonic Select 是原生 select。Webcam 的無搜尋選單可直接換；Connection 的自訂 Option/SingleValue、Tool 的搜尋能力需先保存行為。若無法等價，以 Tonic primitives 寫具 keyboard/ARIA 測試的 domain selector；通過前保留該處 react-select，不可靜默刪搜尋或 rich labels |
+| `react-select` | 簡單選項以 Tonic `Select/Option` 取代；若需保留 rich/search menu，可評估 Tonic `Menu` domain selector | Tonic Select 是原生 select。Webcam 的無搜尋選單可直接換；Connection 的自訂 Option/SingleValue、Tool 的搜尋能力需先保存行為。Tonic `MenuButton/MenuList/MenuItem` 是候選替代，但必須先驗證 keyboard、focus、選取值、disabled、ARIA、i18n 與現有 caller contract；通過前保留該處 react-select，不可靜默刪搜尋或 rich labels |
 | `rc-slider` | 暫時保留，function consumer 照常遷移 | 本機公開 exports **沒有 Slider**。保留原 min/max/step/value label、change/commit 語義與 Stylus；不可 import 不存在的 Tonic Slider。完整替換另立經驗證的 task |
 | `rc-trigger` | 以 Tonic Tooltip/Popover 取代 | 本地 Tooltip/Infotip 最後 consumer 清空後刪除 |
 | `react-repeatable` | 移除套件，保留 CNC 長按 domain hook | `RepeatableButton` 底層用 Tonic Button；delay、interval、pointer/key release、blur、disabled、unmount 全部有 fake-timer tests |

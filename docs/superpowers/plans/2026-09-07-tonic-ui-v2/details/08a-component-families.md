@@ -62,7 +62,7 @@
 - [ ] FormControl/FormGroup/InputGroup/InlineError 改 Tonic form primitives。每欄保留 label/help/error 關聯、required、disabled、numeric zero、empty string 和 Enter submit。
 - [ ] HorizontalForm 的 responsive columns 改 Tonic Grid/Flex；刪 context HOC。
 - [ ] Validation 的 `createForm/createFormControl` class HOC 改既有 react-final-form props/hooks；不能同時保留兩份 draft state。MDI 的完整介面依 06a。
-- [ ] 依 00-design 的 API 相容性規則處理 react-select：先保存搜尋、自訂 options 與 keyboard 行為，再決定 native Select 或 domain selector；未等價的 caller 明列例外。rc-slider 保留，Tonic 沒有公開 Slider，先測 min/max/step、keyboard 與 change/commit 時機。
+- [ ] 依 00-design 的 API 相容性規則處理 react-select：先保存搜尋、自訂 options 與 keyboard 行為，再決定 native Select 或以 Tonic `MenuButton/MenuList/MenuItem` 組成的 domain selector；未等價的 caller 明列例外。若評估 Menu，先測 keyboard、focus return、選取值、disabled、ARIA/i18n 與 change/commit 時機。rc-slider 保留，Tonic 沒有公開 Slider，先測 min/max/step、keyboard 與 change/commit 時機。
 
 **Gate:** P2 family imports 為零；react-select 未等價 caller 逐檔記錄，rc-slider 按設計保留；所有 form 可由 keyboard 完成；invalid submit 不送 HTTP/controller mutation。
 

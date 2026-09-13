@@ -6,7 +6,7 @@ G1–G7、C1–C4 開始時先讀本文件。修改範圍與 test file 使用父
 
 | Task | Owner 與必測情境 |
 | --- | --- |
-| G1 Connection | index 只處理 chrome；Connection 擁有 port/baud/serial-network draft、pending/error。open/close timeout cleanup，連線回覆晚於 disconnect 不恢復舊 pending；rerender 不 connect。保存 custom option 的 port metadata，Tonic native Select 不能靜默丟棄資訊 |
+| G1 Connection | index 只處理 chrome；Connection 擁有 port/baud/serial-network draft、pending/error。open/close timeout cleanup，連線回覆晚於 disconnect 不恢復舊 pending；rerender 不 connect。保存 custom option 的 port metadata；若改用 Tonic Menu domain selector，不能靜默丟棄 metadata、keyboard/focus 或 disabled 語義 |
 | G2 GCode | metadata 由原 store/events 提供；loading/empty、units、line count、收合/展開保持資料；任何呈現操作零 controller command |
 | G3 Spindle | speed 是受控 draft；空值與 0 分別測。coolant M7/M8/M9；正轉 M3 或 M3 S{speed}、反轉 M4 或 M4 S{speed}、停止 M5。每次 action 一次 command('gcode', payload) |
 | G4 Laser | LaserTest 擁有 power/duration/maxS draft；start command('laser_test', power, duration, maxS)，stop command('laser_test', 0)。override 使用 spindle_override -10/-1/1/10/0；長按計時器只有一個 owner |
