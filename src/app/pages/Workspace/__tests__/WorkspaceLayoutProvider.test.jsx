@@ -1,8 +1,8 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { WidgetUIProvider } from '../WidgetUIProvider';
-import { useWorkspaceWidgetIds } from '../useWorkspaceWidgetIds';
-import { useWorkspaceWidgetUI } from '../useWorkspaceWidgetUI';
+import { WorkspaceLayoutProvider } from '../WorkspaceLayoutProvider';
+import { useWidgetGroup } from '../useWidgetGroup';
+import { useWorkspaceLayout } from '../useWorkspaceLayout';
 
 jest.mock('@app/store/config', () => ({
   __esModule: true,
@@ -11,9 +11,9 @@ jest.mock('@app/store/config', () => ({
 
 jest.mock('../widgetRegistry', () => ({
   WIDGET_REGISTRY: {
-    axes: { supportsChrome: true },
-    grbl: { supportsChrome: true, controllerType: 'Grbl' },
-    visualizer: { supportsChrome: false },
+    axes: { hasFrame: true },
+    grbl: { hasFrame: true, controllerType: 'Grbl' },
+    visualizer: { hasFrame: false },
   },
 }));
 
@@ -90,26 +90,35 @@ const createConfig = () => {
   };
 };
 
-const ChromeHarness = () => {
-  const { getChrome, setManyMinimized, toggleFullscreen } = useWorkspaceWidgetUI();
-  const axes = getChrome('axes');
-  const fork = getChrome('axes:fork-1');
-  const visualizer = getChrome('visualizer');
+const LayoutHarness = () => {
+  const {
+    getWidgetView,
+    setWidgetView,
+    setWidgetsCollapsed,
+  } = useWorkspaceLayout();
+  const axes = getWidgetView('axes');
+  const fork = getWidgetView('axes:fork-1');
+  const visualizer = getWidgetView('visualizer');
 
   return (
     <>
-      <output data-testid="axes">{JSON.stringify(axes)}</output>
-      <output data-testid="fork">{JSON.stringify(fork)}</output>
-      <output data-testid="visualizer">{JSON.stringify(visualizer)}</output>
-      <button type="button" onClick={() => setManyMinimized(['axes', 'axes:fork-1'], true)}>Collapse</button>
-      <button type="button" onClick={() => setManyMinimized(['visualizer', 'unknown'], true)}>Invalid</button>
-      <button type="button" onClick={() => toggleFullscreen('axes')}>Fullscreen</button>
+      <output data-testid="axes">{axes}</output>
+      <output data-testid="fork">{fork}</output>
+      <output data-testid="visualizer">{visualizer}</output>
+      <button type="button" onClick={() => setWidgetsCollapsed(['axes', 'axes:fork-1'], true)}>Collapse</button>
+      <button type="button" onClick={() => setWidgetsCollapsed(['visualizer', 'unknown'], true)}>Invalid</button>
+      <button
+        type="button"
+        onClick={() => setWidgetView('axes', axes === 'fullscreen' ? 'normal' : 'fullscreen')}
+      >
+        Fullscreen
+      </button>
     </>
   );
 };
 
 const GroupHarness = () => {
-  const { ids, setWidgetIds } = useWorkspaceWidgetIds('primary');
+  const { ids, setWidgetIds } = useWidgetGroup('primary');
   return (
     <>
       <output data-testid="ids">{JSON.stringify(ids)}</output>
@@ -121,9 +130,9 @@ const GroupHarness = () => {
 test('bulk actions update config once and ignore fullscreen/unsupported ids', () => {
   const config = createConfig();
   render(
-    <WidgetUIProvider config={config}>
-      <ChromeHarness />
-    </WidgetUIProvider>
+    <WorkspaceLayoutProvider config={config}>
+      <LayoutHarness />
+    </WorkspaceLayoutProvider>
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Fullscreen' }));
@@ -132,7 +141,7 @@ test('bulk actions update config once and ignore fullscreen/unsupported ids', ()
   expect(config.update).toHaveBeenCalledTimes(2);
   expect(config.read().widgets.axes.minimized).toBe(false);
   expect(config.read().widgets['axes:fork-1'].minimized).toBe(true);
-  expect(screen.getByTestId('axes')).toHaveTextContent('{"minimized":false,"isFullscreen":true}');
+  expect(screen.getByTestId('axes')).toHaveTextContent('fullscreen');
 
   fireEvent.click(screen.getByRole('button', { name: 'Invalid' }));
   expect(config.update).toHaveBeenCalledTimes(2);
@@ -142,15 +151,15 @@ test('bulk actions update config once and ignore fullscreen/unsupported ids', ()
 test('fullscreen exit preserves the expanded state and config subscriptions clean up', () => {
   const config = createConfig();
   const view = render(
-    <WidgetUIProvider config={config}>
-      <ChromeHarness />
-    </WidgetUIProvider>
+    <WorkspaceLayoutProvider config={config}>
+      <LayoutHarness />
+    </WorkspaceLayoutProvider>
   );
 
   expect(config.listenerCount()).toBe(1);
   fireEvent.click(screen.getByRole('button', { name: 'Fullscreen' }));
   fireEvent.click(screen.getByRole('button', { name: 'Fullscreen' }));
-  expect(screen.getByTestId('axes')).toHaveTextContent('{"minimized":false,"isFullscreen":false}');
+  expect(screen.getByTestId('axes')).toHaveTextContent('normal');
 
   view.unmount();
   expect(config.listenerCount()).toBe(0);
@@ -159,32 +168,32 @@ test('fullscreen exit preserves the expanded state and config subscriptions clea
 test('provider remount reads restored config without polling', () => {
   const config = createConfig();
   const view = render(
-    <WidgetUIProvider config={config}>
-      <ChromeHarness />
-    </WidgetUIProvider>
+    <WorkspaceLayoutProvider config={config}>
+      <LayoutHarness />
+    </WorkspaceLayoutProvider>
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
-  expect(screen.getByTestId('axes')).toHaveTextContent('{"minimized":true,"isFullscreen":false}');
+  expect(screen.getByTestId('axes')).toHaveTextContent('collapsed');
 
   view.unmount();
   config.restoreDefault();
   render(
-    <WidgetUIProvider config={config}>
-      <ChromeHarness />
-    </WidgetUIProvider>
+    <WorkspaceLayoutProvider config={config}>
+      <LayoutHarness />
+    </WorkspaceLayoutProvider>
   );
 
   expect(config.restoreDefault).toHaveBeenCalledTimes(1);
-  expect(screen.getByTestId('axes')).toHaveTextContent('{"minimized":false,"isFullscreen":false}');
+  expect(screen.getByTestId('axes')).toHaveTextContent('normal');
 });
 
 test('group ids read and write the existing workspace config path', () => {
   const config = createConfig();
   render(
-    <WidgetUIProvider config={config}>
+    <WorkspaceLayoutProvider config={config}>
       <GroupHarness />
-    </WidgetUIProvider>
+    </WorkspaceLayoutProvider>
   );
 
   expect(screen.getByTestId('ids')).toHaveTextContent('["axes","visualizer"]');
@@ -197,16 +206,16 @@ test('group ids read and write the existing workspace config path', () => {
   expect(screen.getByTestId('ids')).toHaveTextContent('["grbl"]');
 });
 
-test('external config change updates the minimized snapshot', () => {
+test('external config change updates the collapsed snapshot', () => {
   const config = createConfig();
   render(
-    <WidgetUIProvider config={config}>
-      <ChromeHarness />
-    </WidgetUIProvider>
+    <WorkspaceLayoutProvider config={config}>
+      <LayoutHarness />
+    </WorkspaceLayoutProvider>
   );
 
   act(() => {
     config.set(['widgets', 'axes', 'minimized'], true);
   });
-  expect(screen.getByTestId('axes')).toHaveTextContent('{"minimized":true,"isFullscreen":false}');
+  expect(screen.getByTestId('axes')).toHaveTextContent('collapsed');
 });

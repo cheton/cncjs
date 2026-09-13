@@ -1,37 +1,31 @@
 import PropTypes from 'prop-types';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { WIDGET_REGISTRY } from './widgetRegistry';
-import { useWorkspaceWidgetUI } from './useWorkspaceWidgetUI';
+import { useWorkspaceLayout } from './useWorkspaceLayout';
 
-const WidgetWithChrome = ({ Component, widgetId, ...props }) => {
+const WidgetWithLayout = ({ Component, widgetId, ...props }) => {
   const {
-    getChrome,
-    setMinimized,
-    toggleFullscreen,
-  } = useWorkspaceWidgetUI();
-  const { minimized, isFullscreen } = getChrome(widgetId);
-  const chrome = useMemo(() => ({
-    minimized,
-    isFullscreen,
-    onMinimizedChange: next => setMinimized(widgetId, next),
-    onToggleFullscreen: () => toggleFullscreen(widgetId),
-  }), [isFullscreen, minimized, setMinimized, toggleFullscreen, widgetId]);
+    getWidgetView,
+    setWidgetView,
+  } = useWorkspaceLayout();
+  const view = getWidgetView(widgetId);
 
   return (
     <Component
       {...props}
       widgetId={widgetId}
-      chrome={chrome}
+      view={view}
+      onViewChange={nextView => setWidgetView(widgetId, nextView)}
     />
   );
 };
 
-WidgetWithChrome.propTypes = {
+WidgetWithLayout.propTypes = {
   Component: PropTypes.elementType.isRequired,
   widgetId: PropTypes.string.isRequired,
 };
 
-const WidgetWrapper = ({ widgetId, ...props }) => {
+const WidgetHost = ({ widgetId, ...props }) => {
   if (typeof widgetId !== 'string') {
     return null;
   }
@@ -43,12 +37,12 @@ const WidgetWrapper = ({ widgetId, ...props }) => {
     return null;
   }
 
-  if (!entry.supportsChrome) {
+  if (!entry.hasFrame) {
     return <entry.Component {...props} widgetId={widgetId} />;
   }
 
   return (
-    <WidgetWithChrome
+    <WidgetWithLayout
       {...props}
       Component={entry.Component}
       widgetId={widgetId}
@@ -56,8 +50,8 @@ const WidgetWrapper = ({ widgetId, ...props }) => {
   );
 };
 
-WidgetWrapper.propTypes = {
+WidgetHost.propTypes = {
   widgetId: PropTypes.string.isRequired,
 };
 
-export default WidgetWrapper;
+export default WidgetHost;

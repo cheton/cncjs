@@ -1,1 +1,0 @@
-export { useWorkspaceWidgetIds } from './WidgetUIProvider';

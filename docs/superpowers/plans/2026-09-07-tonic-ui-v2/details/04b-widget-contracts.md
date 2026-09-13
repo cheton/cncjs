@@ -6,7 +6,7 @@ G1–G7、C1–C4 開始時先讀本文件。修改範圍與 test file 使用父
 
 | Task | Owner 與必測情境 |
 | --- | --- |
-| G1 Connection | index 只處理 chrome；Connection 擁有 port/baud/serial-network draft、pending/error。open/close timeout cleanup，連線回覆晚於 disconnect 不恢復舊 pending；rerender 不 connect。保存 custom option 的 port metadata；若改用 Tonic Menu domain selector，不能靜默丟棄 metadata、keyboard/focus 或 disabled 語義 |
+| G1 Connection | index 只處理 `view`／`onViewChange(view)`；Connection 擁有 port/baud/serial-network draft、pending/error。open/close timeout cleanup，連線回覆晚於 disconnect 不恢復舊 pending；rerender 不 connect。保存 custom option 的 port metadata；若改用 Tonic Menu domain selector，不能靜默丟棄 metadata、keyboard/focus 或 disabled 語義 |
 | G2 GCode | metadata 由原 store/events 提供；loading/empty、units、line count、收合/展開保持資料；任何呈現操作零 controller command |
 | G3 Spindle | speed 是受控 draft；空值與 0 分別測。coolant M7/M8/M9；正轉 M3 或 M3 S{speed}、反轉 M4 或 M4 S{speed}、停止 M5。每次 action 一次 command('gcode', payload) |
 | G4 Laser | LaserTest 擁有 power/duration/maxS draft；start command('laser_test', power, duration, maxS)，stop command('laser_test', 0)。override 使用 spindle_override -10/-1/1/10/0；長按計時器只有一個 owner |
@@ -38,7 +38,7 @@ G1–G7、C1–C4 開始時先讀本文件。修改範圍與 test file 使用父
 2. 使用真 index/body（只 mock transport/heavy resource）測 action，不能直接呼叫待測 method 略過 disabled UI；keyboard/click 都測一次與禁止狀態。
 3. 測 events A→B、partial report、wrong controller type、mount→unmount→mount、late timeout；每個 event setup 都有對應 cleanup，活躍 listener 數回 baseline。
 4. 長按用 fake timers：500ms delay、floor(1000/15) interval；release/blur/disabled/unmount 後零新增 command。不要透過 state updater 送命令。
-5. 改 function/chrome/Tonic 後重跑相同 oracle；有意修 bug 必須單列 before failure/new expected，不可只更新 snapshot。
+5. 改 function/layout view/Tonic 後重跑相同 oracle；有意修 bug 必須單列 before failure/new expected，不可只更新 snapshot。
 6. 跑父 task test path、eslint、build，以及 09a 適用 browser case；記 evidence 後才 completed。
 
 R5 彙整這些 command fixtures，並不重複實作所有 widget tests。任何 controller fixture 尚缺、browser 未驗證、事件 cleanup 未證明，均不得宣稱整體 regression 已確保。

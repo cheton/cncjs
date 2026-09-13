@@ -1,9 +1,9 @@
 import { GRBL, MARLIN } from '@app/constants/controller';
 import {
-  createMinimizedSnapshotReader,
+  createCollapsedSnapshotReader,
   selectVisibleWidgetIds,
-  setWidgetsMinimized,
-} from '../widgetUIState';
+  setWidgetsCollapsed,
+} from '../widgetLayoutState';
 import { WIDGET_REGISTRY } from '../widgetRegistry';
 
 jest.mock('@app/widgets/Autolevel', () => 'AutolevelWidget');
@@ -35,42 +35,42 @@ describe('widget registry', () => {
       'visualizer',
       'grbl:fork-1',
     ]);
-    expect(WIDGET_REGISTRY.visualizer.supportsChrome).toBe(false);
+    expect(WIDGET_REGISTRY.visualizer.hasFrame).toBe(false);
     expect(WIDGET_REGISTRY.marlin.controllerType).toBe(MARLIN);
   });
 });
 
-describe('setWidgetsMinimized', () => {
+describe('setWidgetsCollapsed', () => {
   test('bulk collapse updates only selected ids and preserves domain settings', () => {
     const widgets = {
       axes: { minimized: false, axes: ['x', 'y'] },
       'webcam:fork-1': { minimized: false, url: 'fixture' },
       macro: { minimized: false },
     };
-    const next = setWidgetsMinimized(widgets, ['axes', 'webcam:fork-1'], true);
+    const next = setWidgetsCollapsed(widgets, ['axes', 'webcam:fork-1'], true);
 
     expect(next.axes).toEqual({ minimized: true, axes: ['x', 'y'] });
     expect(next['webcam:fork-1'].url).toBe('fixture');
     expect(next.macro).toBe(widgets.macro);
     expect(widgets.axes.minimized).toBe(false);
-    expect(setWidgetsMinimized(next, ['axes'], true)).toBe(next);
+    expect(setWidgetsCollapsed(next, ['axes'], true)).toBe(next);
   });
 
   test('empty and false no-op updates preserve identity', () => {
     const widgets = { axes: { minimized: false } };
 
-    expect(setWidgetsMinimized(widgets, [], true)).toBe(widgets);
-    expect(setWidgetsMinimized(widgets, ['axes'], false)).toBe(widgets);
+    expect(setWidgetsCollapsed(widgets, [], true)).toBe(widgets);
+    expect(setWidgetsCollapsed(widgets, ['axes'], false)).toBe(widgets);
   });
 });
 
-describe('createMinimizedSnapshotReader', () => {
-  test('memoizes minimized ids and ignores unrelated widget settings', () => {
+describe('createCollapsedSnapshotReader', () => {
+  test('memoizes collapsed ids and ignores unrelated widget settings', () => {
     let widgets = {
       axes: { minimized: true, axes: ['x', 'y'] },
       macro: { minimized: false },
     };
-    const reader = createMinimizedSnapshotReader({
+    const reader = createCollapsedSnapshotReader({
       get: () => widgets,
     });
 

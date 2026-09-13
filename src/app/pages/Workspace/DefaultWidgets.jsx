@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import controller from '@app/lib/controller';
 import Widget from './Widget';
-import { useWorkspaceWidgetIds } from './useWorkspaceWidgetIds';
+import { useWidgetGroup } from './useWidgetGroup';
 import { WIDGET_REGISTRY } from './widgetRegistry';
-import { selectVisibleWidgetIds } from './widgetUIState';
+import { selectVisibleWidgetIds } from './widgetLayoutState';
 import styles from './widgets.styl';
 
 const DefaultWidgets = ({ className }) => {
-  const { ids } = useWorkspaceWidgetIds('default');
+  const { ids } = useWidgetGroup('default');
   const widgets = selectVisibleWidgetIds(
     ids,
     controller.availableControllers,

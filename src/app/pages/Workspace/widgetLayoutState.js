@@ -7,40 +7,40 @@ export const selectVisibleWidgetIds = (ids, availableControllers, registry) => {
   });
 };
 
-export const setWidgetsMinimized = (widgets, ids, minimized) => {
+export const setWidgetsCollapsed = (widgets, ids, collapsed) => {
   let next = widgets;
   ids.forEach(id => {
     const previous = widgets[id] || {};
-    if (Boolean(previous.minimized) === minimized) {
+    if (Boolean(previous.minimized) === collapsed) {
       return;
     }
     if (next === widgets) {
       next = { ...widgets };
     }
-    next[id] = { ...previous, minimized };
+    next[id] = { ...previous, minimized: collapsed };
   });
   return next;
 };
 
-export const createMinimizedSnapshotReader = (config) => {
+export const createCollapsedSnapshotReader = (config) => {
   let previousIds = [];
   let previousSnapshot = EMPTY_OBJECT;
 
   return () => {
     const widgets = config.get('widgets', EMPTY_OBJECT) || EMPTY_OBJECT;
-    const minimizedIds = Object.keys(widgets)
+    const collapsedIds = Object.keys(widgets)
       .filter(id => Boolean(widgets[id]?.minimized))
       .sort();
 
     if (
-      minimizedIds.length === previousIds.length &&
-      minimizedIds.every((id, index) => id === previousIds[index])
+      collapsedIds.length === previousIds.length &&
+      collapsedIds.every((id, index) => id === previousIds[index])
     ) {
       return previousSnapshot;
     }
 
-    previousIds = minimizedIds;
-    previousSnapshot = minimizedIds.reduce((snapshot, id) => {
+    previousIds = collapsedIds;
+    previousSnapshot = collapsedIds.reduce((snapshot, id) => {
       snapshot[id] = true;
       return snapshot;
     }, {});

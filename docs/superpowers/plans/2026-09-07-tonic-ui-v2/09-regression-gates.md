@@ -34,26 +34,26 @@
 - [x] 有意差異僅限已明列的：fullscreen 忽略 collapse、Macro refresh 保留已快取資料、mutation 失敗不假成功關閉、Settings 等待 Save。需在整合測試斷言新行為。
 - [x] Visualizer load signature mismatch / Console term.current.clear 的 baseline obligation 已記錄為後續 characterization；測試設計不能把錯誤呼叫也 mock 成成功。
 
-## Task R1：16 個 Widget chrome 合約，全部逐一覆蓋
+## Task R1：16 個 Widget view 合約，全部逐一覆蓋
 
-**Create:** `src/app/pages/Workspace/__tests__/widgetChromeContract.test.jsx`。
+**Create:** `src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx`。
 
 使用這個固定表列測試，不以只測 Connection 代表其他 15 個：
 
 ```js
-export const CHROME_WIDGETS = [
+export const FRAME_WIDGETS = [
   'autolevel', 'axes', 'connection', 'console', 'custom', 'gcode',
   'grbl', 'laser', 'macro', 'marlin', 'probe', 'smoothie',
   'spindle', 'tinyg', 'tool', 'webcam',
 ];
 ```
 
-- [ ] 每個真 index shell 套真 WidgetHost/Provider，mock 各自 heavy body/transport；測 saved minimized、toolbar single/bulk expand-collapse、fullscreen enter/exit、aria-expanded/content visibility。
+- [ ] 每個真 index shell 套真 WidgetHost/Provider，mock 各自 heavy body/transport；測 saved `minimized` → `collapsed`、toolbar single/bulk expand-collapse、fullscreen enter/exit、aria-expanded/content visibility。
 - [ ] 不只使用測試假的 Shell；parameterized import table 指向 16 個真 exports，才捕捉 Autolevel/Tool actions shape 與 Console/Webcam child props。
 - [ ] 每個 shell 計數 body mount/unmount，collapse/expand/fullscreen 不能額外 mount/unmount；widget remove 必須 unmount 一次。
-- [ ] 每個 shell rerender／chrome 操作時 controller.write/command、HTTP mutation 都應零次；必要的讀取 queries 另計，不把 reads 當機器命令。
+- [ ] 每個 shell rerender／view 操作時 controller.write/command、HTTP mutation 都應零次；必要的讀取 queries 另計，不把 reads 當機器命令。
 - [ ] 兩個同型 fork 用不同 widgetId；只影響指定 id。ID 改變由 key remount，設定不串寫。
-- [ ] Visualizer 另外測 registry supportsChrome=false，default container 顯示正常、bulk 操作不寫它的 minimized、不新增 collapse 按鈕。
+- [ ] Visualizer 另外測 registry `hasFrame=false`，default container 顯示正常、bulk 操作不寫它的 `minimized`、不新增 collapse 按鈕。
 
 **跨層整合另測:** 真 Widget 顯示、至少 Axes/Autolevel domain body 的 connected props 變化；shell test mock body 不能證明機器控制正確，R5 補足。
 
@@ -66,8 +66,8 @@ export const CHROME_WIDGETS = [
 | primary ↔ secondary reorder | ids/order 相同；不丟 fork config；sortable data-id/handle/filter 保留 |
 | 連續 fork/remove | source callback 參數一致；原生 widget config 留存；fork config 刪除 |
 | Grbl/Marlin/Smoothie/TinyG filter | render 與 bulk 使用同一 ids；hidden widget config 不變 |
-| config domain event burst | chrome snapshot identity 不變，沒有 persistence feedback loop |
-| chrome bulk 一次 | config 僅一次 change，動作冪等 |
+| config domain event burst | collapsed snapshot identity 不變，沒有 persistence feedback loop |
+| view bulk 一次 | config 僅一次 change，動作冪等 |
 | restore config after async hydration | mounted UI 讀到 saved state；corrupt data 不被無聲覆寫 |
 | mount→unmount→mount | config/controller/PubSub listeners 回到 expected baseline，事件只處理一次 |
 
@@ -140,7 +140,7 @@ test('known path preserves machine-coordinate bounds', () => {
 - [ ] spy `controller.command`、`controller.write` 保存原始參數與順序；使用固定 connection/controller/workflow fixtures，不連真機器。
 - [ ] WorkflowControl baseline：idle ready click Run→`sender_start` 一次；running Pause→`sender_pause`；paused Stop→`sender_stop`, `{force:true}`；idle Close→`sender_unload`。Resume 保留既有確認條件，再斷言 `sender_resume`。
 - [ ] disconnected、not ready、各 controller alarm/locked 狀態阻擋；重構不得只保留 disabled 外觀卻讓 keyboard/onClick 可呼叫 action。
-- [ ] chrome toggle、profile change、camera change、resize、refetch、rerender、StrictMode mount **零 command/write**。
+- [ ] view toggle、profile change、camera change、resize、refetch、rerender、StrictMode mount **零 command/write**。
 - [ ] Axes jog 的長按/release、失焦、modal/input focus、disconnect、unmount 不重送；這由 A1b+RepeatableButton tests 覆蓋，R6 引用結果。
 - [ ] Autolevel show/update/hide probe visualization→drag bounds 回傳→start/stop→compensation load，驗證原 PubSub payload/units/offset 與 controller command 次序。
 - [ ] Console 的 sender id 排除自己 echo；外部 read/write 仍顯示一次；onConnectionClose 應 clear/release 資源、不 throw。先以真方法形狀重現 term.current.clear 問題。

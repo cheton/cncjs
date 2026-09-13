@@ -44,7 +44,8 @@ class ToolWidget extends PureComponent {
   static propTypes = {
     widgetId: PropTypes.string.isRequired,
     onRemove: PropTypes.func.isRequired,
-    chrome: PropTypes.object.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
   };
 
@@ -56,10 +57,10 @@ class ToolWidget extends PureComponent {
 
   actions = {
     toggleFullscreen: () => {
-      this.props.chrome.onToggleFullscreen();
+      this.props.onViewChange(this.props.view === 'fullscreen' ? 'normal' : 'fullscreen');
     },
-    toggleMinimized: () => {
-      this.props.chrome.onMinimizedChange(!this.props.chrome.minimized);
+    toggleCollapsed: () => {
+      this.props.onViewChange(this.props.view === 'collapsed' ? 'normal' : 'collapsed');
     },
     openModal: (name = MODAL_NONE, params = {}) => {
       this.setState({
@@ -494,8 +495,9 @@ class ToolWidget extends PureComponent {
   }
 
   render() {
-    const { widgetId, chrome } = this.props;
-    const { minimized, isFullscreen } = chrome;
+    const { widgetId, view } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
     const state = {
       ...this.state,
       canClick: this.canClick()
@@ -531,18 +533,18 @@ class ToolWidget extends PureComponent {
                 />
               </Widget.Button>
               <Widget.Button
-                aria-label={minimized ? 'Expand' : 'Collapse'}
-                aria-expanded={!minimized}
+                aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
-                title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                onClick={actions.toggleMinimized}
+                title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                onClick={actions.toggleCollapsed}
               >
                 <i
                   aria-hidden="true"
                   className={classNames(
                     'fa',
-                    { 'fa-chevron-up': !minimized },
-                    { 'fa-chevron-down': minimized }
+                    { 'fa-chevron-up': !isCollapsed },
+                    { 'fa-chevron-down': isCollapsed }
                   )}
                 />
               </Widget.Button>
@@ -580,10 +582,10 @@ class ToolWidget extends PureComponent {
             </Widget.Controls>
           </Widget.Header>
           <Widget.Content
-            aria-hidden={minimized}
+            aria-hidden={isCollapsed}
             className={classNames(
               styles['widget-content'],
-              { [styles.hidden]: minimized }
+              { [styles.hidden]: isCollapsed }
             )}
           >
             <Tool

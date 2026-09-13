@@ -4,7 +4,7 @@
 
 **Goal:** 刪除 createFetchMachine 及 Macro actor，統一 HTTP query/mutation 與 cache。
 
-**Architecture:** 先共享 Administration 已有 query hooks，再遷移 Macro query、CRUD、widget chrome；只刪確定無其他使用的 XState dependencies。
+**Architecture:** 先共享 Administration 已有 query hooks，再遷移 Macro query、CRUD、widget view contract；只刪確定無其他使用的 XState dependencies。
 
 **Tech Stack:** JavaScript/JSX、React 18.3.1、Tonic UI 2.15.0、TanStack React Query 4.44.0、Redux、Stylus、Jest 29、Webpack 5。
 
@@ -61,13 +61,13 @@ yarn eslint
 yarn build
 ```
 
-## Task Q2：Macro list／CRUD／chrome
+## Task Q2：Macro list／CRUD／view contract
 
 **Modify:** `src/app/widgets/Macro/index.jsx`, `Macro.jsx`, `modals/NewMacro.jsx`, `modals/EditMacro.jsx`, `modals/ConfirmDeleteMacro.jsx`；檢查 `modals/LoadMacro.jsx`, `modals/RunMacro.jsx`。
 **Delete after tests:** `src/app/widgets/Macro/context.js`, `src/app/machines/index.js`。
 **Create tests:** `src/app/widgets/Macro/__tests__/Macro.test.jsx`, `MacroMutations.test.jsx`。
 
-- [ ] index 改 function + controlled chrome props；移除 interpret/start/stop、ServiceContext、僅為舊 UI 存在的 ModalProvider/ModalRoot。
+- [ ] index 改 function + controlled `view`／`onViewChange(view)` props；移除 interpret/start/stop、ServiceContext、僅為舊 UI 存在的 ModalProvider/ModalRoot。
 - [ ] Macro 直接呼叫 shared useFetchMacrosQuery；`data.records` 是 records，不再取 Axios `data.data.records`。render 對应 `isLoading` / `isError` / empty / records。
 - [ ] Refresh 改 `refetch()`，**明確選擇保留舊資料並顯示 fetching**，不再 CLEAR 整個共享 cache。初次 loading 無資料才顯示整頁 loading；背景 error 顯示錯誤但不清掉可見 records。這是有意的 UX 差異，納入測試。
 - [ ] config:change listener 改 invalidate prefix；effect cleanup remove 同一 callback。多個 forked Macro 的相同資料共用 cache；為避免每個 widget 都訂閱造成多次 invalidation，在主應用程式 `src/app/containers/app/App.jsx` 內建立唯一 Macro invalidation bridge（`src/app/queries/MacroQueryEvents.jsx`），測試 mount/unmount 次數。不能放進會被 portal 再次掛載的 GlobalProvider；主 App 只掛一份，並在有效 session 下啟用。

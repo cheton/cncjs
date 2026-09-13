@@ -119,27 +119,38 @@ jest.mock('@app/widgets/Autolevel/TestProbeModal', () => () => null);
 
 jest.mock('../widgetRegistry', () => {
   const React = require('react');
-  const Body = props => {
+  const Body = ({ view, onViewChange, ...props }) => {
     React.useEffect(() => () => {
       mockBodyUnmountCount += 1;
     }, []);
+
+    const hasLayout = typeof view === 'string';
 
     return React.createElement(
       'output',
       {
         'data-testid': 'body',
-        'data-chrome': JSON.stringify(props.chrome || null),
-        'data-has-chrome-actions': String(
-          typeof props.chrome?.onMinimizedChange === 'function' &&
-          typeof props.chrome?.onToggleFullscreen === 'function'
+        'data-layout': hasLayout ? view : null,
+        'data-has-layout-actions': String(
+          typeof onViewChange === 'function'
         ),
       },
       <>
         {props.children}
-        {props.chrome && (
+        {hasLayout && (
           <>
-            <button type="button" onClick={() => props.chrome.onMinimizedChange(false)}>Change minimized</button>
-            <button type="button" onClick={() => props.chrome.onToggleFullscreen()}>Toggle fullscreen</button>
+            <button
+              type="button"
+              onClick={() => onViewChange(view === 'collapsed' ? 'normal' : 'collapsed')}
+            >
+              Toggle collapse
+            </button>
+            <button
+              type="button"
+              onClick={() => onViewChange(view === 'fullscreen' ? 'normal' : 'fullscreen')}
+            >
+              Toggle fullscreen
+            </button>
           </>
         )}
       </>
@@ -147,53 +158,46 @@ jest.mock('../widgetRegistry', () => {
   };
   return {
     WIDGET_REGISTRY: {
-      axes: { Component: Body, supportsChrome: true },
-      visualizer: { Component: Body, supportsChrome: false },
+      axes: { Component: Body, hasFrame: true },
+      visualizer: { Component: Body, hasFrame: false },
     },
   };
 });
 
-jest.mock('../useWorkspaceWidgetUI', () => {
+jest.mock('../useWorkspaceLayout', () => {
   const React = require('react');
   return {
-    useWorkspaceWidgetUI: () => {
-      const [minimized, setMinimized] = React.useState(true);
-      const [isFullscreen, setFullscreen] = React.useState(false);
+    useWorkspaceLayout: () => {
+      const [view, setView] = React.useState('collapsed');
 
       return {
-        getChrome: () => ({ minimized, isFullscreen }),
-        setMinimized: (widgetId, next) => {
+        getWidgetView: () => view,
+        setWidgetView: (widgetId, nextView) => {
           if (widgetId) {
-            setMinimized(next);
+            setView(nextView);
           }
         },
-        toggleFullscreen: () => setFullscreen(value => !value),
       };
     },
   };
 });
 
-test('chrome widget receives declarative chrome props without a component ref', () => {
+test('widget host receives declarative layout props without a component ref', () => {
   mockBodyUnmountCount = 0;
   render(<Widget widgetId="axes" />);
 
   const body = screen.getByTestId('body');
-  const chrome = JSON.parse(body.getAttribute('data-chrome'));
-  expect(chrome.minimized).toBe(true);
-  expect(chrome.isFullscreen).toBe(false);
-  expect(body).toHaveAttribute('data-has-chrome-actions', 'true');
-  fireEvent.click(screen.getByRole('button', { name: 'Change minimized' }));
+  expect(body).toHaveAttribute('data-layout', 'collapsed');
+  expect(body).toHaveAttribute('data-has-layout-actions', 'true');
+  fireEvent.click(screen.getByRole('button', { name: 'Toggle collapse' }));
   fireEvent.click(screen.getByRole('button', { name: 'Toggle fullscreen' }));
-  expect(JSON.parse(body.getAttribute('data-chrome'))).toEqual({
-    minimized: false,
-    isFullscreen: true,
-  });
+  expect(body).toHaveAttribute('data-layout', 'fullscreen');
   expect(mockBodyUnmountCount).toBe(0);
 });
 
-test('Visualizer bypasses chrome context and unknown widget returns null', () => {
+test('Visualizer bypasses layout context and unknown widget returns null', () => {
   const view = render(<Widget widgetId="visualizer" />);
-  expect(screen.getByTestId('body')).toHaveAttribute('data-chrome', 'null');
+  expect(screen.getByTestId('body')).not.toHaveAttribute('data-layout');
 
   view.rerender(<Widget widgetId="unknown" />);
   expect(screen.queryByTestId('body')).not.toBeInTheDocument();
@@ -204,18 +208,16 @@ test('host passes widget props through unchanged', () => {
   expect(screen.getByTestId('body')).toBeInTheDocument();
 });
 
-test('Connection shell dispatches chrome actions through props', () => {
-  const chrome = {
-    minimized: true,
-    isFullscreen: false,
-    onMinimizedChange: jest.fn(),
-    onToggleFullscreen: jest.fn(),
+test('Connection shell dispatches layout actions through props', () => {
+  const layout = {
+    view: 'collapsed',
+    onViewChange: jest.fn(),
   };
 
   render(
     <ConnectionWidget
       widgetId="connection"
-      chrome={chrome}
+      {...layout}
       onFork={jest.fn()}
       onRemove={jest.fn()}
       sortable={{}}
@@ -223,22 +225,20 @@ test('Connection shell dispatches chrome actions through props', () => {
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
-  expect(chrome.onMinimizedChange).toHaveBeenCalledWith(false);
+  expect(layout.onViewChange).toHaveBeenCalledWith('normal');
   expect(screen.getByTestId('connection-content')).toBeInTheDocument();
 });
 
-test('Autolevel shell forwards chrome actions without local chrome state', () => {
-  const chrome = {
-    minimized: false,
-    isFullscreen: false,
-    onMinimizedChange: jest.fn(),
-    onToggleFullscreen: jest.fn(),
+test('Autolevel shell forwards layout actions without local layout state', () => {
+  const layout = {
+    view: 'normal',
+    onViewChange: jest.fn(),
   };
 
   render(
     <AutolevelWidget
       widgetId="autolevel"
-      chrome={chrome}
+      {...layout}
       onFork={jest.fn()}
       onRemove={jest.fn()}
       sortable={{}}
@@ -246,9 +246,9 @@ test('Autolevel shell forwards chrome actions without local chrome state', () =>
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
-  expect(chrome.onMinimizedChange).toHaveBeenCalledWith(true);
+  expect(layout.onViewChange).toHaveBeenCalledWith('collapsed');
 
   fireEvent.click(screen.getByRole('button', { name: 'More' }));
   fireEvent.click(screen.getByRole('button', { name: 'Enter Full Screen' }));
-  expect(chrome.onToggleFullscreen).toHaveBeenCalledTimes(1);
+  expect(layout.onViewChange).toHaveBeenCalledWith('fullscreen');
 });

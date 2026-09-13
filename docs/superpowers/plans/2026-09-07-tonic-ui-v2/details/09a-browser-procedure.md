@@ -21,7 +21,7 @@ bridge 需要 `socat`。缺少依賴、占用 port、auth/setup 或 WebGL 啟動
 
 ## R6 重播與 instrumentation
 
-- 依 R1–R5 cases 跑真 16 chrome shells、Visualizer 無 chrome、fork/remove/reorder、settings save/cancel、modal keyboard/focus、light/dark/auto；每個 case 保存 assertion 結果，不只有 screenshot。
+- 依 R1–R5 cases 跑真 16 frame widgets、Visualizer 無 frame、fork/remove/reorder、settings save/cancel、modal keyboard/focus、light/dark/auto；每個 case 保存 assertion 結果，不只有 screenshot。
 - 首輪在 dev/test build 中加入受 development guard 控制的觀測 hook：記錄 load start/end、render frame、renderer.info.memory、owned RAF/listener/canvas counters；engine dispose 後取消註冊。不得靠 React component instance 取得 engine，也不能把 debug API 打包成 production 功能。
 - 觀測輸出只含 counters/timings/fixture IDs。pre-extraction instrumentation 從原資源 owner 注入，post-extraction 從 engine owner 注入，相同 schema，避免 before/after 量測不同區間。
 - 五次 warm runs 記錄每次 load time；另每次 30 個固定 pan/zoom/selection 操作，合併 150 個 latency samples 算 p50/p95。五筆 load samples 的 p95 僅供粗略比較，不能冒充可靠 tail latency。

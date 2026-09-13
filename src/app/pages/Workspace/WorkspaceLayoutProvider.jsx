@@ -12,13 +12,14 @@ import React, {
 import configSingleton from '@app/store/config';
 import { WIDGET_REGISTRY } from './widgetRegistry';
 import {
-  createMinimizedSnapshotReader,
-  setWidgetsMinimized,
-} from './widgetUIState';
+  createCollapsedSnapshotReader,
+  setWidgetsCollapsed as updateWidgetsCollapsed,
+} from './widgetLayoutState';
 
 const EMPTY_ARRAY = [];
-const WidgetUIContext = createContext(null);
+const WorkspaceLayoutContext = createContext(null);
 const WIDGET_GROUPS = ['default', 'primary', 'secondary'];
+const WIDGET_VIEWS = ['normal', 'collapsed', 'fullscreen'];
 
 const createWidgetIdsReader = (config, group) => {
   let previousIds = EMPTY_ARRAY;
@@ -72,31 +73,31 @@ const createActiveWidgetIdsReader = config => {
 };
 
 const createWidgetSnapshotReader = config => {
-  const minimizedReader = createMinimizedSnapshotReader(config);
+  const collapsedReader = createCollapsedSnapshotReader(config);
   const activeWidgetIdsReader = createActiveWidgetIdsReader(config);
   let previousSnapshot = null;
 
   return () => {
-    const minimized = minimizedReader();
+    const collapsed = collapsedReader();
     const activeWidgetIds = activeWidgetIdsReader();
 
     if (
       previousSnapshot &&
-      previousSnapshot.minimized === minimized &&
+      previousSnapshot.collapsed === collapsed &&
       previousSnapshot.activeWidgetIds === activeWidgetIds
     ) {
       return previousSnapshot;
     }
 
     previousSnapshot = {
-      minimized,
+      collapsed,
       activeWidgetIds,
     };
     return previousSnapshot;
   };
 };
 
-export const WidgetUIProvider = ({ children, config = configSingleton }) => {
+export const WorkspaceLayoutProvider = ({ children, config = configSingleton }) => {
   const snapshotReader = useMemo(
     () => createWidgetSnapshotReader(config),
     [config]
@@ -106,7 +107,7 @@ export const WidgetUIProvider = ({ children, config = configSingleton }) => {
     [config]
   );
   const snapshot = useSyncExternalStore(subscribe, snapshotReader, snapshotReader);
-  const { minimized, activeWidgetIds } = snapshot;
+  const { collapsed, activeWidgetIds } = snapshot;
   const [fullscreenById, setFullscreenById] = useState({});
   const fullscreenRef = useRef({});
 
@@ -128,79 +129,83 @@ export const WidgetUIProvider = ({ children, config = configSingleton }) => {
     setFullscreenById(next);
   }, [activeWidgetIds]);
 
-  const setManyMinimized = useCallback((ids, next) => {
+  const setWidgetsCollapsed = useCallback((ids, next) => {
     const filteredIds = (ids || []).filter(id => {
       const entry = WIDGET_REGISTRY[id.split(':')[0]];
-      return entry?.supportsChrome && !fullscreenRef.current[id];
+      return entry?.hasFrame && !fullscreenRef.current[id];
     });
 
     if (filteredIds.length === 0) {
       return;
     }
 
-    config.update('widgets', widgets => setWidgetsMinimized(widgets || {}, filteredIds, next));
+    config.update('widgets', widgets => updateWidgetsCollapsed(widgets || {}, filteredIds, next));
   }, [config]);
 
-  const setMinimized = useCallback((id, next) => {
-    setManyMinimized([id], next);
-  }, [setManyMinimized]);
-
-  const toggleFullscreen = useCallback((id) => {
+  const setWidgetView = useCallback((id, view) => {
     const entry = WIDGET_REGISTRY[id.split(':')[0]];
-    if (!entry?.supportsChrome) {
+    if (!entry?.hasFrame || !WIDGET_VIEWS.includes(view)) {
       return;
     }
 
     const isFullscreen = Boolean(fullscreenRef.current[id]);
-    if (!isFullscreen) {
-      setMinimized(id, false);
+    if (view === 'fullscreen') {
+      setWidgetsCollapsed([id], false);
+
+      if (!isFullscreen) {
+        const nextFullscreen = { ...fullscreenRef.current, [id]: true };
+        fullscreenRef.current = nextFullscreen;
+        setFullscreenById(nextFullscreen);
+      }
+      return;
     }
 
-    const nextFullscreen = { ...fullscreenRef.current };
     if (isFullscreen) {
+      const nextFullscreen = { ...fullscreenRef.current };
       delete nextFullscreen[id];
-    } else {
-      nextFullscreen[id] = true;
+      fullscreenRef.current = nextFullscreen;
+      setFullscreenById(nextFullscreen);
     }
-    fullscreenRef.current = nextFullscreen;
-    setFullscreenById(nextFullscreen);
-  }, [setMinimized]);
 
-  const getChrome = useCallback((id) => ({
-    minimized: Boolean(minimized[id]),
-    isFullscreen: Boolean(fullscreenById[id]),
-  }), [fullscreenById, minimized]);
+    setWidgetsCollapsed([id], view === 'collapsed');
+  }, [setWidgetsCollapsed]);
+
+  const getWidgetView = useCallback((id) => {
+    if (fullscreenById[id]) {
+      return 'fullscreen';
+    }
+    return collapsed[id] ? 'collapsed' : 'normal';
+  }, [collapsed, fullscreenById]);
 
   const value = useMemo(() => ({
     config,
-    getChrome,
-    setMinimized,
-    setManyMinimized,
-    toggleFullscreen,
-  }), [config, getChrome, setManyMinimized, setMinimized, toggleFullscreen]);
+    getWidgetView,
+    setWidgetsCollapsed,
+    setWidgetView,
+  }), [config, getWidgetView, setWidgetView, setWidgetsCollapsed]);
 
   return (
-    <WidgetUIContext.Provider value={value}>
+    <WorkspaceLayoutContext.Provider value={value}>
       {children}
-    </WidgetUIContext.Provider>
+    </WorkspaceLayoutContext.Provider>
   );
 };
 
-WidgetUIProvider.propTypes = {
+WorkspaceLayoutProvider.propTypes = {
   children: PropTypes.node,
   config: PropTypes.object,
 };
 
-export const useWorkspaceWidgetUI = () => {
-  const context = useContext(WidgetUIContext);
+export const useWorkspaceLayout = () => {
+  const context = useContext(WorkspaceLayoutContext);
   if (!context) {
-    throw new Error('useWorkspaceWidgetUI must be used within WidgetUIProvider');
+    throw new Error('useWorkspaceLayout must be used within WorkspaceLayoutProvider');
   }
   return context;
 };
 
-export const useWorkspaceWidgetIds = (group) => {
-  const { config } = useWorkspaceWidgetUI();
+export const useWidgetGroup = (group) => {
+  const { config } = useWorkspaceLayout();
   const reader = useMemo(() => createWidgetIdsReader(config, group), [config, group]);
   const subscribe = useCallback(
     listener => subscribeToConfig(config, listener),

@@ -42,7 +42,7 @@ HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 sessio
 | --- | --- | --- |
 | 0 | [設計](00-design.md) ＋ [盤點](inventory.md) | 所有執行者先讀；不直接改 code |
 | 1 | [基線與前端測試](01-foundation.md) | 記錄 lockfile 相容性基線與可執行的 frontend test gate |
-| 2 | [共用元件與 Widget 合約](02-shared-ui.md) | 直接使用 Tonic 的遷移規則、function Widget 外框、16 個 chrome + Visualizer 例外 |
+| 2 | [共用元件與 Widget 合約](02-shared-ui.md) | 直接使用 Tonic 的遷移規則、function Widget 外框、16 個 layout-aware widgets + Visualizer 例外 |
 | 3 | [Macro 與 Query](03-query-and-macro.md) | 刪除 createFetchMachine，Macro CRUD 與 Administration 共用 cache |
 | 4 | [一般 widgets](04-general-widgets.md) | Connection、GCode、Spindle、Laser、Probe、Custom、Webcam、Console |
 | 5 | [控制器 widgets](05-controller-widgets.md) | Grbl、Marlin、Smoothie、TinyG |
@@ -51,7 +51,7 @@ HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 sessio
 | 8 | [Workspace 與最終清理](08-workspace-and-cleanup.md) | 全 src/app class/UI 清零、依賴移除、全流程驗證 |
 | 全程 | [Regression gates](09-regression-gates.md) | F2 後起建立 baseline；Widget/Visualizer 每個階段的必要驗收 |
 
-**02 不需等所有舊 UI 刪光才通過。** 它提供新合約與 pilot，旧 component 只供尚未遷移的 consumers；04–08 逐批清空，08 才是零遺留 gate。03 不必等 Workspace 改寫；02 的 controlled chrome props 契約允許 domain class 與 function widgets 共存。
+**02 不需等所有舊 UI 刪光才通過。** 它提供新合約與 pilot，旧 component 只供尚未遷移的 consumers；04–08 逐批清空，08 才是零遺留 gate。03 不必等 Workspace 改寫；02 的 controlled layout props 契約允許 domain class 與 function widgets 共存。
 
 不建議一次全改：編譯成功不足以證明 CNC 指令、refs、鍵盤、renderer 行為仍正確。也不建議先建立整套 Bootstrap → Tonic 相容層：它會留下使用者希望汰換的抽象。推薦每個 task 完成一個可操作的垂直範圍，測試與 diff 一起交付。
 

@@ -14,7 +14,7 @@
 - `src/app/queries/macros.js` 提供跨 Administration/Macro 的共用 hooks；原 Administration 路徑只做暫時 re-export，所有 consumers 遷移後刪除舊檔。
 - 其餘 server-state hooks 放在各 widget 的 `queries.js`；跨 widget 的 G-code HTTP mutation 放 `src/app/queries/gcode.js`，保留既有 API transport 與 payload。
 - 既有 Redux、controller、PubSub 維持即時機器狀態唯一來源，不把位置串流／run/pause/jog 改成輪詢或 queryFn。
-- `src/app/pages/Workspace/WidgetUIProvider.jsx` 以 widgetId 管理 fullscreen，並訂閱 config 中的 minimized；WidgetHost 傳 controlled chrome props，Workspace toolbar 直接 dispatch。Axes/Tool/Autolevel/Visualizer 的 domain state 各自保留，不做萬用 widget reducer。
+- `src/app/pages/Workspace/WorkspaceLayoutProvider.jsx` 以 widgetId 管理 transient fullscreen，並將既有 config 的 `minimized` key 投影為 runtime `view`；WidgetHost 傳 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`，Workspace toolbar 直接 dispatch。Axes/Tool/Autolevel/Visualizer 的 domain state 各自保留，不做萬用 widget reducer。
 - Widget shell 是 domain composition，允許保留 `Widget.Header` 等結構；Buttons/Dropdown/Modal/GridSystem 等通用元件的最終 consumers 必須直接依賴 Tonic。唯一待實證的 Button 例外是 CNCjs 色票／語意：若實際整合驗收證明 Tonic theme 與 style props 無法維持既有 CNCjs Button 表現，可在 `src/app/components/Button` 建立薄的 domain Button。它必須由 Tonic Button 實作、只封裝已驗證的 CNCjs token/語意，不能 re-export、包裝或保留 `react-bootstrap-buttons`。
 - Font Awesome 是現有圖示資產，不是本輪要淘汰的 UI component library；保留 `@fortawesome/*` 與既有 glyph，避免把視覺資產替換混入 class/query/widget 架構重構。只有新增的 Tonic control 已有一對一圖示且不改語意時可就地採用 Tonic icon。全面圖示統一另開工作。
 - `styled-components` 不符合此 repo 的 Stylus 慣例。每個被本輪觸及的 styled component 改成 Tonic style props 或 colocated Stylus；W3 要求 `src/app` 零 `styled-components` imports，確認最後 consumer 清空後才移除套件。
@@ -24,7 +24,7 @@
 ## 不可破壞的行為
 
 1. Workspace 排序、fork/remove、default/primary/secondary widget 名單與 local settings keys 不變。
-2. 消除 `collapse()` / `expand()`、widgetMap 與 component instance refs。02 統一改 controlled chrome props；收合只隱藏內容，不卸載 terminal、controller subscriptions 或 canvas。DOM refs 與 xterm/renderer 資源 refs 可保留，不能以 useImperativeHandle 重建 class instance。
+2. 消除 `collapse()` / `expand()`、widgetMap 與 component instance refs。02 統一改 controlled `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；收合只隱藏內容，不卸載 terminal、controller subscriptions 或 canvas。DOM refs 與 xterm/renderer 資源 refs 可保留，不能以 useImperativeHandle 重建 class instance。
 3. `setState` merge 語意不能被 hooks 的 replacement 語意取代。原有依賴最新值的事件用 functional setter 或最新 callback/ref；不能把有副作用的 controller 指令放進 state updater、render、useMemo。
 4. 每個事件 listener、PubSub token、timer、resize observer、RAF、xterm／WebGL 資源有單一 owner，effect cleanup 對應 setup，快速 mount/unmount 不累加。
 5. 連線、workflow、machine state、units、jog distance/feed、laser/spindle power 的 gate/payload 不變；長按 release、失焦、disabled 和 unmount 不可繼續送指令。
@@ -68,17 +68,17 @@ Query 的允許邊界、非 hook caller 及靜態掃描規則見 [03b](details/0
 
 每期：指定區域無新 legacy imports、指定 React classes 清空、功能測試成功、build/lint 結果可追溯、同一個流程無重複指令或 listener。
 
-最終：所有 17 widgets 和 Workspace 完成（16 個有 chrome，Visualizer 保留無 chrome）；src/app 的 React classes 為零；createFetchMachine/ServiceContext fetch actor 為零；沒有目標 legacy UI package imports；inventory 的「直接替換」家族全部移除；只保留經逐項證明具 domain 功能的 composition；`styled-components` imports 為零。Font Awesome、rc-slider 及有具名相容性理由的 react-select 依上表記錄；react-datepicker 無 consumers 才刪。重新 `yarn install --immutable` 可重現，Node/backend 測試仍過。
+最終：所有 17 widgets 和 Workspace 完成（16 個有 collapsible frame，Visualizer 保留無 frame）；src/app 的 React classes 為零；createFetchMachine/ServiceContext fetch actor 為零；沒有目標 legacy UI package imports；inventory 的「直接替換」家族全部移除；只保留經逐項證明具 domain 功能的 composition；`styled-components` imports 為零。Font Awesome、rc-slider 及有具名相容性理由的 react-select 依上表記錄；react-datepicker 無 consumers 才刪。重新 `yarn install --immutable` 可重現，Node/backend 測試仍過。
 
 ## Widget 架構的最終資料流
 
 ```mermaid
 flowchart TD
-  Config[Existing persisted config] <--> UI[WidgetUIProvider: chrome by widgetId]
-  Toolbar[Workspace group toolbar] -->|setManyMinimized| UI
-  UI --> Host[Function WidgetHost]
-  Host -->|chrome props| Widget[Function domain widget]
-  Widget -->|onMinimizedChange / onToggleFullscreen| UI
+  Config[Existing persisted config: widgets.*.minimized] <--> Layout[WorkspaceLayoutProvider]
+  Toolbar[Workspace group toolbar] -->|setWidgetsCollapsed| Layout
+  Layout --> Host[Function WidgetHost]
+  Host -->|view + onViewChange(view)| Widget[Function domain widget]
+  Widget -->|onViewChange(view)| Layout
   Widget --> Draft[Controlled settings draft]
   Widget --> Query[Query hooks: HTTP server state]
   Widget --> Controller[Existing controller events and commands]
@@ -87,7 +87,7 @@ flowchart TD
   Hook --> DOM[DOM container ref]
 ```
 
-State ownership 必須有單一來源：minimized 在既有 config，fullscreen 在 Workspace provider，設定草稿在表單 owner，server data 在 Query，機器狀態在既有 Redux/controller，renderer 資源在本 widget hook。避免把所有 state 搬到 Workspace，也不新增可呼叫任意 widget method 的 global event bus。既有 WidgetEventProvider 只在本來需要的 domain 範圍使用，不能作為 component instance registry 的變體。
+State ownership 必須有單一來源：既有 config 的 `widgets.*.minimized` 是 collapsed view 的持久化來源，fullscreen view 只在 Workspace layout provider 的 transient state，絕不寫回 config；設定草稿在表單 owner，server data 在 Query，機器狀態在既有 Redux/controller，renderer 資源在本 widget hook。避免把所有 state 搬到 Workspace，也不新增可呼叫任意 widget method 的 global event bus。既有 WidgetEventProvider 只在本來需要的 domain 範圍使用，不能作為 component instance registry 的變體。
 
 ## 細化文件與驗證優先順序
 

@@ -242,7 +242,7 @@ Task / session / timestamp: BR0 / current root session / 2026-09-13T20:06:00+08:
 
 Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `62ea82ca` / existing main-managed docs, artifacts, synthetic fixtures, and the requested `Connection.jsx` selector patch; browser-only scope, no source edits in this run.
 
-Plan contract and baseline fixture: `EXECUTION.md`, `details/09a-browser-procedure.md`, anonymous `docs/testing/configs/browser-test.cncrc`, `br0-small.gcode`, `br0-large-100000.gcode`, and `br0-watch-tree`.
+Plan contract and baseline fixture: `EXECUTION.md`, `details/09a-browser-procedure.md`, anonymous `docs/testing/configs/browser-test.cncrc`, `small.gcode`, `large-100000.gcode`, and `watch-tree`.
 
 Worker selection: browser-only BR0 / required `gpt-5.6-luna` / `reasoning_effort: medium`; no worker dispatch capability was exposed in this session, so root did not substitute direct browser automation.
 
@@ -352,7 +352,7 @@ Next exact step: D4 group containers and Workspace toolbar wiring, including `Wo
 
 ## Browser fixture retention decision — 2026-09-13
 
-Decision: keep only the small, reviewable browser fixtures in `src/app/test/fixtures/browser/` (`br0-small.gcode`, `br0-linear.gcode`, `br0-arc.gcode`, and `br0-probe.gcode`). Remove the runtime-generated `br0-large-100000.gcode` and `br0-watch-tree/` payloads from the working tree and prevent them from being re-added with `.gitignore` rules.
+Decision: keep only the small, reviewable browser fixtures in `src/app/test/fixtures/browser/` (`small.gcode`, `linear.gcode`, `arc.gcode`, and `probe.gcode`). Remove the runtime-generated `large-100000.gcode` and `watch-tree/` payloads from the working tree and prevent them from being re-added with `.gitignore` rules.
 
 Reason: the large G-code and 5,000-node watch tree are useful BR0/R6 input shapes, but they are execution data rather than product source or D3 tests. Future browser runs should generate deterministic copies under unique `/tmp` paths and record the recipe/hash in durable artifacts. Historical browser artifacts may still describe the payloads that were used; that is evidence, not a request to keep the generated files in Git.
 
@@ -369,3 +369,19 @@ Verification: focused D4 command (`widgetUIState`, `WidgetUIProvider`, `WidgetCh
 Browser status: no browser gate is claimed in D4. BR0 remains explicitly waived; its missing Stop/jog/disconnect/large/watch/viewport/selector evidence is carried to R6. SocketConnection remains excluded per user direction.
 
 Status transition: D4 `todo` → `completed`; R1/R2 are now the next eligible regression gates. The next exact step is the 16-widget chrome contract run, followed by Workspace list/event/config regression coverage.
+
+## Browser fixture naming cleanup — 2026-09-14
+
+Decision: remove the BR0 task prefix from the tracked small fixtures. The repository names are now `small.gcode`, `linear.gcode`, `arc.gcode`, and `probe.gcode`; the fixture contents are unchanged. Runtime-only `large-100000.gcode` and `watch-tree/` ignore entries use the same task-neutral names. Historical browser artifacts retain the paths recorded by the runs that produced them.
+
+## Widget layout naming/API cleanup — 2026-09-14
+
+Task / session: D3/D4 follow-up / root session.
+
+Decision: the runtime terminology is now layout-oriented. `WidgetUIProvider` became `WorkspaceLayoutProvider`, `widgetUIState` became `widgetLayoutState`, `useWorkspaceWidgetUI` became `useWorkspaceLayout`, and `useWorkspaceWidgetIds` became `useWidgetGroup`. The registry capability is `hasFrame`; the host is named `WidgetHost`, and the host test is `WidgetHost.test.jsx` because the remaining test scope is host dispatch.
+
+Final widget contract: frame-capable widgets receive `view` with one of `normal`, `collapsed`, or `fullscreen`, plus `onViewChange(view)`. The existing config key `widgets.<id>.minimized` remains the persistence schema for collapsed view. Fullscreen is transient in `WorkspaceLayoutProvider` and is never written to config. Bulk toolbar operations use `setWidgetsCollapsed(ids, collapsed)`.
+
+Implementation: migrated all 16 frame widget shells from the old aggregate prop to the single view contract, kept Visualizer as `hasFrame: false`, and updated provider/group/host tests and plan references. The tracked browser fixture names remain task-neutral; runtime-generated large/watch payloads remain ignored.
+
+Verification: focused layout run `yarn test:frontend --runInBand --silent --runTestsByPath src/app/pages/Workspace/__tests__/WorkspaceLayoutProvider.test.jsx src/app/pages/Workspace/__tests__/WidgetHost.test.jsx src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx src/app/pages/Workspace/__tests__/widgetLayoutState.test.js` / 0 / 4 suites and 19 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 10 suites and 31 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with 3 existing performance warnings plus the existing i18next scanner warning; `git diff --check` / 0. No browser gate was run; BR0 remains waived, and SocketConnection remains excluded per user direction.

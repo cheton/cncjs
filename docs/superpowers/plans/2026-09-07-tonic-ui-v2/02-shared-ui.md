@@ -31,10 +31,10 @@
 
 - [x] D1：registry capabilities、pure bulk update、穩定 snapshot tests。
 - [x] D2：config hydration 通知、Provider actions、group ids hook。
-- [x] D3：16 個 chrome consumers + function WidgetHost；Visualizer 保持無 chrome。
+- [x] D3：16 個 layout-aware consumers + function WidgetHost；Visualizer 保持無 frame。
 - [x] D4：group function components、Workspace toolbar，移除所有 widgetMap/component instance 控制。
 
-minimized 的唯一來源是既有 config，Provider 僅持有 transient fullscreen；不複製一份 minimized state 再同步回 config。最終仍以 props 傳 `{minimized,isFullscreen,onMinimizedChange,onToggleFullscreen}`。
+collapsed view 的唯一持久化來源是既有 config 的 `widgets.*.minimized` key；`WorkspaceLayoutProvider` 僅持有 transient fullscreen view。不複製第二份 minimized state 再同步回 config。Host 以明確 props 傳 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`。
 
 D3/D4 同一可交付整合單位；不能只改父層控制就交付。先跑 [R1/R2](09-regression-gates.md) 的全 shell/Workspace 回歸，不以單個 pilot 替代 16 個真 index 的覆蓋。
 

@@ -98,7 +98,7 @@
 - [ ] I18n 保留必要的 rich interpolation；純文字 consumers 直接用既有 i18next。RenderBlock 改 inline render或純函式。
 - [ ] Iframe/Webcam 改 function resource owner，DOM/media ref只留在 owner hook；測 load/error、URL change、event cleanup、unmount。
 - [ ] RepeatableButton 保留 CNC 長按 hook，底層 Tonic Button；移除 `react-repeatable`。以 fake timers 測 500ms delay、`floor(1000/15)` interval、pointer/key release、blur、disabled、unmount。
-- [ ] Widget 依 02a 保留 domain chrome composition，所有檔案為 function，且沒有 collapse/expand/settings instance method。DropdownButton 使用 Tonic Menu。
+- [ ] Widget 依 02a 保留 domain composition，所有檔案為 function，且沒有 collapse/expand/settings instance method；frame widget 使用 `view` contract。DropdownButton 使用 Tonic Menu。
 - [ ] class-only `withRouter` consumers改 Router hooks後刪 HOC；`withMemo` 改 `React.memo` 或刪除。不能以新 HOC 包裝 hooks來模擬 class API。
 
 **Gate:** P5 中只有 CodePreview/I18n/Iframe/RepeatableButton/Webcam/Widget 可按上述非視覺 contract 保留；其內部 UI 直接用 Tonic且全為 function。RenderBlock、withRouter、withMemo 與 `react-repeatable` 為零。

@@ -1,11 +1,11 @@
 import React from 'react';
-import { WidgetUIProvider } from './WidgetUIProvider';
+import { WorkspaceLayoutProvider } from './WorkspaceLayoutProvider';
 import WorkspacePage from './Workspace';
 
 const WorkspaceRoot = props => (
-  <WidgetUIProvider>
+  <WorkspaceLayoutProvider>
     <WorkspacePage {...props} />
-  </WidgetUIProvider>
+  </WorkspaceLayoutProvider>
 );
 
 export default WorkspaceRoot;

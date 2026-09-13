@@ -162,11 +162,16 @@ jest.mock('react-sortablejs', () => {
 
 jest.mock('../widgetRegistry', () => {
   const React = require('react');
-  const WidgetBody = ({ widgetId, chrome, onFork, onRemove }) => React.createElement(
+  const WidgetBody = ({
+    widgetId,
+    view,
+    onFork,
+    onRemove,
+  }) => React.createElement(
     'section',
     {
       'data-testid': `host-${widgetId}`,
-      'data-chrome': JSON.stringify(chrome || null),
+      'data-layout': typeof view === 'string' ? view : null,
     },
     React.createElement(
       'button',
@@ -181,9 +186,9 @@ jest.mock('../widgetRegistry', () => {
   );
 
   mockWidgetRegistry = {
-    axes: { Component: WidgetBody, supportsChrome: true },
-    grbl: { Component: WidgetBody, supportsChrome: true, controllerType: 'Grbl' },
-    visualizer: { Component: WidgetBody, supportsChrome: false },
+    axes: { Component: WidgetBody, hasFrame: true },
+    grbl: { Component: WidgetBody, hasFrame: true, controllerType: 'Grbl' },
+    visualizer: { Component: WidgetBody, hasFrame: false },
   };
 
   return { WIDGET_REGISTRY: mockWidgetRegistry };
@@ -252,20 +257,25 @@ jest.mock('@app/components/Modal', () => {
 
 const PrimaryWidgets = require('../PrimaryWidgets').default;
 const SecondaryWidgets = require('../SecondaryWidgets').default;
-const { WidgetUIProvider } = require('../WidgetUIProvider');
-const { useWorkspaceWidgetIds } = require('../useWorkspaceWidgetIds');
-const { useWorkspaceWidgetUI } = require('../useWorkspaceWidgetUI');
-const { WorkspaceWithWidgetUI } = require('../Workspace');
+const { WorkspaceLayoutProvider } = require('../WorkspaceLayoutProvider');
+const { useWidgetGroup } = require('../useWidgetGroup');
+const { useWorkspaceLayout } = require('../useWorkspaceLayout');
+const { WorkspaceWithLayout } = require('../Workspace');
 
 const FullscreenHarness = () => {
-  const { ids, setWidgetIds } = useWorkspaceWidgetIds('primary');
-  const { getChrome, toggleFullscreen } = useWorkspaceWidgetUI();
-  const chrome = getChrome('axes');
+  const { ids, setWidgetIds } = useWidgetGroup('primary');
+  const { getWidgetView, setWidgetView } = useWorkspaceLayout();
+  const view = getWidgetView('axes');
 
   return (
     <>
-      <output data-testid="fullscreen-chrome">{JSON.stringify(chrome)}</output>
-      <button type="button" onClick={() => toggleFullscreen('axes')}>Toggle fullscreen</button>
+      <output data-testid="fullscreen-layout">{view}</output>
+      <button
+        type="button"
+        onClick={() => setWidgetView('axes', view === 'fullscreen' ? 'normal' : 'fullscreen')}
+      >
+        Toggle fullscreen
+      </button>
       <button
         type="button"
         onClick={() => setWidgetIds(ids.filter(id => id !== 'axes'))}
@@ -284,10 +294,10 @@ const groupProps = () => ({
 });
 
 const renderGroups = () => render(
-  <WidgetUIProvider config={mockConfig}>
+  <WorkspaceLayoutProvider config={mockConfig}>
     <PrimaryWidgets {...groupProps()} />
     <SecondaryWidgets {...groupProps()} />
-  </WidgetUIProvider>
+  </WorkspaceLayoutProvider>
 );
 
 const reset = () => {
@@ -353,9 +363,9 @@ test('group registry filtering hides unavailable controller widgets', () => {
 test('fork and remove persist settings while native widget settings remain untouched', () => {
   const props = groupProps();
   render(
-    <WidgetUIProvider config={mockConfig}>
+    <WorkspaceLayoutProvider config={mockConfig}>
       <PrimaryWidgets {...props} />
-    </WidgetUIProvider>
+    </WorkspaceLayoutProvider>
   );
 
   fireEvent.click(screen.getByTestId('fork-axes'));
@@ -379,23 +389,23 @@ test('fork and remove persist settings while native widget settings remain untou
   expect(props.onRemoveWidget).toHaveBeenCalledWith(forkedWidgetId);
 });
 
-test('Workspace toolbar drives the real group host and ignores visualizer chrome', () => {
+test('Workspace toolbar drives the real group host and ignores visualizer layout', () => {
   mockState.workspace.container.primary.widgets = ['axes', 'visualizer'];
   render(
-    <WidgetUIProvider config={mockConfig}>
-      <WorkspaceWithWidgetUI
+    <WorkspaceLayoutProvider config={mockConfig}>
+      <WorkspaceWithLayout
         isConnected={true}
         location={{ pathname: '/workspace' }}
       />
-    </WidgetUIProvider>
+    </WorkspaceLayoutProvider>
   );
 
   expect(screen.getByTestId('host-axes')).toHaveAttribute(
-    'data-chrome',
-    '{"minimized":false,"isFullscreen":false}'
+    'data-layout',
+    'normal'
   );
   screen.getAllByTestId('host-visualizer').forEach(host => {
-    expect(host).toHaveAttribute('data-chrome', 'null');
+    expect(host).not.toHaveAttribute('data-layout');
   });
 
   fireEvent.click(screen.getByRole('button', { name: 'Collapse all left panel widgets' }));
@@ -404,8 +414,8 @@ test('Workspace toolbar drives the real group host and ignores visualizer chrome
   expect(mockConfig.read().widgets.axes.minimized).toBe(true);
   expect(mockConfig.read().widgets.visualizer.minimized).toBe(false);
   expect(screen.getByTestId('host-axes')).toHaveAttribute(
-    'data-chrome',
-    '{"minimized":true,"isFullscreen":false}'
+    'data-layout',
+    'collapsed'
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Expand all left panel widgets' }));
@@ -414,18 +424,18 @@ test('Workspace toolbar drives the real group host and ignores visualizer chrome
 
 test('removing an active widget clears its transient fullscreen entry', () => {
   render(
-    <WidgetUIProvider config={mockConfig}>
+    <WorkspaceLayoutProvider config={mockConfig}>
       <FullscreenHarness />
-    </WidgetUIProvider>
+    </WorkspaceLayoutProvider>
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Toggle fullscreen' }));
-  expect(screen.getByTestId('fullscreen-chrome')).toHaveTextContent(
-    '{"minimized":false,"isFullscreen":true}'
+  expect(screen.getByTestId('fullscreen-layout')).toHaveTextContent(
+    'fullscreen'
   );
 
   fireEvent.click(screen.getByRole('button', { name: 'Remove axes' }));
-  expect(screen.getByTestId('fullscreen-chrome')).toHaveTextContent(
-    '{"minimized":false,"isFullscreen":false}'
+  expect(screen.getByTestId('fullscreen-layout')).toHaveTextContent(
+    'normal'
   );
 });

@@ -14,9 +14,9 @@ import log from '@app/lib/log';
 import portal from '@app/lib/portal';
 import config from '@app/store/config';
 import Widget from './Widget';
-import { useWorkspaceWidgetIds } from './useWorkspaceWidgetIds';
+import { useWidgetGroup } from './useWidgetGroup';
 import { WIDGET_REGISTRY } from './widgetRegistry';
-import { selectVisibleWidgetIds } from './widgetUIState';
+import { selectVisibleWidgetIds } from './widgetLayoutState';
 import styles from './widgets.styl';
 
 const PrimaryWidgets = ({
@@ -26,7 +26,7 @@ const PrimaryWidgets = ({
   onDragStart,
   onDragEnd,
 }) => {
-  const { ids, setWidgetIds } = useWorkspaceWidgetIds('primary');
+  const { ids, setWidgetIds } = useWidgetGroup('primary');
 
   useEffect(() => {
     const token = pubsub.subscribe('updatePrimaryWidgets', (msg, widgets) => {

@@ -65,7 +65,8 @@ class AutolevelWidget extends PureComponent {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
-    chrome: PropTypes.object.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
   };
 
@@ -76,10 +77,10 @@ class AutolevelWidget extends PureComponent {
   actions = {
     // Widget controls
     toggleFullscreen: () => {
-      this.props.chrome.onToggleFullscreen();
+      this.props.onViewChange(this.props.view === 'fullscreen' ? 'normal' : 'fullscreen');
     },
-    toggleMinimized: () => {
-      this.props.chrome.onMinimizedChange(!this.props.chrome.minimized);
+    toggleCollapsed: () => {
+      this.props.onViewChange(this.props.view === 'collapsed' ? 'normal' : 'collapsed');
     },
 
     // Modal management
@@ -992,8 +993,9 @@ class AutolevelWidget extends PureComponent {
   }
 
   render() {
-    const { widgetId, chrome } = this.props;
-    const { minimized, isFullscreen } = chrome;
+    const { widgetId, view } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
     const actions = this.actions;
 
@@ -1012,14 +1014,14 @@ class AutolevelWidget extends PureComponent {
           <Widget.Controls className={this.props.sortable.filterClassName}>
             <Widget.Button
               disabled={isFullscreen}
-              title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-              onClick={actions.toggleMinimized}
+              title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+              onClick={actions.toggleCollapsed}
             >
               <i
                 className={classNames(
                   'fa',
-                  { 'fa-chevron-up': !minimized },
-                  { 'fa-chevron-down': minimized }
+                  { 'fa-chevron-up': !isCollapsed },
+                  { 'fa-chevron-down': isCollapsed }
                 )}
               />
             </Widget.Button>
@@ -1064,7 +1066,7 @@ class AutolevelWidget extends PureComponent {
         <Widget.Content
           className={classNames(
             styles.widgetContent,
-            { [styles.hidden]: minimized }
+            { [styles.hidden]: isCollapsed }
           )}
         >
           {this.renderContent()}

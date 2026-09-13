@@ -31,7 +31,7 @@
 
 - [ ] 讀 inventory 該 widget 全部 source（含已是 function 的內容、modals、settings、Stylus），找舊 component imports 與跨元件 refs。建立「state owner / events / cleanup / public instance calls」小表於執行紀錄。
 - [ ] 在表列 test file 寫指定行為案例，先跑原版取得基線。將新介面／cleanup 的回歸案例先跑成失敗，確定測試不是空殼。
-- [ ] Visualizer 保留無 chrome 的特殊結構；domain state 用 useState/useReducer，callback 不呼叫 React component instance。
+- [ ] Visualizer 保留無 layout frame 的特殊結構；domain state 用 useState/useReducer，callback 不呼叫 React component instance。
 - [ ] 所有 inventory 列出的舊 UI imports 逐個改 Tonic，包含原已是 function 的檔案；form 改 controlled values，ref 只對 DOM/第三方資源使用。
 - [ ] lifecycle 拆成對應資源 effect：controller/pubsub/keyboard/timer/resize setup 與 cleanup 同處。依賴最新 props 的 handler 使用既有 useEventCallback 或明確 deps，不關掉 hooks lint。
 - [ ] HTTP 按 03 的分工改 useQuery/useMutation；preserve response/payload，server query data 與未提交 form draft 分開。
@@ -62,6 +62,6 @@
 - [ ] E3：renderer/canvas/geometry/material/texture、兩條 RAF、late assets、controls 完整 ownership/cleanup。
 - [ ] E4：owner hook + 純 DOM view，config/PubSub 橋接與 controller bbox side effect 不放 engine。
 
-Visualizer 不增加 minimized/fullscreen chrome；它原本沒有這組外框。Workspace 隱藏區域、camera visibility、viewport resize 仍依原有行為。
+Visualizer 不增加 `view` contract 或 layout frame；它原本沒有這組外框。Workspace 隱藏區域、camera visibility、viewport resize 仍依原有行為。
 
 **Gate:** [R3/R4/R5/R6](09-regression-gates.md) 全部所屬項目過；真 parser/Three.js 數值測試與真 browser WebGL 都要有證據。先用 [geometry-baseline.json](geometry-baseline.json) 的原版結果固定幾何 oracle，禁止只 mock load 回 bbox 就宣稱 regression 已確保。

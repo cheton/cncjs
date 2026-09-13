@@ -291,7 +291,7 @@ rg --files src/app/components
 | Tooltip | 直接替換 | Tooltip | `src/app/__deprecated/TopNav.old/TopNav.jsx`<br>`src/app/widgets/Axes/DisplayPanel.jsx`<br>`src/app/widgets/Tool/Tool.jsx`<br>`src/app/widgets/Visualizer/SecondaryToolbar.jsx`<br>`src/app/widgets/Webcam/Webcam.jsx` |
 | Validation | 按責任拆分 | 既有 react-final-form + Tonic fields，刪 class HOC | `src/app/widgets/Axes/Settings/MDI/CreateRecord.jsx`<br>`src/app/widgets/Axes/Settings/MDI/UpdateRecord.jsx` |
 | Webcam | 按責任拆分 | 保留 media lifecycle，UI Tonic，React function | `src/app/widgets/Webcam/Webcam.jsx` |
-| Widget | 按責任拆分 | 保留 CNC domain chrome composition；controlled props，無 instance API | `src/app/widgets/Autolevel/index.jsx`<br>`src/app/widgets/Axes/index.jsx`<br>`src/app/widgets/Connection/index.jsx`<br>`src/app/widgets/Console/index.jsx`<br>`src/app/widgets/Custom/index.jsx`<br>`src/app/widgets/GCode/index.jsx`<br>`src/app/widgets/Grbl/index.jsx`<br>`src/app/widgets/Laser/index.jsx`<br>`src/app/widgets/Macro/index.jsx`<br>`src/app/widgets/Marlin/index.jsx`<br>`src/app/widgets/Probe/index.jsx`<br>`src/app/widgets/Smoothie/index.jsx`<br>`src/app/widgets/Spindle/index.jsx`<br>`src/app/widgets/TinyG/index.jsx`<br>`src/app/widgets/Tool/index.jsx`<br>`src/app/widgets/Visualizer/index.jsx`<br>`src/app/widgets/Webcam/index.jsx` |
+| Widget | 按責任拆分 | 保留 CNC domain composition；frame widgets 使用 controlled `view`，無 instance API | `src/app/widgets/Autolevel/index.jsx`<br>`src/app/widgets/Axes/index.jsx`<br>`src/app/widgets/Connection/index.jsx`<br>`src/app/widgets/Console/index.jsx`<br>`src/app/widgets/Custom/index.jsx`<br>`src/app/widgets/GCode/index.jsx`<br>`src/app/widgets/Grbl/index.jsx`<br>`src/app/widgets/Laser/index.jsx`<br>`src/app/widgets/Macro/index.jsx`<br>`src/app/widgets/Marlin/index.jsx`<br>`src/app/widgets/Probe/index.jsx`<br>`src/app/widgets/Smoothie/index.jsx`<br>`src/app/widgets/Spindle/index.jsx`<br>`src/app/widgets/TinyG/index.jsx`<br>`src/app/widgets/Tool/index.jsx`<br>`src/app/widgets/Visualizer/index.jsx`<br>`src/app/widgets/Webcam/index.jsx` |
 | shared | 按責任拆分 | 逐檔檢查，僅保留仍被 domain composition 使用的 utilities | `src/app/components/Card/Card.jsx`<br>`src/app/components/Card/CardBody.jsx`<br>`src/app/components/Card/CardDeck.jsx`<br>`src/app/components/Card/CardFooter.jsx`<br>`src/app/components/Card/CardHeader.jsx`<br>`src/app/components/Progress/Progress.jsx`<br>`src/app/components/Progress/ProgressBar.jsx` |
 | withRouter | 按責任拆分 | 只為 class 注入 router 的 consumers 改 hooks 後刪除 | `src/app/__deprecated/TopNav.old/TopNav.jsx`<br>`src/app/pages/Workspace/Workspace.jsx` |
 
@@ -366,7 +366,7 @@ rg --files src/app/components
 
 | 原行為 | 最終介面 | Task |
 | --- | --- | --- |
-| Workspace → Primary/Secondary collapseAll → widgetMap → collapse/expand | WidgetUIProvider state/actions + controlled chrome props | U1a/U1b |
+| Workspace → Primary/Secondary collapseAll → widgetMap → collapse/expand | WorkspaceLayoutProvider actions + controlled `view`／`onViewChange(view)` | U1a/U1b |
 | Axes Settings 讀 node.mdi.state / node.general.value / shuttle value | parent draft + value/onChange + onSubmit | A1a |
 | Visualizer index → this.visualizer.load/zoom/pan | owner hook → 非 React renderer engine | V2/V3 |
 | Console → TerminalWrapper methods | 同 owner 的 useTerminal hook + DOM containerRef | G8 |

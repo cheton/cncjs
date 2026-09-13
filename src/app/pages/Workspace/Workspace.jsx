@@ -37,9 +37,10 @@ import * as widgetManager from './widget-manager';
 import DefaultWidgets from './DefaultWidgets';
 import PrimaryWidgets from './PrimaryWidgets';
 import SecondaryWidgets from './SecondaryWidgets';
-import { useWorkspaceWidgetIds, useWorkspaceWidgetUI } from './WidgetUIProvider';
+import { useWidgetGroup } from './useWidgetGroup';
+import { useWorkspaceLayout } from './useWorkspaceLayout';
 import { WIDGET_REGISTRY } from './widgetRegistry';
-import { selectVisibleWidgetIds } from './widgetUIState';
+import { selectVisibleWidgetIds } from './widgetLayoutState';
 import FeederPaused from './modals/FeederPaused';
 import FeederWait from './modals/FeederWait';
 import ServerDisconnected from './modals/ServerDisconnected';
@@ -390,7 +391,7 @@ class Workspace extends Component {
     const {
       isConnected,
       className,
-      widgetUI,
+      workspaceLayout,
       primaryWidgetIds,
       secondaryWidgetIds,
       ...props
@@ -517,14 +518,14 @@ class Workspace extends Component {
                             <Button
                               aria-label="Collapse all left panel widgets"
                               title={i18n._('Collapse All')}
-                              onClick={() => widgetUI.setManyMinimized(primaryWidgetIds, true)}
+                              onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, true)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                             </Button>
                             <Button
                               aria-label="Expand all left panel widgets"
                               title={i18n._('Expand All')}
-                              onClick={() => widgetUI.setManyMinimized(primaryWidgetIds, false)}
+                              onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, false)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                             </Button>
@@ -608,14 +609,14 @@ class Workspace extends Component {
                             <Button
                               aria-label="Collapse all right panel widgets"
                               title={i18n._('Collapse All')}
-                              onClick={() => widgetUI.setManyMinimized(secondaryWidgetIds, true)}
+                              onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, true)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                             </Button>
                             <Button
                               aria-label="Expand all right panel widgets"
                               title={i18n._('Expand All')}
-                              onClick={() => widgetUI.setManyMinimized(secondaryWidgetIds, false)}
+                              onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, false)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                             </Button>
@@ -671,16 +672,16 @@ class Workspace extends Component {
   }
 }
 
-const WorkspaceWithWidgetUI = props => {
-  const widgetUI = useWorkspaceWidgetUI();
-  const { ids: primaryIds } = useWorkspaceWidgetIds('primary');
-  const { ids: secondaryIds } = useWorkspaceWidgetIds('secondary');
+const WorkspaceWithLayout = props => {
+  const workspaceLayout = useWorkspaceLayout();
+  const { ids: primaryIds } = useWidgetGroup('primary');
+  const { ids: secondaryIds } = useWidgetGroup('secondary');
   const availableControllers = controller.availableControllers;
 
   return (
     <Workspace
       {...props}
-      widgetUI={widgetUI}
+      workspaceLayout={workspaceLayout}
       primaryWidgetIds={selectVisibleWidgetIds(
         primaryIds,
         availableControllers,
@@ -695,7 +696,7 @@ const WorkspaceWithWidgetUI = props => {
   );
 };
 
-export { Workspace, WorkspaceWithWidgetUI };
+export { Workspace, WorkspaceWithLayout };
 
 export default compose(
   withRouter,
@@ -707,7 +708,7 @@ export default compose(
       isConnected,
     };
   }),
-)(WorkspaceWithWidgetUI);
+)(WorkspaceWithLayout);
 
 const DropzoneOverlay = styled(
   ({ disabled, ...props }) => <div {...props} />

@@ -63,7 +63,8 @@ class AxesWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
-    chrome: PropTypes.object.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
   };
 
@@ -789,8 +790,9 @@ class AxesWidget extends Component {
   }
 
   render() {
-    const { widgetId, chrome } = this.props;
-    const { minimized, isFullscreen } = chrome;
+    const { widgetId, view, onViewChange } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
     const { units, machinePosition, workPosition } = this.state;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
     const config = this.config;
@@ -849,21 +851,21 @@ class AxesWidget extends Component {
                 <Space width={8} />
               </Widget.Button>
               <Widget.Button
-                aria-label={minimized ? 'Expand' : 'Collapse'}
-                aria-expanded={!minimized}
+                aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
-                title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                onClick={() => chrome.onMinimizedChange(!minimized)}
+                title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
               >
-                {minimized &&
+                {isCollapsed &&
                   <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-                {!minimized &&
+                {!isCollapsed &&
                   <FontAwesomeIcon icon="chevron-up" fixedWidth />}
               </Widget.Button>
               {isFullscreen && (
                 <Widget.Button
                   title={i18n._('Exit Full Screen')}
-                  onClick={chrome.onToggleFullscreen}
+                  onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
                 >
                   <FontAwesomeIcon icon="compress" fixedWidth />
                 </Widget.Button>
@@ -878,7 +880,7 @@ class AxesWidget extends Component {
                   if (eventKey === 'settings') {
                     actions.openModal(MODAL_SETTINGS);
                   } else if (eventKey === 'fullscreen') {
-                    chrome.onToggleFullscreen();
+                    onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                   } else if (eventKey === 'fork') {
                     this.props.onFork();
                   } else if (eventKey === 'remove') {
@@ -915,10 +917,10 @@ class AxesWidget extends Component {
             </Widget.Controls>
           </Widget.Header>
           <Widget.Content
-            aria-hidden={minimized}
+            aria-hidden={isCollapsed}
             className={cx(
               styles['widget-content'],
-              { [styles.hidden]: minimized }
+              { [styles.hidden]: isCollapsed }
             )}
           >
             {state.modal.name === MODAL_SETTINGS && (
