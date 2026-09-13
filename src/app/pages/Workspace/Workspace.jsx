@@ -37,6 +37,9 @@ import * as widgetManager from './widget-manager';
 import DefaultWidgets from './DefaultWidgets';
 import PrimaryWidgets from './PrimaryWidgets';
 import SecondaryWidgets from './SecondaryWidgets';
+import { useWorkspaceWidgetIds, useWorkspaceWidgetUI } from './WidgetUIProvider';
+import { WIDGET_REGISTRY } from './widgetRegistry';
+import { selectVisibleWidgetIds } from './widgetUIState';
 import FeederPaused from './modals/FeederPaused';
 import FeederWait from './modals/FeederWait';
 import ServerDisconnected from './modals/ServerDisconnected';
@@ -103,15 +106,6 @@ class Workspace extends Component {
       }));
     }
   };
-
-  sortableGroup = {
-    primary: null,
-    secondary: null
-  };
-
-  primaryWidgets = null;
-
-  secondaryWidgets = null;
 
   controllerEvents = {
     'connect': () => {
@@ -396,6 +390,9 @@ class Workspace extends Component {
     const {
       isConnected,
       className,
+      widgetUI,
+      primaryWidgetIds,
+      secondaryWidgetIds,
       ...props
     } = this.props;
     const {
@@ -520,18 +517,14 @@ class Workspace extends Component {
                             <Button
                               aria-label="Collapse all left panel widgets"
                               title={i18n._('Collapse All')}
-                              onClick={event => {
-                                this.primaryWidgets.collapseAll();
-                              }}
+                              onClick={() => widgetUI.setManyMinimized(primaryWidgetIds, true)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                             </Button>
                             <Button
                               aria-label="Expand all left panel widgets"
                               title={i18n._('Expand All')}
-                              onClick={event => {
-                                this.primaryWidgets.expandAll();
-                              }}
+                              onClick={() => widgetUI.setManyMinimized(primaryWidgetIds, false)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                             </Button>
@@ -546,9 +539,6 @@ class Workspace extends Component {
                       px="3x"
                     >
                       <PrimaryWidgets
-                        ref={node => {
-                          this.primaryWidgets = node;
-                        }}
                         onForkWidget={this.widgetEventHandler.onForkWidget}
                         onRemoveWidget={this.widgetEventHandler.onRemoveWidget}
                         onDragStart={this.widgetEventHandler.onDragStart}
@@ -618,18 +608,14 @@ class Workspace extends Component {
                             <Button
                               aria-label="Collapse all right panel widgets"
                               title={i18n._('Collapse All')}
-                              onClick={event => {
-                                this.secondaryWidgets.collapseAll();
-                              }}
+                              onClick={() => widgetUI.setManyMinimized(secondaryWidgetIds, true)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                             </Button>
                             <Button
                               aria-label="Expand all right panel widgets"
                               title={i18n._('Expand All')}
-                              onClick={event => {
-                                this.secondaryWidgets.expandAll();
-                              }}
+                              onClick={() => widgetUI.setManyMinimized(secondaryWidgetIds, false)}
                             >
                               <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                             </Button>
@@ -668,9 +654,6 @@ class Workspace extends Component {
                       px="3x"
                     >
                       <SecondaryWidgets
-                        ref={node => {
-                          this.secondaryWidgets = node;
-                        }}
                         onForkWidget={this.widgetEventHandler.onForkWidget}
                         onRemoveWidget={this.widgetEventHandler.onRemoveWidget}
                         onDragStart={this.widgetEventHandler.onDragStart}
@@ -688,6 +671,32 @@ class Workspace extends Component {
   }
 }
 
+const WorkspaceWithWidgetUI = props => {
+  const widgetUI = useWorkspaceWidgetUI();
+  const { ids: primaryIds } = useWorkspaceWidgetIds('primary');
+  const { ids: secondaryIds } = useWorkspaceWidgetIds('secondary');
+  const availableControllers = controller.availableControllers;
+
+  return (
+    <Workspace
+      {...props}
+      widgetUI={widgetUI}
+      primaryWidgetIds={selectVisibleWidgetIds(
+        primaryIds,
+        availableControllers,
+        WIDGET_REGISTRY
+      )}
+      secondaryWidgetIds={selectVisibleWidgetIds(
+        secondaryIds,
+        availableControllers,
+        WIDGET_REGISTRY
+      )}
+    />
+  );
+};
+
+export { Workspace, WorkspaceWithWidgetUI };
+
 export default compose(
   withRouter,
   connect(store => {
@@ -698,7 +707,7 @@ export default compose(
       isConnected,
     };
   }),
-)(Workspace);
+)(WorkspaceWithWidgetUI);
 
 const DropzoneOverlay = styled(
   ({ disabled, ...props }) => <div {...props} />

@@ -1,18 +1,18 @@
 # Migration task status
 
-更新日期：2026-09-13。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-14。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: D4（D3 WidgetHost/chrome consumers completed; BR0 browser gaps deferred to R6）
+- Active task: R1/R2（D4 Workspace/group wiring completed; BR0 browser gaps deferred to R6）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / medium, `McClintock`); advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: D4（group function components、Workspace toolbar、移除 instance control）
+- Next eligible task: R1（16 個 chrome contract cases），接著 R2（Workspace list／事件／設定回歸）
 - Current blockers: BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: keep `WidgetChromeIntegration.test.jsx` while chrome prop/action integration remains in scope; rename it to `WidgetHost.test.jsx` if the remaining D3 scope becomes host dispatch only, and update all plan/log/test-command references together.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
-- Validation: `yarn build-dev` and `yarn build` pass; `yarn eslint` exits 0 with 17 existing warnings; current frontend suite is 9 suites / 26 tests passed, including focused `WidgetChromeIntegration` 5/5. The full Jest path is not a D3 completion gate: `SocketConnection` remains excluded per user direction, and the prior sandbox server run recorded `listen EPERM` separately. The latest prescribed `yarn dev` lifecycle exited 0 after worker cleanup, with simulator, frontend, backend, and `/tmp/ttyGRBL` confirmed. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
+- Validation: D4 focused tests pass 5 suites / 22 tests; full frontend passes 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings; `yarn build` compiles successfully with existing bundle-size and i18next scanner warnings. The negative Workspace instance-control scan is clean. The full Jest path is not a D4 completion gate: `SocketConnection` remains excluded per user direction, and the prior sandbox server run recorded `listen EPERM` separately. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
 
 ## Explicit waiver
 
@@ -38,8 +38,8 @@
 | R0 | [原版 baseline](09-regression-gates.md) | H3 (BR0 waived) | completed | root session / 2026-09-13T20:35:00+08:00 | [`regression-baseline.md`](regression-baseline.md); frontend characterization 5/5 suites and 9/9 tests pass; geometry oracle preserved. BR0 browser gaps are explicitly carry-forward to R6. |
 | D1 | [chrome 純資料](details/02a-widget-state.md) | R0 | completed | root session / 2026-09-13T20:48:00+08:00 | `widgetRegistry.js`, `widgetUIState.js`, and `__tests__/widgetUIState.test.js`; focused and full frontend suites pass (4/4 and 6/6 suites respectively). Pure helpers preserve no-op/object identity; registry covers 17 widgets and controller filtering. |
 | D2 | [Provider](details/02a-widget-state.md) | D1 | completed | root session / 2026-09-13T21:35:00+08:00 | `WidgetUIProvider.jsx`, hook entry files, hydration utility, config wiring, and tests; full frontend 8 suites / 21 tests and build pass. Covers successful/corrupt hydration, restoreDefault remount, fullscreen, bulk filtering, config subscriptions, and group ids. |
-| D3 | [16 shells 接線](details/02a-widget-state.md) | D2 | completed | root session / 2026-09-13T21:56:00+08:00 | `Widget.jsx` is function-based with registry lookup, `useMemo` chrome dispatch, Visualizer bypass, and unknown→null behavior. All 16 chrome shells consume required `chrome` props without local chrome state/persistence; `Widget.jsx`/`Button.jsx` are functions. `WidgetChromeIntegration.test.jsx` passes 5/5; full frontend passes 9 suites / 26 tests; ESLint/build pass; static local-chrome scan is clean. D4 Workspace wiring remains. |
-| D4 | [Workspace 接線](details/02a-widget-state.md) | D3 | todo | — | — |
+| D3 | [16 shells 接線](details/02a-widget-state.md) | D2 | completed | root session / 2026-09-13T21:56:00+08:00 | `Widget.jsx` is function-based with registry lookup, `useMemo` chrome dispatch, Visualizer bypass, and unknown→null behavior. All 16 chrome shells consume required `chrome` props without local chrome state/persistence; `Widget.jsx`/`Button.jsx` are functions. `WidgetChromeIntegration.test.jsx` passes 5/5; full frontend passes 9 suites / 26 tests; ESLint/build pass; static local-chrome scan is clean. D4 Workspace wiring completed in the following task. |
+| D4 | [Workspace 接線](details/02a-widget-state.md) | D3 | completed | root session / 2026-09-14T00:09:05+08:00 | Added `WorkspaceRoot` Provider boundary, function group containers with config-backed ids and one PubSub subscription each, selector-based controller filtering, toolbar bulk chrome actions, fork/remove/sort persistence, active-id fullscreen cleanup, and `WidgetGroups.test.jsx`. Focused D4 command: 5 suites / 22 tests; full frontend: 10 suites / 31 tests; ESLint/build/diff checks pass. Browser gates remain waived/deferred to R6. |
 | R1 | [chrome 驗收](09-regression-gates.md) | D4 | todo | — | — |
 | R2 | [Workspace 驗收](09-regression-gates.md) | D4 | todo | — | — |
 | U2 | [primitives pilot](02-shared-ui.md) | R1, R2 | todo | — | — |

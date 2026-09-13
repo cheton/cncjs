@@ -139,13 +139,13 @@ Test：用 mock registry body renderCounter/unmountCounter 驗證雙 fork、coll
 **Modify:** `PrimaryWidgets.jsx`, `SecondaryWidgets.jsx`, `DefaultWidgets.jsx`, `Workspace.jsx`, `index.js`。
 **Create:** `WorkspaceRoot.jsx`, `__tests__/WidgetGroups.test.jsx`。
 
-- [ ] index.js barrel 改 export WorkspaceRoot；新增 JSX 文件避免 JS entry 解析歧義。WorkspaceRoot 包 Provider，內層 function boundary 用 hook 把 `widgetUI` props 傳進暫留 class 的 Workspace；原 router/Redux export 合約原樣轉發。
-- [ ] Primary/Secondary 改 function，讀 useWorkspaceWidgetIds；fork/remove/sort handlers 直接寫 config list，沿用確認 dialogs、UUID、settings clone 和 `onForkWidget/onRemoveWidget` 原 callback 參數。
-- [ ] PubSub updatePrimaryWidgets/updateSecondaryWidgets 訂閱一次，handler 更新同一 config list；不再 componentDidUpdate 回寫。Sortable callbacks 使用當下 list，跨欄位移動保留 group put/pull 設定。
-- [ ] registry filter 使用 selectVisibleWidgetIds；Workspace toolbar 用相同 selector 和目前 config list 取得 ids，再呼叫 widgetUI.setManyMinimized。可保留 controller.availableControllers 原來源，此輪不加新 controller subscription。
-- [ ] 刪 shouldComponentUpdate、widgetMap、collapseAll/expandAll、Primary/Secondary component refs。Visualizer 若在 default/其他 group，依 supportsChrome=false 不做 minimize。
-- [ ] remove fork 設定仍 `config.unset(['widgets',widgetId])`，原生 widget 保留設定；fullscreen entry 在 active ids 移除時清除，持久化資料不可因 general render 被掃除。
-- [ ] 測 toolbar→真 group→Host→chrome 的完整鏈、設定寫入次數、availableControllers、跨欄 drag、fork/remove、舊設定重新載入。mock Sortable 以其 onChange/order 合約觸發，不 mock state reducer。
+- [x] index.js barrel 改 export WorkspaceRoot；新增 JSX 文件避免 JS entry 解析歧義。WorkspaceRoot 包 Provider，內層 function boundary 用 hook 把 `widgetUI` props 傳進暫留 class 的 Workspace；原 router/Redux export 合約原樣轉發。
+- [x] Primary/Secondary 改 function，讀 useWorkspaceWidgetIds；fork/remove/sort handlers 直接寫 config list，沿用確認 dialogs、UUID、settings clone 和 `onForkWidget/onRemoveWidget` 原 callback 參數。
+- [x] PubSub updatePrimaryWidgets/updateSecondaryWidgets 訂閱一次，handler 更新同一 config list；不再 componentDidUpdate 回寫。Sortable callbacks 使用當下 list，跨欄位移動保留 group put/pull 設定。
+- [x] registry filter 使用 selectVisibleWidgetIds；Workspace toolbar 用相同 selector 和目前 config list 取得 ids，再呼叫 widgetUI.setManyMinimized。可保留 controller.availableControllers 原來源，此輪不加新 controller subscription。
+- [x] 刪 shouldComponentUpdate、widgetMap、collapseAll/expandAll、Primary/Secondary component refs。Visualizer 若在 default/其他 group，依 supportsChrome=false 不做 minimize。
+- [x] remove fork 設定仍 `config.unset(['widgets',widgetId])`，原生 widget 保留設定；fullscreen entry 在 active ids 移除時清除，持久化資料不可因 general render 被掃除。
+- [x] 測 toolbar→真 group→Host→chrome 的完整鏈、設定寫入次數、availableControllers、跨欄 drag、fork/remove、舊設定重新載入。mock Sortable 以其 onChange/order 合約觸發，不 mock state reducer。
 
 D3/D4 可分 patch review，但必須一起通過 build/browser 才交付；中間沒有用 imperative bridge 維持 runtime 的需求。
 

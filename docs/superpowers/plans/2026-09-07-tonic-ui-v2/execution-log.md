@@ -355,3 +355,17 @@ Next exact step: D4 group containers and Workspace toolbar wiring, including `Wo
 Decision: keep only the small, reviewable browser fixtures in `src/app/test/fixtures/browser/` (`br0-small.gcode`, `br0-linear.gcode`, `br0-arc.gcode`, and `br0-probe.gcode`). Remove the runtime-generated `br0-large-100000.gcode` and `br0-watch-tree/` payloads from the working tree and prevent them from being re-added with `.gitignore` rules.
 
 Reason: the large G-code and 5,000-node watch tree are useful BR0/R6 input shapes, but they are execution data rather than product source or D3 tests. Future browser runs should generate deterministic copies under unique `/tmp` paths and record the recipe/hash in durable artifacts. Historical browser artifacts may still describe the payloads that were used; that is evidence, not a request to keep the generated files in Git.
+
+## D4 Workspace/group wiring complete — 2026-09-14T00:09:05+08:00
+
+Task / session / timestamp: D4 / root session / 2026-09-14T00:09:05+08:00.
+
+Implementation: added `WorkspaceRoot.jsx` as the `WidgetUIProvider` boundary and kept the connected/router default export in `Workspace.jsx` behind a hook function boundary. Primary, Secondary, and Default containers now read config-backed ids through `useWorkspaceWidgetIds`; controller visibility uses `selectVisibleWidgetIds`. Primary/Secondary preserve the existing PubSub topics, Sortable group `put/pull` options, fork settings clone, remove semantics, callback parameters, and config order writes without local widget lists or component refs. Workspace toolbar collapse/expand uses `widgetUI.setManyMinimized` with the current visible ids. Provider cleanup removes transient fullscreen entries when an active widget leaves all three groups.
+
+Test coverage: `WidgetGroups.test.jsx` uses a Sortable contract mock and real `Widget.jsx` registry dispatch to cover sort/order persistence, cross-column options, PubSub updates, fork/remove with native settings preservation, toolbar→group→Host→chrome behavior, Visualizer chrome bypass, available controller filtering, and fullscreen cleanup.
+
+Verification: focused D4 command (`widgetUIState`, `WidgetUIProvider`, `WidgetChromeIntegration`, `WidgetGroups`, and hydration tests) / 0 / 5 suites and 22 tests passed; `yarn test:frontend --runInBand --silent` / 0 / 10 suites and 31 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing bundle-size and i18next scanner warnings; negative scan for `widgetMap|collapseAll|expandAll|useImperativeHandle` under `src/app/pages/Workspace` / no matches; `git diff --check` / 0.
+
+Browser status: no browser gate is claimed in D4. BR0 remains explicitly waived; its missing Stop/jog/disconnect/large/watch/viewport/selector evidence is carried to R6. SocketConnection remains excluded per user direction.
+
+Status transition: D4 `todo` → `completed`; R1/R2 are now the next eligible regression gates. The next exact step is the 16-widget chrome contract run, followed by Workspace list/event/config regression coverage.
