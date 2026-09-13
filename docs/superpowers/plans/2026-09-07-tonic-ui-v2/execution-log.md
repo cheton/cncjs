@@ -349,3 +349,9 @@ Full server Jest was not used as a D3 gate: `SocketConnection` remains excluded 
 Status transition: D3 `in_progress` → `completed`; D4 remains the next eligible task. The D3 test keeps the name `WidgetChromeIntegration.test.jsx` because it still covers shell chrome integration; rename to `WidgetHost.test.jsx` only if the remaining scope later becomes host dispatch alone, updating all references together.
 
 Next exact step: D4 group containers and Workspace toolbar wiring, including `WorkspaceRoot`, group-id hooks in the real containers, toolbar bulk actions, fork/remove/sort persistence, and removal of imperative `widgetMap`/component-instance control.
+
+## Browser fixture retention decision — 2026-09-13
+
+Decision: keep only the small, reviewable browser fixtures in `src/app/test/fixtures/browser/` (`br0-small.gcode`, `br0-linear.gcode`, `br0-arc.gcode`, and `br0-probe.gcode`). Remove the runtime-generated `br0-large-100000.gcode` and `br0-watch-tree/` payloads from the working tree and prevent them from being re-added with `.gitignore` rules.
+
+Reason: the large G-code and 5,000-node watch tree are useful BR0/R6 input shapes, but they are execution data rather than product source or D3 tests. Future browser runs should generate deterministic copies under unique `/tmp` paths and record the recipe/hash in durable artifacts. Historical browser artifacts may still describe the payloads that were used; that is evidence, not a request to keep the generated files in Git.

@@ -18,6 +18,8 @@ Environment:
 - G-code SHA256: `e9f23b3146d2ac3d4ad39ed63a0af2f26b61e483ad495a5a4345806bef46517b`
 - Watch tree: 4,900 directory files (100 directories × 49 files), plus 3 root fixtures
 
+The watch tree and any large-fixture payload described here were generated for the historical browser run. They are runtime-only data and are not part of the current versioned fixture set.
+
 Observed baseline:
 
 - App loaded at `/#/workspace` with title `CNCjs 2.0.0-dev`.
