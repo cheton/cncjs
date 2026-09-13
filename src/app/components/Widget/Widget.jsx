@@ -1,36 +1,32 @@
 import { Box } from '@tonic-ui/react';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import styles from './index.styl';
 
-class Widget extends Component {
-  static propTypes = {
-    borderless: PropTypes.bool,
-    fullscreen: PropTypes.bool
-  };
-
-  static defaultProps = {
-    borderless: false,
-    fullscreen: false
-  };
-
-  render() {
-    const { borderless, fullscreen, className, ...props } = this.props;
-
-    return (
-      <Box
-        role="region"
-        {...props}
-        className={cx(
-          className,
-          styles.widget,
-          { [styles.widgetBorderless]: borderless },
-          { [styles.widgetFullscreen]: fullscreen }
-        )}
-      />
-    );
-  }
+function Widget({ borderless, fullscreen, className, ...props }) {
+  return (
+    <Box
+      role="region"
+      {...props}
+      className={cx(
+        className,
+        styles.widget,
+        { [styles.widgetBorderless]: borderless },
+        { [styles.widgetFullscreen]: fullscreen }
+      )}
+    />
+  );
 }
+
+Widget.propTypes = {
+  borderless: PropTypes.bool,
+  fullscreen: PropTypes.bool
+};
+
+Widget.defaultProps = {
+  borderless: false,
+  fullscreen: false
+};
 
 export default Widget;

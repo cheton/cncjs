@@ -65,16 +65,8 @@ class AutolevelWidget extends PureComponent {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    chrome: PropTypes.object.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
@@ -84,15 +76,10 @@ class AutolevelWidget extends PureComponent {
   actions = {
     // Widget controls
     toggleFullscreen: () => {
-      const { minimized, isFullscreen } = this.state;
-      this.setState({
-        minimized: isFullscreen ? minimized : false,
-        isFullscreen: !isFullscreen
-      });
+      this.props.chrome.onToggleFullscreen();
     },
     toggleMinimized: () => {
-      const { minimized } = this.state;
-      this.setState({ minimized: !minimized });
+      this.props.chrome.onMinimizedChange(!this.props.chrome.minimized);
     },
 
     // Modal management
@@ -742,14 +729,12 @@ class AutolevelWidget extends PureComponent {
 
   componentDidUpdate(prevProps, prevState) {
     const {
-      minimized, units, wizardView, probedPositions,
+      units, wizardView, probedPositions,
       stepX, stepY,
       startX, startY, endX, endY,
       clearanceZ, startZ, endZ,
       feedrate,
     } = this.state;
-
-    this.config.set('minimized', minimized);
 
     // Do not save config settings if the units just changed between in and mm
     if (this.unitsDidChange) {
@@ -798,8 +783,6 @@ class AutolevelWidget extends PureComponent {
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       canClick: true,
       connected: !!controller.connection.ident,
       units: METRIC_UNITS,
@@ -1009,8 +992,8 @@ class AutolevelWidget extends PureComponent {
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, chrome } = this.props;
+    const { minimized, isFullscreen } = chrome;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
     const actions = this.actions;
 

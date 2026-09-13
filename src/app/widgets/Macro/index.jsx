@@ -10,7 +10,6 @@ import { ModalProvider, ModalRoot } from '@app/components/Modal';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
 import { createFetchMachine } from '@app/machines';
-import WidgetConfig from '@app/widgets/shared/WidgetConfig';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import Macro from './Macro';
 import { ServiceContext } from './context';
@@ -22,21 +21,9 @@ class MacroWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    chrome: PropTypes.object.isRequired,
     sortable: PropTypes.object
   };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
-  };
-
-  config = new WidgetConfig(this.props.widgetId);
-
-  state = this.getInitialState();
 
   serviceContext = {
     fetchMacrosService: interpret(
@@ -52,19 +39,6 @@ class MacroWidget extends Component {
     ),
   };
 
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
-
   componentDidMount() {
     this.serviceContext.fetchMacrosService.start();
   }
@@ -73,24 +47,9 @@ class MacroWidget extends Component {
     this.serviceContext.fetchMacrosService.stop();
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      minimized
-    } = this.state;
-
-    this.config.set('minimized', minimized);
-  }
-
-  getInitialState() {
-    return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
-    };
-  }
-
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, chrome } = this.props;
+    const { minimized, isFullscreen } = chrome;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
     return (
@@ -115,7 +74,7 @@ class MacroWidget extends Component {
                     aria-expanded={!minimized}
                     disabled={isFullscreen}
                     title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                    onClick={this.toggleMinimized}
+                    onClick={() => chrome.onMinimizedChange(!minimized)}
                   >
                     {minimized &&
                       <FontAwesomeIcon icon="chevron-down" fixedWidth />}
@@ -125,7 +84,7 @@ class MacroWidget extends Component {
                   {isFullscreen && (
                     <Widget.Button
                       title={i18n._('Exit Full Screen')}
-                      onClick={this.toggleFullscreen}
+                      onClick={chrome.onToggleFullscreen}
                     >
                       <FontAwesomeIcon icon="compress" fixedWidth />
                     </Widget.Button>
@@ -138,7 +97,7 @@ class MacroWidget extends Component {
                     )}
                     onSelect={(eventKey) => {
                       if (eventKey === 'fullscreen') {
-                        this.toggleFullscreen();
+                        chrome.onToggleFullscreen();
                       } else if (eventKey === 'fork') {
                         this.props.onFork();
                       } else if (eventKey === 'remove') {

@@ -9,6 +9,10 @@ yarn-error.log
 /output
 /releases
 
+# Browser stress fixtures are generated in temporary test runs.
+/src/app/test/fixtures/browser/br0-large-100000.gcode
+/src/app/test/fixtures/browser/br0-watch-tree/
+
 # https://next.yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
 .pnp.*
 .yarn/*

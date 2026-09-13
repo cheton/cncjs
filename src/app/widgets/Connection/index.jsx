@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
-import WidgetConfig from '@app/widgets/shared/WidgetConfig';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import Connection from './Connection';
 
@@ -15,49 +14,13 @@ class ConnectionWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    chrome: PropTypes.object.isRequired,
     sortable: PropTypes.object
   };
 
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
-  };
-
-  config = new WidgetConfig(this.props.widgetId);
-
-  state = this.getInitialState();
-
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
-
-  componentDidUpdate(prevProps, prevState) {
-    this.config.set('minimized', this.state.minimized);
-  }
-
-  getInitialState() {
-    return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
-    };
-  }
-
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, chrome } = this.props;
+    const { minimized, isFullscreen } = chrome;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
     return (
@@ -79,7 +42,7 @@ class ConnectionWidget extends Component {
                 aria-expanded={!minimized}
                 disabled={isFullscreen}
                 title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                onClick={this.toggleMinimized}
+                onClick={() => chrome.onMinimizedChange(!minimized)}
               >
                 {minimized &&
                 <FontAwesomeIcon icon="chevron-down" fixedWidth />}
@@ -89,7 +52,7 @@ class ConnectionWidget extends Component {
               {isFullscreen && (
                 <Widget.Button
                   title={i18n._('Exit Full Screen')}
-                  onClick={this.toggleFullscreen}
+                  onClick={chrome.onToggleFullscreen}
                 >
                   <FontAwesomeIcon icon="compress" fixedWidth />
                 </Widget.Button>
@@ -102,7 +65,7 @@ class ConnectionWidget extends Component {
                 )}
                 onSelect={(eventKey) => {
                   if (eventKey === 'fullscreen') {
-                    this.toggleFullscreen();
+                    chrome.onToggleFullscreen();
                   }
                 }}
               >

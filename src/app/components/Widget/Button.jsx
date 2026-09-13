@@ -1,33 +1,29 @@
 import cx from 'classnames';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Anchor from '../Anchor';
 import styles from './index.styl';
 
-class Button extends Component {
-  static propTypes = {
-    ...Anchor.propTypes,
-    inverted: PropTypes.bool
-  };
-
-  static defaultProps = {
-    ...Anchor.defaultProps,
-    inverted: false
-  };
-
-  render() {
-    const { inverted, className, ...props } = this.props;
-
-    return (
-      <Anchor
-        {...props}
-        className={cx(className, styles.widgetButton, {
-          [styles.disabled]: !!props.disabled,
-          [styles.inverted]: inverted
-        })}
-      />
-    );
-  }
+function Button({ inverted, className, ...props }) {
+  return (
+    <Anchor
+      {...props}
+      className={cx(className, styles.widgetButton, {
+        [styles.disabled]: !!props.disabled,
+        [styles.inverted]: inverted
+      })}
+    />
+  );
 }
+
+Button.propTypes = {
+  ...Anchor.propTypes,
+  inverted: PropTypes.bool
+};
+
+Button.defaultProps = {
+  ...Anchor.defaultProps,
+  inverted: false
+};
 
 export default Button;
