@@ -269,3 +269,83 @@ Status transition: BR0 `blocking` → `waived`; R0 dependency `BR0` → `H3 (BR0
 Decision: keep the current `react-select` implementation and selector patch in scope for the ongoing path. Record Tonic `MenuButton/MenuList/MenuItem` as a future domain-selector option, not as an implicit part of the BR0 waiver or current R0 start.
 
 Acceptance criteria for a future evaluation: preserve keyboard interaction, focus and focus-return behavior, selected value and custom option metadata, disabled state, ARIA/i18n semantics, and existing Connection/Tool callback contracts. The evaluation must have its own implementation and regression task before any `react-select` dependency/import is removed.
+
+## R0 non-browser baseline complete — 2026-09-13T20:35:00+08:00
+
+Task / session / timestamp: R0 / root session / 2026-09-13T20:35:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `39edd315` / `src/app/widgets/Connection/Connection.jsx` selector patch and synthetic browser fixtures. No Tonic widget migration was included in this R0 checkpoint.
+
+Plan contract and baseline fixture: `09-regression-gates.md`, `regression-baseline.md`, `geometry-baseline.json`, existing frontend characterization tests, and the BR0 waiver recorded above.
+
+Command / exit code / tested revision: `yarn test:frontend --runInBand` / 0 / current working tree; 5 suites and 9 tests passed. Existing full Jest SocketConnection `ECONNRESET` remains excluded per user direction. The prescribed dev lifecycle had already exited 0 with cleanup verified.
+
+Before / after / intentional differences: the baseline records existing source behavior and the four plan-approved future differences (fullscreen collapse, Macro cached refresh, mutation close behavior, Settings Save timing). Geometry oracle remains the existing real parser/Three.js read-only result. No production migration was performed.
+
+Artifacts: `regression-baseline.md`, `geometry-baseline.json`, and frontend test paths listed in the baseline. BR0 browser gaps remain carry-forward to R6 under the explicit waiver.
+
+Status transition: R0 `todo` → `completed` for the waived non-browser scope; D1 `todo` → `in_progress`. Next exact step: implement and test D1 pure widget registry/state helpers without connecting them to Provider or Workspace.
+
+## D1 pure widget state complete — 2026-09-13T20:48:00+08:00
+
+Task / session / timestamp: D1 / root session / 2026-09-13T20:48:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `39edd315` / `Connection.jsx` selector patch, R0 docs, and synthetic browser fixtures. D1 changed only `src/app/pages/Workspace/widgetRegistry.js`, `widgetUIState.js`, and `__tests__/widgetUIState.test.js`.
+
+Plan contract and baseline fixture: `details/02a-widget-state.md`; registry preserves the existing 17 widget mappings, Visualizer has `supportsChrome: false`, and controller widgets use the existing controller constants. Pure helpers do not import config, React, or controller state.
+
+Implementation / review: the first test run correctly failed because the modules did not exist. A second run exposed that importing real widgets pulled `import.meta` from the development Redux store; the test now mocks all 17 widget modules. One over-broad unknown-id expectation was removed because filtering belongs to `selectVisibleWidgetIds`, while `setWidgetsMinimized` intentionally trusts pre-filtered ids. Final review confirms selected/domain object identity and memoized minimized snapshot behavior.
+
+Commands / exit codes: focused `yarn test:frontend --runInBand --runTestsByPath src/app/pages/Workspace/__tests__/widgetUIState.test.js` / 0 / 4 tests passed; full `yarn test:frontend --runInBand` / 0 / 6 suites and 13 tests passed; `yarn eslint` / 0 / no output.
+
+Status transition: D1 `in_progress` → `completed`; D2 `todo` → `in_progress`. Next exact step: add config hydration notification, Provider actions, and group-id snapshot hook tests before wiring Workspace.
+
+## D2 Provider and hydration checkpoint — 2026-09-13T21:20:00+08:00
+
+Task / session / timestamp: D2 / root session / 2026-09-13T21:20:00+08:00.
+
+Changed files: `WidgetUIProvider.jsx`, `useWorkspaceWidgetUI.js`, `useWorkspaceWidgetIds.js`, `widgetUIState` consumers, `src/app/store/config/hydration.js`, `src/app/store/config/index.js`, `hydration.test.js`, `WidgetUIProvider.test.jsx`, and `jest.frontend.config.js` (added exact bare `@app` mapper while retaining `@app/*`).
+
+Verification: `yarn test:frontend --runInBand` / 0 / 8 suites and 19 tests passed; focused hydration/provider run / 0 / 6 tests passed; `yarn eslint` / 0; `yarn build` / 0. Build retains existing bundle-size and i18next scanner warnings plus `Error in undefined: Line 17: Unexpected reserved word` from the existing scanner path, but webpack compiled successfully.
+
+Current implementation: Provider uses the memoized minimized snapshot reader and `useSyncExternalStore`; fullscreen state has a latest ref; bulk actions filter unsupported/unknown/fullscreen ids; group ids use the existing config paths; successful hydration emits one `change` after migration, while corrupt input leaves state untouched and calls the error handler.
+
+Remaining D2 gates: add a real config-module restoreDefault/corrupt-settings integration check or explicitly record why the isolated hydration seam is sufficient; then review whether D2 can transition to completed. No Workspace wiring has started.
+
+## D2 Provider and hydration complete — 2026-09-13T21:35:00+08:00
+
+Task / session / timestamp: D2 / root session / 2026-09-13T21:35:00+08:00.
+
+Completion review: the real config startup integration test now covers localStorage parse/normalize/assign and one post-migration `change` event; the corrupt-input seam preserves the existing state and does not emit. Provider tests cover bulk actions, fullscreen expand/exit semantics, restoreDefault followed by remount, unsupported/unknown ids, group path read/write, external minimized changes, and listener cleanup. Stable hook entry files were added without duplicating context logic. The Jest config now maps both bare `@app` and `@app/*`.
+
+Verification: `yarn test:frontend --runInBand` / 0 / 8 suites and 21 tests passed; focused Provider / hydration runs passed; `yarn eslint` / 0; `yarn build` / 0 with existing bundle-size/scanner warnings. No browser gate was run; BR0 waiver and R6 carry-forward remain unchanged.
+
+Status transition: D2 `in_progress` → `completed`; D3 `todo` → `in_progress`. Next exact step: write the D3 WidgetHost/chrome integration test against the new registry/provider contract before modifying `Widget.jsx`.
+
+## D3 WidgetHost dispatch checkpoint — 2026-09-13T21:50:00+08:00
+
+Task / session / timestamp: D3 / root session / 2026-09-13T21:50:00+08:00.
+
+Implementation: added the function-based `Widget.jsx` registry lookup and declarative chrome dispatch boundary. Chrome-capable widgets receive `minimized`, `isFullscreen`, `onMinimizedChange`, and `onToggleFullscreen`; Visualizer bypasses chrome; unknown widget ids return `null`; no component instance ref is registered. Added `WidgetChromeIntegration.test.jsx` with 3/3 tests covering chrome props/actions, Visualizer bypass/unknown ids, and prop passthrough.
+
+Naming decision: `WidgetChromeIntegration.test.jsx` remains the correct name while the test covers both host dispatch and chrome contract integration. If the remaining D3 scope is reduced to host dispatch only, rename it to `WidgetHost.test.jsx` and update `details/02a-widget-state.md`, `STATUS.md`, this log, and the prescribed test command together.
+
+Verification: `yarn test:frontend --runInBand` / 0 / 9 suites and 24 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with 3 existing performance warnings plus the existing i18next scanner warning. The 16 widget shell migrations and D4 Workspace wiring are not complete; D3 remains `in_progress`.
+
+Next exact step: migrate the 16 chrome-consuming widget shells while preserving domain state, lifecycle, and service ownership; keep Visualizer outside the chrome contract.
+
+## D3 WidgetHost and chrome consumers complete — 2026-09-13T21:56:00+08:00
+
+Task / session / timestamp: D3 / root session / 2026-09-13T21:56:00+08:00.
+
+Implementation: completed the function-based `Widget.jsx` host and function `components/Widget/Widget.jsx` / `Button.jsx`. The host performs registry lookup, returns `null` for unknown ids, bypasses chrome for Visualizer, and memoizes `{ minimized, isFullscreen, onMinimizedChange, onToggleFullscreen }` for chrome-capable widgets without component refs. Migrated all 16 chrome shells: Axes, Autolevel, Tool, Marlin, Smoothie, TinyG, Connection, Console, Custom, GCode, Grbl, Laser, Macro, Probe, Spindle, and Webcam. Local minimized/fullscreen state and chrome persistence were removed while domain state, lifecycle, Macro services, and non-chrome config persistence were retained.
+
+Test coverage: `WidgetChromeIntegration.test.jsx` covers declarative host updates without body unmount, Visualizer bypass, unknown ids, prop passthrough, and real Connection/Autolevel shell action forwarding. The existing `Connection.jsx` selector/data-test patch remains in scope; the future Tonic Menu alternative remains deferred.
+
+Verification: focused `yarn test:frontend --runInBand --runTestsByPath src/app/pages/Workspace/__tests__/WidgetChromeIntegration.test.jsx` / 0 / 5 tests passed; full `yarn test:frontend --runInBand` / 0 / 9 suites and 26 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing performance and i18next scanner warnings; `git diff --check` / 0. The static scan for local chrome state/methods in all 16 shell indexes returned no matches (expected `rg` exit 1).
+
+Full server Jest was not used as a D3 gate: `SocketConnection` remains excluded per user direction, and the earlier sandbox `listen EPERM` server failure remains environmental evidence. No browser gate is claimed; BR0 is explicitly waived and its missing evidence remains a carry-forward to R6.
+
+Status transition: D3 `in_progress` → `completed`; D4 remains the next eligible task. The D3 test keeps the name `WidgetChromeIntegration.test.jsx` because it still covers shell chrome integration; rename to `WidgetHost.test.jsx` only if the remaining scope later becomes host dispatch alone, updating all references together.
+
+Next exact step: D4 group containers and Workspace toolbar wiring, including `WorkspaceRoot`, group-id hooks in the real containers, toolbar bulk actions, fork/remove/sort persistence, and removal of imperative `widgetMap`/component-instance control.

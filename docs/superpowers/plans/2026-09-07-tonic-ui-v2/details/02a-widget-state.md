@@ -63,7 +63,7 @@ export const setWidgetsMinimized = (widgets, ids, minimized) => {
 
 `ids` 進入 setWidgetsMinimized 前已由 Provider 過濾 capabilities/fullscreen，這個 pure helper 不 import React/config/controller。保留沒在 ids 的設定物件 identity；fork id 用 object key／array path，不用有歧義的 dotted 字串。
 
-- [ ] 建立下面 failing test，再實作 helpers。
+- [x] 建立下面 failing test，再實作 helpers。
 
 ```js
 import { setWidgetsMinimized } from '../widgetUIState';
@@ -83,8 +83,8 @@ test('bulk collapse updates only selected ids and preserves domain settings', ()
 });
 ```
 
-- [ ] 再測 empty ids、false/default no-op、unknown registry id、controller filter、Visualizer 可見但不支援 chrome。
-- [ ] `createMinimizedSnapshotReader(config)` 回傳 memoized getter：讀 `config.get('widgets', EMPTY_OBJECT)`，投影成**只有 minimized=true 的 ids map**；若 keys/boolean 全相同，回傳上次同一物件。無關 axes position/settings 更新不得換 snapshot。不可在 getter 寫 config。
+- [x] 再測 empty ids、false/default no-op、unknown registry id、controller filter、Visualizer 可見但不支援 chrome。
+- [x] `createMinimizedSnapshotReader(config)` 回傳 memoized getter：讀 `config.get('widgets', EMPTY_OBJECT)`，投影成**只有 minimized=true 的 ids map**；若 keys/boolean 全相同，回傳上次同一物件。無關 axes position/settings 更新不得換 snapshot。不可在 getter 寫 config。
 - [ ] `config` 注入只為測試這個有 IO 邊界的 reader，不做泛用 store framework。測試 reader 連續呼叫 `toBe` 相同、改 domain 值相同、改 minimized 不同、unset/reset 回到 empty。
 
 Run: `yarn test:frontend --runInBand --runTestsByPath src/app/pages/Workspace/__tests__/widgetUIState.test.js`。
@@ -95,15 +95,15 @@ Expected: 新增 import 缺失先 FAIL；helpers 完成後上述 identities 與 
 **Create:** `WidgetUIProvider.jsx`, `useWorkspaceWidgetUI.js`, `useWorkspaceWidgetIds.js`, `__tests__/WidgetUIProvider.test.jsx`（均在 Workspace）。
 **Modify:** `src/app/store/config/index.js` 的成功載入路径；新增 `src/app/store/config/__tests__/hydration.test.js`。
 
-- [ ] 只在成功 parse/normalize/assign，且 migration 完成後 `config.emit('change', config.get())`。記錄一個 local `didRestore` flag 控制通知，失敗的 corrupted-settings 分支不要把預設值默默 persist 覆蓋原資料。測試 mock Electron 延遲成功/失敗；不修改 EventEmitterStore.state setter 的全域語意。
-- [ ] `config.restoreDefault()` 的現有 consumers 會 persist 然後 reload，Provider 透過 remount 取得新值，不另加輪詢或全域 reset event。其他將來不 reload 的整份狀態替換必須遵守通知契約。
-- [ ] Provider `useSyncExternalStore(subscribe, readMinimizedSnapshot)`；subscribe 只在 effect 所控生命周期 attach `config.on('change', listener)` 並回傳 off。reader 用 useMemo 建一次。
-- [ ] fullscreenById 是 Provider 的 local state；在 action handler 同步更新 latest ref 和 setState，以支援同一 event 中連續 toggle；ref 不在 render 改，不藏其他 domain state。
-- [ ] `setManyMinimized(ids,next)` 過濾 unknown、supportsChrome=false 與 fullscreen=true；呼叫一次 `config.update('widgets', widgets => setWidgetsMinimized(widgets || {}, filteredIds, next))`，不是每 id 逐一 emit。next 是 boolean，禁止 toggle 批次副作用。
-- [ ] `setMinimized(id,next)` 呼叫同一 bulk action。`toggleFullscreen(id)` 進入時先展開，然後 set fullscreen；退出保留展開，不恢復舊收合值。fullscreen 時單一/批次 collapse 都忽略。
-- [ ] 支援 group toolbar 的最終契約仍為 `{ getChrome, setMinimized, setManyMinimized, toggleFullscreen }`，getChrome 回 `{ minimized, isFullscreen }`。context value 對 snapshot/fullscreen 變化 memoized，無關資料不更新。
-- [ ] `useWorkspaceWidgetIds(group)` 用相同 config change 訂閱與 `config.get(['workspace','container',group,'widgets'], EMPTY_ARRAY)` snapshot；EMPTY_ARRAY 模組級常數。setWidgetIds(group, ids) 直接寫原 path；不再複製 group list 到第二份 local state。
-- [ ] 僅支持 default/primary/secondary 三個既有 group，沒有新 plugin schema、跨 widget command bus 或任意 method registry。
+- [x] 只在成功 parse/normalize/assign，且 migration 完成後 `config.emit('change', config.get())`。記錄一個 local `didRestore` flag 控制通知，失敗的 corrupted-settings 分支不要把預設值默默 persist 覆蓋原資料。測試 mock Electron 延遲成功/失敗；不修改 EventEmitterStore.state setter 的全域語意。
+- [x] `config.restoreDefault()` 的現有 consumers 會 persist 然後 reload，Provider 透過 remount 取得新值，不另加輪詢或全域 reset event。其他將來不 reload 的整份狀態替換必須遵守通知契約。
+- [x] Provider `useSyncExternalStore(subscribe, readMinimizedSnapshot)`；subscribe 只在 effect 所控生命周期 attach `config.on('change', listener)` 並回傳 off。reader 用 useMemo 建一次。
+- [x] fullscreenById 是 Provider 的 local state；在 action handler 同步更新 latest ref 和 setState，以支援同一 event 中連續 toggle；ref 不在 render 改，不藏其他 domain state。
+- [x] `setManyMinimized(ids,next)` 過濾 unknown、supportsChrome=false 與 fullscreen=true；呼叫一次 `config.update('widgets', widgets => setWidgetsMinimized(widgets || {}, filteredIds, next))`，不是每 id 逐一 emit。next 是 boolean，禁止 toggle 批次副作用。
+- [x] `setMinimized(id,next)` 呼叫同一 bulk action。`toggleFullscreen(id)` 進入時先展開，然後 set fullscreen；退出保留展開，不恢復舊收合值。fullscreen 時單一/批次 collapse 都忽略。
+- [x] 支援 group toolbar 的最終契約仍為 `{ getChrome, setMinimized, setManyMinimized, toggleFullscreen }`，getChrome 回 `{ minimized, isFullscreen }`。context value 對 snapshot/fullscreen 變化 memoized，無關資料不更新。
+- [x] `useWorkspaceWidgetIds(group)` 用相同 config change 訂閱與 `config.get(['workspace','container',group,'widgets'], EMPTY_ARRAY)` snapshot；EMPTY_ARRAY 模組級常數。setWidgetIds(group, ids) 直接寫原 path；不再複製 group list 到第二份 local state。
+- [x] 僅支持 default/primary/secondary 三個既有 group，沒有新 plugin schema、跨 widget command bus 或任意 method registry；hook entry files expose the two stable imports.
 
 測試用 `EventEmitterStore` 或只 mock `{get,update,on,off}`，不要載入真 config singleton 的 localStorage 啟動副作用。建立 Harness 的 buttons 呼叫 actions，output 顯示 JSON chrome，再用 Testing Library 點擊。
 
@@ -124,13 +124,13 @@ Expected: 新增 import 缺失先 FAIL；helpers 完成後上述 identities 與 
 **Modify:** `Widget.jsx`；除 Visualizer 外 16 個 `widgets/<Name>/index.jsx`；`components/Widget/Widget.jsx` / `Button.jsx`。
 **Create Test:** `__tests__/WidgetChromeIntegration.test.jsx`。
 
-- [ ] WidgetHost 改 function；先 registry lookup，unknown→null；supportsChrome=false 直接傳原 props，不 subscribe 每 widget chrome。
-- [ ] 支援 chrome 的內層 Host 取 context，`useMemo` 組 `{ minimized, isFullscreen, onMinimizedChange, onToggleFullscreen }` 傳下去。callback 綁 widgetId，不能再把 component ref 傳到 registry Component。
-- [ ] simple shells（Connection/Console/Custom/GCode/Grbl/Laser/Macro/Probe/Spindle/Webcam）移除 local minimized/fullscreen 和 public methods；可以順便轉 function，但 Macro actor 須保留至 Q2 正確 cleanup，不任意刪除其 services。
-- [ ] domain shells（Axes/Autolevel/Tool/Marlin/Smoothie/TinyG）只換 chrome：state 不再放兩個欄位；保留其餘 state、lifecycle 和 domain actions。本 task 不是大規模重寫 domain。
-- [ ] Axes componentDidUpdate 只移除 minimized 寫入，axes/jog/mdi persistence 保留。Tool 的 unitsDidChange guard 保留。Autolevel/Tool `actions.toggleMinimized/toggleFullscreen` 可短期作事件轉送到 props，但不能再 setState chrome。
-- [ ] Console/Webcam 傳給內容的 isFullscreen 改 `chrome.isFullscreen`；其他 child 若解構整個 state，需要在 callsite 明確補同名 UI prop，不把 chrome 再存回 state。
-- [ ] Widget 外框用 function，保留 role region 與 fullscreen class；內容隱藏保持 mounted。Tonic Button 使用現有 header sizing/disabled behavior。
+- [x] WidgetHost 改 function；先 registry lookup，unknown→null；supportsChrome=false 直接傳原 props，不 subscribe 每 widget chrome。
+- [x] 支援 chrome 的內層 Host 取 context，`useMemo` 組 `{ minimized, isFullscreen, onMinimizedChange, onToggleFullscreen }` 傳下去。callback 綁 widgetId，不能再把 component ref 傳到 registry Component。
+- [x] simple shells（Connection/Console/Custom/GCode/Grbl/Laser/Macro/Probe/Spindle/Webcam）移除 local minimized/fullscreen 和 public methods；可以順便轉 function，但 Macro actor 須保留至 Q2 正確 cleanup，不任意刪除其 services。
+- [x] domain shells（Axes/Autolevel/Tool/Marlin/Smoothie/TinyG）只換 chrome：state 不再放兩個欄位；保留其餘 state、lifecycle 和 domain actions。本 task 不是大規模重寫 domain。
+- [x] Axes componentDidUpdate 只移除 minimized 寫入，axes/jog/mdi persistence 保留。Tool 的 unitsDidChange guard 保留。Autolevel/Tool `actions.toggleMinimized/toggleFullscreen` 可短期作事件轉送到 props，但不能再 setState chrome。
+- [x] Console/Webcam 傳給內容的 isFullscreen 改 `chrome.isFullscreen`；其他 child 若解構整個 state，需要在 callsite 明確補同名 UI prop，不把 chrome 再存回 state。
+- [x] Widget 外框用 function，保留 role region 與 fullscreen class；內容隱藏保持 mounted。Tonic Button 使用現有 header sizing/disabled behavior。
 
 Test：用 mock registry body renderCounter/unmountCounter 驗證雙 fork、collapse 不卸載；另以真 Connection 和 Autolevel shell（mock controller）驗證，不只 mock 全部內容。
 

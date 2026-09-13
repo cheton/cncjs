@@ -570,7 +570,7 @@ function Connection({
                     return (
                       <>
                         <FormGroup>
-                          <TextLabel mb="2x">
+                          <TextLabel htmlFor="connection-serial-port" mb="2x">
                             {i18n._('Serial port')}
                           </TextLabel>
                           <Row style={{ alignItems: 'center' }}>
@@ -588,26 +588,31 @@ function Connection({
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Select
-                                      components={{
-                                        Option: SerialPortOption,
-                                        SingleValue: SerialPortSingleValue,
-                                      }}
-                                      value={value}
-                                      onChange={(option) => {
-                                        const { value } = option;
-                                        input.onChange(value);
+                                    <div data-test="connection-serial-port">
+                                      <Select
+                                        components={{
+                                          Option: SerialPortOption,
+                                          SingleValue: SerialPortSingleValue,
+                                        }}
+                                        inputId="connection-serial-port"
+                                        aria-label={i18n._('Serial port')}
+                                        classNamePrefix="connection-serial-port"
+                                        value={value}
+                                        onChange={(option) => {
+                                          const { value } = option;
+                                          input.onChange(value);
 
-                                        config.set('connection.serial.path', value);
-                                      }}
-                                      isClearable={false}
-                                      isDisabled={isDisabled}
-                                      isLoading={isFetchingSerialPorts}
-                                      isSearchable={false}
-                                      noOptionsMessage={() => i18n._('No ports available')}
-                                      options={options}
-                                      placeholder={i18n._('Choose a port')}
-                                    />
+                                          config.set('connection.serial.path', value);
+                                        }}
+                                        isClearable={false}
+                                        isDisabled={isDisabled}
+                                        isLoading={isFetchingSerialPorts}
+                                        isSearchable={false}
+                                        noOptionsMessage={() => i18n._('No ports available')}
+                                        options={options}
+                                        placeholder={i18n._('Choose a port')}
+                                      />
+                                    </div>
                                   );
                                 }}
                               </Field>
@@ -636,7 +641,7 @@ function Connection({
                           </Row>
                         </FormGroup>
                         <FormGroup>
-                          <TextLabel mb="2x">
+                          <TextLabel htmlFor="connection-baud-rate" mb="2x">
                             {i18n._('Baud rate')}
                           </TextLabel>
                           <Row style={{ alignItems: 'center' }}>
@@ -652,21 +657,26 @@ function Connection({
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Select
-                                      value={value}
-                                      onChange={(option) => {
-                                        const { value } = option;
-                                        input.onChange(value);
+                                    <div data-test="connection-baud-rate">
+                                      <Select
+                                        inputId="connection-baud-rate"
+                                        aria-label={i18n._('Baud rate')}
+                                        classNamePrefix="connection-baud-rate"
+                                        value={value}
+                                        onChange={(option) => {
+                                          const { value } = option;
+                                          input.onChange(value);
 
-                                        config.set('connection.serial.baudRate', value);
-                                      }}
-                                      isClearable={false}
-                                      isDisabled={isDisabled}
-                                      isLoading={isFetchingSerialBaudRates}
-                                      isSearchable={false}
-                                      options={options}
-                                      placeholder={i18n._('Choose a baud rate')}
-                                    />
+                                          config.set('connection.serial.baudRate', value);
+                                        }}
+                                        isClearable={false}
+                                        isDisabled={isDisabled}
+                                        isLoading={isFetchingSerialBaudRates}
+                                        isSearchable={false}
+                                        options={options}
+                                        placeholder={i18n._('Choose a baud rate')}
+                                      />
+                                    </div>
                                   );
                                 }}
                               </Field>

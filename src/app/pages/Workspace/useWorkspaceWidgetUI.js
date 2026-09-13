@@ -1,0 +1,1 @@
+export { useWorkspaceWidgetUI } from './WidgetUIProvider';

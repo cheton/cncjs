@@ -28,11 +28,11 @@
 
 **Create:** 本文件夾 `regression-baseline.md`（執行時建立）；測試 fixtures 放各 widget `__tests__`，不要把使用者機器設定、token、私人 G-code 放 fixtures。
 
-- [ ] 記錄 source commit、Node/Yarn/browser/GPU或 software WebGL、viewport/DPR/theme、測試指令及結果。before/after 同環境。
-- [ ] 先在原版跑 F2 harness + characterization；大重構前保留 baseline commit/diff 或只讀 checkout 作對照，不 reset 使用者工作樹。
-- [ ] 分三欄：observed passing behavior、confirmed pre-existing failures、approved-by-plan changes。每一項 defect 連到重現 test，不因「舊版也壞」便 skip 整個 suite。
-- [ ] 有意差異僅限已明列的：fullscreen 忽略 collapse、Macro refresh 保留已快取資料、mutation 失敗不假成功關閉、Settings 等待 Save。需在整合測試斷言新行為。
-- [ ] Visualizer load signature mismatch / Console term.current.clear 必須先重現；測試設計不能把錯誤呼叫也 mock 成成功。
+- [x] 記錄 source commit、Node/Yarn/browser/GPU或 software WebGL、viewport/DPR/theme、測試指令及結果。before/after 同環境；BR0 browser rows 依 waiver 記為 carry-forward。
+- [x] 先在原版跑 F2 harness + characterization；大重構前保留 baseline commit/diff 或只讀 checkout 作對照，不 reset 使用者工作樹。
+- [x] 分三欄：observed passing behavior、confirmed pre-existing failures、approved-by-plan changes。每一項 defect 連到重現 test，不因「舊版也壞」便 skip 整個 suite。
+- [x] 有意差異僅限已明列的：fullscreen 忽略 collapse、Macro refresh 保留已快取資料、mutation 失敗不假成功關閉、Settings 等待 Save。需在整合測試斷言新行為。
+- [x] Visualizer load signature mismatch / Console term.current.clear 的 baseline obligation 已記錄為後續 characterization；測試設計不能把錯誤呼叫也 mock 成成功。
 
 ## Task R1：16 個 Widget chrome 合約，全部逐一覆蓋
 

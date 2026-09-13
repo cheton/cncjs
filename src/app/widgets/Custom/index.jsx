@@ -19,16 +19,8 @@ class CustomWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    chrome: PropTypes.object.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
@@ -41,40 +33,24 @@ class CustomWidget extends Component {
     }));
   };
 
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
-
   componentDidUpdate(prevProps, prevState) {
     const {
       disabled,
-      minimized,
     } = this.state;
 
     this.config.set('disabled', disabled);
-    this.config.set('minimized', minimized);
   }
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       disabled: this.config.get('disabled'),
     };
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen, disabled } = this.state;
+    const { widgetId, chrome } = this.props;
+    const { minimized, isFullscreen } = chrome;
+    const { disabled } = this.state;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
     return (
@@ -134,7 +110,7 @@ class CustomWidget extends Component {
                           aria-expanded={!minimized}
                           disabled={isFullscreen}
                           title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                          onClick={this.toggleMinimized}
+                          onClick={() => chrome.onMinimizedChange(!minimized)}
                         >
                           {minimized &&
                             <FontAwesomeIcon icon="chevron-down" fixedWidth />}
@@ -144,7 +120,7 @@ class CustomWidget extends Component {
                         {isFullscreen && (
                           <Widget.Button
                             title={i18n._('Exit Full Screen')}
-                            onClick={this.toggleFullscreen}
+                            onClick={chrome.onToggleFullscreen}
                           >
                             <FontAwesomeIcon icon="compress" fixedWidth />
                           </Widget.Button>
@@ -159,7 +135,7 @@ class CustomWidget extends Component {
                             if (eventKey === 'settings') {
                               openModal(SettingsModal);
                             } else if (eventKey === 'fullscreen') {
-                              this.toggleFullscreen();
+                              chrome.onToggleFullscreen();
                             } else if (eventKey === 'fork') {
                               this.props.onFork();
                             } else if (eventKey === 'remove') {

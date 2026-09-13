@@ -44,16 +44,8 @@ class ToolWidget extends PureComponent {
   static propTypes = {
     widgetId: PropTypes.string.isRequired,
     onRemove: PropTypes.func.isRequired,
+    chrome: PropTypes.object.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
@@ -64,15 +56,10 @@ class ToolWidget extends PureComponent {
 
   actions = {
     toggleFullscreen: () => {
-      const { minimized, isFullscreen } = this.state;
-      this.setState({
-        minimized: isFullscreen ? minimized : false,
-        isFullscreen: !isFullscreen
-      });
+      this.props.chrome.onToggleFullscreen();
     },
     toggleMinimized: () => {
-      const { minimized } = this.state;
-      this.setState({ minimized: !minimized });
+      this.props.chrome.onMinimizedChange(!this.props.chrome.minimized);
     },
     openModal: (name = MODAL_NONE, params = {}) => {
       this.setState({
@@ -392,12 +379,6 @@ class ToolWidget extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      minimized
-    } = this.state;
-
-    this.config.set('minimized', minimized);
-
     // Do not save config settings if the units did change between in and mm
     if (this.unitsDidChange) {
       this.unitsDidChange = false;
@@ -443,8 +424,6 @@ class ToolWidget extends PureComponent {
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       canClick: true, // Defaults to true
       connected: !!controller.connection.ident,
       units: METRIC_UNITS,
@@ -515,8 +494,8 @@ class ToolWidget extends PureComponent {
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, chrome } = this.props;
+    const { minimized, isFullscreen } = chrome;
     const state = {
       ...this.state,
       canClick: this.canClick()

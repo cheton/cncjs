@@ -29,9 +29,9 @@
 
 依 [02a — Widget state](details/02a-widget-state.md) 的 D1–D4 執行；它取代初稿的 mirrored minimized map/reducer。
 
-- [ ] D1：registry capabilities、pure bulk update、穩定 snapshot tests。
-- [ ] D2：config hydration 通知、Provider actions、group ids hook。
-- [ ] D3：16 個 chrome consumers + function WidgetHost；Visualizer 保持無 chrome。
+- [x] D1：registry capabilities、pure bulk update、穩定 snapshot tests。
+- [x] D2：config hydration 通知、Provider actions、group ids hook。
+- [x] D3：16 個 chrome consumers + function WidgetHost；Visualizer 保持無 chrome。
 - [ ] D4：group function components、Workspace toolbar，移除所有 widgetMap/component instance 控制。
 
 minimized 的唯一來源是既有 config，Provider 僅持有 transient fullscreen；不複製一份 minimized state 再同步回 config。最終仍以 props 傳 `{minimized,isFullscreen,onMinimizedChange,onToggleFullscreen}`。
