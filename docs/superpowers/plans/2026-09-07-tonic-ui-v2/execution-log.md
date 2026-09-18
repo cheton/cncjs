@@ -848,4 +848,4 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker completed the contr
 
 Verification: focused Macro/query/session command passed 5 suites / 29 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 141 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Browser gates remain waived/deferred to R6.
 
-Status transition / blocker ID: M3 `in_progress` → `completed`; no blocker. Next eligible task is Q2-cleanup.
+Status transition / blocker ID: M3 `in_progress` → `completed`; no blocker. Phase commit: `db0db29e`. Next eligible task is Q2-cleanup.
