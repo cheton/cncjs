@@ -1,14 +1,14 @@
 # Migration task status
 
-更新日期：2026-09-14。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-18。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: none（layout/API 階段已收束；等待使用者選定 R1／R2／R3 其中一個開跑）
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / medium, `McClintock`); advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: **R1、R2、R3 三者皆可立即開跑**（依 `Depends on` 全部 completed/waived 計算）；其餘 47 個 todo 仍被未完成依賴擋住。建議順序 R1 → R2 → R3，尚未選定，開跑前先向使用者確認。
+- Active task: none（R1 completed; waiting to select R2 or R3）
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / max, R1）; advisor: gpt-5.6-sol / medium（按需唯讀）。
+- Next eligible task: **R2、R3**（依 `Depends on` 全部 completed/waived 計算）；其餘 todo 仍被未完成依賴擋住。
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -40,7 +40,7 @@
 | D2 | [Layout Provider](details/02a-widget-state.md) | D1 | completed | root session / 2026-09-13T21:35:00+08:00 | `WorkspaceLayoutProvider.jsx`, hook entry files, hydration utility, config wiring, and tests; full frontend 8 suites / 21 tests and build pass. Covers successful/corrupt hydration, restoreDefault remount, fullscreen, bulk filtering, config subscriptions, and group ids. |
 | D3 | [16 shells 接線](details/02a-widget-state.md) | D2 | completed | root session / 2026-09-13T21:56:00+08:00 | `Widget.jsx` is the function-based `WidgetHost` with registry lookup, `view`/`onViewChange(view)` dispatch, Visualizer bypass, and unknown→null behavior. All 16 layout-aware shells consume the view contract without local layout state/persistence; `WidgetHost.test.jsx` covers host dispatch and shell forwarding. D4 Workspace wiring completed in the following task. |
 | D4 | [Workspace 接線](details/02a-widget-state.md) | D3 | completed | root session / 2026-09-14T00:09:05+08:00 | Added `WorkspaceRoot` layout Provider boundary, function group containers with config-backed ids and one PubSub subscription each, selector-based controller filtering, toolbar `setWidgetsCollapsed` actions, fork/remove/sort persistence, active-id fullscreen cleanup, and `WidgetGroups.test.jsx`. Focused D4 command: 5 suites / 22 tests; full frontend: 10 suites / 31 tests; ESLint/build/diff checks pass. Browser gates remain waived/deferred to R6. |
-| R1 | [Widget view contract 驗收](09-regression-gates.md) | D4 | todo | — | — |
+| R1 | [Widget view contract 驗收](09-regression-gates.md) | D4 | completed | root session / 2026-09-18T17:58:00+08:00 | `WidgetLayoutContract.test.jsx`: 16 real frame shells, view/fullscreen/accessibility/lifecycle/fork/side-effect assertions; focused 36/36, nearby 55/55, full frontend 12 suites/68 tests; ESLint clean. Fixed missing Autolevel `aria-expanded`. |
 | R2 | [Workspace 驗收](09-regression-gates.md) | D4 | todo | — | — |
 | U2 | [primitives pilot](02-shared-ui.md) | R1, R2 | todo | — | — |
 | U3 | [overlay/form 合約](02-shared-ui.md) | U2 | todo | — | — |

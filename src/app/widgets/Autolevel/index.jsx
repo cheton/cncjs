@@ -1013,6 +1013,7 @@ class AutolevelWidget extends PureComponent {
           </Widget.Title>
           <Widget.Controls className={this.props.sortable.filterClassName}>
             <Widget.Button
+              aria-expanded={!isCollapsed}
               disabled={isFullscreen}
               title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
               onClick={actions.toggleCollapsed}

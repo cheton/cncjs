@@ -413,3 +413,41 @@ Status transition / blocker ID: 無 task ID 變更（此修正不屬於任何 to
 ## 依賴可執行集重算 — 2026-09-18
 
 以 STATUS `Depends on`（completed 與 waived 均視為滿足）重算：可立即開跑的只有 **R1**（← D4）、**R2**（← D4）、**R3**（← R0）。其餘 47 個 todo 仍被未完成依賴擋住。無 `in_progress`、無未解 blocker。HANDOFF 已補「下一個可執行項目」章節與更新恢復 prompt；STATUS current checkpoint 同步。
+
+## R1 Widget view contract — started 2026-09-18T17:36:35+08:00
+
+Task / session / timestamp: R1 / root session / 2026-09-18T17:36:35+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `ecbdc560` / working tree clean.
+
+Plan contract and baseline fixture: `09-regression-gates.md` Task R1. Create `src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx`; cover all 16 real frame-widget exports, saved collapsed state, single/bulk view changes, fullscreen, ARIA/content visibility, mount lifecycle, no command/HTTP mutation side effects, fork isolation, and Visualizer `hasFrame=false` behavior.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: the contract is fixed, but the test spans 16 real exports, shared Provider/Host state, mount/unmount lifecycle, and negative command-side-effect assertions; this is cross-widget integration with high state/timing and impact risk. Unresolved decision / decision owner: none; root reviews the diff and owns ledger/status.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required focused frontend test, then root review and regression verification.
+
+Status transition / blocker ID: R1 `todo` → `in_progress`; no blocker.
+
+## R1 Widget view contract — completed 2026-09-18T17:58:00+08:00
+
+Task / session / timestamp: R1 / root session / 2026-09-18T17:58:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `ecbdc560` / R1 test and Autolevel accessibility fix only; ledger files were the pre-existing session changes.
+
+Changed files / commit or uncommitted diff: `src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx` (new), `src/app/widgets/Autolevel/index.jsx` (`aria-expanded={!isCollapsed}`); uncommitted, no commit requested.
+
+Before / after / intentional differences: R1 had no 16-shell contract test. The new parameterized suite uses all 16 real frame exports through `WidgetHost` and `WorkspaceLayoutProvider`, asserting saved collapsed state, single/bulk view changes, fullscreen, ARIA/content visibility, stable body lifecycle, fork isolation, no controller/HTTP mutation, and Visualizer frame bypass. The Autolevel shell was the only frame shell missing `aria-expanded`; the one-line fix aligns it with the existing shell contract.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx` / 0 / 36 tests passed; nearby focused Workspace/layout suites / 0 / 5 suites and 55 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 12 suites and 68 tests passed; `yarn eslint src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx src/app/widgets/Autolevel/index.jsx` / 0; `git diff --check` / 0.
+
+Review findings and resolutions: initial RED test exposed the missing Autolevel `aria-expanded`; fixed with the minimal production change. All other 15 shells already exposed the attribute. Domain-body and transport integrations remain mocked by design; those are outside R1 and remain covered by later widget/controller gates.
+
+Artifacts: `src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx`.
+
+Remaining untested paths: real domain-body behavior and actual transport integrations; no browser evidence is required for R1 and no browser gate is claimed.
+
+Next exact step and expected result: select and start R2 (recommended) or R3. R2 should add/complete Workspace list/event/config regression coverage and preserve the R1 passing baseline.
+
+Status transition / blocker ID: R1 `in_progress` → `completed`; no blocker.
