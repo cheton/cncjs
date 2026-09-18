@@ -36,13 +36,13 @@
 
 **Interface:** `useTerminal({ enabled, cols, rows, cursorBlink, scrollback, tabStopWidth, onData })` → `{ containerRef, isReady, prompt, actions }`。actions 只有 T1 被使用的功能。
 
-- [ ] `enabled=isConnected`，callback containerRef 保存實際 DOM node；disconnected 時 Console 原本只顯示 No serial connection，因此 node 可為 null。effect 依 node/enabled create/dispose，不能只有依 [] 导致重連後沒有 terminal。
-- [ ] 不把 rows/cols/options/onData 放進建立 effect；尺寸與 options 用更新 effect/setOption，onData 使用最新 callback ref，避免新 props 建第二個 terminal。
-- [ ] 搬 onKey/onPaste/history/prompt 原行為；history 的箭頭與 input editing 不改演算法。`cols=254`, rows=fullscreen?'auto':15，scrollback=1000，tabStopWidth=2 保留。
-- [ ] Terminal view 是 `function Terminal({containerRef})`，保持 CSS class 與 aria；父層不再 `ref={terminalRef}`。
-- [ ] controller listeners與 terminal action 使用相同 owner；未 ready 時不觸發底層 method，保留原缺 term 時忽略輸出的語意，不新增無上限 buffer。
-- [ ] Console 的 WidgetEventProvider 既有 terminal:clearSelection/refresh/selectAll 事件可保留（domain events），handler 呼叫 hook actions；不是任意 component method dispatch。
-- [ ] 明確保存 onKey/onResize 的 disposables，cleanup onpaste 與 scrollbar，再依 xterm API 釋放 Terminal/owned addon；不能只設 ref=null。
+- [x] `enabled=isConnected`，callback containerRef 保存實際 DOM node；disconnected 時 Console 原本只顯示 No serial connection，因此 node 可為 null。effect 依 node/enabled create/dispose，不能只有依 [] 导致重連後沒有 terminal。
+- [x] 不把 rows/cols/options/onData 放進建立 effect；尺寸與 options 用更新 effect/setOption，onData 使用最新 callback ref，避免新 props 建第二個 terminal。
+- [x] 搬 onKey/onPaste/history/prompt 原行為；history 的箭頭與 input editing 不改演算法。`cols=254`, rows=fullscreen?'auto':15，scrollback=1000，tabStopWidth=2 保留。
+- [x] Terminal view 是 `function Terminal({containerRef})`，保持 CSS class 與 aria；父層不再 `ref={terminalRef}`。
+- [x] controller listeners與 terminal action 使用相同 owner；未 ready 時不觸發底層 method，保留原缺 term 時忽略輸出的語意，不新增無上限 buffer。
+- [x] Console 的 WidgetEventProvider 既有 terminal:clearSelection/refresh/selectAll 事件可保留（domain events），handler 呼叫 hook actions；不是任意 component method dispatch。
+- [x] 明確保存 onKey/onResize 的 disposables，cleanup onpaste 與 scrollbar，再依 xterm API 釋放 Terminal/owned addon；不能只設 ref=null。
 
 ## Task T3：事件與 lifecycle gates
 

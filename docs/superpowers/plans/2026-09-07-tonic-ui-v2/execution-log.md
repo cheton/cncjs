@@ -695,3 +695,37 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker completed source in
 Verification: focused `yarn test:frontend --runInBand --runTestsByPath src/app/widgets/Console/__tests__/Console.test.jsx` passed 1 suite / 6 tests; full `yarn test:frontend --runInBand --silent` passed 21 suites / 120 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Codebase-memory coverage for all relied-on production files reported no recorded issue; the test subtree is intentionally excluded and was read directly.
 
 Status transition / blocker ID: T1 `in_progress` → `completed`; no blocker. Next eligible tasks are T2 and P0.
+
+## T2 Terminal owner — started 2026-09-18T21:42:00+08:00
+
+Task / session / timestamp: T2 / root session / 2026-09-18T21:42:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c10e4569` / working tree clean.
+
+Plan contract: `details/04a-terminal-owner.md` Task T2. Create `useTerminal({ enabled, cols, rows, cursorBlink, scrollback, tabStopWidth, onData })` with `{ containerRef, isReady, prompt, actions }`; move xterm ownership and Terminal input/history/prompt behavior into the hook; make `Terminal` a function DOM view; preserve the T1 consumer list, disconnected output behavior, options/size updates, callback freshness, and explicit resource cleanup. Do not implement T3 lifecycle gates beyond what T2 cleanup requires.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, ready moderate generation `2026-09-18T11:44:50Z`; source coverage for Console/Terminal/History was clean at T1, while tests are excluded by design and require direct reads. The worker must review the full Terminal implementation before changing ownership.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: T2 crosses xterm resource creation, DOM refs, keyboard/paste/history state, callback freshness, option/size updates, and Console event ownership; max effort is required for the fixed API and lifecycle risk. Worker owns only `useTerminal.js`, `useTerminal.test.jsx`, `Terminal.jsx`, `Console.jsx`, and relevant Console test adjustments; it must not modify STATUS/HANDOFF/execution-log, must preserve T1 behavior, and must stop/report if xterm or React lifecycle semantics are ambiguous.
+
+Changed files / commit: pending worker; no production change claimed.
+
+Verification: pending focused Console/useTerminal tests, nearby/full frontend regression, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: T2 `todo` → `in_progress`; no blocker.
+
+## T2 Terminal owner — completed 2026-09-18T21:55:01+08:00
+
+Task / session / timestamp: T2 / root session / 2026-09-18T21:55:01+08:00.
+
+Changed files: `src/app/widgets/Console/useTerminal.js`, `src/app/widgets/Console/__tests__/useTerminal.test.jsx`, `src/app/widgets/Console/Terminal.jsx`, `src/app/widgets/Console/Console.jsx`, `src/app/widgets/Console/__tests__/Console.test.jsx`, and the T2 plan/ledger documents.
+
+Implementation: `useTerminal` now owns xterm, FitAddon, PerfectScrollbar, prompt, keyboard editing, paste normalization, History, current callback ref, option/size updates, and explicit event/addon/terminal cleanup. Its public API is `{ containerRef, isReady, prompt, actions }`, with only the seven T1 consumer actions. `Terminal` is a function DOM view with the existing log semantics and CSS. `Console` uses the hook owner for controller/pubsub/widget events and keeps sender filtering unchanged.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker completed contract review but produced no source diff; root implemented the bounded T2 change and recorded the same contract. No worker ledger changes were accepted.
+
+Verification: focused Console/useTerminal command passed 2 suites / 9 tests; full `yarn test:frontend --runInBand --silent` passed 22 suites / 123 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Codebase-memory coverage reported metadata changes for Console/Terminal and new/untracked useTerminal/test paths; all were read directly, and the Console test subtree remains intentionally excluded.
+
+Scope boundary: T3 reconnect/disconnect/reconnect, callback-after-rerender Enter, paste/history/selection event matrix, StrictMode 20-cycle resource gate, and browser evidence remain unimplemented and are not claimed here.
+
+Status transition / blocker ID: T2 `in_progress` → `completed`; no blocker. Next eligible tasks are T3 and P0.

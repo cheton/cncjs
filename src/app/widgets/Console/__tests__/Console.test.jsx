@@ -8,10 +8,27 @@ const mockTerminalRefresh = jest.fn();
 const mockTerminalSelectAll = jest.fn();
 const mockTerminalWriteln = jest.fn();
 const mockListeners = {};
-const mockTerminalProps = [];
+const mockUseTerminalOptions = [];
 const mockEmitterListeners = {};
 const mockPubsubListeners = {};
 const mockControllerWrite = jest.fn();
+const mockTerminalActions = {
+  clear: mockTerminalClear,
+  clearSelection: mockTerminalClearSelection,
+  refresh: mockTerminalRefresh,
+  resize: mockTerminalResize,
+  selectAll: mockTerminalSelectAll,
+  writeln: mockTerminalWriteln,
+};
+const mockUseTerminal = jest.fn(options => {
+  mockUseTerminalOptions.push(options);
+  return {
+    actions: mockTerminalActions,
+    containerRef: jest.fn(),
+    isReady: true,
+    prompt: '> ',
+  };
+});
 const mockEmitter = {
   on: jest.fn((event, listener) => {
     mockEmitterListeners[event] = listener;
@@ -52,25 +69,17 @@ jest.mock('@app/widgets/shared/useWidgetEvent', () => ({
   default: () => mockEmitter,
 }));
 
+jest.mock('../useTerminal', () => ({
+  __esModule: true,
+  default: options => mockUseTerminal(options),
+}));
+
 jest.mock('../Terminal', () => {
   const React = require('react');
 
   return {
     __esModule: true,
-    default: React.forwardRef((props, ref) => {
-      mockTerminalProps.push(props);
-      React.useImperativeHandle(ref, () => ({
-        clear: mockTerminalClear,
-        clearSelection: mockTerminalClearSelection,
-        prompt: '> ',
-        refresh: mockTerminalRefresh,
-        resize: mockTerminalResize,
-        selectAll: mockTerminalSelectAll,
-        writeln: mockTerminalWriteln,
-      }), []);
-
-      return React.createElement('div');
-    }),
+    default: () => React.createElement('div'),
   };
 });
 
@@ -82,7 +91,7 @@ describe('Console connection lifecycle', () => {
     Object.keys(mockListeners).forEach(event => delete mockListeners[event]);
     Object.keys(mockEmitterListeners).forEach(event => delete mockEmitterListeners[event]);
     Object.keys(mockPubsubListeners).forEach(event => delete mockPubsubListeners[event]);
-    mockTerminalProps.length = 0;
+    mockUseTerminalOptions.length = 0;
   });
 
   test('clears the terminal once when the connection closes', () => {
@@ -124,7 +133,7 @@ describe('Console connection lifecycle', () => {
     const view = render(<Console isConnected={true} isFullscreen={false} />);
 
     try {
-      mockTerminalProps[0].onData('G0 X1\n');
+      mockUseTerminalOptions[0].onData('G0 X1\n');
       expect(mockControllerWrite).toHaveBeenCalledTimes(1);
       const sender = mockControllerWrite.mock.calls[0][1].__sender__;
       expect(sender).toEqual(expect.any(String));
@@ -149,9 +158,9 @@ describe('Console connection lifecycle', () => {
     );
 
     try {
-      expect(mockTerminalProps).toHaveLength(2);
-      mockTerminalProps[0].onData('first\n');
-      mockTerminalProps[1].onData('second\n');
+      expect(mockUseTerminalOptions).toHaveLength(2);
+      mockUseTerminalOptions[0].onData('first\n');
+      mockUseTerminalOptions[1].onData('second\n');
 
       const firstSender = mockControllerWrite.mock.calls[0][1].__sender__;
       const secondSender = mockControllerWrite.mock.calls[1][1].__sender__;

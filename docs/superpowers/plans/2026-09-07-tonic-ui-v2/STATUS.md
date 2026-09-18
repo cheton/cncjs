@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **none**（T1 completed；2026-09-18T21:40:00+08:00）
+- Active task: **none**（T2 completed；2026-09-18T21:55:01+08:00）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none; advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: T2 and P0 remain dependency-eligible; no task is active in this session.
+- Next eligible task: T3 and P0 remain dependency-eligible; no task is active in this session.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -58,7 +58,7 @@
 | G6 | [Custom](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G7 | [Webcam](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | T1 | [Terminal baseline](details/04a-terminal-owner.md) | U3 | completed | root session / 2026-09-18T21:40:00+08:00 | `Console.test.jsx` covers all seven owner consumers, close ref shape, connection read/write/self-echo, resize, widget actions, and distinct sender ids. Focused 6/6; full frontend 21 suites/120 tests; build-dev, ESLint, and diff checks pass. No production change. |
-| T2 | [Terminal owner](details/04a-terminal-owner.md) | T1 | todo | — | — |
+| T2 | [Terminal owner](details/04a-terminal-owner.md) | T1 | completed | root session / 2026-09-18T21:55:01+08:00 | `useTerminal` owns xterm/input/history/paste/resources; Terminal is a DOM view and Console uses the seven T1 actions. Focused 2 suites/9 tests; full frontend 22 suites/123 tests; build-dev, ESLint, and diff checks pass. T3 gates remain separate. |
 | T3 | [Terminal lifecycle](details/04a-terminal-owner.md) | T2 | todo | — | — |
 | C1 | [Grbl](05-controller-widgets.md) | G4 | todo | — | — |
 | C2 | [Marlin](05-controller-widgets.md) | G4 | todo | — | — |
