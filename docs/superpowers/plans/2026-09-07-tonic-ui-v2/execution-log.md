@@ -878,4 +878,4 @@ Audit and behavior: repo-wide source/literal scans found no XState, Macro fetch 
 
 Verification: focused Macro query suite passed 15 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 142 tests; `yarn remove xstate @xstate/react` completed with existing peer warnings; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
 
-Status transition / blocker ID: Q2-cleanup `in_progress` → `completed`; no blocker. Next eligible tasks are G1–G7.
+Status transition / blocker ID: Q2-cleanup `in_progress` → `completed`; no blocker. Phase commit: `730a0045`. Next eligible tasks are G1–G7.

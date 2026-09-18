@@ -71,7 +71,7 @@ The Macro widget now consumes `useFetchMacrosQuery` directly and retains control
 
 ## Q2-cleanup completion checkpoint
 
-The repo-wide audit found no remaining XState or Macro fetch-machine consumers. `yarn remove xstate @xstate/react` removed both root dependencies and their lockfile entries. The shared Macro query regression mounts unfiltered widget and paginated Administration observers against one QueryClient, runs one create mutation, and proves both keys refetch and receive updated records. Focused Macro query tests pass 15/15; full frontend passes 25 suites/142 tests; ESLint exits 0 with 17 existing warnings; `yarn build-dev` compiles successfully; `git diff --check` passes. Q2-cleanup is complete; next eligible work is G1–G7.
+The repo-wide audit found no remaining XState or Macro fetch-machine consumers. `yarn remove xstate @xstate/react` removed both root dependencies and their lockfile entries. The shared Macro query regression mounts unfiltered widget and paginated Administration observers against one QueryClient, runs one create mutation, and proves both keys refetch and receive updated records. Focused Macro query tests pass 15/15; full frontend passes 25 suites/142 tests; ESLint exits 0 with 17 existing warnings; `yarn build-dev` compiles successfully; `git diff --check` passes. Q2-cleanup phase commit: `730a0045`; next eligible work is G1–G7.
 
 ## B1 completion checkpoint
 
