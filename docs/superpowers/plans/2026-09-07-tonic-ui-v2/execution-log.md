@@ -821,3 +821,31 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker completed contract 
 Verification: focused `macros`, `session`, and `MacroQueryEvents` suites passed 3 suites / 20 tests; full `yarn test:frontend --runInBand --silent` passed 23 suites / 132 tests; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
 
 Status transition / blocker ID: M2 `in_progress` → `completed`; no blocker. Next eligible task is M3.
+
+## M3 Macro UI — started 2026-09-18T22:29:00+08:00
+
+Task / session / timestamp: M3 / root session / 2026-09-18T22:29:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `f2dd2d66` / working tree clean.
+
+Plan contract: `details/03a-query-contract.md` Task M3. Convert the Macro widget to shared `useFetchMacrosQuery` data and controlled view props; preserve controller run/load/export behavior and existing action gating. New/Edit/Delete must use shared mutations, await success before close, retain form values and show an i18n error on failure, and prevent duplicate pending submissions. Verify delete confirmation closes exactly the intended layer. Cover initial loading, empty, failure, background refetch with rows retained, and widget/Administration cache synchronization. Do not remove XState packages or unrelated widgets until repo-wide consumer audit proves they are unused.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: M3 crosses class-to-function conversion, Query observer states, portal form lifecycles, and nested modal close ordering; max effort is required to preserve user-visible behavior while removing the fetch actor. Worker owns Macro widget/modal source and colocated tests only, must not modify STATUS/HANDOFF/execution-log, must stop on any API or close-order ambiguity, and must not start Q2 cleanup or remove shared XState dependencies.
+
+Verification: pending focused Macro UI/mutation tests, full frontend regression, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: M3 `todo` → `in_progress`; no blocker.
+
+## M3 Macro UI — completed 2026-09-18T22:55:00+08:00
+
+Task / session / timestamp: M3 / root session / 2026-09-18T22:55:00+08:00.
+
+Changed files: `src/app/widgets/Macro/index.jsx`, `Macro.jsx`, `modals/NewMacro.jsx`, `modals/EditMacro.jsx`, `modals/ConfirmDeleteMacro.jsx`, `__tests__/Macro.test.jsx`, and `__tests__/MacroMutations.test.jsx`; removed the Macro-only `context.js` and orphaned `src/app/machines/index.js`. Updated the M3 plan/ledger documents. The unrelated `src/server/controllers/Grbl/GrblController.js` warning remains pre-existing and was not changed.
+
+Implementation: Macro now uses the shared `useFetchMacrosQuery` observer and controlled widget view props. New/Edit/Delete use shared mutations, await success before close, retain form drafts and show i18n form errors on failure, and use synchronous pending locks. Delete confirmation keeps both layers open on failure and closes `closeConfirm` before `closeEdit` on success. Background refetch errors retain visible rows. The error text uses the Tonic spacing token `mr="-9x"` (`1x = 4px`, so `-9x = -36px`). A repo-wide source scan found no remaining Macro actor/machine/context consumers; XState package removal remains Q2-cleanup scope.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker completed the contract review but produced no source diff before it was stopped. Root implemented and verified the bounded M3 change. No worker ledger changes were accepted.
+
+Verification: focused Macro/query/session command passed 5 suites / 29 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 141 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Browser gates remain waived/deferred to R6.
+
+Status transition / blocker ID: M3 `in_progress` → `completed`; no blocker. Next eligible task is Q2-cleanup.

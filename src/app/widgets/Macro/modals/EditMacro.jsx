@@ -16,43 +16,26 @@ import {
   ModalBody,
   ModalFooter,
   Space,
+  Text,
   Textarea,
   TextLabel,
 } from '@tonic-ui/react';
 import { ensureArray } from 'ensure-type';
 import _uniqueId from 'lodash/uniqueId';
 import React, { useRef } from 'react';
-import { Form, Field } from 'react-final-form';
-import axios from '@app/api/axios';
+import { FORM_ERROR } from 'final-form';
+import { Form, Field, FormSpy } from 'react-final-form';
 import FormGroup from '@app/components/FormGroup';
 import InlineError from '@app/components/InlineError';
 import i18n from '@app/lib/i18n';
 import portal from '@app/lib/portal';
+import {
+  useDeleteMacroMutation,
+  useUpdateMacroMutation,
+} from '@app/queries/macros';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 import variables from '../shared/variables';
 import ConfirmDeleteMacro from './ConfirmDeleteMacro';
-
-const updateMacro = async ({ id, name, content }) => {
-  try {
-    const url = `/api/macros/${id}`;
-    const data = {
-      name,
-      content,
-    };
-    await axios.put(url, data);
-  } catch (err) {
-    // TODO: toast notification
-  }
-};
-
-const deleteMacro = async ({ id }) => {
-  try {
-    const url = `/api/macros/${id}`;
-    await axios.delete(url);
-  } catch (err) {
-    // TODO: toast notification
-  }
-};
 
 const mapMacroVariablesToMenuGroupItems = (variables) => ensureArray(variables).map(x => {
   if (x.role === 'group') {
@@ -81,25 +64,45 @@ function EditMacro({
   content,
 }) {
   const contentRef = useRef();
+  const submitLockRef = useRef(false);
+  const updateMacroMutation = useUpdateMacroMutation();
+  const deleteMacroMutation = useDeleteMacroMutation();
   const initialValues = {
     name,
     content,
   };
+  const handleClose = () => {
+    if (
+      submitLockRef.current ||
+      updateMacroMutation.isLoading ||
+      deleteMacroMutation.isLoading
+    ) {
+      return;
+    }
+    onClose();
+  };
 
-  const handleClickDelete = (e) => {
-    const onParentClose = onClose;
-    const onConfirm = async (e) => {
-      await deleteMacro({ id });
-      onClose();
-      onParentClose();
+  const handleClickDelete = () => {
+    if (
+      submitLockRef.current ||
+      updateMacroMutation.isLoading ||
+      deleteMacroMutation.isLoading
+    ) {
+      return;
+    }
+    const closeEdit = onClose;
+    const onConfirm = async (closeConfirm) => {
+      await deleteMacroMutation.mutateAsync({ meta: { id } });
+      closeConfirm();
+      closeEdit();
     };
 
-    portal(({ onClose }) => (
+    portal(({ onClose: closeConfirm }) => (
       // TODO
       <ConfirmDeleteMacro
-        onClose={onClose}
+        onClose={closeConfirm}
         name={name}
-        onConfirm={onConfirm}
+        onConfirm={() => onConfirm(closeConfirm)}
       />
     ));
   };
@@ -108,15 +111,30 @@ function EditMacro({
     <Modal
       isClosable
       isOpen
-      onClose={onClose}
+      onClose={handleClose}
       size="md"
     >
       <Form
         initialValues={initialValues}
         onSubmit={async (values) => {
+          if (submitLockRef.current) {
+            return undefined;
+          }
+          submitLockRef.current = true;
           const { name, content } = values;
-          await updateMacro({ id, name, content });
-          onClose();
+          try {
+            await updateMacroMutation.mutateAsync({
+              meta: { id },
+              data: { name, content },
+            });
+            onClose();
+          } catch (error) {
+            submitLockRef.current = false;
+            return {
+              [FORM_ERROR]: error.message || i18n._('An unexpected error has occurred.'),
+            };
+          }
+          return undefined;
         }}
         subscription={{}}
       >
@@ -208,10 +226,18 @@ function EditMacro({
                 </Field>
               </ModalBody>
               <ModalFooter justify="space-between">
+                <FormSpy subscription={{ submitError: true }}>
+                  {({ submitError }) => submitError && (
+                    <Text color="red:50" mr="auto">
+                      {submitError}
+                    </Text>
+                  )}
+                </FormSpy>
                 <Box>
                   <Button
                     variant="emphasis"
                     minWidth="20x"
+                    disabled={updateMacroMutation.isLoading || deleteMacroMutation.isLoading}
                     onClick={handleClickDelete}
                   >
                     {i18n._('Delete')}
@@ -220,13 +246,15 @@ function EditMacro({
                 <Box>
                   <Button
                     variant="default"
-                    onClick={onClose}
+                    disabled={updateMacroMutation.isLoading || deleteMacroMutation.isLoading}
+                    onClick={handleClose}
                     minWidth="20x"
                   >
                     {i18n._('Cancel')}
                   </Button>
                   <Button
                     variant="primary"
+                    disabled={updateMacroMutation.isLoading}
                     onClick={() => form.submit()}
                     minWidth="20x"
                   >

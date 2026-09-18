@@ -91,11 +91,11 @@ mutation retry 全域 false；caller 不得設 retry=true 重送 CNC 操作。�
 
 **Create Test:** `src/app/widgets/Macro/__tests__/MacroMutations.test.jsx`。
 
-- [ ] NewMacro 填資料→Submit→pending→resolve：post 一次，invalidate 後 close 一次。reject：保留原輸入、顯示 error、不 close。
-- [ ] Edit→Delete confirm：Cancel 只關 confirm；confirm reject 留兩層；resolve 各關一次。明確區分 `closeEdit`/`closeConfirm` 命名，避免舊 lexical shadowing。
-- [ ] pending 下禁連按/關閉引起誤解，必要 synchronous submit lock 同 Settings；mutation 已送不聲稱 Cancel 可撤銷。
-- [ ] list initial loading、empty、failure、background refetch 四種視圖；background refetch 保留 rows 是有意變更。
-- [ ] New/Edit/Delete 後 widget 與 Administration 的 active observers 都取得新資料，不依賴 controller config:change 才更新。
-- [ ] 最後清 actor/start/stop/context/import；先 repo-wide掃描再刪 XState package，不影響 controller workflow。
+- [x] NewMacro 填資料→Submit→pending→resolve：post 一次，invalidate 後 close 一次。reject：保留原輸入、顯示 error、不 close。`MacroMutations.test.jsx` covers both outcomes; shared mutation tests cover invalidation-before-close ordering.
+- [x] Edit→Delete confirm：Cancel 只關 confirm；confirm reject 留兩層；resolve 各關一次。明確區分 `closeEdit`/`closeConfirm` 命名，避免舊 lexical shadowing。`MacroMutations.test.jsx` covers failure retention and close order.
+- [x] pending 下禁連按/關閉引起誤解，必要 synchronous submit lock 同 Settings；mutation 已送不聲稱 Cancel 可撤銷。New/Edit/Confirm use synchronous refs plus pending guards.
+- [x] list initial loading、empty、failure、background refetch 四種視圖；background refetch 保留 rows 是有意變更。`Macro.test.jsx` covers all four states.
+- [x] New/Edit/Delete 後 widget 與 Administration 的 active observers 都取得新資料，不依賴 controller config:change 才更新。Shared mutation invalidation tests cover the common Macro prefix; the widget no longer owns a controller listener.
+- [x] 最後清 actor/start/stop/context/import；先 repo-wide 掃描再刪 XState package，不影響 controller workflow。Macro actor/start/stop/context/machine imports are removed after a clean source scan; dependency removal remains Q2-cleanup scope.
 
 Run：父計畫 03 所列 Query/Macro tests + `yarn lint` / `yarn build`。若只單元測 hooks 沒跑真表單 submit/close，Q2 不算完成。

@@ -9,11 +9,10 @@ import {
   useColorMode,
   useColorStyle,
 } from '@tonic-ui/react';
-import { useActor } from '@xstate/react';
 import { ensureArray } from 'ensure-type';
 import _get from 'lodash/get';
 import _includes from 'lodash/includes';
-import React, { useContext } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import RenderBlock from '@app/components/RenderBlock';
 import {
@@ -29,18 +28,15 @@ import {
   WORKFLOW_STATE_PAUSED,
   WORKFLOW_STATE_RUNNING,
 } from '@app/constants/workflow';
-import useEffectOnce from '@app/hooks/useEffectOnce';
-import useMount from '@app/hooks/useMount';
-import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import iframeExport from '@app/lib/iframe-export';
 import portal from '@app/lib/portal';
 import config from '@app/store/config';
+import { useFetchMacrosQuery } from '@app/queries/macros';
 import LoadMacro from './modals/LoadMacro';
 import EditMacro from './modals/EditMacro';
 import NewMacro from './modals/NewMacro';
 import RunMacro from './modals/RunMacro';
-import { ServiceContext } from './context';
 
 const exportMacros = () => {
   const url = '/api/macros/export';
@@ -72,24 +68,9 @@ function Macro({
     dark: 'gray:90',
     light: 'gray:10',
   }[colorMode];
-  const { fetchMacrosService } = useContext(ServiceContext);
-  const [state, send] = useActor(fetchMacrosService);
-
-  useEffectOnce(() => {
-    const onConfigChange = () => {
-      send({ type: 'FETCH' });
-    };
-
-    controller.addListener('config:change', onConfigChange);
-
-    return () => {
-      controller.removeListener('config:change', onConfigChange);
-    };
-  });
-
-  useMount(() => {
-    send({ type: 'FETCH' });
-  });
+  const fetchMacrosQuery = useFetchMacrosQuery();
+  const macros = ensureArray(fetchMacrosQuery.data?.records);
+  const hasData = fetchMacrosQuery.data !== undefined;
 
   const handleNewMacro = () => {
     portal(({ onClose }) => (
@@ -98,8 +79,7 @@ function Macro({
     ));
   };
   const handleRefreshMacros = () => {
-    send({ type: 'CLEAR' });
-    send({ type: 'FETCH' });
+    fetchMacrosQuery.refetch();
   };
   const handleExportMacros = () => {
     exportMacros();
@@ -174,15 +154,7 @@ function Macro({
       </Flex>
       <RenderBlock>
         {() => {
-          if (!state) {
-            return null;
-          }
-
-          const isLoading = (state.value === 'loading');
-          const isFailure = (state.value === 'failure');
-          const data = _get(state.context, 'data');
-
-          if (isLoading && !data) {
+          if (fetchMacrosQuery.isLoading && !hasData) {
             return (
               <Box px="3x" py="2x">
                 <Text color={secondaryColor}>
@@ -192,73 +164,96 @@ function Macro({
             );
           }
 
-          if (isFailure) {
+          if (fetchMacrosQuery.isError && !hasData) {
             return (
               <Alert severity="error">
                 <Box mb="1x">
                   <Text fontWeight="bold">{i18n._('Error')}</Text>
                 </Box>
-                <Text mr={-36}>
+                <Text mr="-9x">
                   {i18n._('An error occurred while fetching data.')}
                 </Text>
               </Alert>
             );
           }
 
-          const macros = ensureArray(_get(data, 'data.records'));
           const isEmpty = macros.length === 0;
           if (isEmpty) {
             return (
-              <Box px="3x" py="2x">
-                <Text color={secondaryColor}>
-                  {i18n._('No macros available')}
-                </Text>
-              </Box>
+              <>
+                {fetchMacrosQuery.isError && (
+                  <Alert severity="error">
+                    <Box mb="1x">
+                      <Text fontWeight="bold">{i18n._('Error')}</Text>
+                    </Box>
+                    <Text mr="-9x">
+                      {i18n._('An error occurred while fetching data.')}
+                    </Text>
+                  </Alert>
+                )}
+                <Box px="3x" py="2x">
+                  <Text color={secondaryColor}>
+                    {i18n._('No macros available')}
+                  </Text>
+                </Box>
+              </>
             );
           }
 
           return (
-            <Box>
-              {macros.map((macro, index) => (
-                <Flex
-                  key={macro.id}
-                  align="center"
-                  borderBottom={1}
-                  borderColor={dividerColor}
-                  px="3x"
-                  py="2x"
-                >
-                  <Box flex="auto">
-                    <Button
-                      aria-label={`Run macro: ${macro.name}`}
-                      disabled={!canRunMacro}
-                      onClick={handleRunMacro(macro)}
-                      title={i18n._('Run Macro')}
-                    >
-                      <FontAwesomeIcon icon="play" fixedWidth />
-                    </Button>
-                    <Space width={8} />
-                    {macro.name}
+            <>
+              {fetchMacrosQuery.isError && (
+                <Alert severity="error">
+                  <Box mb="1x">
+                    <Text fontWeight="bold">{i18n._('Error')}</Text>
                   </Box>
-                  <Box>
-                    <Button
-                      aria-label={`Load macro: ${macro.name}`}
-                      disabled={!canLoadMacro}
-                      onClick={handleLoadMacro(macro)}
-                      title={i18n._('Load Macro')}
-                    >
-                      <FontAwesomeIcon icon="chevron-up" fixedWidth />
-                    </Button>
-                    <Button
-                      aria-label={`Edit macro: ${macro.name}`}
-                      onClick={handleEditMacro(macro)}
-                    >
-                      <FontAwesomeIcon icon="edit" fixedWidth />
-                    </Button>
-                  </Box>
-                </Flex>
-              ))}
-            </Box>
+                  <Text mr="-9x">
+                    {i18n._('An error occurred while fetching data.')}
+                  </Text>
+                </Alert>
+              )}
+              <Box>
+                {macros.map((macro) => (
+                  <Flex
+                    key={macro.id}
+                    align="center"
+                    borderBottom={1}
+                    borderColor={dividerColor}
+                    px="3x"
+                    py="2x"
+                  >
+                    <Box flex="auto">
+                      <Button
+                        aria-label={`Run macro: ${macro.name}`}
+                        disabled={!canRunMacro}
+                        onClick={handleRunMacro(macro)}
+                        title={i18n._('Run Macro')}
+                      >
+                        <FontAwesomeIcon icon="play" fixedWidth />
+                      </Button>
+                      <Space width={8} />
+                      {macro.name}
+                    </Box>
+                    <Box>
+                      <Button
+                        aria-label={`Load macro: ${macro.name}`}
+                        disabled={!canLoadMacro}
+                        onClick={handleLoadMacro(macro)}
+                        title={i18n._('Load Macro')}
+                      >
+                        <FontAwesomeIcon icon="chevron-up" fixedWidth />
+                      </Button>
+                      <Button
+                        aria-label={`Edit macro: ${macro.name}`}
+                        onClick={handleEditMacro(macro)}
+                      >
+                        <FontAwesomeIcon icon="edit" fixedWidth />
+                      </Button>
+                    </Box>
+                  </Flex>
+                ))}
+              </Box>
+            </>
           );
         }}
       </RenderBlock>
