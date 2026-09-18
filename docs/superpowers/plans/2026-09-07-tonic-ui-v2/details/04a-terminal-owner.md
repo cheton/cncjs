@@ -25,9 +25,9 @@
 **Read:** `src/app/widgets/Console/Console.jsx`, `Terminal.jsx`, `History.js`。
 **Create:** `src/app/widgets/Console/__tests__/Console.test.jsx`。
 
-- [ ] 列現有 consumers：`writeln(data)`、`prompt`（字串）、`clear()`、`resize()`、`clearSelection()`、`refresh()`、`selectAll()`。其餘 TerminalWrapper methods 若全 repo 無 consumer，不搬成公開 API；hook 內部需要則保留內部函式。**尚未完成**：`Console.test.jsx` 目前只覆蓋 `clear()` 路徑，T2 建立 `useTerminal` 前必須先補齊其餘 consumers 清單。
+- [x] 列現有 consumers：`writeln(data)`、`prompt`（字串）、`clear()`、`resize()`、`clearSelection()`、`refresh()`、`selectAll()`。其餘 TerminalWrapper methods 若全 repo 無 consumer，不搬成公開 API；hook 內部需要則保留內部函式。`Console.test.jsx` now covers each owner path before T2.
 - [x] connection:close 的 `const {current:term}=terminalRef; term.current.clear()` 與其餘用法不一致；已以 mock 真 wrapper shape 重現並修正（`98ceb1f6`，改為 `term.clear()`），測試 `src/app/widgets/Console/__tests__/Console.test.jsx`。**尚未完成**：plan 原要求的 owner action／`useTerminal` 架構屬 T2，不在本次範圍。
-- [ ] sender id 每個 Console owner 固定 UUID，同 widget echo 被過濾；兩個 fork 各有 id。
+- [x] sender id 每個 Console owner 固定 UUID，同 widget echo 被過濾；兩個 fork 各有 id。`Console.test.jsx` verifies self-echo filtering and distinct sender ids for two mounted owners.
 
 ## Task T2：useTerminal 與 DOM view
 

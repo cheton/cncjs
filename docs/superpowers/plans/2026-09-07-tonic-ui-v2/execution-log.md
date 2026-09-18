@@ -663,3 +663,35 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker produced no source 
 Verification: focused M1 suite passed 10 tests; full `yarn test:frontend --runInBand --silent` passed 21 suites / 115 tests; `yarn build-dev` compiled successfully; full ESLint exited 0 with 17 existing warnings; changed-file ESLint exited 0; `git diff --check` passed. Production `yarn build` was not run because the repository rules reserve production builds for CI.
 
 Status transition / blocker ID: M1 `in_progress` → `completed`; no blocker. Next eligible tasks are T1 and P0.
+
+## T1 Terminal owner baseline — started 2026-09-18T20:55:00+08:00
+
+Task / session / timestamp: T1 / root session / 2026-09-18T20:55:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `3386cd7b` / working tree clean.
+
+Plan contract: `details/04a-terminal-owner.md` Task T1. Inventory the actual `Console` owner contract (`writeln`, `prompt`, `clear`, `resize`, `clearSelection`, `refresh`, `selectAll`), preserve the fixed `connection:close` ref shape, and prove each Console owner instance has a stable distinct sender id with self-echo filtering. T1 is a characterization baseline; do not introduce `useTerminal` or T2 lifecycle changes.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, ready moderate generation `2026-09-18T11:44:50Z`; `search_graph` located `Console.jsx`, `Terminal.jsx`, `History.js`, and `ConsoleWidget`; direct source reads are required for the test directory because tests are excluded from the graph index. Coverage checks will be run for every relied-on source/test path before completion.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: T1 is a bounded characterization task, but Terminal has multiple event/lifecycle consumers and per-owner sender filtering; max effort reduces the risk of missing an existing consumer while keeping the worker limited to the Console baseline test. Worker must own only `src/app/widgets/Console/__tests__/Console.test.jsx`, must not modify STATUS/HANDOFF/execution-log, and must stop on any contract ambiguity.
+
+Changed files / commit: pending worker; no production change claimed.
+
+Verification: pending focused Console baseline tests, nearby/full frontend regression, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: T1 `todo` → `in_progress`; no blocker.
+
+## T1 Terminal owner baseline — completed 2026-09-18T21:40:00+08:00
+
+Task / session / timestamp: T1 / root session / 2026-09-18T21:40:00+08:00.
+
+Changed files: `src/app/widgets/Console/__tests__/Console.test.jsx` and the T1 plan/ledger documents. No production source change was required; the existing `98ceb1f6` close-ref fix remains the implementation baseline.
+
+Implementation: the Console characterization suite now inventories all actual owner consumers: connection-open/write/read `writeln`, string `prompt`, connection-close `clear`, shared/fullscreen `resize`, and terminal widget `clearSelection`/`refresh`/`selectAll`. It verifies the fixed wrapper ref shape, filters self-echo by sender id, forwards `onData` context, and proves two mounted owners receive distinct sender ids.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker completed source inventory and reported no diff; root added the bounded test coverage. No worker ledger changes were accepted.
+
+Verification: focused `yarn test:frontend --runInBand --runTestsByPath src/app/widgets/Console/__tests__/Console.test.jsx` passed 1 suite / 6 tests; full `yarn test:frontend --runInBand --silent` passed 21 suites / 120 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Codebase-memory coverage for all relied-on production files reported no recorded issue; the test subtree is intentionally excluded and was read directly.
+
+Status transition / blocker ID: T1 `in_progress` → `completed`; no blocker. Next eligible tasks are T2 and P0.
