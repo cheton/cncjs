@@ -19,8 +19,8 @@ const createState = () => ({
   workspace: {
     container: {
       default: { widgets: ['visualizer'] },
-      primary: { widgets: ['axes'] },
-      secondary: { widgets: ['grbl'] },
+      primary: { widgets: ['axes'], show: true },
+      secondary: { widgets: ['grbl'], show: true },
     },
   },
   widgets: {
@@ -188,6 +188,9 @@ jest.mock('../widgetRegistry', () => {
   mockWidgetRegistry = {
     axes: { Component: WidgetBody, hasFrame: true },
     grbl: { Component: WidgetBody, hasFrame: true, controllerType: 'Grbl' },
+    marlin: { Component: WidgetBody, hasFrame: true, controllerType: 'Marlin' },
+    smoothie: { Component: WidgetBody, hasFrame: true, controllerType: 'Smoothie' },
+    tinyg: { Component: WidgetBody, hasFrame: true, controllerType: 'TinyG' },
     visualizer: { Component: WidgetBody, hasFrame: false },
   };
 
@@ -329,6 +332,24 @@ test('group containers persist current sortable order and retain cross-column op
     pull: true,
     put: ['primary'],
   });
+  expect(mockSortables.primary.options).toMatchObject({
+    handle: '.sortable-handle',
+    filter: '.sortable-filter',
+    dataIdAttr: 'data-widget-id',
+  });
+  expect(mockSortables.secondary.options).toMatchObject({
+    handle: '.sortable-handle',
+    filter: '.sortable-filter',
+    dataIdAttr: 'data-widget-id',
+  });
+  expect(screen.getByTestId('host-axes').parentElement).toHaveAttribute(
+    'data-widget-id',
+    'axes'
+  );
+  expect(screen.getByTestId('host-grbl').parentElement).toHaveAttribute(
+    'data-widget-id',
+    'grbl'
+  );
 
   fireEvent.click(screen.getByTestId('sort-primary'));
   fireEvent.click(screen.getByTestId('sort-secondary'));
@@ -344,12 +365,18 @@ test('group containers persist current sortable order and retain cross-column op
 
   act(() => {
     mockPubsubSubscriptions.updatePrimaryWidgets('updatePrimaryWidgets', ['grbl']);
+    mockPubsubSubscriptions.updateSecondaryWidgets('updateSecondaryWidgets', ['axes']);
   });
   expect(mockConfig.read().workspace.container.primary.widgets).toEqual(['grbl']);
+  expect(mockConfig.read().workspace.container.secondary.widgets).toEqual(['axes']);
   expect(mockConfig.set).toHaveBeenLastCalledWith(
-    ['workspace', 'container', 'primary', 'widgets'],
-    ['grbl']
+    ['workspace', 'container', 'secondary', 'widgets'],
+    ['axes']
   );
+  expect(screen.getByTestId('sortable-primary').querySelector('[data-widget-id="grbl"]'))
+    .toBeInTheDocument();
+  expect(screen.getByTestId('sortable-secondary').querySelector('[data-widget-id="axes"]'))
+    .toBeInTheDocument();
 });
 
 test('group registry filtering hides unavailable controller widgets', () => {
@@ -358,6 +385,88 @@ test('group registry filtering hides unavailable controller widgets', () => {
 
   expect(screen.queryByTestId('host-grbl')).not.toBeInTheDocument();
   expect(screen.getByTestId('host-axes')).toBeInTheDocument();
+});
+
+test('primary and secondary reorder preserves ids and order across a move', () => {
+  mockState.workspace.container.primary.widgets = ['axes', 'grbl'];
+  mockState.workspace.container.secondary.widgets = [];
+  renderGroups();
+
+  act(() => {
+    mockSortables.primary.onChange(['grbl', 'axes']);
+  });
+
+  expect(mockConfig.read().workspace.container.primary.widgets).toEqual(['grbl', 'axes']);
+  expect(
+    Array.from(
+      screen.getByTestId('sortable-primary').querySelectorAll('[data-widget-id]')
+    ).map(element => element.getAttribute('data-widget-id'))
+  ).toEqual(['grbl', 'axes']);
+
+  act(() => {
+    mockPubsubSubscriptions.updatePrimaryWidgets('updatePrimaryWidgets', ['grbl']);
+    mockPubsubSubscriptions.updateSecondaryWidgets('updateSecondaryWidgets', ['axes']);
+  });
+
+  expect(mockConfig.read().workspace.container.primary.widgets).toEqual(['grbl']);
+  expect(mockConfig.read().workspace.container.secondary.widgets).toEqual(['axes']);
+  expect(screen.getByTestId('sortable-primary').querySelector('[data-widget-id="grbl"]'))
+    .toBeInTheDocument();
+  expect(screen.getByTestId('sortable-secondary').querySelector('[data-widget-id="axes"]'))
+    .toBeInTheDocument();
+});
+
+test.each([
+  ['Grbl', 'grbl'],
+  ['Marlin', 'marlin'],
+  ['Smoothie', 'smoothie'],
+  ['TinyG', 'tinyg'],
+])('controller filtering uses the same ids for render and bulk actions: %s', (
+  controllerType,
+  visibleControllerWidget
+) => {
+  const controllerWidgets = ['grbl', 'marlin', 'smoothie', 'tinyg'];
+  mockController.availableControllers = [controllerType];
+  mockState.workspace.container.primary.widgets = ['axes', ...controllerWidgets];
+  mockState.workspace.container.secondary.widgets = [];
+  controllerWidgets.forEach(widgetId => {
+    mockState.widgets[widgetId] = {
+      minimized: false,
+      nativeSetting: `${widgetId}-native`,
+    };
+  });
+
+  const beforeHiddenSettings = controllerWidgets.reduce((settings, widgetId) => {
+    if (widgetId !== visibleControllerWidget) {
+      settings[widgetId] = mockState.widgets[widgetId];
+    }
+    return settings;
+  }, {});
+
+  render(
+    <WorkspaceLayoutProvider config={mockConfig}>
+      <WorkspaceWithLayout
+        isConnected={true}
+        location={{ pathname: '/workspace' }}
+      />
+    </WorkspaceLayoutProvider>
+  );
+
+  expect(screen.getByTestId('host-axes')).toBeInTheDocument();
+  expect(screen.getByTestId(`host-${visibleControllerWidget}`)).toBeInTheDocument();
+  controllerWidgets
+    .filter(widgetId => widgetId !== visibleControllerWidget)
+    .forEach(widgetId => {
+      expect(screen.queryByTestId(`host-${widgetId}`)).not.toBeInTheDocument();
+    });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Collapse all left panel widgets' }));
+
+  expect(mockConfig.read().widgets.axes.minimized).toBe(true);
+  expect(mockConfig.read().widgets[visibleControllerWidget].minimized).toBe(true);
+  Object.entries(beforeHiddenSettings).forEach(([widgetId, settings]) => {
+    expect(mockConfig.read().widgets[widgetId]).toEqual(settings);
+  });
 });
 
 test('fork and remove persist settings while native widget settings remain untouched', () => {
@@ -376,6 +485,7 @@ test('fork and remove persist settings while native widget settings remain untou
   const forkedWidgetId = mockConfig.read().workspace.container.primary.widgets[1];
   expect(forkedWidgetId).toMatch(/^axes:/);
   expect(mockConfig.read().widgets[forkedWidgetId]).toEqual(mockConfig.read().widgets.axes);
+  expect(mockConfig.read().widgets[forkedWidgetId]).not.toBe(mockConfig.read().widgets.axes);
   expect(props.onForkWidget).toHaveBeenCalledWith('axes');
 
   fireEvent.click(screen.getByTestId(`remove-${forkedWidgetId}`));
@@ -387,6 +497,47 @@ test('fork and remove persist settings while native widget settings remain untou
   expect(mockConfig.read().widgets[forkedWidgetId]).toBeUndefined();
   expect(mockConfig.read().widgets.axes).toEqual({ minimized: false, axes: ['x', 'y'] });
   expect(props.onRemoveWidget).toHaveBeenCalledWith(forkedWidgetId);
+});
+
+test('continuous fork and remove keeps callback ids and native settings stable', () => {
+  const props = groupProps();
+  const nativeSettings = mockConfig.read().widgets.axes;
+  render(
+    <WorkspaceLayoutProvider config={mockConfig}>
+      <PrimaryWidgets {...props} />
+    </WorkspaceLayoutProvider>
+  );
+
+  const forkedWidgetIds = [];
+  [0, 1].forEach(() => {
+    fireEvent.click(screen.getByTestId('fork-axes'));
+    const forkModal = render(mockPortalContent);
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    forkModal.unmount();
+
+    const primaryWidgets = mockConfig.read().workspace.container.primary.widgets;
+    const forkedWidgetId = primaryWidgets[primaryWidgets.length - 1];
+    forkedWidgetIds.push(forkedWidgetId);
+    expect(mockConfig.read().widgets[forkedWidgetId]).toEqual(nativeSettings);
+    expect(mockConfig.read().widgets[forkedWidgetId]).not.toBe(nativeSettings);
+    expect(props.onForkWidget).toHaveBeenLastCalledWith('axes');
+
+    fireEvent.click(screen.getByTestId(`remove-${forkedWidgetId}`));
+    const removeModal = render(mockPortalContent);
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    removeModal.unmount();
+
+    expect(mockConfig.read().workspace.container.primary.widgets).toEqual(['axes']);
+    expect(mockConfig.read().widgets[forkedWidgetId]).toBeUndefined();
+    expect(mockConfig.read().widgets.axes).toEqual(nativeSettings);
+  });
+
+  expect(props.onForkWidget).toHaveBeenCalledTimes(2);
+  expect(props.onForkWidget).toHaveBeenNthCalledWith(1, 'axes');
+  expect(props.onForkWidget).toHaveBeenNthCalledWith(2, 'axes');
+  expect(props.onRemoveWidget).toHaveBeenCalledTimes(2);
+  expect(props.onRemoveWidget).toHaveBeenNthCalledWith(1, forkedWidgetIds[0]);
+  expect(props.onRemoveWidget).toHaveBeenNthCalledWith(2, forkedWidgetIds[1]);
 });
 
 test('Workspace toolbar drives the real group host and ignores visualizer layout', () => {

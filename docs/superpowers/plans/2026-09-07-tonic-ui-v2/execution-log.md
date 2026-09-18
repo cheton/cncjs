@@ -451,3 +451,41 @@ Remaining untested paths: real domain-body behavior and actual transport integra
 Next exact step and expected result: select and start R2 (recommended) or R3. R2 should add/complete Workspace list/event/config regression coverage and preserve the R1 passing baseline.
 
 Status transition / blocker ID: R1 `in_progress` → `completed`; no blocker.
+
+## R2 Workspace regression — started 2026-09-18T18:07:41+08:00
+
+Task / session / timestamp: R2 / root session / 2026-09-18T18:07:41+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c1c1d91f` / working tree clean.
+
+Plan contract and baseline fixture: `09-regression-gates.md` Task R2. Cover Workspace primary↔secondary reorder, fork/remove semantics, controller filtering, config event bursts, one-shot/idempotent bulk view changes, async hydration restore, and mount→unmount→mount listener cleanup including StrictMode-safe active listener counts. Create or extend `WidgetGroups.test.jsx` and create `WidgetLifecycle.test.jsx` as needed.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: R2 spans shared Workspace group state, PubSub/config event timing, hydration, and lifecycle cleanup across multiple consumers; contract is mostly fixed by D4 but state/timing and cross-component impact are high. Unresolved decision / decision owner: none; root reviews the diff and owns ledger/status.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required focused R2 tests, nearby/full frontend regression, ESLint, and diff check.
+
+Status transition / blocker ID: R2 `todo` → `in_progress`; no blocker.
+
+## R2 Workspace regression — completed 2026-09-18T18:22:42+08:00
+
+Task / session / timestamp: R2 / root session / 2026-09-18T18:22:42+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c1c1d91f` / R2 tests and ledger updates only.
+
+Changed files / commit or uncommitted diff: `src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx` extended; `src/app/pages/Workspace/__tests__/WidgetLifecycle.test.jsx` added; uncommitted, phase commit pending.
+
+Before / after / intentional differences: R2 now verifies primary↔secondary order and Sortable id/handle/filter contracts, repeated fork/remove callback and config semantics, Grbl/Marlin/Smoothie/TinyG filtering with hidden settings preservation, config burst snapshot identity/no persistence feedback, idempotent bulk view actions, async hydration and corrupt-state preservation, and StrictMode-safe config/controller/PubSub listener cleanup across remounts.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx src/app/pages/Workspace/__tests__/WidgetLifecycle.test.jsx` / 0 / 2 suites and 15 tests passed; nearby Workspace/layout suites / 0 / 6 suites and 65 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 13 suites and 78 tests passed; `yarn eslint src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx src/app/pages/Workspace/__tests__/WidgetLifecycle.test.jsx` / 0 errors, 17 existing warnings.
+
+Review findings and resolutions: initial lifecycle RED exposed that StrictMode produces six active config subscriptions for the Workspace composition; the test oracle was corrected to assert the actual active baseline and cleanup, not constructor/setup counts. No production changes were needed.
+
+Artifacts: `src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx`, `src/app/pages/Workspace/__tests__/WidgetLifecycle.test.jsx`.
+
+Remaining untested paths: native browser Sortable drag mechanics and full localStorage persistence/debounce behavior; no browser gate is required for R2.
+
+Next exact step and expected result: start R3 geometry baseline with real `three` and `GCodeVisualizer`; preserve R1/R2 frontend test baseline.
+
+Status transition / blocker ID: R2 `in_progress` → `completed`; no blocker.

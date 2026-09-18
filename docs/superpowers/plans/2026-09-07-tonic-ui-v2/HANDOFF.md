@@ -7,23 +7,22 @@
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。此 session 已依規則派 Luna medium，並使用已授權的 bind 環境。
-- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1 已完成；R2/R3 為下一個 eligible gate，browser gaps 依 waiver 延後至 R6。R1 新增 16 個真 frame shell 的 contract tests，並修正 Autolevel 缺少 `aria-expanded` 的 accessibility contract。工作樹目前保留 R1 test 與該一行 production fix；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
+- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1、R2 已完成；R3 為下一個 eligible gate，browser gaps 依 waiver 延後至 R6。R1 新增 16 個真 frame shell 的 contract tests；R2 新增 Workspace group/lifecycle regression coverage。工作樹目前保留 R2 test 與 ledger updates，準備 phase commit；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
 - Naming note：D3 scope 已收斂為 host dispatch，測試已命名為 `WidgetHost.test.jsx`。Widget runtime 不再使用 `chrome`/`widgetUI` props；frame-capable widgets 接收 `view` 與 `onViewChange(view)`。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
 
 ## 下一個可執行項目（依 STATUS 依賴計算，2026-09-18）
 
-目前 **沒有** `in_progress`、也沒有未解 blocker。以 `Depends on` 全部 completed/waived 計算，唯一可立即開跑的是 R2、R3；其餘 47 個 todo 都還被未完成依賴擋住。
+目前 **沒有** `in_progress`、也沒有未解 blocker。以 `Depends on` 全部 completed/waived 計算，唯一可立即開跑的是 R3；其餘 47 個 todo 都還被未完成依賴擋住。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **R2** [Workspace 驗收](09-regression-gates.md) | D4 ✅ | Workspace list／事件／設定回歸（`WidgetGroups.test.jsx`、`WidgetLifecycle.test.jsx`） | 否（unit） |
 | **R3** [geometry baseline](09-regression-gates.md) | R0 ✅ | 真 `three` + 真 `GCodeVisualizer` 幾何/pivot 基準 | 否（unit） |
 
-**建議順序：R2 → R3。** 理由：R2 是 D4 的另一個直接下游驗收，也是 U2 → U3 → 全線 widget 任務（T1、B1、M1、G1–G7）的剩餘瓶頸；R3 沒有下游依賴，可延後。
+**建議順序：R3。** R1 與 R2 已完成；R3 沒有下游依賴，但是真 `three` / `GCodeVisualizer` geometry oracle 的必要 baseline。
 
-**要從哪裡開始？** R1 已完成。下一步可從 R2 或 R3 開始；未指定時建議 R2。
+**要從哪裡開始？** R1、R2 已完成。下一步是 R3。
 
 注意：`T1`（Terminal baseline，包含 `useTerminal` owner-action 重構）**目前不可開跑**——它依賴 `U3`，而 `U3` 依賴 `U2`，`U2` 依賴 `R1`+`R2`。已完成的 crash 修正（`98ceb1f6`）不改變 T1 的依賴狀態。
 
@@ -60,7 +59,7 @@ Verification: R1 focused contract test passes 36/36; nearby Workspace/layout sui
 請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（目前 HEAD `ecbdc560`；工作樹保留未提交的 R1 test、Autolevel accessibility fix 與 ledger updates；不要 reset）。
-優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，目前可立即開跑的只有 R2、R3；其餘 todo 均被未完成依賴擋住，不要領取 U2／U3／T1 等尚未解鎖的 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。開跑前先向使用者確認要從 R2 或 R3 哪一個開始（未指定時建議 R2）。
+優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，目前可立即開跑的只有 R3；其餘 todo 均被未完成依賴擋住，不要領取 U2／U3／T1 等尚未解鎖的 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。下一個 task 是 R3。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
 Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。
