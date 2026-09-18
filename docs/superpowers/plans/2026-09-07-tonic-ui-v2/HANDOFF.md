@@ -24,7 +24,7 @@ R1、R2、R3、U2、U3、B1、M1、M2、M3、Q2-cleanup、T1、T2、T3、P0 已�
 
 **要從哪裡開始？** 先領取 **G1**（推薦）。
 
-注意：`G1`–`G7`、`S1` 與 `V1` 仍依賴 Q2-cleanup 或 A3b；不要跳過其前置 task。已完成的 crash 修正（`98ceb1f6`）不改變這些依賴狀態。
+注意：`G1`–`G7` 與 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過其前置 task。已完成的 crash 修正（`98ceb1f6`）不改變這些依賴狀態。
 
 ## Hard rules / current execution rules
 
@@ -67,7 +67,7 @@ Shared Macro CRUD mutations preserve exact endpoints and variables, invalidate t
 
 ## M3 completion checkpoint
 
-The Macro widget now consumes `useFetchMacrosQuery` directly and retains controller run/load/export behavior with the existing action gates. New/Edit/Delete use shared mutations, await success before closing, retain drafts and show i18n errors on rejection, and use synchronous pending locks. Delete confirmation keeps both layers open after failure and closes `closeConfirm` before `closeEdit` after success. `Macro.test.jsx` covers loading, empty, failure, background refetch with rows retained, and refresh; `MacroMutations.test.jsx` covers create success/failure, duplicate-submit locking, delete failure retention, and close order. Focused Macro/query/session tests pass 5 suites/29 tests; full frontend passes 25 suites/141 tests; full ESLint exits 0 with 17 existing warnings; `yarn build-dev` compiles successfully; `git diff --check` passes. Macro actor/context/machine imports are removed after a repo-wide source scan; XState dependency removal remains Q2-cleanup scope. Phase delivery commit: `db0db29e`.
+The Macro widget now consumes `useFetchMacrosQuery` directly and retains controller run/load/export behavior with the existing action gates. New/Edit/Delete use shared mutations, await success before closing, retain drafts and show i18n errors on rejection, and use synchronous pending locks. Delete confirmation keeps both layers open after failure and closes `closeConfirm` before `closeEdit` after success. `Macro.test.jsx` covers loading, empty, failure, background refetch with rows retained, and refresh; `MacroMutations.test.jsx` covers create success/failure, duplicate-submit locking, delete failure retention, and close order. Focused Macro/query/session tests pass 5 suites/29 tests; full frontend passes 25 suites/141 tests; full ESLint exits 0 with 17 existing warnings; `yarn build-dev` compiles successfully; `git diff --check` passes. Macro actor/context/machine imports are removed after a repo-wide source scan; XState dependency removal was completed in Q2-cleanup. Phase delivery commit: `db0db29e`.
 
 ## Q2-cleanup completion checkpoint
 
