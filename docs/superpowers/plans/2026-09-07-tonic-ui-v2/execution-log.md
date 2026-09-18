@@ -599,3 +599,35 @@ Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath 
 Review findings and resolutions: Tonic focus restoration completes after the controlled caller unmounts the always-open modal; the test harness models that lifecycle. Nested Escape closes only the top dialog and then restores the original trigger after the outer dialog closes. The literal `final-form` `FORM_ERROR` key is used so returned failures render through `FormSpy`.
 
 Status transition / blocker ID: U3 `in_progress` → `completed`; no blocker.
+
+## B1 session boundary — started 2026-09-18T20:17:38+08:00
+
+Task / session / timestamp: B1 / root session / 2026-09-18T20:17:38+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `7995ee67` / working tree clean.
+
+Plan contract: `details/03b-query-boundaries.md` Task B1. Create `src/app/queries/session.js` and `src/app/queries/__tests__/session.test.jsx`; migrate LoginPage sign-in to a `useSigninMutation` with `retry: false` and pending-submit protection; cancel and clear session-scoped Query cache before logout navigation; make bootstrap reuse a pure sign-in transport without calling hooks; preserve token storage, authenticated/error/navigation, analytics, and controller connection behavior. Never place tokens in query keys, DOM, errors, or logs.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, moderate generation `2026-09-18T11:44:50Z`, status ready, parse-partial only unrelated files; `search_graph` found `lib.user.signin`, `lib.user.signout`, `bootstrap.authenticateSessionToken`, LoginPage, Header, GlobalProvider, and QueryClientProvider. `trace_path` returned zero for the JS import callers, so literal callers were confirmed with `rg`: LoginPage sign-in, Header logout, and bootstrap session restore. Coverage checks for LoginPage, Header, bootstrap, user, context, and test render returned no recorded issues.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: B1 crosses React Query mutation state, logout cache lifecycle, saga/bootstrap non-React boundaries, and authentication failure semantics; it has a fixed contract but high session-state risk. Worker must use test-first red/green evidence, preserve the existing controller/analytics flows, stop and report if the QueryClient ownership or logout ordering is ambiguous, and must not modify STATUS/HANDOFF/execution-log.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required focused session tests, nearby auth/provider regression, full frontend regression, ESLint, and `git diff --check`.
+
+Status transition / blocker ID: B1 `todo` → `in_progress`; no blocker.
+
+## B1 session boundary — completed 2026-09-18T20:44:00+08:00
+
+Task / session / timestamp: B1 / root session / 2026-09-18T20:44:00+08:00.
+
+Changed files: `src/app/queries/session.js`, `src/app/queries/__tests__/session.test.jsx`, `src/app/containers/app/LoginPage.jsx`, `src/app/containers/app/__tests__/LoginPage.test.jsx`, `src/app/sagas/app/bootstrap.js`, `src/app/sagas/app/__tests__/bootstrap.test.js`, and `src/app/containers/app/Header.jsx`.
+
+Implementation: `useSigninMutation` wraps the pure `signin` transport with `retry: false`; LoginPage uses `mutateAsync`, preserves authentication failure, analytics, controller, and navigation behavior, and blocks duplicate pending submits. Logout awaits pure sign-out, then cancels active queries and clears the QueryClient before navigation. Bootstrap exports and reuses the same pure signin transport without invoking a hook. No access token is added to a query key, DOM output, error message, or execution log.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker produced no source diff after a progress check and was stopped; root completed the bounded implementation and recorded the same contract. No worker ledger changes were accepted.
+
+Verification: focused B1 command (`session`, `LoginPage`, and `bootstrap`) passed 3 suites / 8 tests; full `yarn test:frontend --runInBand --silent` passed 20 suites / 105 tests; changed-file ESLint exited 0; `git diff --check` passed. Phase delivery committed as `feat: add session query boundary`.
+
+Status transition / blocker ID: B1 `in_progress` → `completed`; no blocker. Next eligible tasks are M1, T1, and P0.

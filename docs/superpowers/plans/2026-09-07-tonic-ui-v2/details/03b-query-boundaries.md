@@ -56,9 +56,9 @@ rg -n "from ['\"](@app/)?api|from ['\"]axios|require\(['\"]axios|useFetch|useAsy
 **Create:** `src/app/queries/session.js`, `src/app/queries/__tests__/session.test.jsx`。
 **Modify:** `src/app/containers/app/LoginPage.jsx`、實際 bootstrap/saga caller；`src/app/lib/user.js` 僅在需要抽出純函式時修改。
 
-- [ ] `useSigninMutation` 使用 `useMutation({ mutationFn: signin, retry: false })`；LoginPage 以 `mutateAsync` 保留原 authenticated/error/navigation 流程，pending 時禁止重送。
-- [ ] 登出成功後先 cancel active queries，再 clear/remove session-scoped cache；不能讓上一使用者資料閃現。不要把 access token放 query key、DOM、錯誤訊息或 execution log。
-- [ ] bootstrap caller 重用純 fetch 函式；禁止在 saga 裡呼叫 hook。測 sign-in success/failure、double submit、logout cache、bootstrap 一次請求。
+- [x] `useSigninMutation` 使用 `useMutation({ mutationFn: signin, retry: false })`；LoginPage 以 `mutateAsync` 保留原 authenticated/error/navigation 流程，pending 時禁止重送。
+- [x] 登出成功後先 cancel active queries，再 clear/remove session-scoped cache；不能讓上一使用者資料閃現。不要把 access token放 query key、DOM、錯誤訊息或 execution log。
+- [x] bootstrap caller 重用純 fetch 函式；禁止在 saga 裡呼叫 hook。測 sign-in success/failure、double submit、logout cache、bootstrap 一次請求。
 
 ## Task B2：資源逐批搬移
 
