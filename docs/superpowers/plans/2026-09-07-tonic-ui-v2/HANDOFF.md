@@ -2,7 +2,8 @@
 
 ## 現況
 
-- Mode: **layout naming/API cleanup complete; implementation paused with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers 與 D4 Workspace/group wiring 已完成；下一個 eligible task 是 R1 Widget view contract，接著 R2 Workspace regression。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
+- Mode: **layout naming/API cleanup complete; implementation paused with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers 與 D4 Workspace/group wiring 已完成；最後一次落地為 `98ceb1f6`（Console `term.current.clear` crash 修正，已 push 至 `origin/feat/tonic-ui-v2-migration`）。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
+
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。此 session 已依規則派 Luna medium，並使用已授權的 bind 環境。
@@ -10,6 +11,22 @@
 - Naming note：D3 scope 已收斂為 host dispatch，測試已命名為 `WidgetHost.test.jsx`。Widget runtime 不再使用 `chrome`/`widgetUI` props；frame-capable widgets 接收 `view` 與 `onViewChange(view)`。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
+
+## 下一個可執行項目（依 STATUS 依賴計算，2026-09-18）
+
+目前 **沒有** `in_progress`、也沒有未解 blocker。以 `Depends on` 全部 completed/waived 計算，唯一可立即開跑的是這三個；其餘 47 個 todo 都還被未完成依賴擋住。
+
+| 可執行 task | Depends on | 性質 | 需要 browser？ |
+| --- | --- | --- | --- |
+| **R1** [Widget view contract 驗收](09-regression-gates.md) | D4 ✅ | 16 個真 shell 的參數化合約測試（`WidgetLayoutContract.test.jsx` 尚未建立） | 否（unit） |
+| **R2** [Workspace 驗收](09-regression-gates.md) | D4 ✅ | Workspace list／事件／設定回歸 | 否（unit） |
+| **R3** [geometry baseline](09-regression-gates.md) | R0 ✅ | 真 `three` + 真 `GCodeVisualizer` 幾何/pivot 基準 | 否（unit） |
+
+**建議順序：R1 → R2 → R3。** 理由：R1/R2 是 D4 的直接下游驗收，也是 U2 → U3 → 全線 widget 任務（T1、B1、M1、G1–G7）的唯一瓶頸——現在它們擋住 47 個 task。R3 沒有下游依賴，可延後。
+
+**要從哪裡開始？** 三個都可執行，尚未選定。未指定時建議 R1；若要改從 R2 或 R3 起跑，或想先處理其他事，直接說即可。
+
+注意：`T1`（Terminal baseline，包含 `useTerminal` owner-action 重構）**目前不可開跑**——它依賴 `U3`，而 `U3` 依賴 `U2`，`U2` 依賴 `R1`+`R2`。已完成的 crash 修正（`98ceb1f6`）不改變 T1 的依賴狀態。
 
 ## Hard rules / current execution rules
 
@@ -36,16 +53,15 @@
 
 `WorkspaceRoot.jsx` now owns the `WorkspaceLayoutProvider`; the connected/router Workspace export keeps a hook function boundary that passes `workspaceLayout` actions and selector-filtered group ids into the retained Workspace class. Primary/Secondary/Default containers use config-backed group ids, preserve PubSub and Sortable contracts, and persist fork/remove/sort changes without local widget lists or component refs. Toolbar bulk actions dispatch through `workspaceLayout.setWidgetsCollapsed`; Visualizer is excluded by `hasFrame: false`; removed active ids clear transient fullscreen state while native widget settings remain.
 
-Verification: focused layout tests pass 4 suites / 19 tests; full frontend tests pass 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings and no errors; `yarn build` succeeds with 3 existing performance warnings plus the existing i18next scanner warning; `git diff --check` passes. No browser gate is claimed; BR0 remains waived and missing browser evidence is carried to R6. Next exact step after resuming: R1’s 16-widget view contract, then R2 Workspace list/event/config regression.
+Verification: focused layout tests pass 4 suites / 19 tests; full frontend tests pass 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings and no errors; `yarn build` succeeds with 3 existing performance warnings plus the existing i18next scanner warning; `git diff --check` passes. No browser gate is claimed; BR0 remains waived and missing browser evidence is carried to R6. Next exact step after resuming: 依 STATUS 依賴計算，R1、R2、R3 皆可立即開跑且尚未選定；見上方「下一個可執行項目」。R1 與 R2 解鎖 U2 → U3 → 其餘 widget 任務，建議優先。
 
 ## 恢復 prompt
 
 ```text
 請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
-先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD。
-優先恢復 in_progress；目前恢復 R1/R2。若有 waived dependency，依 STATUS 的 waiver scope 繼續指定的下游 task；其他 blocking 先判斷解阻條件，否則選 Depends on 都 completed 的 todo。
-目前若尚未開始，執行 F1。不要重做 completed task，也不要只靠 checkbox 判斷測試通過。
+先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（預期在 `98ceb1f6`，工作樹乾淨，已與 origin 同步）。
+優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，目前可立即開跑的只有 R1、R2、R3；其餘 todo 均被未完成依賴擋住，不要領取 U2／U3／T1 等尚未解鎖的 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。開跑前先向使用者確認要從 R1、R2 或 R3 哪一個開始（未指定時建議 R1）。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
 Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。

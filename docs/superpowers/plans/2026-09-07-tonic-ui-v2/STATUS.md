@@ -6,13 +6,13 @@
 
 ## Current checkpoint
 
-- Active task: R1/R2（D4 Workspace/group wiring completed; BR0 browser gaps deferred to R6）
+- Active task: none（layout/API 階段已收束；等待使用者選定 R1／R2／R3 其中一個開跑）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / medium, `McClintock`); advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: R1（16 個 Widget view contract cases），接著 R2（Workspace list／事件／設定回歸）
-- Current blockers: BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
+- Next eligible task: **R1、R2、R3 三者皆可立即開跑**（依 `Depends on` 全部 completed/waived 計算）；其餘 47 個 todo 仍被未完成依賴擋住。建議順序 R1 → R2 → R3，尚未選定，開跑前先向使用者確認。
+- Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
-- Validation: D4 focused tests pass 5 suites / 22 tests; full frontend passes 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings; `yarn build` compiles successfully with existing bundle-size and i18next scanner warnings. The negative Workspace instance-control scan is clean. The full Jest path is not a D4 completion gate: `SocketConnection` remains excluded per user direction, and the prior sandbox server run recorded `listen EPERM` separately. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
+- Validation: `98ceb1f6` 修正 `Console` `term.current.clear` crash（`term.clear()`），並新增 `Console.test.jsx`；該 commit 上 full frontend 為 11 suites / 32 tests pass、`yarn eslint` 0 errors、development build 編譯成功（僅既有 `Connection.jsx` warning）。D4 focused tests pass 5 suites / 22 tests; full frontend passes 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings; `yarn build` compiles successfully with existing bundle-size and i18next scanner warnings. The negative Workspace instance-control scan is clean. The full Jest path is not a D4 completion gate: `SocketConnection` remains excluded per user direction, and the prior sandbox server run recorded `listen EPERM` separately. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
 
 ## Explicit waiver
 

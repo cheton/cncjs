@@ -385,3 +385,31 @@ Final widget contract: frame-capable widgets receive `view` with one of `normal`
 Implementation: migrated all 16 frame widget shells from the old aggregate prop to the single view contract, kept Visualizer as `hasFrame: false`, and updated provider/group/host tests and plan references. The tracked browser fixture names remain task-neutral; runtime-generated large/watch payloads remain ignored.
 
 Verification: focused layout run `yarn test:frontend --runInBand --silent --runTestsByPath src/app/pages/Workspace/__tests__/WorkspaceLayoutProvider.test.jsx src/app/pages/Workspace/__tests__/WidgetHost.test.jsx src/app/pages/Workspace/__tests__/WidgetGroups.test.jsx src/app/pages/Workspace/__tests__/widgetLayoutState.test.js` / 0 / 4 suites and 19 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 10 suites and 31 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with 3 existing performance warnings plus the existing i18next scanner warning; `git diff --check` / 0. No browser gate was run; BR0 remains waived, and SocketConnection remains excluded per user direction.
+
+## Console terminal-clear crash fixed; ready set re-established — 2026-09-18T14:56:00+08:00
+
+Task / session / timestamp: FIX-003（未編號的既有 bug 修正，非新 task ID）/ root session / 2026-09-18T14:56:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `dd352521` / 工作樹乾淨；先前未提交的 `Console.test.jsx` 已由本 session 恢復。
+
+Contract and result: `04a-terminal-owner.md` T1 第二個 checkbox 與 `regression-baseline.md` 列為 E1/R4 obligation 的 `Console` `term.current.clear`。`onConnectionClose` 先 `const { current: term } = terminalRef;` 取得 Terminal 實例，卻再呼叫 `term.current.clear()`；`Terminal.clear()`（`Terminal.jsx:351`）是實例上的直接方法，多一層 `.current` 解析為 `undefined`，因此關閉連線時 throw 而非清除 buffer。同檔其餘 8 個呼叫點皆正確使用 `term.method()`，此為唯一異常。改為 `term.clear()`。
+
+Changed files / commit: `src/app/widgets/Console/Console.jsx`, `src/app/widgets/Console/__tests__/Console.test.jsx`; commit `98ceb1f6`; 已 push 至 `origin/feat/tonic-ui-v2-migration`（使用者明確授權）。push 為 fast-forward（`dd352521..98ceb1f6`），遠端當時無新 commit，零衝突。
+
+Command / exit code / tested revision: `yarn test:frontend --runInBand --coverage=false --runTestsByPath src/app/widgets/Console/__tests__/Console.test.jsx` / 0 / 1 test pass at `98ceb1f6`. 反證：將 `term.clear()` 還原為 `term.current.clear()` 後同一測試 FAIL，訊息 `Cannot read properties of undefined (reading 'clear')`，確認測試確實綁定此修正而非空過。full `yarn test:frontend --runInBand` / 0 / 11 suites and 32 tests pass；`yarn eslint` / 0 / 17 existing warnings, no errors；development build `npx webpack serve --config webpack.config.development.js` / compiled with 1 existing `Connection.jsx` warning。依 HANDOFF rule 7 未執行 `yarn build-prod`。
+
+Before / after / intentional differences: 修正前 `connection:close` 會 throw 且 buffer 不清除；修正後正常清除一次。無其他行為變更，未觸碰 emitter 事件或 xterm 資源處置。遠端先前亦存在同一 bug，本次為首次修正。
+
+Review findings and resolutions: 全 repo 掃描 `.current.current` 與其餘 `term.current` 用法，均無同類錯誤（同類 bug 僅此一處）。plan 原要求的 owner action／`useTerminal` 架構屬 T2，**本次未做**，已於 `04a-terminal-owner.md` 誠實標註為未完成。
+
+Artifacts: `src/app/widgets/Console/__tests__/Console.test.jsx`（受版本控制）。
+
+Remaining untested paths: `Console` 其餘 consumers（`writeln`/`prompt`/`resize`/`clearSelection`/`refresh`/`selectAll`）仍無 characterization 測試；T1 第一個 checkbox 未完成。無 browser evidence。
+
+Next exact step and expected result: 依 STATUS 依賴計算，R1、R2、R3 皆可開跑，尚未選定，需使用者決定。
+
+Status transition / blocker ID: 無 task ID 變更（此修正不屬於任何 todo task 的完成條件）。R1/R2/R3 維持 todo；無新增 blocker。
+
+## 依賴可執行集重算 — 2026-09-18
+
+以 STATUS `Depends on`（completed 與 waived 均視為滿足）重算：可立即開跑的只有 **R1**（← D4）、**R2**（← D4）、**R3**（← R0）。其餘 47 個 todo 仍被未完成依賴擋住。無 `in_progress`、無未解 blocker。HANDOFF 已補「下一個可執行項目」章節與更新恢復 prompt；STATUS current checkpoint 同步。

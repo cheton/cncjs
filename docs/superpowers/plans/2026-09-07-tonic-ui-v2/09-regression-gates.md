@@ -143,7 +143,7 @@ test('known path preserves machine-coordinate bounds', () => {
 - [ ] view toggle、profile change、camera change、resize、refetch、rerender、StrictMode mount **零 command/write**。
 - [ ] Axes jog 的長按/release、失焦、modal/input focus、disconnect、unmount 不重送；這由 A1b+RepeatableButton tests 覆蓋，R6 引用結果。
 - [ ] Autolevel show/update/hide probe visualization→drag bounds 回傳→start/stop→compensation load，驗證原 PubSub payload/units/offset 與 controller command 次序。
-- [ ] Console 的 sender id 排除自己 echo；外部 read/write 仍顯示一次；onConnectionClose 應 clear/release 資源、不 throw。先以真方法形狀重現 term.current.clear 問題。
+- [ ] Console 的 sender id 排除自己 echo；外部 read/write 仍顯示一次；onConnectionClose 應 clear/release 資源、不 throw。`term.current.clear` 的 throw 已由 `98ceb1f6` 修正並以 `Console/__tests__/Console.test.jsx` 覆蓋；本項仍未驗證的是 sender echo 過濾與外部 read/write 單次顯示。
 
 ## Task R6：真 browser、效能與最終門檻
 

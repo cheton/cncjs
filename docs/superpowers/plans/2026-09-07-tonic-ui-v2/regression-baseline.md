@@ -34,7 +34,7 @@
 
 - BR0 is `waived` by explicit user direction. R0 is allowed to proceed with source/unit characterization; R6 must rerun equivalent browser and performance gates before final delivery.
 - Approved-by-plan behavior differences to preserve in later integration tests: fullscreen ignores collapse, Macro refresh keeps cached data, failed mutations do not close optimistically, and Settings waits for Save completion.
-- Visualizer load-signature mismatch and `Console` `term.current.clear` remain explicitly named characterization obligations for E1/R4. This R0 baseline does not mock either failure into success.
+- Visualizer load-signature mismatch 已由 `Visualizer/__tests__/loadGCode.test.jsx` 覆蓋（three-argument `load(name, gcode, callback)`）；`Console` `term.current.clear` crash 已由 `98ceb1f6` 修正，並由 `Console/__tests__/Console.test.jsx` 以真 wrapper shape 驗證。E1/R4 仍未完成的部分是 `useTerminal` owner-action 架構（T2），不是這兩個 crash。
 - The React Select selector patch is testability/accessibility-only. A future Tonic `MenuButton/MenuList/MenuItem` replacement requires a separate task and compatibility proof for keyboard, focus, selected value, disabled, ARIA/i18n, metadata, and callbacks.
 
 ## R0 conclusion
