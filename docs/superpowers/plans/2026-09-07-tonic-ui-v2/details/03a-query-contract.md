@@ -55,9 +55,9 @@ test('list works without meta and returns the payload rather than axios response
 });
 ```
 
-- [ ] 相同 key 的兩個 observers 在同一 render mount，以 deferred GET 斷言在完成前只有一次 request；不是第二個晚 mount 在 stale data 時也強制零 refetch。
-- [ ] filtered query key 與全列表不能互相覆蓋；detail query 無 id disabled；cancelQueries 傳 signal abort，未 resolve 的舊請求不可覆寫新使用者 cache。
-- [ ] options.queryFn/queryKey 不允許覆蓋共享 resource contract；options.enabled/select/staleTime 等保留既有呼叫需求。
+- [x] 相同 key 的兩個 observers 在同一 render mount，以 deferred GET 斷言在完成前只有一次 request；不是第二個晚 mount 在 stale data 時也強制零 refetch。
+- [x] filtered query key 與全列表不能互相覆蓋；detail query 無 id disabled；cancelQueries 傳 signal abort，未 resolve 的舊請求不可覆寫新使用者 cache。
+- [x] options.queryFn/queryKey 不允許覆蓋共享 resource contract；options.enabled/select/staleTime 等保留既有呼叫需求。
 
 ## Task M2：Mutation callbacks 與 retry
 

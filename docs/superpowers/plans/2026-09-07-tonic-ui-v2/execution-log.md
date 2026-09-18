@@ -631,3 +631,35 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker produced no source 
 Verification: focused B1 command (`session`, `LoginPage`, and `bootstrap`) passed 3 suites / 8 tests; full `yarn test:frontend --runInBand --silent` passed 20 suites / 105 tests; changed-file ESLint exited 0; `git diff --check` passed. Phase delivery committed as `feat: add session query boundary`.
 
 Status transition / blocker ID: B1 `in_progress` → `completed`; no blocker. Next eligible tasks are M1, T1, and P0.
+
+## M1 shared Macro query contract — started 2026-09-18T20:37:20+08:00
+
+Task / session / timestamp: M1 / root session / 2026-09-18T20:37:20+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `338da320` / working tree clean.
+
+Plan contract: `details/03a-query-contract.md` Task M1. Create `src/app/queries/macros.js` and its tests; move Administration Macro query hooks behind the shared module; preserve `API_MACROS_QUERY_KEY`, hook names, `{ meta, data }` variables, response payloads, filter/detail key separation, Axios abort signal, option overrides that are not `queryKey`/`queryFn`, and mandatory CRUD invalidation ordering.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, ready moderate index generation `2026-09-18T11:44:50Z`; Macro query hooks and all Administration/widget callers were located with `search_graph`/`rg`; coverage checks are required for every changed source and test path before completion. M1 is unit-only; no browser gate applies.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: M1 has a fixed hook/transport contract but multiple Query v4 cache, signal, option, and invalidation edge cases; a max worker can implement the test-first contract in isolation while root audits callers and ledger state. Worker must own only the Macro query module/tests and Administration query re-export/import edits, must not modify STATUS/HANDOFF/execution-log, and must stop on contract ambiguity.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required Macro query focused tests, nearby/full frontend regression, ESLint, and `git diff --check`.
+
+Status transition / blocker ID: M1 `todo` → `in_progress`; no blocker.
+
+## M1 shared Macro query contract — completed 2026-09-18T20:50:29+08:00
+
+Task / session / timestamp: M1 / root session / 2026-09-18T20:50:29+08:00.
+
+Changed files: `src/app/queries/macros.js`, `src/app/queries/__tests__/macros.test.jsx`, `src/app/pages/Administration/Macros/queries.js`, `src/app/pages/Administration/Macros/Macros.jsx`, `src/app/pages/Administration/Macros/drawers/CreateMacroDrawer.jsx`, and `src/app/pages/Administration/Macros/drawers/UpdateMacroDrawer.jsx`.
+
+Implementation: shared list/detail hooks preserve the existing list key and mutation variable shapes, return `response.data`, pass Axios abort signals, isolate detail cache entries, and disable missing-id detail queries. Query key/query function options are fixed while caller options such as `select` remain available. All Macro CRUD hooks explicitly disable retries, invalidate the Macro key prefix before caller `onSuccess`, and preserve failure behavior. Administration now imports the shared module directly; its local module remains a compatibility re-export and duplicate invalidation calls were removed.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker produced no source diff after repeated progress checks and was stopped; root completed the bounded implementation with the same test-first contract. No worker ledger changes were accepted.
+
+Verification: focused M1 suite passed 10 tests; full `yarn test:frontend --runInBand --silent` passed 21 suites / 115 tests; `yarn build-dev` compiled successfully; full ESLint exited 0 with 17 existing warnings; changed-file ESLint exited 0; `git diff --check` passed. Production `yarn build` was not run because the repository rules reserve production builds for CI.
+
+Status transition / blocker ID: M1 `in_progress` → `completed`; no blocker. Next eligible tasks are T1 and P0.

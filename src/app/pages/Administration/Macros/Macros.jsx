@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -30,15 +29,14 @@ import {
   DEFAULT_ROWS_PER_PAGE_OPTIONS,
 } from '@app/components/TablePagination/constants';
 import i18n from '@app/lib/i18n';
+import {
+  useFetchMacrosQuery,
+  useBulkDeleteMacrosMutation,
+} from '@app/queries/macros';
 import TableRowToggleIcon from '../components/TableRowToggleIcon';
 import ConfirmBulkDeleteRecordsModal from '../modals/ConfirmBulkDeleteRecordsModal';
 import CreateMacroDrawer from './drawers/CreateMacroDrawer';
 import UpdateMacroDrawer from './drawers/UpdateMacroDrawer';
-import {
-  API_MACROS_QUERY_KEY,
-  useFetchMacrosQuery,
-  useBulkDeleteMacrosMutation,
-} from './queries';
 
 const Macros = () => {
   // pagination
@@ -52,7 +50,6 @@ const Macros = () => {
     setRowSelection({});
   }, []);
 
-  const queryClient = useQueryClient();
   const fetchMacrosQuery = useFetchMacrosQuery({
     meta: {
       query: qs.stringify({
@@ -62,12 +59,7 @@ const Macros = () => {
       }),
     },
   });
-  const bulkDeleteMacrosMutation = useBulkDeleteMacrosMutation({
-    onSuccess: () => {
-      // Invalidate `useFetchMacrosQuery`
-      queryClient.invalidateQueries({ queryKey: API_MACROS_QUERY_KEY });
-    },
-  });
+  const bulkDeleteMacrosMutation = useBulkDeleteMacrosMutation();
   const portal = usePortalManager();
   const [colorMode] = useColorMode();
   const selectedRowCount = Object.keys(rowSelection).length;
