@@ -61,7 +61,7 @@ function Console({
         return;
       }
 
-      term.current.clear();
+      term.clear();
     };
 
     const onConnectionWrite = (state, data, context) => {
