@@ -2,6 +2,17 @@ import React, { useEffect } from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderAppUI } from '@app/test/render';
 
+const mockConfig = {
+  on: jest.fn(),
+  off: jest.fn(),
+  get: jest.fn(),
+};
+
+jest.mock('@app/store/config', () => ({
+  __esModule: true,
+  default: mockConfig,
+}));
+
 const mockSignin = jest.fn();
 const mockSignout = jest.fn();
 
@@ -13,6 +24,7 @@ jest.mock('@app/lib/user', () => ({
 
 const {
   clearSessionQueryCache,
+  createSessionQueryBoundary,
   signoutAndClearSession,
   useSigninMutation,
 } = require('../session');
@@ -116,5 +128,39 @@ describe('session query boundary', () => {
     await signoutAndClearSession(queryClient);
 
     expect(calls).toEqual(['signout', 'cancel', 'clear']);
+  });
+
+  test('cancels and removes old-session queries when the session identity changes', async () => {
+    const calls = [];
+    let sessionIdentity = 'session-a';
+    const queryClient = {
+      cancelQueries: jest.fn(() => {
+        calls.push('cancel');
+        return Promise.resolve();
+      }),
+      removeQueries: jest.fn(() => {
+        calls.push('remove');
+      }),
+    };
+    const onSpy = jest.spyOn(mockConfig, 'on');
+    const offSpy = jest.spyOn(mockConfig, 'off');
+    const dispose = createSessionQueryBoundary(queryClient, () => sessionIdentity);
+    const onConfigChange = onSpy.mock.calls.at(-1)[1];
+
+    try {
+      onConfigChange();
+      expect(calls).toEqual([]);
+
+      sessionIdentity = 'session-b';
+      await onConfigChange();
+      expect(calls).toEqual(['cancel', 'remove']);
+      expect(queryClient.cancelQueries).toHaveBeenCalledTimes(1);
+      expect(queryClient.removeQueries).toHaveBeenCalledTimes(1);
+    } finally {
+      dispose();
+      expect(offSpy).toHaveBeenCalledWith('change', onConfigChange);
+      onSpy.mockRestore();
+      offSpy.mockRestore();
+    }
   });
 });

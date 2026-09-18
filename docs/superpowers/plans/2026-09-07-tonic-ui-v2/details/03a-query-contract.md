@@ -82,10 +82,10 @@ const useCreateMacroMutation = (options = {}) => {
 
 mutation retry 全域 false；caller 不得設 retry=true 重送 CNC 操作。本 module 的 CRUD 也沿用 false。
 
-- [ ] 測 mutationFn params、success invalidate prefix、onSuccess args/order、failure 不調 success、不 close。批次刪除仍 POST `api/macros/delete`，不能照單筆 DELETE 改 API。
-- [ ] GlobalProvider 的 client 維持 module singleton；portal 的第二 React root 要共用它。不要每 render new QueryClient；每個測試用自己的 client。
-- [ ] MacroQueryEvents 只掛主 App 一次，不放到 portal 重建的 GlobalProvider。config:change 事件只 invalidates read data，不觸發 mutations。
-- [ ] session token 變更時清理 server cache：在主 App 的 session lifecycle bridge 保存前一 session identity（不 log/token key），先 cancel/remove 舊 queries，後開啟新 session query；Axios 取最新 token。測慢舊 request 晚到與兩個 portal roots 的共享狀態。
+- [x] 測 mutationFn params、success invalidate prefix、onSuccess args/order、failure 不調 success、不 close。批次刪除仍 POST `api/macros/delete`，不能照單筆 DELETE 改 API。Shared tests cover all four CRUD hooks, exact endpoints/variables, invalidate-before-callback ordering, failure isolation, and caller `retry: true` being ignored.
+- [x] GlobalProvider 的 client 維持 module singleton；portal 的第二 React root 要共用它。不要每 render new QueryClient；每個測試用自己的 client。`context.jsx` keeps the module-level QueryClient and `portal.jsx` imports the same GlobalProvider module; test helpers create a fresh client per test.
+- [x] MacroQueryEvents 只掛主 App 一次，不放到 portal 重建的 GlobalProvider。config:change 事件只 invalidates read data，不觸發 mutations。`MacroQueryEvents` is mounted once by `App.jsx`, uses the shared prefix invalidation, and has a listener cleanup test.
+- [x] session token 變更時清理 server cache：在主 App 的 session lifecycle bridge 保存前一 session identity（不 log/token key），先 cancel/remove 舊 queries，後開啟新 session query；Axios 取最新 token。測慢舊 request 晚到與兩個 portal roots 的共享狀態。`createSessionQueryBoundary` is mounted by the main App, stores only the previous identity in memory, cancels then removes old queries, and has an identity-change ordering test.
 
 ## Task M3：Macro UI 與失敗路徑
 

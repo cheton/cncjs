@@ -793,3 +793,31 @@ Verification: full `yarn test:frontend --runInBand --silent` passed 22 suites / 
 Worker execution: the dispatched `gpt-5.6-luna` / max worker completed the initial static review but produced no diff before it was stopped; root performed the bounded deletion after independently verifying the same zero-consumer result. No worker ledger changes were accepted.
 
 Status transition / blocker ID: P0 `in_progress` → `completed`; no blocker. Next eligible task is M2.
+
+## M2 Macro mutation — started 2026-09-18T22:14:00+08:00
+
+Task / session / timestamp: M2 / root session / 2026-09-18T22:14:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `d37338f0` / working tree clean.
+
+Plan contract: `details/03a-query-contract.md` Task M2. Verify every shared Macro CRUD mutation keeps the exact API shape, uses `retry: false`, invalidates the `API_MACROS_QUERY_KEY` prefix before the caller `onSuccess`, and leaves failure paths without invalidation or callbacks. Audit shared QueryClient ownership across the main app and portal roots; config changes may invalidate reads only and must not trigger mutations. Preserve session cache-boundary behavior and do not change unrelated query domains.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: M2 combines mutation ordering with multi-root QueryClient/session lifecycle behavior; max effort is required to verify async ordering and avoid duplicate invalidation or mutation triggers. Worker owns bounded M2 tests/source changes only, must not modify STATUS/HANDOFF/execution-log, must stop on any contract ambiguity, and must not start M3 UI work.
+
+Verification: M2 focused mutation/lifecycle tests passed 3 suites / 20 tests; full `yarn test:frontend --runInBand --silent` passed 23 suites / 132 tests; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
+
+Status transition / blocker ID: M2 `todo` → `in_progress`; no blocker.
+
+## M2 Macro mutation — completed 2026-09-18T22:25:00+08:00
+
+Task / session / timestamp: M2 / root session / 2026-09-18T22:25:00+08:00.
+
+Changed files: `src/app/queries/__tests__/macros.test.jsx` now proves caller retry overrides cannot resubmit any CRUD mutation; `src/app/queries/MacroQueryEvents.jsx` and its test add one App-owned config listener that invalidates Macro read data only; `src/app/queries/session.js` and `App.jsx` add the main-root session cache boundary; session tests cover identity-change cancel/remove ordering. The shared `macros.js` mutation implementation already matched the required exact endpoint, payload, retry, invalidation, and callback contract, so no hook source change was needed.
+
+Lifecycle audit: `context.jsx` keeps one module-level QueryClient, and `portal.jsx` reuses that same GlobalProvider module. MacroQueryEvents is mounted by the main App, not GlobalProvider, so portal roots do not create duplicate bridge listeners. Session identity is held only in memory; a change cancels queries before removing old cache entries, without logging or keying by token.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker completed contract review but produced no diff before it was stopped. Root added the bounded tests and lifecycle bridge after independently reviewing the same source contract. No worker ledger changes were accepted.
+
+Verification: focused `macros`, `session`, and `MacroQueryEvents` suites passed 3 suites / 20 tests; full `yarn test:frontend --runInBand --silent` passed 23 suites / 132 tests; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
+
+Status transition / blocker ID: M2 `in_progress` → `completed`; no blocker. Next eligible task is M3.

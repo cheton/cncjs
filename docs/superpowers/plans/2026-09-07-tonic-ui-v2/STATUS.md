@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **none**（P0 completed；2026-09-18T22:15:00+08:00）
+- Active task: **none**（M2 completed；2026-09-18T22:25:00+08:00）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none; advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: M2 remains dependency-eligible; no task is active in this session.
+- Next eligible task: M3 remains dependency-eligible; no task is active in this session.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -47,7 +47,7 @@
 | B0 | [HTTP import baseline](details/03b-query-boundaries.md) | H3 | completed | root session / 2026-09-07T18:55:00+08:00 | `query-boundary-baseline.md`; direct imports classified by endpoint, operation, owner task, and explicit exceptions. Static audit only; no transport or browser behavior run. |
 | B1 | [session boundary](details/03b-query-boundaries.md) | B0, U3 | completed | root session / 2026-09-18T20:44:00+08:00 | Added `useSigninMutation`/pure signin export, LoginPage pending/error boundary, logout `signout → cancelQueries → clear` ordering, and bootstrap shared-transport caller. Focused B1 tests: 3 suites / 8 tests pass; full frontend: 20 suites / 105 tests pass; changed-file ESLint and diff checks pass. |
 | M1 | [Macro query](details/03a-query-contract.md) | B0, U3 | completed | root session / 2026-09-18T20:50:29+08:00 | Shared `src/app/queries/macros.js` owns list/detail/CRUD hooks; Administration imports the shared module and retains a re-export compatibility layer. Focused M1 tests: 10 pass; full frontend: 21 suites / 115 tests pass; development build compiled; ESLint and diff checks pass. |
-| M2 | [Macro mutation](details/03a-query-contract.md) | M1 | todo | — | — |
+| M2 | [Macro mutation](details/03a-query-contract.md) | M1 | completed | root session / 2026-09-18T22:25:00+08:00 | Shared CRUD hooks cover exact endpoints/variables, prefix invalidation before caller success, failure isolation, and retry=false even when requested by callers. Main App now mounts one MacroQueryEvents bridge and one session cache boundary; focused 3 suites/20 tests pass. |
 | M3 | [Macro UI](details/03a-query-contract.md) | M2 | todo | — | — |
 | Q2-cleanup | [fetch machine 移除與跨畫面驗收](03-query-and-macro.md) | M3 | todo | — | — |
 | G1 | [Connection](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |

@@ -2,27 +2,27 @@
 
 ## 現況
 
-- Mode: **layout naming/API cleanup, B1 session boundary, M1 Macro query contract, T1–T3 Terminal work, and P0 cleanup complete; implementation ready for the next task with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers、D4 Workspace/group wiring、B1 session/query boundary、M1 shared Macro query contract、T1–T3 Terminal work，以及 P0 unused-family cleanup 已完成；B1, M1, T1, T2, T3, and P0 phase deliveries are committed on the current feature branch。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
+- Mode: **layout naming/API cleanup, B1 session boundary, M1–M2 Macro query work, T1–T3 Terminal work, and P0 cleanup complete; implementation ready for the next task with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers、D4 Workspace/group wiring、B1 session/query boundary、M1–M2 shared Macro query/mutation contract、T1–T3 Terminal work，以及 P0 unused-family cleanup 已完成；B1, M1, M2, T1, T2, T3, and P0 phase deliveries are committed on the current feature branch。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
 
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。此 session 已依規則派 Luna medium，並使用已授權的 bind 環境。
-- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1、R2、R3、U2、U3、B1、M1、T1、T2、T3、P0 已完成，browser gaps 依 waiver 延後至 R6。U3 完成 Custom SettingsModal 的 direct Tonic overlay/form contract 與六個 interaction tests；`useToast` 已是 Tonic Toast 並保持既有 persistence semantics。B1 完成 session mutation、pending/error login handling、logout cache ordering、以及 bootstrap pure transport reuse。M1 完成 shared Macro list/detail/CRUD query hooks, Axios signal propagation, stable key/options contracts, and invalidation ordering。T1 固定 Console owner 的七個實際 terminal consumers、close ref contract、sender isolation 與 lifecycle baseline tests。T2 把 xterm、prompt/history、paste、option/size update、callback ref 與 cleanup 收回 `useTerminal`，Terminal 僅保留 DOM view。T3 驗證 reconnect disposal/recreation、最新 Enter callback、history/paste/action callbacks 與 StrictMode active-resource bounds。P0 刪除 14 個 graph/literal zero-consumer component families；`Notifications/ToastNotification` 仍依 P1 管理。R1 新增 16 個真 frame shell 的 contract tests；R2 新增 Workspace group/lifecycle regression coverage；R3 新增 real Three.js/GCodeVisualizer geometry and pivot baselines；U3、B1、M1、T1、T2、T3、P0 phase deliveries 已 committed；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
+- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1、R2、R3、U2、U3、B1、M1、M2、T1、T2、T3、P0 已完成，browser gaps 依 waiver 延後至 R6。U3 完成 Custom SettingsModal 的 direct Tonic overlay/form contract 與六個 interaction tests；`useToast` 已是 Tonic Toast 並保持既有 persistence semantics。B1 完成 session mutation、pending/error login handling、logout cache ordering、以及 bootstrap pure transport reuse。M1 完成 shared Macro list/detail/CRUD query hooks, Axios signal propagation, stable key/options contracts, and invalidation ordering。M2 固定 caller retry override、mutation callback/invalidation ordering、App-only Macro read invalidation bridge、以及 session identity cache reset。T1 固定 Console owner 的七個實際 terminal consumers、close ref contract、sender isolation 與 lifecycle baseline tests。T2 把 xterm、prompt/history、paste、option/size update、callback ref 與 cleanup 收回 `useTerminal`，Terminal 僅保留 DOM view。T3 驗證 reconnect disposal/recreation、最新 Enter callback、history/paste/action callbacks 與 StrictMode active-resource bounds。P0 刪除 14 個 graph/literal zero-consumer component families；`Notifications/ToastNotification` 仍依 P1 管理。R1 新增 16 個真 frame shell 的 contract tests；R2 新增 Workspace group/lifecycle regression coverage；R3 新增 real Three.js/GCodeVisualizer geometry and pivot baselines；U3、B1、M1、M2、T1、T2、T3、P0 phase deliveries 已 committed；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
 - Naming note：D3 scope 已收斂為 host dispatch，測試已命名為 `WidgetHost.test.jsx`。Widget runtime 不再使用 `chrome`/`widgetUI` props；frame-capable widgets 接收 `view` 與 `onViewChange(view)`。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
 
 ## 下一個可執行項目（依 STATUS 依賴計算，2026-09-18）
 
-目前 **沒有** `in_progress`、也沒有未解 blocker。R1、R2、R3、U2、U3、B1、M1、T1、T2、T3、P0 已完成；G8 Terminal work and P0 cleanup are complete. M2 is the next dependency-eligible task in this lane.
+目前 **沒有** `in_progress`、也沒有未解 blocker。R1、R2、R3、U2、U3、B1、M1、M2、T1、T2、T3、P0 已完成；G8 Terminal work, Macro query/mutation work, and P0 cleanup are complete. M3 is the next dependency-eligible task in this lane.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **M2** [Macro mutation](details/03a-query-contract.md) | M1 ✅ | shared Macro mutation contract | 否（unit） |
+| **M3** [Macro UI](details/03a-query-contract.md) | M2 ✅ | shared Macro UI and failure paths | 否（unit） |
 
-R1、R2、R3、U2、U3、B1、M1、T1、T2、T3、P0 已完成。G8 Terminal work and P0 cleanup are complete. 下一個推薦 task 是 **M2**，因為 M1 已建立 shared Macro query contract。
+R1、R2、R3、U2、U3、B1、M1、M2、T1、T2、T3、P0 已完成。G8 Terminal work, Macro query/mutation work, and P0 cleanup are complete. 下一個推薦 task 是 **M3**，因為 M1/M2 已建立 shared Macro query、mutation、invalidation、以及 session boundary contract。
 
-**要從哪裡開始？** 先領取 **M2**（推薦）。
+**要從哪裡開始？** 先領取 **M3**（推薦）。
 
 注意：`G1`–`G7`、`S1` 與 `V1` 仍依賴 Q2-cleanup 或 A3b；不要跳過其前置 task。已完成的 crash 修正（`98ceb1f6`）不改變這些依賴狀態。
 
@@ -61,6 +61,10 @@ T3 lifecycle tests cover connected→disconnected→connected xterm disposal/rec
 
 The 14 P0 families with zero resolved runtime consumers were deleted: Blink, Breadcrumbs, ColorModeProvider, Ellipsis, Form, Input, Loader, OverflowTooltip, RefHolder, RowsHelper, SectionGroup, SectionTitle, Toggle, and ToastNotification. Graph/literal/barrel/style scans are clean; the separate P1 `Notifications/ToastNotification` remains. Full frontend passes 22 suites/126 tests; `yarn build-dev` compiles successfully; ESLint exits 0 with 17 existing warnings; `git diff --check` passes. The P0 phase delivery is committed.
 
+## M2 completion checkpoint
+
+Shared Macro CRUD mutations preserve exact endpoints and variables, invalidate the Macro prefix before caller `onSuccess`, and force `retry: false` even when a caller requests retries. `MacroQueryEvents` is mounted once by the main App and invalidates read data only; `createSessionQueryBoundary` cancels then removes old-session queries without storing or logging token keys. Focused Macro/session/event tests pass 3 suites/20 tests; full frontend passes 23 suites/132 tests; full ESLint exits 0 with 17 existing warnings; `yarn build-dev` compiles successfully; `git diff --check` passes. The M2 phase delivery is committed.
+
 ## B1 completion checkpoint
 
 `src/app/queries/session.js` now owns the React Query sign-in mutation and pure session transports. `LoginPage.jsx` uses `mutateAsync`, preserves the existing authenticated/error/analytics/controller/navigation flow, and disables duplicate pending submits. Header logout waits for sign-out, cancels active queries, clears the shared QueryClient, then navigates. Bootstrap reuses the pure signin transport and does not call hooks. Focused B1 tests pass 3 suites / 8 tests; full frontend passes 20 suites / 105 tests; changed-file ESLint and `git diff --check` pass. The B1 phase delivery is committed.
@@ -85,7 +89,7 @@ Verification: R1 focused contract test passes 36/36; nearby Workspace/layout sui
 請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（目前 HEAD 應為最新 phase commit；不要 reset）。
-優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/T1/T2/T3/P0 已完成；目前推薦先領取 M2，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
+優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/T1/T2/T3/P0 已完成；目前推薦先領取 M3，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
 Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。

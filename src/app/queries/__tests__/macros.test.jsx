@@ -197,6 +197,30 @@ describe('shared Macro query contract', () => {
     }
   });
 
+  test.each(mutationCases)('$label does not retry when a caller requests retry', async ({ hook, variables, request }) => {
+    const error = new Error('request failed');
+    const onSuccess = jest.fn();
+    const client = createTestQueryClient();
+    client.invalidateQueries = jest.fn();
+    axios[request.method].mockRejectedValue(error);
+    const view = renderHook(() => hook({ retry: true, onSuccess }), {
+      wrapper: createTestWrapper(client),
+    });
+
+    try {
+      await act(async () => {
+        await expect(view.result.current.mutateAsync(variables))
+          .rejects.toThrow('request failed');
+      });
+      expect(axios[request.method]).toHaveBeenCalledTimes(1);
+      expect(client.invalidateQueries).not.toHaveBeenCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
+    } finally {
+      view.unmount();
+      client.clear();
+    }
+  });
+
   test('does not invalidate or call success after a failed mutation', async () => {
     const error = new Error('request failed');
     axios.post.mockRejectedValue(error);
