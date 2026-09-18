@@ -849,3 +849,33 @@ Worker execution: the dispatched `gpt-5.6-luna` / max worker completed the contr
 Verification: focused Macro/query/session command passed 5 suites / 29 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 141 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Browser gates remain waived/deferred to R6.
 
 Status transition / blocker ID: M3 `in_progress` → `completed`; no blocker. Phase commit: `db0db29e`. Next eligible task is Q2-cleanup.
+
+## Q2-cleanup — started 2026-09-18T23:10:00+08:00
+
+Task / session / timestamp: Q2-cleanup / root session / 2026-09-18T23:10:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c89efced` / working tree clean.
+
+Plan contract: remove `xstate` and `@xstate/react` only after a repo-wide consumer audit; verify widget and Administration Macro observers share the same invalidation contract after create/update/delete; preserve controller Run/Load and existing Administration pagination/filter behavior. Do not remove unrelated generic fetch hooks or change other widgets.
+
+Consumer audit: source and non-generated repository scans found no `createFetchMachine`, `fetchMacrosService`, `ServiceContext`, `@xstate/react`, `xstate`, or `@app/machines` consumers. `yarn why` reports both packages as root-only dependencies.
+
+Worker assignment: plan default is `gpt-5.6-luna` / high; this Q2 subtask has a fixed consumer boundary and bounded package/cache verification, so max effort is not required. Root is executing the implementation; no worker ledger changes are authorized.
+
+Changed files / commit: pending; no source change claimed yet.
+
+Verification: pending dependency audit, shared-cache cross-screen regression, full frontend tests, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: Q2-cleanup `todo` → `in_progress`; no blocker.
+
+## Q2-cleanup — completed 2026-09-18T23:25:00+08:00
+
+Task / session / timestamp: Q2-cleanup / root session / 2026-09-18T23:25:00+08:00.
+
+Changed files: `package.json` and `yarn.lock` remove the now-unused `xstate` and `@xstate/react` root dependencies. `src/app/queries/__tests__/macros.test.jsx` adds a shared-cache regression with active unfiltered widget and paginated Administration observers. Updated the Q2 checkboxes and task ledger.
+
+Audit and behavior: repo-wide source/literal scans found no XState, Macro fetch actor, context, or machine consumers; `yarn why` showed both packages as root-only. The new test proves one create mutation invalidates both observers, causes two refetches, and stores updated records under both query keys. No controller workflow, Run/Load gating, export path, or unrelated generic fetch hook was changed.
+
+Verification: focused Macro query suite passed 15 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 142 tests; `yarn remove xstate @xstate/react` completed with existing peer warnings; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
+
+Status transition / blocker ID: Q2-cleanup `in_progress` → `completed`; no blocker. Next eligible tasks are G1–G7.

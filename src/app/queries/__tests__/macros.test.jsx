@@ -164,6 +164,71 @@ describe('shared Macro query contract', () => {
     }
   });
 
+  test('refreshes widget and Administration observers after a shared mutation', async () => {
+    const initialWidgetPayload = { records: [{ id: 'm1', name: 'initial' }] };
+    const initialAdministrationPayload = {
+      records: [{ id: 'm1', name: 'initial' }],
+      pagination: { totalRecords: 1 },
+    };
+    const updatedWidgetPayload = { records: [{ id: 'm1', name: 'updated' }] };
+    const updatedAdministrationPayload = {
+      records: [{ id: 'm1', name: 'updated' }],
+      pagination: { totalRecords: 1 },
+    };
+    const requestCounts = {
+      widget: 0,
+      administration: 0,
+    };
+    axios.get.mockImplementation((url) => {
+      if (url === 'api/macros') {
+        const data = requestCounts.widget++ === 0
+          ? initialWidgetPayload
+          : updatedWidgetPayload;
+        return Promise.resolve({ data });
+      }
+
+      const data = requestCounts.administration++ === 0
+        ? initialAdministrationPayload
+        : updatedAdministrationPayload;
+      return Promise.resolve({ data });
+    });
+    axios.post.mockResolvedValue({ data: { status: 'ok' } });
+    const client = createTestQueryClient();
+    const widgetView = renderHook(() => useFetchMacrosQuery(), {
+      wrapper: createTestWrapper(client),
+    });
+    const administrationView = renderHook(() => useFetchMacrosQuery({
+      meta: { query: 'paging=true' },
+    }), {
+      wrapper: createTestWrapper(client),
+    });
+    const mutationView = renderHook(() => useCreateMacroMutation(), {
+      wrapper: createTestWrapper(client),
+    });
+
+    try {
+      await waitFor(() => {
+        expect(widgetView.result.current.isSuccess).toBe(true);
+        expect(administrationView.result.current.isSuccess).toBe(true);
+      });
+      await act(async () => {
+        await mutationView.result.current.mutateAsync({
+          data: { name: 'updated', action: 'G0 X1' },
+        });
+      });
+      await waitFor(() => {
+        expect(requestCounts).toEqual({ widget: 2, administration: 2 });
+      });
+      expect(client.getQueryData(['api/macros'])).toEqual(updatedWidgetPayload);
+      expect(client.getQueryData(['api/macros', 'paging=true'])).toEqual(updatedAdministrationPayload);
+    } finally {
+      widgetView.unmount();
+      administrationView.unmount();
+      mutationView.unmount();
+      client.clear();
+    }
+  });
+
   test.each(mutationCases)('$label returns data and invalidates before caller onSuccess', async ({ hook, variables, request }) => {
     const payload = { status: 'ok' };
     const calls = [];

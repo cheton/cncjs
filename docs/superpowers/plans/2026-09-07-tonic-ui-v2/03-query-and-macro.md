@@ -67,15 +67,15 @@ yarn build
 **Delete after tests:** `src/app/widgets/Macro/context.js`, `src/app/machines/index.js`。
 **Create tests:** `src/app/widgets/Macro/__tests__/Macro.test.jsx`, `MacroMutations.test.jsx`。
 
-- [ ] index 改 function + controlled `view`／`onViewChange(view)` props；移除 interpret/start/stop、ServiceContext、僅為舊 UI 存在的 ModalProvider/ModalRoot。
-- [ ] Macro 直接呼叫 shared useFetchMacrosQuery；`data.records` 是 records，不再取 Axios `data.data.records`。render 對应 `isLoading` / `isError` / empty / records。
-- [ ] Refresh 改 `refetch()`，**明確選擇保留舊資料並顯示 fetching**，不再 CLEAR 整個共享 cache。初次 loading 無資料才顯示整頁 loading；背景 error 顯示錯誤但不清掉可見 records。這是有意的 UX 差異，納入測試。
-- [ ] config:change listener 改 invalidate prefix；effect cleanup remove 同一 callback。多個 forked Macro 的相同資料共用 cache；為避免每個 widget 都訂閱造成多次 invalidation，在主應用程式 `src/app/containers/app/App.jsx` 內建立唯一 Macro invalidation bridge（`src/app/queries/MacroQueryEvents.jsx`），測試 mount/unmount 次數。不能放進會被 portal 再次掛載的 GlobalProvider；主 App 只掛一份，並在有效 session 下啟用。
-- [ ] New/Edit/Delete 使用 shared `mutateAsync`；await success 後 close，catch 顯示既有 i18n 錯誤並留在表單，pending 時禁重複送出。不能保留現有吞 error 卻 close 的 helpers。
-- [ ] 修正 EditMacro nested delete 的 onClose scope：成功只關 confirm 與 edit 各一次；取消只關 confirm；失敗兩者仍保留，input 不丟失。
-- [ ] Run/Load 保持 controller 執行路徑與 gating，禁止用 queryFn 自動執行 Macro。export iframe/form download 保留傳輸機制。
-- [ ] 驗證 Administration 新增/更新/刪除同步到已開啟的 widget，widget 更新也同步到 Administration；不依賴 websocket 才能刷新。
-- [ ] 清空所有引用後刪 fetch machine/context，掃描所有 src 再判斷移除 `xstate` / `@xstate/react`。舊 generic useFetch/useAsync 只禁止新 server-state 使用；無關無消费者 hooks 不為本任務順便刪除。
+- [x] index 改 function + controlled `view`／`onViewChange(view)` props；移除 interpret/start/stop、ServiceContext、僅為舊 UI 存在的 ModalProvider/ModalRoot。
+- [x] Macro 直接呼叫 shared useFetchMacrosQuery；`data.records` 是 records，不再取 Axios `data.data.records`。render 對应 `isLoading` / `isError` / empty / records。
+- [x] Refresh 改 `refetch()`，**明確選擇保留舊資料並顯示 fetching**，不再 CLEAR 整個共享 cache。初次 loading 無資料才顯示整頁 loading；背景 error 顯示錯誤但不清掉可見 records。這是有意的 UX 差異，納入測試。
+- [x] config:change listener 改 invalidate prefix；effect cleanup remove 同一 callback。多個 forked Macro 的相同資料共用 cache；為避免每個 widget 都訂閱造成多次 invalidation，在主應用程式 `src/app/containers/app/App.jsx` 內建立唯一 Macro invalidation bridge（`src/app/queries/MacroQueryEvents.jsx`），測試 mount/unmount 次數。不能放進會被 portal 再次掛載的 GlobalProvider；主 App 只掛一份，並在有效 session 下啟用。
+- [x] New/Edit/Delete 使用 shared `mutateAsync`；await success 後 close，catch 顯示既有 i18n 錯誤並留在表單，pending 時禁重複送出。不能保留現有吞 error 卻 close 的 helpers。
+- [x] 修正 EditMacro nested delete 的 onClose scope：成功只關 confirm 與 edit 各一次；取消只關 confirm；失敗兩者仍保留，input 不丟失。
+- [x] Run/Load 保持 controller 執行路徑與 gating，禁止用 queryFn 自動執行 Macro。export iframe/form download 保留傳輸機制。
+- [x] 驗證 Administration 新增/更新/刪除同步到已開啟的 widget，widget 更新也同步到 Administration；不依賴 websocket 才能刷新。Shared-cache regression covers unfiltered widget and paginated Administration observers.
+- [x] 清空所有引用後刪 fetch machine/context，掃描所有 src 再判斷移除 `xstate` / `@xstate/react`。舊 generic useFetch/useAsync 只禁止新 server-state 使用；無關無消费者 hooks 不為本任務順便刪除。
 
 ```bash
 rg -n 'createFetchMachine|fetchMacrosService|ServiceContext|@xstate/react|from .xstate' src/app

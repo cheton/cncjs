@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **none**（M3 completed 2026-09-18T22:55:00+08:00）
-- Main: current root session（非 Terra；此限制已記錄）；M3 worker `/root/m3_macro_ui` (`gpt-5.6-luna` / max) was stopped after contract review without a diff; root completed the bounded implementation.
-- Next eligible task: **Q2-cleanup** (`M3` completed); no parallel task is authorized in this lane.
+- Active task: **none**（Q2-cleanup completed 2026-09-18T23:25:00+08:00）
+- Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
+- Next eligible task: **G1–G7** (all depend on Q2-cleanup); no parallel task is authorized in this lane.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -49,7 +49,7 @@
 | M1 | [Macro query](details/03a-query-contract.md) | B0, U3 | completed | root session / 2026-09-18T20:50:29+08:00 | Shared `src/app/queries/macros.js` owns list/detail/CRUD hooks; Administration imports the shared module and retains a re-export compatibility layer. Focused M1 tests: 10 pass; full frontend: 21 suites / 115 tests pass; development build compiled; ESLint and diff checks pass. |
 | M2 | [Macro mutation](details/03a-query-contract.md) | M1 | completed | root session / 2026-09-18T22:25:00+08:00 | Shared CRUD hooks cover exact endpoints/variables, prefix invalidation before caller success, failure isolation, and retry=false even when requested by callers. Main App now mounts one MacroQueryEvents bridge and one session cache boundary; focused 3 suites/20 tests pass. |
 | M3 | [Macro UI](details/03a-query-contract.md) | M2 | completed | root session / 2026-09-18T22:55:00+08:00 | Commit `db0db29e`; `Macro.test.jsx` and `MacroMutations.test.jsx` cover query view states, mutation failure retention, pending locks, and nested delete close order. Full frontend: 25 suites / 141 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. |
-| Q2-cleanup | [fetch machine 移除與跨畫面驗收](03-query-and-macro.md) | M3 | todo | — | — |
+| Q2-cleanup | [fetch machine 移除與跨畫面驗收](03-query-and-macro.md) | M3 | completed | root session / 2026-09-18T23:25:00+08:00 | Removed `xstate` and `@xstate/react` after a clean repo-wide audit. Shared-cache regression proves unfiltered widget and paginated Administration observers refetch after one mutation. Full frontend: 25 suites / 142 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. Commit pending. |
 | G1 | [Connection](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G2 | [GCode](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G3 | [Spindle](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |

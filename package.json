@@ -142,7 +142,6 @@
     "@tonic-ui/react": "^2.0.0",
     "@tonic-ui/react-hooks": "^2.0.0",
     "@tonic-ui/react-icons": "^2.0.0",
-    "@xstate/react": "~3.0.1",
     "awilix": "~4.3.1",
     "awilix-express": "~3.0.0",
     "axios": "~1.1.3",
@@ -275,7 +274,6 @@
     "uuid": "~9.0.0",
     "watch": "~1.0.2",
     "winston": "~3.6.0",
-    "xstate": "~4.30.6",
     "xterm": "~4.9.0",
     "xterm-addon-fit": "~0.4.0"
   },
