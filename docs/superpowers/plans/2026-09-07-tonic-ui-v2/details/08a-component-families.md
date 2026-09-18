@@ -35,9 +35,9 @@
 
 **Files:** manifest P0 的 `src/app/components/<Family>/**`；只修改 import graph 證實仍存在的 consumer。
 
-- [ ] 對每一家族先跑 import graph。確認無 runtime consumer 的 Blink、Breadcrumbs、ColorModeProvider、Ellipsis、Form、Input、Loader、OverflowTooltip、RefHolder、RowsHelper、SectionGroup、SectionTitle、Toggle、ToastNotification 直接刪除，不把 class 改成 function 後再保存。
-- [ ] 如果掃到 consumer，依 inventory 的 replacement 改 Tonic `Box/Flex/Text/Input/Spinner/Tooltip` 或原生 expression；有 observable behavior 才補 colocated test。
-- [ ] 刪除失去入口的 index.js、Stylus、圖片與 context；確認 `src/app/styles` 沒有再 import其 Stylus。
+- [x] 對每一家族先跑 import graph。確認無 runtime consumer 的 Blink、Breadcrumbs、ColorModeProvider、Ellipsis、Form、Input、Loader、OverflowTooltip、RefHolder、RowsHelper、SectionGroup、SectionTitle、Toggle、ToastNotification 直接刪除，不把 class 改成 function 後再保存。Graph plus literal alias/relative/barrel scan found zero resolved consumers for all 14 P0 paths; `Notifications/ToastNotification` is a separate P1 family and was not touched.
+- [x] 如果掃到 consumer，依 inventory 的 replacement 改 Tonic `Box/Flex/Text/Input/Spinner/Tooltip` 或原生 expression；有 observable behavior 才補 colocated test。No P0 consumer was found, so no replacement was required.
+- [x] 刪除失去入口的 index.js、Stylus、圖片與 context；確認 `src/app/styles` 沒有再 import其 Stylus。
 
 **Gate:** P0 family names不再出現在 resolved imports；刪除不改任何使用者流程；frontend tests、eslint、build 過。
 

@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **none**（T3 completed；2026-09-18T22:01:00+08:00）
+- Active task: **none**（P0 completed；2026-09-18T22:15:00+08:00）
 - Main: current root session（非 Terra；此限制已記錄）；worker: none; advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: P0 remains dependency-eligible; no task is active in this session.
+- Next eligible task: M2 remains dependency-eligible; no task is active in this session.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -81,7 +81,7 @@
 | R4 | [resources 驗收](09-regression-gates.md) | E4, T3 | todo | — | — |
 | R5 | [commands 驗收](09-regression-gates.md) | E4, A1b, A3b, T3, C1, C2, C3, C4 | todo | — | — |
 | W1 | [Workspace domain](08-workspace-and-cleanup.md) | G1, G2, G3, G4, G5, G6, G7, T3, C1, C2, C3, C4, A2, A3b, E4, B1 | todo | — | — |
-| P0 | [unused families](details/08a-component-families.md) | U3 | todo | — | — |
+| P0 | [unused families](details/08a-component-families.md) | U3 | completed | root session / 2026-09-18T22:15:00+08:00 | Deleted all 14 P0 families after graph/literal zero-consumer audit. `Notifications/ToastNotification` remains separate P1 code. Full frontend 22 suites/126 tests; build-dev, ESLint, and diff checks pass. |
 | P1 | [overlays](details/08a-component-families.md) | W1, P0 | todo | — | — |
 | P2 | [forms](details/08a-component-families.md) | P1 | todo | — | — |
 | P3 | [layout](details/08a-component-families.md) | P2 | todo | — | — |

@@ -761,3 +761,35 @@ Coverage: connected→disconnected→connected disposes and recreates xterm reso
 Worker execution: the dispatched `gpt-5.6-luna` / max worker was stopped after contract review without a diff; root added the bounded lifecycle tests. No worker ledger changes were accepted.
 
 Status transition / blocker ID: T3 `in_progress` → `completed`; no blocker. Next eligible task is P0.
+
+## P0 unused families — started 2026-09-18T22:03:00+08:00
+
+Task / session / timestamp: P0 / root session / 2026-09-18T22:03:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `0074ff98` / working tree clean.
+
+Plan contract: `details/08a-component-families.md` Task P0. Run import-graph/static inventory for Blink, Breadcrumbs, ColorModeProvider, Ellipsis, Form, Input, Loader, OverflowTooltip, RefHolder, RowsHelper, SectionGroup, SectionTitle, Toggle, and ToastNotification. Delete only families with zero resolved runtime consumers, including orphaned index/style/assets/context files; if a consumer exists, use the documented Tonic/native replacement and add only behavior tests. Do not touch P1–P6 families or unrelated UI code.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, ready moderate generation `2026-09-18T11:44:50Z`; structural graph queries plus literal `rg`/filesystem resolution are required because aliases, barrels, and deprecated files can evade one method. Coverage checks will be run for every changed/deleted path and the negative scan.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: P0 is a static/import-resolution task with potentially destructive deletions; max effort is required to prove zero consumers and avoid deleting hidden barrel/style/context dependencies. Worker owns inventory and bounded P0 deletions only, must not modify STATUS/HANDOFF/execution-log, must stop on any consumer ambiguity, and must not delete P1–P6 families.
+
+Changed files / commit: pending worker; no family deletion claimed.
+
+Verification: pending P0 import scan, focused consumer tests if needed, full frontend regression, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: P0 `todo` → `in_progress`; no blocker.
+
+## P0 unused families — completed 2026-09-18T22:15:00+08:00
+
+Task / session / timestamp: P0 / root session / 2026-09-18T22:15:00+08:00.
+
+Changed files: deleted the 14 orphaned P0 family directories under `src/app/components`: Blink, Breadcrumbs, ColorModeProvider, Ellipsis, Form, Input, Loader, OverflowTooltip, RefHolder, RowsHelper, SectionGroup, SectionTitle, Toggle, and ToastNotification. Updated the P0 plan/ledger documents. No consumer replacement was needed. `src/app/components/Notifications/ToastNotification.jsx` is a distinct P1 family and remains untouched.
+
+Import audit: codebase graph search plus literal alias/relative/barrel/style scans found zero resolved runtime consumers for every deleted path. No `src/app/styles` import referenced deleted Stylus. The negative path scan is clean after deletion.
+
+Verification: full `yarn test:frontend --runInBand --silent` passed 22 suites / 126 tests; `yarn build-dev` compiled successfully; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Codebase-memory coverage was refreshed after deletion and reported the deleted family paths as not tracked; direct source and import reads were used for the audit.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker completed the initial static review but produced no diff before it was stopped; root performed the bounded deletion after independently verifying the same zero-consumer result. No worker ledger changes were accepted.
+
+Status transition / blocker ID: P0 `in_progress` → `completed`; no blocker. Next eligible task is M2.
