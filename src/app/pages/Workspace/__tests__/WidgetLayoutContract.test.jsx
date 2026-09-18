@@ -143,9 +143,14 @@ jest.mock('@app/components/Widget', () => {
   return Widget;
 });
 
-jest.mock('@tonic-ui/react', () => ({
-  Space: ({ children }) => children || null,
-}));
+jest.mock('@tonic-ui/react', () => {
+  const React = require('react');
+
+  return {
+    Space: ({ children }) => children || null,
+    Box: ({ children, ...props }) => React.createElement('div', props, children),
+  };
+});
 
 jest.mock('@app/components/FormGroup', () => {
   const React = require('react');

@@ -1,5 +1,12 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Input,
+  InputGroup,
+  InputGroupAddon,
   Space,
   TextLabel,
 } from '@tonic-ui/react';
@@ -9,12 +16,7 @@ import _includes from 'lodash/includes';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Form, Field } from 'react-final-form';
-import { Button, ButtonGroup } from '@app/components/Buttons';
-import Input from '@app/components/FormControl/Input';
-import FormGroup from '@app/components/FormGroup';
-import { Container, Row, Col } from '@app/components/GridSystem';
 import ImageIcon from '@app/components/ImageIcon';
-import InputGroup from '@app/components/InputGroup';
 import {
   CONNECTION_STATE_CONNECTED,
 } from '@app/constants/connection';
@@ -52,15 +54,15 @@ function Spindle({
       subscription={{}}
     >
       {({ form }) => (
-        <Container fluid>
-          <FormGroup>
+        <Box width="100%">
+          <Box mb="4x">
             <TextLabel mb="2x">
               {i18n._('Coolant')}
             </TextLabel>
-            <Row>
-              <Col width={8}>
+            <Flex>
+              <Box width="66.66666667%">
                 <ButtonGroup
-                  sm
+                  size="sm"
                   style={{ width: '100%' }}
                 >
                   <Button
@@ -111,15 +113,15 @@ function Spindle({
                     M9
                   </Button>
                 </ButtonGroup>
-              </Col>
-            </Row>
-          </FormGroup>
-          <FormGroup>
+              </Box>
+            </Flex>
+          </Box>
+          <Box mb="4x">
             <TextLabel mb="2x">
               {i18n._('Spindle')}
             </TextLabel>
-            <Row>
-              <Col width={8}>
+            <Flex>
+              <Box width="66.66666667%">
                 <Field name="speed">
                   {({ input }) => {
                     const invalidSpeed = !Number.isFinite(input.value);
@@ -128,7 +130,7 @@ function Spindle({
 
                     return (
                       <ButtonGroup
-                        sm
+                        size="sm"
                         style={{ width: '100%' }}
                       >
                         <Button
@@ -176,18 +178,18 @@ function Spindle({
                     );
                   }}
                 </Field>
-              </Col>
-            </Row>
-          </FormGroup>
-          <FormGroup>
+              </Box>
+            </Flex>
+          </Box>
+          <Box mb="4x">
             <TextLabel mb="2x">
               {i18n._('Spindle Speed')}
             </TextLabel>
-            <Row>
-              <Col width={8}>
+            <Flex>
+              <Box width="66.66666667%">
                 <Field name="speed">
                   {({ input, meta }) => (
-                    <InputGroup sm>
+                    <InputGroup size="sm">
                       <Input
                         type="number"
                         value={input.value}
@@ -201,18 +203,16 @@ function Spindle({
                           config.set('speed', speed);
                         }}
                       />
-                      <InputGroup.Append>
-                        <InputGroup.Text>
-                          {i18n._('RPM')}
-                        </InputGroup.Text>
-                      </InputGroup.Append>
+                      <InputGroupAddon>
+                        {i18n._('RPM')}
+                      </InputGroupAddon>
                     </InputGroup>
                   )}
                 </Field>
-              </Col>
-            </Row>
-          </FormGroup>
-        </Container>
+              </Box>
+            </Flex>
+          </Box>
+        </Box>
       )}
     </Form>
   );

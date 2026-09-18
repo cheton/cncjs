@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: none（R3 completed; later implementation tasks remain dependency-blocked）
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / max, R3）; advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: **U2** (primitives pilot; depends on completed R1 + R2); later implementation tasks remain dependency-blocked by U2/U3 and downstream contracts.
+- Active task: none（U2 completed; U3 is now eligible）
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / high, U2）; advisor: gpt-5.6-sol / medium（按需唯讀）。
+- Next eligible task: **U3**（overlay/form 合約；依賴 U2）；後續 implementation tasks remain dependency-blocked.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -42,7 +42,7 @@
 | D4 | [Workspace 接線](details/02a-widget-state.md) | D3 | completed | root session / 2026-09-14T00:09:05+08:00 | Added `WorkspaceRoot` layout Provider boundary, function group containers with config-backed ids and one PubSub subscription each, selector-based controller filtering, toolbar `setWidgetsCollapsed` actions, fork/remove/sort persistence, active-id fullscreen cleanup, and `WidgetGroups.test.jsx`. Focused D4 command: 5 suites / 22 tests; full frontend: 10 suites / 31 tests; ESLint/build/diff checks pass. Browser gates remain waived/deferred to R6. |
 | R1 | [Widget view contract 驗收](09-regression-gates.md) | D4 | completed | root session / 2026-09-18T17:58:00+08:00 | `WidgetLayoutContract.test.jsx`: 16 real frame shells, view/fullscreen/accessibility/lifecycle/fork/side-effect assertions; focused 36/36, nearby 55/55, full frontend 12 suites/68 tests; ESLint clean. Fixed missing Autolevel `aria-expanded`. |
 | R2 | [Workspace 驗收](09-regression-gates.md) | D4 | completed | root session / 2026-09-18T18:22:42+08:00 | `WidgetGroups.test.jsx` and `WidgetLifecycle.test.jsx`: reorder, sortable contract, fork/remove, controller filtering, config bursts, idempotent bulk view, hydration/corrupt data, StrictMode listener cleanup; focused 15/15, nearby 65/65, full frontend 13 suites/78 tests; ESLint clean. |
-| U2 | [primitives pilot](02-shared-ui.md) | R1, R2 | todo | — | — |
+| U2 | [primitives pilot](02-shared-ui.md) | R1, R2 | completed | root session / 2026-09-18T19:40:40+08:00 | Direct Tonic pilot in Spindle/GCode; Spindle behavior tests cover M7/M8/M9/M3/M4/M5, disabled state, and speed persistence. Full frontend 16 suites/91 tests; ESLint clean. Remaining legacy consumers logged. |
 | U3 | [overlay/form 合約](02-shared-ui.md) | U2 | todo | — | — |
 | B0 | [HTTP import baseline](details/03b-query-boundaries.md) | H3 | completed | root session / 2026-09-07T18:55:00+08:00 | `query-boundary-baseline.md`; direct imports classified by endpoint, operation, owner task, and explicit exceptions. Static audit only; no transport or browser behavior run. |
 | B1 | [session boundary](details/03b-query-boundaries.md) | B0, U3 | todo | — | — |

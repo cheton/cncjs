@@ -527,3 +527,41 @@ Remaining untested paths: renderer/WebGL resource lifecycle and browser visual e
 Next exact step and expected result: R1, R2, and R3 are complete. U2 is now the only eligible implementation task because its R1/R2 dependencies are complete; preserve the three passing regression baselines.
 
 Status transition / blocker ID: R3 `in_progress` → `completed`; no blocker.
+
+## U2 primitives pilot — started 2026-09-18T19:30:55+08:00
+
+Task / session / timestamp: U2 / root session / 2026-09-18T19:30:55+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `90d7b1b5` / working tree clean.
+
+Plan contract and baseline fixture: `02-shared-ui.md` Task U2. Pilot direct replacement in `src/app/widgets/Spindle/Spindle.jsx` and `src/app/widgets/GCode/index.jsx`; add `src/app/widgets/Spindle/__tests__/Spindle.test.jsx`; preserve controller command callbacks, numeric speed persistence, G-code data rendering, existing view contract, and responsive/light-dark behavior. Do not remove all legacy consumers or create a permanent compatibility wrapper.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `high`, `fork_turns: none`. Selection reason: Tonic primitive mappings and pilot scope are fixed and local; state/timing risk is limited to existing form/controller callbacks, so high is sufficient. Escalation condition: if Tonic prop behavior or callback ownership proves cross-component/async and cannot be validated locally, stop and reclassify to max. Unresolved decision / decision owner: none; root reviews the diff and owns ledger/status.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required Spindle/GCode focused tests, nearby/full frontend regression, ESLint, and diff check.
+
+Status transition / blocker ID: U2 `todo` → `in_progress`; no blocker.
+
+## U2 primitives pilot — completed 2026-09-18T19:40:40+08:00
+
+Task / session / timestamp: U2 / root session / 2026-09-18T19:40:40+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `90d7b1b5` / U2 source/tests and ledger updates only.
+
+Changed files / commit or uncommitted diff: `src/app/widgets/Spindle/Spindle.jsx`, `src/app/widgets/GCode/index.jsx`, `src/app/widgets/Spindle/__tests__/Spindle.test.jsx`, and the Tonic `Box` mock update in `WidgetLayoutContract.test.jsx`; uncommitted, phase commit pending.
+
+Before / after / intentional differences: Spindle no longer imports legacy Buttons, FormControl/Input, FormGroup, GridSystem, or InputGroup. It uses direct Tonic Button/ButtonGroup/Input/InputGroup/InputGroupAddon/Box/Flex primitives while preserving 12-column width semantics (`8/12` → `66.66666667%`), spacing, disabled rules, speed config persistence, and controller commands. GCode replaces the legacy fluid Container with a full-width Tonic Box. The Spindle test rejects legacy primitive imports and verifies all six command payloads, disabled state, and positive/non-positive speed persistence. No broad legacy deletion was attempted.
+
+Verification: required `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Spindle/__tests__/Spindle.test.jsx src/app/widgets/GCode/__tests__/GCodeStats.test.js` / 0 / 2 suites and 4 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 16 suites and 91 tests passed; `yarn eslint src/app/widgets/Spindle/Spindle.jsx src/app/widgets/GCode/index.jsx src/app/widgets/Spindle/__tests__/Spindle.test.jsx src/app/pages/Workspace/__tests__/WidgetLayoutContract.test.jsx` / 0 errors, 17 existing warnings; `git diff --check` / 0.
+
+Review findings and resolutions: Tonic `InputGroupAddon` replaces the legacy compound append/text pair; no compatibility wrapper was introduced. Remaining legacy consumers are intentional and include 34 widget Button imports plus layout imports in `GCodeStats.jsx` and `Spindle/index.jsx`.
+
+Artifacts: `src/app/widgets/Spindle/__tests__/Spindle.test.jsx`.
+
+Remaining untested paths: browser visual comparison and other legacy consumers remain later task scope; no browser gate is required for U2.
+
+Next exact step and expected result: start U3 overlay/form contract pilot, preserving the 16-suite/91-test baseline.
+
+Status transition / blocker ID: U2 `in_progress` → `completed`; no blocker.

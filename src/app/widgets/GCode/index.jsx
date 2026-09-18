@@ -1,10 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Box,
   Space,
 } from '@tonic-ui/react';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Container } from '@app/components/GridSystem';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
@@ -105,14 +105,14 @@ class GCodeWidget extends Component {
               display: (isCollapsed ? 'none' : 'block'),
             }}
           >
-            <Container
-              fluid
+            <Box
+              width="100%"
               style={{
                 padding: '.75rem',
               }}
             >
               <GCodeStats />
-            </Container>
+            </Box>
           </Widget.Content>
         </Widget>
       </WidgetConfigProvider>
