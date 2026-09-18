@@ -47,6 +47,15 @@ jest.mock('xterm', () => ({
       focus: jest.fn(),
       dispose: jest.fn(),
     };
+    instance.line = line;
+    instance.open.mockImplementation(node => {
+      const xtermElement = node.ownerDocument.createElement('div');
+      xtermElement.className = 'xterm';
+      const viewportElement = node.ownerDocument.createElement('div');
+      viewportElement.className = 'xterm-viewport';
+      node.appendChild(xtermElement);
+      node.appendChild(viewportElement);
+    });
     instance.onKey.mockImplementation(handler => {
       instance.keyHandler = handler;
       return instance.keyDisposable;
@@ -198,6 +207,93 @@ describe('useTerminal', () => {
     view.unmount();
   });
 
+  test('disposes and recreates the resource across disconnect and reconnect', () => {
+    const view = render(
+      <Harness
+        enabled={true}
+        cols={254}
+        rows={15}
+        cursorBlink={true}
+        scrollback={1000}
+        tabStopWidth={2}
+        onData={jest.fn()}
+      />,
+    );
+    const firstTerm = mockXtermInstances[0];
+
+    view.rerender(
+      <Harness
+        enabled={false}
+        cols={254}
+        rows={15}
+        cursorBlink={true}
+        scrollback={1000}
+        tabStopWidth={2}
+        onData={jest.fn()}
+      />,
+    );
+    expect(firstTerm.dispose).toHaveBeenCalledTimes(1);
+
+    view.rerender(
+      <Harness
+        enabled={true}
+        cols={254}
+        rows={15}
+        cursorBlink={true}
+        scrollback={1000}
+        tabStopWidth={2}
+        onData={jest.fn()}
+      />,
+    );
+    expect(mockXtermInstances).toHaveLength(2);
+    expect(mockXtermInstances[1]).not.toBe(firstTerm);
+    view.unmount();
+    expect(mockXtermInstances[1].dispose).toHaveBeenCalledTimes(1);
+  });
+
+  test('uses the latest onData callback for Enter and preserves history navigation', () => {
+    const firstOnData = jest.fn();
+    const secondOnData = jest.fn();
+    const view = render(
+      <Harness
+        enabled={true}
+        cols={254}
+        rows={15}
+        cursorBlink={true}
+        scrollback={1000}
+        tabStopWidth={2}
+        onData={firstOnData}
+      />,
+    );
+    const [term] = mockXtermInstances;
+    term.line.translateToString.mockReturnValue('> G0');
+    term._core.buffer.x = 4;
+    term.keyHandler({ key: '\n', domEvent: { key: 'Enter' } });
+    expect(firstOnData).toHaveBeenCalledWith('G0\n');
+
+    view.rerender(
+      <Harness
+        enabled={true}
+        cols={254}
+        rows={15}
+        cursorBlink={true}
+        scrollback={1000}
+        tabStopWidth={2}
+        onData={secondOnData}
+      />,
+    );
+    term.line.translateToString.mockReturnValue('> ');
+    term._core.buffer.x = 2;
+    term.keyHandler({ key: 'ArrowUp', domEvent: { key: 'ArrowUp' } });
+    expect(term.write).toHaveBeenCalledWith('G0');
+
+    term.line.translateToString.mockReturnValue('> G1');
+    term._core.buffer.x = 4;
+    term.keyHandler({ key: '\n', domEvent: { key: 'Enter' } });
+    expect(secondOnData).toHaveBeenCalledWith('G1\n');
+    view.unmount();
+  });
+
   test('preserves prompt, paste, and owner actions', () => {
     const onData = jest.fn();
     const view = render(
@@ -238,7 +334,31 @@ describe('useTerminal', () => {
     expect(term.refresh).toHaveBeenCalled();
     expect(term.selectAll).toHaveBeenCalledTimes(1);
     expect(term.write).toHaveBeenCalledWith(expect.stringContaining('response'), undefined);
+    term.resizeHandler(254, 15);
+    expect(mockScrollbars[0].update).toHaveBeenCalledTimes(1);
 
     view.unmount();
+  });
+
+  test('leaves one active resource under StrictMode and none after unmount', () => {
+    const view = render(
+      <React.StrictMode>
+        <Harness
+          enabled={true}
+          cols={254}
+          rows={15}
+          cursorBlink={true}
+          scrollback={1000}
+          tabStopWidth={2}
+          onData={jest.fn()}
+        />
+      </React.StrictMode>,
+    );
+
+    const activeBeforeUnmount = mockXtermInstances.filter(term => term.dispose.mock.calls.length === 0);
+    expect(activeBeforeUnmount).toHaveLength(1);
+    view.unmount();
+    const activeAfterUnmount = mockXtermInstances.filter(term => term.dispose.mock.calls.length === 0);
+    expect(activeAfterUnmount).toHaveLength(0);
   });
 });

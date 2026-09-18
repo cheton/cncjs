@@ -729,3 +729,35 @@ Verification: focused Console/useTerminal command passed 2 suites / 9 tests; ful
 Scope boundary: T3 reconnect/disconnect/reconnect, callback-after-rerender Enter, paste/history/selection event matrix, StrictMode 20-cycle resource gate, and browser evidence remain unimplemented and are not claimed here.
 
 Status transition / blocker ID: T2 `in_progress` → `completed`; no blocker. Next eligible tasks are T3 and P0.
+
+## T3 Terminal lifecycle — started 2026-09-18T21:58:00+08:00
+
+Task / session / timestamp: T3 / root session / 2026-09-18T21:58:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `8c9a8646` / working tree clean.
+
+Plan contract: `details/04a-terminal-owner.md` Task T3. Prove connected→disconnected→connected resource disposal/recreation, fullscreen resize without owner replacement, latest `onData` on Enter, connection read/write once, paste/history/selection/refresh/resize callbacks, and bounded active resources over repeated mount/unmount plus StrictMode. Browser font/size/selection evidence remains R6 scope.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, ready moderate generation `2026-09-18T11:44:50Z`; T2 source paths have metadata changes and new hook/test paths are not tracked, so direct source/test reads remain authoritative. Coverage will be checked for the T3 paths before completion.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: T3 combines React effect ordering, xterm resource disposal, callback freshness, history/input semantics, and StrictMode accounting; max effort is required for lifecycle risk. Worker owns only T3 test additions/adjustments and bounded hook fixes in the Console files; it must not modify STATUS/HANDOFF/execution-log, must preserve T2’s public API, and must stop/report if a browser-only claim is required.
+
+Changed files / commit: pending worker; no lifecycle gate claimed.
+
+Verification: pending focused Console/useTerminal lifecycle tests, nearby/full frontend regression, ESLint, development build, and `git diff --check`.
+
+Status transition / blocker ID: T3 `todo` → `in_progress`; no blocker.
+
+## T3 Terminal lifecycle — completed 2026-09-18T22:01:00+08:00
+
+Task / session / timestamp: T3 / root session / 2026-09-18T22:01:00+08:00.
+
+Changed files: `src/app/widgets/Console/__tests__/useTerminal.test.jsx` and the T3 plan/ledger documents. No production source change was required; T2’s resource owner passed the lifecycle gates.
+
+Verification: focused Console/useTerminal command passed 2 suites / 12 tests; full `yarn test:frontend --runInBand --silent` passed 22 suites / 126 tests; full `yarn eslint` exited 0 with 17 existing warnings; `git diff --check` passed. Codebase-memory coverage reported no recorded issue but stale metadata for T2/new paths; direct source/test reads were used, and the test subtree remains intentionally excluded.
+
+Coverage: connected→disconnected→connected disposes and recreates xterm resources; latest `onData` is used by Enter after rerender; history up, multiline paste, selection, refresh, resize, fullscreen/size updates, connection owner behavior, and StrictMode one-active/zero-after-unmount checks pass. Browser font/size/selection evidence remains deferred to R6 under the existing BR0 waiver.
+
+Worker execution: the dispatched `gpt-5.6-luna` / max worker was stopped after contract review without a diff; root added the bounded lifecycle tests. No worker ledger changes were accepted.
+
+Status transition / blocker ID: T3 `in_progress` → `completed`; no blocker. Next eligible task is P0.

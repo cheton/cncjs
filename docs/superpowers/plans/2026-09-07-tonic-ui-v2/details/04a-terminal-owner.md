@@ -46,10 +46,10 @@
 
 ## Task T3：事件與 lifecycle gates
 
-- [ ] connected→disconnected→connected：原 console DOM/資源 dispose，新 terminal 初始化；history 的重連重設與原 Terminal remount 一致。
-- [ ] fullscreen toggle 只 resize，反覆 collapse 不卸載；connection read/write 每筆顯示一次。
-- [ ] rerender 更換 onData，再 Enter 使用新 callback；自己 sender echo 不寫一次以上。
-- [ ] 模擬 paste 多行、history up/down、selection、refresh、resize callbacks；以 controlled fake xterm API 驗證，不 mock 整個 useTerminal。
-- [ ] 20 次 mount/unmount、StrictMode 活躍資源為零/一份，見 R4；真 browser 有字型、實際寬高與選取驗證，見 R6。
+- [x] connected→disconnected→connected：原 console DOM/資源 dispose，新 terminal 初始化；history 的重連重設與原 Terminal remount 一致。
+- [x] fullscreen toggle 只 resize，反覆 collapse 不卸載；connection read/write 每筆顯示一次。
+- [x] rerender 更換 onData，再 Enter 使用新 callback；自己 sender echo 不寫一次以上。
+- [x] 模擬 paste 多行、history up/down、selection、refresh、resize callbacks；以 controlled fake xterm API 驗證，不 mock 整個 useTerminal。
+- [x] 20 次 mount/unmount、StrictMode 活躍資源為零/一份，見 R4；真 browser 有字型、實際寬高與選取驗證，見 R6。Browser evidence remains an R6 gate.
 
 Run: `yarn test:frontend --runInBand --runTestsByPath src/app/widgets/Console/__tests__/Console.test.jsx src/app/widgets/Console/__tests__/useTerminal.test.jsx`，再 `yarn eslint`、`yarn build`。
