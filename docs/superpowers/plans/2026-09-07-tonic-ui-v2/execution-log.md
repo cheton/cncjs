@@ -489,3 +489,41 @@ Remaining untested paths: native browser Sortable drag mechanics and full localS
 Next exact step and expected result: start R3 geometry baseline with real `three` and `GCodeVisualizer`; preserve R1/R2 frontend test baseline.
 
 Status transition / blocker ID: R2 `in_progress` → `completed`; no blocker.
+
+## R3 geometry baseline — started 2026-09-18T18:25:06+08:00
+
+Task / session / timestamp: R3 / root session / 2026-09-18T18:25:06+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `89a863a8` / working tree clean.
+
+Plan contract and baseline fixture: `09-regression-gates.md` Task R3 and `geometry-baseline.json`. Create `src/app/widgets/Visualizer/__tests__/fixtures.js`, `geometry.test.js`, and `pivot.test.js`; use real `three`, real `GCodeVisualizer`, real parser/helpers, hand-written expected geometry, explicit cleanup, arc-plane fixtures, empty/reload/unit/frame cases, and pivot oracle with tolerance.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: R3 is a geometry oracle and pivot/state baseline spanning parser, Three.js object ownership, arc sampling, and machine-profile transitions; contract is fixed but verification and numerical/state risk are high. Unresolved decision / decision owner: none; root reviews the oracle and owns ledger/status.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required focused geometry/pivot tests, nearby/full frontend regression, ESLint, and diff check.
+
+Status transition / blocker ID: R3 `todo` → `in_progress`; no blocker.
+
+## R3 geometry baseline — completed 2026-09-18T18:43:47+08:00
+
+Task / session / timestamp: R3 / root session / 2026-09-18T18:43:47+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `89a863a8` / R3 tests and ledger updates only.
+
+Changed files / commit or uncommitted diff: `src/app/widgets/Visualizer/__tests__/fixtures.js`, `geometry.test.js`, and `pivot.test.js`; uncommitted, phase commit pending.
+
+Before / after / intentional differences: R3 now records real parser/Three.js geometry using the fixed rectangle and repo arc-plane fixtures, hand-written bounds and sample points, metric/imperial units, empty input, frame-index bounds, same/different reload replacement, and explicit geometry/material cleanup. Pivot tests exercise profile A/profile B/no profile transitions, G-code centering, unload behavior, and world-center tolerance `1e-6` through the existing Visualizer class and renderer scene capture.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/pivot.test.js` / 0 / 2 suites and 10 tests passed; nearby Visualizer tests / 0 / 4 suites and 12 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 15 suites and 88 tests passed; `yarn eslint src/app/widgets/Visualizer/__tests__/fixtures.js src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/pivot.test.js` / 0 errors, 17 existing warnings; `git diff --check` / 0.
+
+Review findings and resolutions: the initial rectangle assertion used `min.x = 11`, but the real parser and plan fixture produce `10`; corrected to the plan oracle. The initial frame-color assertion assumed a THREE.Color object, but Three.js stores the known lightgrey value as an integer; removed the non-contract color assertion rather than coupling the gate to representation. No production changes were needed.
+
+Artifacts: `src/app/widgets/Visualizer/__tests__/fixtures.js`, `geometry.test.js`, `pivot.test.js`.
+
+Remaining untested paths: renderer/WebGL resource lifecycle and browser visual evidence remain R4/R6 obligations; R3 is a non-browser geometry/pivot gate.
+
+Next exact step and expected result: R1, R2, and R3 are complete. U2 is now the only eligible implementation task because its R1/R2 dependencies are complete; preserve the three passing regression baselines.
+
+Status transition / blocker ID: R3 `in_progress` → `completed`; no blocker.

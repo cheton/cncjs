@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: none（R2 completed; waiting to start R3）
-- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / max, R2）; advisor: gpt-5.6-sol / medium（按需唯讀）。
-- Next eligible task: **R3**（依 `Depends on` 全部 completed/waived 計算）；其餘 todo 仍被未完成依賴擋住。
+- Active task: none（R3 completed; later implementation tasks remain dependency-blocked）
+- Main: current root session（非 Terra；此限制已記錄）；worker: none（last worker `gpt-5.6-luna` / max, R3）; advisor: gpt-5.6-sol / medium（按需唯讀）。
+- Next eligible task: **U2** (primitives pilot; depends on completed R1 + R2); later implementation tasks remain dependency-blocked by U2/U3 and downstream contracts.
 - Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -72,7 +72,7 @@
 | A2 | [Tool](06-motion-widgets.md) | A1b | todo | — | — |
 | A3a | [Autolevel forms](06-motion-widgets.md) | A1b | todo | — | — |
 | A3b | [Autolevel workflow](06-motion-widgets.md) | A3a | todo | — | — |
-| R3 | [geometry baseline](09-regression-gates.md) | R0 | todo | — | — |
+| R3 | [geometry baseline](09-regression-gates.md) | R0 | completed | root session / 2026-09-18T18:43:47+08:00 | Real `three` + `GCodeVisualizer` geometry, arc-plane samples, units, empty/reload/frame cases, and Visualizer pivot/profile transitions; focused 10/10 R3, Visualizer nearby 12/12, full frontend 15 suites/88 tests; ESLint clean. |
 | V1 | [toolbar/watch directory](07-visualizer.md) | A3b, U3 | todo | — | — |
 | E1 | [load characterization](details/07a-visualizer-engine.md) | R3, A3b | todo | — | — |
 | E2 | [engine extraction](details/07a-visualizer-engine.md) | E1 | todo | — | — |
