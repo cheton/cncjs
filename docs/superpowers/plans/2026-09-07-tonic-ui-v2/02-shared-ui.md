@@ -74,10 +74,10 @@ const controls = (
 **Read:** `src/app/components/Modal/*`, `ModalTemplate/*`, `Validation/*`, `Notifications/*`, `src/app/lib/portal.jsx`, `src/app/hooks/useToast.js`。
 **Pilot Modify:** `src/app/widgets/Custom/modals/SettingsModal.jsx`（以 inventory 實際路徑核對），及其呼叫者。測試 `src/app/widgets/Custom/__tests__/SettingsModal.test.jsx`。
 
-- [ ] 將舊 Modal compound elements 換 Tonic imports；`show` → `isOpen`、`showCloseButton` → `isClosable`；overlay click、Esc、focus-lock 顯式設定，不沿用 Tonic 預設猜行為。
-- [ ] 單個 widget 的 modal 開關優先 local state；本來用 portal 的允許繼續使用。不要為 Tonic 新建第二套 ModalProvider/ModalRoot。
-- [ ] 舊 Validation 不是 Tonic form engine 的等價物。使用既有 react-final-form 加 Tonic fields，保持 validation timing、初始值、dirty/cancel/submit 行為；只在被遷移的表單修改。
-- [ ] Notifications UI 轉 Tonic Toast/Alert，使用現有 app useToast 保存 error/warning persistent、info/success 五秒規則。若來源是瀏覽器 OS notification，保留該 domain side effect。
-- [ ] 測試 submit success 才 close、failure 保留輸入、Cancel 不送 request、nested modal 關閉順序與 focus restoration、overlay/escape 一致。
+- [x] 將舊 Modal compound elements 換 Tonic imports；`show` → `isOpen`、`showCloseButton` → `isClosable`；overlay click、Esc、focus-lock 顯式設定，不沿用 Tonic 預設猜行為。
+- [x] 單個 widget 的 modal 開關優先 local state；本來用 portal 的允許繼續使用。不要為 Tonic 新建第二套 ModalProvider/ModalRoot。（本 pilot 保留既有 Custom `ModalProvider/ModalRoot`，未新增第二套。）
+- [x] 舊 Validation 不是 Tonic form engine 的等價物。使用既有 react-final-form 加 Tonic fields，保持 validation timing、初始值、dirty/cancel/submit 行為；只在被遷移的表單修改。
+- [x] Notifications UI 轉 Tonic Toast/Alert，使用現有 app useToast 保存 error/warning persistent、info/success 五秒規則。若來源是瀏覽器 OS notification，保留該 domain side effect。（本 pilot 無 notification consumer；既有 `useToast` 已使用 Tonic Toast，語意未改。）
+- [x] 測試 submit success 才 close、failure 保留輸入、Cancel 不送 request、nested modal 關閉順序與 focus restoration、overlay/escape 一致。
 
 **Gate:** pilot 可操作；後續 tasks 有核實過的 replacement 範例；不新增永久通用 UI wrapper。全部 consumers 完成後由 08 刪除 legacy Modal/Dropdown/Validation 等。

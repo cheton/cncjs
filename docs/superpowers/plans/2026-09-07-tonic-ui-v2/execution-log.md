@@ -565,3 +565,37 @@ Remaining untested paths: browser visual comparison and other legacy consumers r
 Next exact step and expected result: start U3 overlay/form contract pilot, preserving the 16-suite/91-test baseline.
 
 Status transition / blocker ID: U2 `in_progress` → `completed`; no blocker.
+
+## U3 overlay/form contract — started 2026-09-18T19:47:18+08:00
+
+Task / session / timestamp: U3 / root session / 2026-09-18T19:47:18+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `a2a19935` / generated `.codebase-memory/` only; no source changes.
+
+Plan contract: `02-shared-ui.md` Task U3. Pilot the Custom settings modal with direct Tonic Modal/Button/field primitives; explicitly configure `isOpen`, `isClosable`, overlay/Escape behavior, focus lock and focus restoration; preserve react-final-form initial values, validation timing, dirty/cancel/submit semantics; retain existing `useToast` persistence behavior; add modal/form interaction tests including submit success/failure, cancel, overlay/Escape, and nested-close focus ordering. Do not add another modal provider/root or broadly remove legacy families.
+
+Codebase-memory handoff: project `cncjs-tonic-ui-v2`, moderate index generation `2026-09-18T11:44:50Z`; `search_graph` located `src/app/widgets/Custom/modals/SettingsModal.jsx`, old Modal family, and `useToast.js`; `trace_path` returned no JSX callers/callees, so literal callers must be checked with `rg`; `check_index_coverage` reported no recorded issue for all relied-on source files.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `max`, `fork_turns: none`. Selection reason: U3 changes modal lifecycle, focus lock/restoration, overlay/Escape semantics, react-final-form validation/submission timing, and nested modal behavior; the task has fixed scope but high state and accessibility risk. Worker must use test-first red/green evidence, stop and report if the Tonic API cannot preserve the old contract, and must not modify STATUS/HANDOFF/execution-log.
+
+Changed files / commit: pending worker.
+
+Verification: pending worker; required focused SettingsModal tests, nearby/full frontend regression, ESLint, and `git diff --check`.
+
+Status transition / blocker ID: U3 `todo` → `in_progress`; no blocker.
+
+## U3 overlay/form contract — completed 2026-09-18T20:01:41+08:00
+
+Task / session / timestamp: U3 / root session / 2026-09-18T20:01:41+08:00.
+
+Changed files: `src/app/widgets/Custom/modals/SettingsModal.jsx` and `src/app/widgets/Custom/__tests__/SettingsModal.test.jsx`. Existing Custom `ModalProvider/ModalRoot` caller wiring remains; no second provider/root was added. `useToast` was inspected and left unchanged because it already renders Tonic `Toast` with the required success/info 5-second and error/warning persistent durations.
+
+Before / after / intentional differences: the pilot removed legacy Button, FormControl/Input, FormGroup, InlineError, and compound Modal imports. It now renders direct Tonic Modal/Overlay/Content/Header/Body/Footer/Button/Input/Box/Text primitives; maps `isOpen`/`isClosable`; explicitly enables `autoFocus`/`ensureFocus`/`closeOnEsc`/`returnFocusOnClose` behavior and disables outside interaction. React Final Form initial values, field wiring, submit/cancel flow, config writes, touched-error rendering, and draft preservation remain in place. Synchronous config-write failures become form-level errors and do not close the modal.
+
+Worker execution: the two dispatched Luna `max` workers were stopped after no source/test diff became visible; root completed the bounded implementation after preserving the same contract and recording the result here. No worker ledger changes were accepted.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Custom/__tests__/SettingsModal.test.jsx` / 0 / 1 suite and 6 tests passed; nearby Custom + Workspace contract/lifecycle tests / 0 / 3 suites and 46 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 17 suites and 97 tests passed; ESLint exits 0 with 17 existing warnings and no errors; `git diff --check` exits 0. Codebase-memory coverage check returned no recorded issue for the changed source and new test (source metadata changed/new test not tracked, so direct source/test reads were used).
+
+Review findings and resolutions: Tonic focus restoration completes after the controlled caller unmounts the always-open modal; the test harness models that lifecycle. Nested Escape closes only the top dialog and then restores the original trigger after the outer dialog closes. The literal `final-form` `FORM_ERROR` key is used so returned failures render through `FormSpy`.
+
+Status transition / blocker ID: U3 `in_progress` → `completed`; no blocker.
