@@ -14,7 +14,7 @@
 
 使用者提到的「blocking」在此指 task **被阻塞**；造成其他 task 無法開始的關係由 Depends on 欄表示。無權限執行的 plan_only 暫停是專案模式，不把全部 tasks 標 blocking。
 
-使用者明確授權時，可將特定 gate 記為 `waived` 並讓明確指定的下游 task 繼續。waiver 必須在 `STATUS.md`、`HANDOFF.md` 與 execution log 記錄 scope、未完成 evidence、接受的風險與重新驗證位置；不得把 waived 當成 completed，也不得讓它繞過最終交付 gate。
+使用者明確授權時，可將特定 gate 記為 `waived` 並讓明確指定的下游 task 繼續。waiver 必須在 `STATUS.md`、[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) 與 execution log 記錄 scope、未完成 evidence、接受的風險與重新驗證位置；不得把 waived 當成 completed，也不得讓它繞過最終交付 gate。
 
 ## Terra main loop / Luna worker
 
@@ -22,7 +22,7 @@
 
 | 角色 | 責任與寫入範圍 |
 | --- | --- |
-| Terra main | 讀依賴、細化合約、選 task、派工、獨立 review 與整合驗證；唯一可修改 STATUS、HANDOFF、execution-log 及計畫 checkboxes 的角色 |
+| Terra main | 讀依賴、細化合約、選 task、派工、獨立 review 與整合驗證；唯一可修改 STATUS、[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)、execution-log 及計畫 checkboxes 的角色 |
 | Luna worker | 在指定 files/contract 內實作、跑測試、回報 diff 與證據；不自行改架構、擴大範圍、標 completed、派更多 subagents 或 commit |
 | Sol medium advisor（按需） | 對具體技術問題做獨立、唯讀判斷；回傳來源證據、選項與建議，不改 source/ledger、不派工；Terra 負責採納與整合 |
 
@@ -30,7 +30,7 @@
 
 所有 browser tests、browser regression、screenshot、accessible snapshot，以及 Playwright／browser runner 操作，**必須**由 `gpt-5.6-luna`、`reasoning_effort: "medium"` 執行。此規則覆蓋本文件其他 Luna effort 預設與 task matrix。
 
-- 主控只可提供 bounded brief、審核實際 evidence、更新 `STATUS.md`／`HANDOFF.md`／`execution-log.md`，不得自行執行 browser 操作或改派其他模型。
+- 主控只可提供 bounded brief、審核實際 evidence、更新 `STATUS.md`／[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)／`execution-log.md`，不得自行執行 browser 操作或改派其他模型。
 - 若 Luna medium 不可用，browser gate 保持 `in_progress` 或記錄具名 blocker；不得以主控、Terra、Sol 或其他 model 代跑並宣稱已驗證。
 - 每個 browser worker brief 與 execution log 必須記錄此 hard rule 與實際 `model`／`reasoning_effort`。
 
@@ -120,17 +120,17 @@ Sol 判斷期間讓 Luna 在 checkpoint 暫停，避免同一問題邊修改邊 
 4. Luna 回傳：changed files、實作摘要、命令/exit code、未跑項目、review 注意事項、blocker 或下一步；測試結果標明所測工作樹，不只說「passed」。
 5. Terra 讀實際 diff，檢查 contract、command payload、effect cleanup 與測試品質。worker 的自評不等於 completed；必要的整合/browser/simulator gates 由 Terra 確認實際證據。
 6. 有缺陷時 Terra 給同一 worker 具體修正與驗收條件。相同缺陷連續兩次修正仍未解時，停止盲目重試，由 Terra 診斷/縮小問題；真正無法推進才標 blocking，記解阻條件。
-7. 通過後由 Terra 更新 completed、checkbox、log、HANDOFF。若本次授權為 loop，繼續同一授權範圍內下一個 eligible task；若指定單一 task，完成即停止。
+7. 通過後由 Terra 更新 completed、checkbox、log、交接入口。若本次授權為 loop，繼續同一授權範圍內下一個 eligible task；若指定單一 task，完成即停止。
 
-使用者說「開始 main loop」但沒有指定範圍時，預設跑 **目前階段**（01–09 的單一父計畫及必要的細化/驗收），完成該階段即交接；不自動跑完整 migration。範圍、停止邊界先記在 HANDOFF，無需每個 task 重問。遇到需要使用者決策的 scope 變更、無可執行 task、使用者要求停止或 session 資源不足，保存 checkpoint 後停止。
+使用者說「開始 main loop」但沒有指定範圍時，預設跑 **目前階段**（01–09 的單一父計畫及必要的細化/驗收），完成該階段即交接；不自動跑完整 migration。範圍、停止邊界先記在交接入口，無需每個 task 重問。遇到需要使用者決策的 scope 變更、無可執行 task、使用者要求停止或 session 資源不足，保存 checkpoint 後停止。
 
 ### Worker 中斷與重啟
 
-subagent ID 只供當前 session 查詢，不是長期恢復機制。worker 中斷時先檢查 process 是否仍在執行，再核對 dirty diff/最後命令；保留可用修改，不 reset。新的 Luna 從持久 brief、實際 diff 與下一步恢復，不從頭覆寫。Terra session 結束前讓 worker 停在安全點，將未完成內容寫入 HANDOFF；不能留下仍在寫檔的 worker 卻派另一個接手。
+subagent ID 只供當前 session 查詢，不是長期恢復機制。worker 中斷時先檢查 process 是否仍在執行，再核對 dirty diff/最後命令；保留可用修改，不 reset。新的 Luna 從持久 brief、實際 diff 與下一步恢復，不從頭覆寫。Terra session 結束前讓 worker 停在安全點，將未完成內容寫入交接入口；不能留下仍在寫檔的 worker 卻派另一個接手。
 
 ## 啟動程序（每次換模型／隔週接手都做）
 
-1. 讀 HANDOFF、STATUS、00-design、repo AGENTS；執行 git status --short 與 git rev-parse HEAD。比對 handoff 的 branch、HEAD、dirty files。保留未知差異，先判斷是否影響目標 task。
+1. 讀 [交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)、STATUS、00-design、repo AGENTS；執行 git status --short 與 git rev-parse HEAD。比對 handoff 的 branch、HEAD、dirty files。保留未知差異，先判斷是否影響目標 task。
 2. 確認本次使用者授權是 plan_only 或 implementation。單純請求 review/handoff 不啟動 coding。
 3. 若有 in_progress，先看 checkpoint 並恢復同一 task；若 owner 是仍在執行的 session，不重複領取。owner 欄包含 session 日期/識別，不以模型名稱作唯一 owner。
 4. 若有 blocking，只有解阻條件已成立才重試。否則挑無依賴阻塞的 todo。每次派工一個最小 task；是否繼續下一個依本次 loop 授權範圍，不因 handoff 自動啟動 implementation。
@@ -162,10 +162,10 @@ completed 要有所有必要 unit/integration、browser、simulator gates 的實
 ## 停止與 handoff
 
 1. 在安全邊界停止：記錄尚未完成的 edit/test；不丟棄使用者修改。
-2. 同步 STATUS、execution-log、相關 plan checkboxes；最後更新 HANDOFF 的 current checkpoint。
-3. 有提交授權才 commit；沒有則寫明 dirty files 與 diff。HANDOFF 不要求必須已有 commit 才能恢復。
+2. 同步 STATUS、execution-log、相關 plan checkboxes；最後更新交接入口的 current checkpoint。
+3. 有提交授權才 commit；沒有則寫明 dirty files 與 diff。交接入口不要求必須已有 commit 才能恢復。
 4. 有背景 dev server/simulator 要記 session/PID、port、啟動命令與 owner；結束僅停自己的 process。不能 kill 共用程序。
-5. 可另輸出 /tmp handoff 便於轉交，但內容以 repo 內 HANDOFF 連結為準。/tmp 遺失不影響恢復。
+5. 可另輸出 /tmp handoff 便於轉交，但內容以 repo 內交接入口連結為準。/tmp 遺失不影響恢復。
 
 ## 計畫演進與重新驗證
 

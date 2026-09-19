@@ -2,7 +2,7 @@
 
 本套文件是可交給 terra / luna 逐 task 執行的計畫。範圍為 **`src/app` 全部 UI 與 React class components**，其中 widgets 位於 `src/app/widgets`，共 17 種。使用者提到的 `src/widgets`、`src/components` 在這個 checkout 對應到上述路徑。計畫已進入執行階段；進度以 [STATUS](STATUS.md) 為準。
 
-**跨 session 入口：`../../cncjs-next-tonic-ui-v2-handoff.md` → [HANDOFF.md](HANDOFF.md) → [STATUS.md](STATUS.md) → [EXECUTION.md](EXECUTION.md)。** 狀態使用 `todo / in_progress / completed / blocking / waived`；STATUS 是唯一來源，父 task 與細化 task 的對應也在其中。下一次請從 bootstrap 入口開始，並使用 HANDOFF 中的恢復 prompt。
+**跨 session 入口：[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) → [STATUS.md](STATUS.md) → [EXECUTION.md](EXECUTION.md)。** 交接入口是唯一入口（快照、hard rules、恢復 prompt 都在該檔）。狀態使用 `todo / in_progress / completed / blocking / waived`；STATUS 仍是唯一 task ledger。
 
 ## 文件目錄與維護責任
 
@@ -17,17 +17,16 @@ docs/superpowers/
     ├── details/                        # 子任務合約、步驟與測試案例
     ├── STATUS.md                       # 唯一 task ledger
     ├── EXECUTION.md                    # 狀態轉移與交接規則
-    ├── HANDOFF.md                      # 最新 checkpoint、恢復 prompt
     ├── execution-log.md                # 追加式執行歷史與驗證證據索引
     ├── geometry-baseline.json          # 已保存的幾何量測
     └── artifacts/                      # 執行時才建立：task/session 驗證產物
 ```
 
-檔案依責任分工，不依 todo/in_progress/completed 移動目錄；任務 ID 與連結維持穩定。plan/details 只在步驟或合約改變時更新；每次 session 更新 STATUS、execution-log 與 HANDOFF，step checkbox 同步到對應 plan。
+檔案依責任分工，不依 todo/in_progress/completed 移動目錄；任務 ID 與連結維持穩定。plan/details 只在步驟或合約改變時更新；每次 session 更新 STATUS、execution-log 與[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)，step checkbox 同步到對應 plan。
 
 artifacts 建議路徑為 `artifacts/<task-id>/<session-id>/`；09a 的共用 browser 命令與 fixture 說明放 `artifacts/browser/`。實際測試程式及合成 fixtures 依各 task 放在 src/app/test 或 colocated __tests__，不把測試程式藏在文件目錄。大型產物可用 durable CI artifact，log 留連結與期限；不提交密碼、token 或 browser storage state。
 
-HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 session 新增另一份完整 handoff。bootstrap 入口 `../../cncjs-next-tonic-ui-v2-handoff.md` 只放快照與讀取順序；/tmp 便攜 handoff 可隨時重建。多週後不需重命名計畫日期；專案完成後保留原路徑與最終 STATUS。
+交接入口只保留最新恢復資訊，歷史寫 execution-log，不每次 session 新增另一份完整 handoff。本計畫目錄不再放第二份 handoff；/tmp 便攜 handoff 可隨時重建。多週後不需重命名計畫日期；專案完成後保留原路徑與最終 STATUS。
 
 ## 已核對的基線
 
@@ -56,7 +55,7 @@ HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 sessio
 
 ## 給 terra / luna 的起始 prompt
 
-下方只適用第一次 F1；之後一律使用 [HANDOFF](HANDOFF.md) 的恢復 prompt，先核对 STATUS 的 active task，避免每個新 session 都從 F1 開始。
+下方只適用第一次 F1；之後一律使用[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)的恢復 prompt，先核對 STATUS 的 active task，避免每個新 session 都從 F1 開始。
 
 ```text
 請執行 docs/superpowers/plans/2026-09-07-tonic-ui-v2/01-foundation.md 的第一個未完成 task。
@@ -67,7 +66,7 @@ HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 sessio
 更新 task checkbox 與執行紀錄。沒有測過的 UI flow 不能宣稱通過。
 ```
 
-角色固定為 Terra main loop、Luna implementation worker；共用介面、Query、Axes、Autolevel、Visualizer 由 Terra 先細化 contract 再派 Luna，所有 diff 由 Terra review。最多一個活躍 worker，Terra 唯一維護狀態；詳細規則見 EXECUTION。開始時選 Terra 為主模型並使用 HANDOFF prompt，不需導入 loop-engineering。
+角色固定為 Terra main loop、Luna implementation worker；共用介面、Query、Axes、Autolevel、Visualizer 由 Terra 先細化 contract 再派 Luna，所有 diff 由 Terra review。最多一個活躍 worker，Terra 唯一維護狀態；詳細規則見 EXECUTION。開始時選 Terra 為主模型並使用交接入口的恢復 prompt，不需導入 loop-engineering。
 
 ## 每個 task 的執行與交接
 

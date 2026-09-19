@@ -2,7 +2,7 @@
 
 更新日期：2026-09-19。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
-本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
+本檔是任務狀態唯一來源；[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) 是恢復起點，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
