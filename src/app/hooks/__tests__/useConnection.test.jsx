@@ -42,7 +42,7 @@ function ConnectionConsumer({ runtime }) {
   return (
     <>
       <span data-testid="connection-state">{connection.state}</span>
-      <button onClick={() => connection.open({ controller: {}, connection: {} })}>
+      <button type="button" onClick={() => connection.open({ controller: {}, connection: {} })}>
         Open
       </button>
     </>

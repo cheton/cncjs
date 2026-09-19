@@ -240,6 +240,38 @@ describe('Connection form', () => {
     expect(mockRefetchBaudRates).toHaveBeenCalledTimes(1);
   });
 
+  test('disables serial refresh while connected', () => {
+    mockConnection = createConnection({
+      state: 'connected',
+      ident: 'serial:/dev/ttyUSB0',
+    });
+
+    renderAppUI(<Connection />);
+
+    expect(screen.getAllByRole('button', { name: 'Refresh' })[0]).toBeDisabled();
+    expect(screen.getAllByRole('button', { name: 'Refresh' })[1]).toBeDisabled();
+  });
+
+  test('preserves network selection and sends the socket port in the open payload', () => {
+    renderAppUI(<Connection />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wi-Fi' }));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'cnc.local' } });
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '9010' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+
+    expect(mockOpen).toHaveBeenCalledWith({
+      controller: { type: 'grbl' },
+      connection: {
+        type: 'socket',
+        options: {
+          host: 'cnc.local',
+          port: 9010,
+        },
+      },
+    });
+  });
+
   test('disables a duplicate open while the runtime is awaiting confirmation', () => {
     mockConnection = createConnection({
       state: 'error',
