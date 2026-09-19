@@ -1,15 +1,15 @@
 # Migration task status
 
-更新日期：2026-09-18。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-19。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[HANDOFF](HANDOFF.md) 是恢復入口，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: **none**（Q2-cleanup completed 2026-09-18T23:25:00+08:00）
+- Active task: **G1**（Connection；started 2026-09-19T10:37:18+08:00；現在 `blocking`）
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: **G1–G7** (all depend on Q2-cleanup); no parallel task is authorized in this lane.
-- Current blockers: 無未解 blocker。BR0 is waived, not passed, by explicit user direction. Existing evidence still proves only connection/upload/Run/Pause/Resume; Stop/jog/disconnect/large/watch/viewport and the new selector browser evidence remain unverified. These gaps are carried to R6, which remains a hard final gate. System Chrome channel remains unsupported for screenshots.
+- Next eligible task: **G1** is blocked by G1-B01; no parallel task is authorized in this lane.
+- Current blockers: G1-B01 requires open/close request timeout and stale-response protection, but the current execution brief limits production changes to `src/app/widgets/Connection/` and forbids reducer/saga changes. Redux/controller own the connection state, so this contract cannot be proven within the authorized scope. BR0 is waived, not passed, by explicit user direction. Existing browser evidence still proves only connection/upload/Run/Pause/Resume; remaining browser gaps are carried to R6. System Chrome channel remains unsupported for screenshots.
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
 - Validation: `98ceb1f6` 修正 `Console` `term.current.clear` crash（`term.clear()`），並新增 `Console.test.jsx`；該 commit 上 full frontend 為 11 suites / 32 tests pass、`yarn eslint` 0 errors、development build 編譯成功（僅既有 `Connection.jsx` warning）。D4 focused tests pass 5 suites / 22 tests; full frontend passes 10 suites / 31 tests; `yarn eslint` exits 0 with 17 existing warnings; `yarn build` compiles successfully with existing bundle-size and i18next scanner warnings. The negative Workspace instance-control scan is clean. The full Jest path is not a D4 completion gate: `SocketConnection` remains excluded per user direction, and the prior sandbox server run recorded `listen EPERM` separately. BR0 browser gaps are waived for the current implementation path and must be re-run at R6.
@@ -50,7 +50,7 @@
 | M2 | [Macro mutation](details/03a-query-contract.md) | M1 | completed | root session / 2026-09-18T22:25:00+08:00 | Shared CRUD hooks cover exact endpoints/variables, prefix invalidation before caller success, failure isolation, and retry=false even when requested by callers. Main App now mounts one MacroQueryEvents bridge and one session cache boundary; focused 3 suites/20 tests pass. |
 | M3 | [Macro UI](details/03a-query-contract.md) | M2 | completed | root session / 2026-09-18T22:55:00+08:00 | Commit `db0db29e`; `Macro.test.jsx` and `MacroMutations.test.jsx` cover query view states, mutation failure retention, pending locks, and nested delete close order. Full frontend: 25 suites / 141 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. |
 | Q2-cleanup | [fetch machine 移除與跨畫面驗收](03-query-and-macro.md) | M3 | completed | root session / 2026-09-18T23:25:00+08:00 | Commit `730a0045`; removed `xstate` and `@xstate/react` after a clean repo-wide audit. Shared-cache regression proves unfiltered widget and paginated Administration observers refetch after one mutation. Full frontend: 25 suites / 142 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. |
-| G1 | [Connection](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
+| G1 | [Connection](04-general-widgets.md) | U3, Q2-cleanup | blocking | root session / 2026-09-19T17:18:18+08:00 | Partial implementation and tests are complete: focused Connection suite 10/10, full frontend 26 suites/152 tests, `yarn build-dev` exit 0, ESLint exit 0 with 17 existing warnings, and diff check clean. G1-B01 remains: request timeout/generation and late open-after-disconnect protection require reducer/saga ownership outside the authorized Connection-only scope. |
 | G2 | [GCode](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G3 | [Spindle](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G4 | [Laser](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |

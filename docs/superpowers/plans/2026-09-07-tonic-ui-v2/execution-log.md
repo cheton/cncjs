@@ -1,5 +1,41 @@
 # Migration execution log
 
+## G1 Connection — started 2026-09-19T10:37:18+08:00
+
+Task / session / timestamp: G1 / root session / 2026-09-19T10:37:18+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `8121197dab8a9999ea2487f8fa771fa122b16d75` / working tree clean.
+
+Plan contract: `04-general-widgets.md` Task G1 and `details/04b-widget-contracts.md`. Preserve serial/network selection, port/baud settings, pending/error states, auto-reconnect, timeout cleanup, custom serial-port metadata, and the existing open/close payloads. Convert the widget shell to the controlled `view` / `onViewChange(view)` contract, replace local UI primitives with direct Tonic v2 equivalents where supported, and keep `react-select` until the later Tonic UI v3 Dropdown phase.
+
+Worker brief: root session is implementing the bounded G1 change because the current main session is not the prescribed Terra/Luna model pair. No browser work is in scope; browser evidence remains deferred to R6. Production source changes are limited to `src/app/widgets/Connection/`; the new test is `src/app/widgets/Connection/__tests__/Connection.test.jsx`. The test must be written and observed failing before production changes. Do not change connection actions, reducers, sagas, or the Tonic dependency version.
+
+Baseline: current Connection form is a function component but imports local Checkbox, Clickable, Input, FormGroup, GridSystem, InlineError, and ModalTemplate families; `index.jsx` still uses a React class. Existing behavior and payloads are the oracle. Verification will use the focused frontend test, full frontend tests, ESLint, `yarn build-dev`, and `git diff --check`.
+
+Changed files / commit: pending.
+
+Verification: pending failing contract tests, implementation, regression tests, ESLint, development build, and diff check.
+
+Status transition / blocker ID: G1 `todo` → `in_progress`; no blocker.
+
+## G1 Connection — checkpoint and blocker 2026-09-19T17:18:18+08:00
+
+Task / session / timestamp: G1 / current root session / 2026-09-19T17:18:18+08:00.
+
+Implementation: `ConnectionWidget` is now a function using `view` / `onViewChange(view)`; Connection uses direct Tonic `Checkbox`, `Input`, layout, alert, and modal primitives; local legacy imports are removed; `react-select` remains for rich serial-port metadata. The socket payload now intentionally reads `connection.socket.port` as a number because the previous `connection.serial.port` path produced an undefined network port. The close confirmation explicitly preserves the legacy close button and overlay-dismiss behavior through Tonic modal props. `onFork` and `onRemove` prop declarations were removed from the Connection shell.
+
+Tests: `src/app/widgets/Connection/__tests__/Connection.test.jsx` covers controlled view behavior, serial metadata rendering and selection, exact serial/socket payloads, pending open/close gates, serial refresh gates, confirmation cancel/close behavior, error display, and no reconnect on rerender. The focused suite passes 10/10.
+
+Independent review: the fresh read-only review found no Critical issues. It identified G1-B01 and test gaps; the in-scope gaps were addressed. The review also confirmed that browser visual/focus evidence remains outside G1 and deferred to R6.
+
+Ruling: keep the socket-port correction — the config contract and new test use `connection.socket.port`, while HEAD used `connection.serial.port` and sent `undefined`; cost if wrong: network connections would retain the existing broken port payload.
+
+Ruling: do not claim the open/close timeout and stale-response contract complete — the execution brief forbids reducer/saga changes, while `src/app/reducers/connection.js` and `src/app/sagas/controller/index.js` own connection state and accept uncorrelated controller responses; cost if wrong: a late open event could still restore connected state after a disconnect. Set G1 to `blocking` with blocker G1-B01. Next exact step: authorize the required reducer/saga scope expansion or amend the contract, then add the request-generation/timeout regression tests before resuming G1.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Connection/__tests__/Connection.test.jsx` / 0 / 1 suite and 10 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 26 suites and 152 tests passed; `yarn build-dev` / 0; ESLint / 0 errors with 17 existing warnings; `git diff --check` / 0. Local commit is authorized; no push will be performed.
+
+Status transition / blocker ID: G1 `in_progress` → `blocking` (G1-B01).
+
 ## F1 start — 2026-09-07T11:48:50+08:00
 
 Task / session / timestamp: F1 / root session / 2026-09-07T11:48:50+08:00.
