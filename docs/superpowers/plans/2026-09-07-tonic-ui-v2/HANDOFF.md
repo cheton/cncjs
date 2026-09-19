@@ -9,7 +9,7 @@
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
 - 每次派工再按合約明確度、狀態/時序、影響範圍、驗證能力判斷子任務 effort，brief 記一句選擇理由。合約歧義先交 Terra，缺 oracle 先建立驗證，不因失敗一律升 max。**Hard rule:** 所有 browser tests／browser regression／screenshot／accessible snapshot 必須由 `gpt-5.6-luna` / `medium` 執行；主控只審核 evidence 與更新 ledger，不得代跑或改派模型。此 session 已依規則派 Luna medium，並使用已授權的 bind 環境。
-- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1、R2、R3、U2、U3、B1、M1、M2、M3、T1、T2、T3、P0 已完成，browser gaps 依 waiver 延後至 R6。U3 完成 Custom SettingsModal 的 direct Tonic overlay/form contract 與六個 interaction tests；`useToast` 已是 Tonic Toast 並保持既有 persistence semantics。B1 完成 session mutation、pending/error login handling、logout cache ordering、以及 bootstrap pure transport reuse。M1 完成 shared Macro list/detail/CRUD query hooks, Axios signal propagation, stable key/options contracts, and invalidation ordering。M2 固定 caller retry override、mutation callback/invalidation ordering、App-only Macro read invalidation bridge、以及 session identity cache reset。M3 完成 shared Macro UI、loading/error/background-refetch states、mutation failure retention、pending locks、以及 nested delete close ordering。T1 固定 Console owner 的七個實際 terminal consumers、close ref contract、sender isolation 與 lifecycle baseline tests。T2 把 xterm、prompt/history、paste、option/size update、callback ref 與 cleanup 收回 `useTerminal`，Terminal 僅保留 DOM view。T3 驗證 reconnect disposal/recreation、最新 Enter callback、history/paste/action callbacks 與 StrictMode active-resource bounds。P0 刪除 14 個 graph/literal zero-consumer component families；`Notifications/ToastNotification` 仍依 P1 管理。R1 新增 16 個真 frame shell 的 contract tests；R2 新增 Workspace group/lifecycle regression coverage；R3 新增 real Three.js/GCodeVisualizer geometry and pivot baselines；U3、B1、M1、M2、M3、T1、T2、T3、P0 phase deliveries 已 committed；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
+- [STATUS](STATUS.md)：BR0 為 waived；R0 non-browser baseline、D1、D2、D3、D4、R1、R2、R3、U2、U3、B1、M1、M2、M3、T1、T2、T3、P0、**G1** 已完成，browser gaps 依 waiver 延後至 R6。G1 完成 Connection 的 frontend-only 轉換：`useConnection()` 單一介面、framework-independent runtime（timeout／duplicate-request guard／late-event authority／disconnect release）、TanStack Query 讀取 ports/baud rates、app root 初始化 singleton；`src/server/**`、`CNCJSController`、Socket.IO protocol 與 Redux reducer/saga/action 全部未動。U3 完成 Custom SettingsModal 的 direct Tonic overlay/form contract 與六個 interaction tests；`useToast` 已是 Tonic Toast 並保持既有 persistence semantics。B1 完成 session mutation、pending/error login handling、logout cache ordering、以及 bootstrap pure transport reuse。M1 完成 shared Macro list/detail/CRUD query hooks, Axios signal propagation, stable key/options contracts, and invalidation ordering。M2 固定 caller retry override、mutation callback/invalidation ordering、App-only Macro read invalidation bridge、以及 session identity cache reset。M3 完成 shared Macro UI、loading/error/background-refetch states、mutation failure retention、pending locks、以及 nested delete close ordering。T1 固定 Console owner 的七個實際 terminal consumers、close ref contract、sender isolation 與 lifecycle baseline tests。T2 把 xterm、prompt/history、paste、option/size update、callback ref 與 cleanup 收回 `useTerminal`，Terminal 僅保留 DOM view。T3 驗證 reconnect disposal/recreation、最新 Enter callback、history/paste/action callbacks 與 StrictMode active-resource bounds。P0 刪除 14 個 graph/literal zero-consumer component families；`Notifications/ToastNotification` 仍依 P1 管理。R1 新增 16 個真 frame shell 的 contract tests；R2 新增 Workspace group/lifecycle regression coverage；R3 新增 real Three.js/GCodeVisualizer geometry and pivot baselines；U3、B1、M1、M2、M3、T1、T2、T3、P0 phase deliveries 已 committed；runtime-generated large G-code/watch-tree payload 不追蹤。BR0-B06 已解決，BR0-B07/B08 與 `br0-20260913-200600` evidence 已保存。
 - Naming note：D3 scope 已收斂為 host dispatch，測試已命名為 `WidgetHost.test.jsx`。Widget runtime 不再使用 `chrome`/`widgetUI` props；frame-capable widgets 接收 `view` 與 `onViewChange(view)`。
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
@@ -93,14 +93,35 @@ The repo-wide audit found no remaining XState or Macro fetch-machine consumers. 
 
 Verification: R1 focused contract test passes 36/36; nearby Workspace/layout suites pass 55/55; full frontend passes 12 suites / 68 tests; `yarn eslint` exits 0; `git diff --check` passes. No browser gate is claimed; BR0 remains waived and missing browser evidence is carried to R6. This is the historical D4 checkpoint; current completion and next tasks are recorded in the U3 checkpoint above.
 
+## G1 completion checkpoint
+
+**G1 Connection: completed 2026-09-19T20:08:32+08:00.** Commits `bd19ed63` (widget UI migration), `5b0c00e2` (redux-free runtime), `8768a09d` (restored dropped tests).
+
+G1-B01 is resolved by redefining scope, not by expanding it. The original brief limited production changes to `src/app/widgets/Connection/` and forbade reducer/saga edits, which made the open/close timeout and stale-response contract unprovable. Adversarial review then produced a plan requiring server changes; the user rejected that and required the existing Socket.IO protocol to stay unchanged. The accepted design is frontend-only:
+
+- `src/app/runtime/connectionRuntime.js` — framework-independent runtime with `getSnapshot()`/`subscribe()`; owns timeout, duplicate-request guard, late-event authority, and Socket.IO disconnect release.
+- `src/app/runtime/connectionRuntimeSingleton.js` — singleton bound to `@app/lib/controller`.
+- `src/app/context.jsx` — imports the singleton at the app root, so initialization is not tied to widget mount.
+- `src/app/hooks/useConnection.js` — `useSyncExternalStore` binding; the single public frontend interface.
+- `src/app/queries/serialport.js` — TanStack Query hooks for `getPorts()`/`getBaudRates()`.
+- `Connection.jsx` — consumes the hook and query hooks; Redux connection and serial-port action imports removed.
+
+Verification: focused 4 suites / 16 tests; full frontend 29 suites / **158** tests; ESLint 0 errors / 17 pre-existing warnings; `yarn build-dev` exit 0; `git diff --check` clean. `git diff 8121197d..HEAD` over `src/server/`, `src/app/lib/controller/`, `src/app/reducers`, `src/app/sagas`, `src/app/actions` is **empty**.
+
+Two pre-existing cases (network/socket payload, refresh-disabled-while-connected) were dropped by the runtime rewrite and restored in `8768a09d`. The socket case also covers the intentional port correction (`connection.socket.port` read as a number instead of the previous undefined `connection.serial.port`).
+
+Carry-forward: browser visual/focus evidence for Connection remains deferred to R6 under the BR0 waiver. Redux connection state is untouched and still serves widgets not yet migrated.
+
 ## 恢復 prompt
 
 ```text
-請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
+請從 docs/superpowers/cncjs-next-tonic-ui-v2-handoff.md 接手（bootstrap 入口），再讀 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（目前 HEAD 應為最新 phase commit；不要 reset）。
+分支 `feat/tonic-ui-v2-migration` 目前領先 origin 4 commits（`bd19ed63`、`5b0c00e2`、`8768a09d`、`fd613f32`），尚未 push；不要自行 push，除非本次另有授權。
 優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0/G1 已完成；目前推薦先領取 G2，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
 G1 留下的可沿用 pattern：單一 frontend hook owner（`useConnection()`）、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
+不可跨越的邊界：`src/server/**`、`CNCJSController`、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / `connectionLifecycleMeta` / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
 Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。

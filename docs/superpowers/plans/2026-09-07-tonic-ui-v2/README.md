@@ -1,15 +1,14 @@
 # CNCjs next → Tonic UI v2 遷移執行入口
 
-本套文件是可交給 terra / luna 逐 task 執行的計畫，尚未實作。範圍為 **`src/app` 全部 UI 與 React class components**，其中 widgets 位於 `src/app/widgets`，共 17 種。使用者提到的 `src/widgets`、`src/components` 在這個 checkout 對應到上述路徑。
+本套文件是可交給 terra / luna 逐 task 執行的計畫。範圍為 **`src/app` 全部 UI 與 React class components**，其中 widgets 位於 `src/app/widgets`，共 17 種。使用者提到的 `src/widgets`、`src/components` 在這個 checkout 對應到上述路徑。計畫已進入執行階段；進度以 [STATUS](STATUS.md) 為準。
 
-**跨 session 入口：[HANDOFF.md](HANDOFF.md) → [STATUS.md](STATUS.md) → [EXECUTION.md](EXECUTION.md)。** 狀態使用 `todo / in_progress / completed / blocking`；STATUS 是唯一來源，父 task 與細化 task 的對應也在其中。目前為 plan_only / paused，所有實作 todo。下一次請直接使用 HANDOFF 中的恢復 prompt。
+**跨 session 入口：`../../cncjs-next-tonic-ui-v2-handoff.md` → [HANDOFF.md](HANDOFF.md) → [STATUS.md](STATUS.md) → [EXECUTION.md](EXECUTION.md)。** 狀態使用 `todo / in_progress / completed / blocking / waived`；STATUS 是唯一來源，父 task 與細化 task 的對應也在其中。下一次請從 bootstrap 入口開始，並使用 HANDOFF 中的恢復 prompt。
 
 ## 文件目錄與維護責任
 
 ```text
 docs/superpowers/
-├── handoffs/
-│   └── cncjs-next-tonic-ui-v2-handoff.md  # 舊路徑入口，只連到本計畫
+├── cncjs-next-tonic-ui-v2-handoff.md   # bootstrap 入口：快照＋讀取順序
 └── plans/2026-09-07-tonic-ui-v2/
     ├── README.md                       # 索引、範圍、目錄規則
     ├── 00-design.md                    # 架構決策與限制
@@ -28,7 +27,7 @@ docs/superpowers/
 
 artifacts 建議路徑為 `artifacts/<task-id>/<session-id>/`；09a 的共用 browser 命令與 fixture 說明放 `artifacts/browser/`。實際測試程式及合成 fixtures 依各 task 放在 src/app/test 或 colocated __tests__，不把測試程式藏在文件目錄。大型產物可用 durable CI artifact，log 留連結與期限；不提交密碼、token 或 browser storage state。
 
-HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 session 新增另一份完整 handoff。舊 `handoffs/` 檔案僅作轉址；/tmp 便攜 handoff 可隨時重建。多週後不需重命名計畫日期；專案完成後保留原路徑與最終 STATUS。
+HANDOFF 只保留最新恢復資訊，歷史寫 execution-log，不每次 session 新增另一份完整 handoff。bootstrap 入口 `../../cncjs-next-tonic-ui-v2-handoff.md` 只放快照與讀取順序；/tmp 便攜 handoff 可隨時重建。多週後不需重命名計畫日期；專案完成後保留原路徑與最終 STATUS。
 
 ## 已核對的基線
 
