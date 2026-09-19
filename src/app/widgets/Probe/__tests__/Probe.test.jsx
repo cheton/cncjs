@@ -33,24 +33,29 @@ jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   }),
 }));
 
-jest.mock('@app/components/Buttons', () => {
-  throw new Error('ProbeModal must use Tonic Button directly');
-});
-
-jest.mock('@app/components/FormGroup', () => {
-  throw new Error('ProbeModal must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/Modal', () => {
-  throw new Error('ProbeModal must use Tonic modal primitives directly');
-});
+jest.mock('@app/components/Modal', () => ({
+  ModalProvider: ({ children }) => children,
+  ModalRoot: () => null,
+}));
 
 jest.mock('@app/components/CodePreview', () => ({
   __esModule: true,
   default: ({ data }) => <pre>{data}</pre>,
 }));
 
+jest.mock('@app/components/GridSystem', () => {
+  throw new Error('Probe widget must use Tonic Box directly');
+});
+
+jest.mock('../Probe', () => () => <div>Probe form</div>);
+
+jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
+  __esModule: true,
+  default: ({ children }) => children,
+}));
+
 const ProbeModal = require('../modals/ProbeModal').default;
+const ProbeWidget = require('../index').default;
 
 const probeData = {
   probeAxis: 'Z',
@@ -90,5 +95,23 @@ describe('Probe modal command contract', () => {
       expect.stringContaining('G38.2 Z-10 F100')
     );
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  test('keeps the widget view controlled by the host', () => {
+    const onViewChange = jest.fn();
+
+    renderAppUI(
+      <ProbeWidget
+        widgetId="probe"
+        onFork={jest.fn()}
+        onRemove={jest.fn()}
+        view="normal"
+        onViewChange={onViewChange}
+        sortable={{ handleClassName: '', filterClassName: '' }}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
+
+    expect(onViewChange).toHaveBeenCalledWith('collapsed');
   });
 });

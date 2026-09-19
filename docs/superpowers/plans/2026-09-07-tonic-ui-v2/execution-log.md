@@ -1033,3 +1033,5 @@ Task / session / timestamp: G5 / current root session / 2026-09-19T23:20:00+08:0
 Plan contract: `04-general-widgets.md` Task G5 and `details/04b-widget-contracts.md`; controlled ProbeModal parameters, preview, exact one-shot command, cancel/invalid/disconnected gates, and controller workflow gates. Source/contract discovery started. Per user direction, `resource.json` files are out of scope; do not run or clean generators that modify them.
 
 Status transition / blocker ID: G5 `todo` → `in_progress`; no blocker.
+
+G5 partial checkpoint: commit `89e0517d` migrates `ProbeModal` to direct Tonic Modal/Button/ButtonGroup and adds two command-contract tests (cancel sends no command; Run sends one WCS preview command). The uncommitted `Probe/index.jsx` and its expanded test migrate only the host shell to a function and Tonic `Box`/`sx`; focused test passes 3/3 and lint exits 0 with 16 pre-existing warnings. `Probe.jsx` remains legacy and is the next required unit. `resource.json` remains out of scope; do not run generators that modify it.

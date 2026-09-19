@@ -6,7 +6,7 @@
 
 ## Current checkpoint
 
-- Active task: **G5 Probe**（started 2026-09-19T23:20:00+08:00）。
+- Active task: **G5 Probe**（started 2026-09-19T23:20:00+08:00；ProbeModal committed, form migration pending）。
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
 - Next eligible task: **G5**（Probe）。G1–G4 已完成，G1-B01 已由使用者重新界定 scope 後解除。無並行 task 授權。
 - Current blockers: 無。G1-B01 已解除，見下方記錄。BR0 依使用者明確指示為 `waived`（非 passed）。既有 browser evidence 仍只涵蓋 connection/upload/Run/Pause/Resume；剩餘 browser gaps 依 waiver 延後至 R6。System Chrome channel 仍不支援 screenshot。
