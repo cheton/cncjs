@@ -45,9 +45,20 @@ G1–G7 執行細節補充於 [04b](details/04b-widget-contracts.md)，包括 st
 
 ## Task G1：Connection
 
+**Status:** ✅ 完成 2026-09-19T20:08:32+08:00（commit `bd19ed63`、`5b0c00e2`，外加還原測試的 follow-up）。G1-B01 已解除；不要重領。
+
 **Modify:** `src/app/widgets/Connection/` 的 inventory 全部來源與相關 Stylus。
 **Create Test:** `src/app/widgets/Connection/__tests__/Connection.test.jsx`。
 **Specific acceptance:** serial/network 選擇、port/baud 設定、連線/斷線 pending 與 error；讀取 controller 狀態不重複 connect；不能 fork/remove 的原限制保留。
+
+**實際交付範圍補充（領取 G2 前先讀）：** 原計畫只允許改 `src/app/widgets/Connection/`，但 open/close timeout 與 late-response protection 無法在該範圍內證明。使用者重新界定為 frontend-only，並採用新的前端 owner，因此交付多出三個新模組，後續 G2–G7 可沿用同一模式：
+
+- `src/app/runtime/connectionRuntime.js`：framework-independent runtime，`getSnapshot()` / `subscribe()`；擁有 timeout、duplicate-request guard、late-event authority、disconnect release。
+- `src/app/hooks/useConnection.js`：`useSyncExternalStore` 綁定，唯一公開前端介面。
+- `src/app/queries/serialport.js`：TanStack Query 讀取 `getPorts()` / `getBaudRates()`。
+- `src/app/context.jsx`：app root 匯入 singleton，初始化不綁 widget mount。
+
+**不可跨越的邊界：** `src/server/**`、`CNCJSController`、現有 Socket.IO protocol 一律不動；不新增 Redux action/reducer/saga。曾被提出的 server operation ID / `connectionLifecycleMeta` / cancellation event 方案已由使用者否決，不要再提。
 
 ## Task G2：GCode
 

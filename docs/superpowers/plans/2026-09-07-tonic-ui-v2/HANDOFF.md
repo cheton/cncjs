@@ -2,9 +2,9 @@
 
 ## 現況
 
-- **Latest G1 checkpoint (2026-09-19T17:18:18+08:00):** Connection migration is partially implemented and independently reviewed. Focused Connection tests pass 10/10; full frontend passes 26 suites/152 tests; `yarn build-dev` and ESLint pass, with 17 existing ESLint warnings. G1 is now **blocking on G1-B01**: the contract requires open/close request timeout and late-response protection, but the current brief authorizes only `src/app/widgets/Connection/` and forbids reducer/saga changes, while those layers own the connection state. Do not mark G1 completed until the scope is authorized or the contract is amended. The socket-port correction is intentional and recorded in `execution-log.md`.
+- **Latest checkpoint (2026-09-19T20:08:32+08:00):** **G1 Connection is complete** (commits `bd19ed63`, `5b0c00e2`, plus the restored-test follow-up). G1-B01 is resolved by redefining the scope instead of expanding it: the Connection widget reads `useConnection()`, a single frontend interface over a framework-independent runtime (`src/app/runtime/connectionRuntime.js`) with a `useSyncExternalStore` singleton started from `src/app/context.jsx`, and reads ports/baud rates through TanStack Query (`src/app/queries/serialport.js`). Redux connection and serial-port action imports are gone from the widget. Verified: focused 4 suites / 16 tests, full frontend 29 suites / 158 tests, ESLint 0 errors / 17 pre-existing warnings, `yarn build-dev` exit 0, `git diff --check` clean, and zero diff under `src/server/**`, `src/app/lib/controller/**`, reducers, sagas, and actions. Browser visual/focus evidence remains deferred to R6. **Rejected plan, kept for the record:** the earlier adversarial-review plan that added server operation IDs, `connectionLifecycleMeta`, and cancellation events was rejected by user direction; the existing Socket.IO protocol and `CNCJSController` stay unchanged. Next eligible tasks are **G2–G7**; none is claimed.
 
-- Mode: **layout naming/API cleanup, B1 session boundary, M1–M3 Macro work, Q2-cleanup, T1–T3 Terminal work, and P0 cleanup complete; implementation ready for G1–G7 with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers、D4 Workspace/group wiring、B1 session/query boundary、M1–M3 shared Macro query/mutation/UI contract、Q2-cleanup、T1–T3 Terminal work，以及 P0 unused-family cleanup 已完成；B1, M1, M2, M3, Q2-cleanup, T1, T2, T3, and P0 phase deliveries are committed on the current feature branch。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
+- Mode: **layout naming/API cleanup, B1 session boundary, M1–M3 Macro work, Q2-cleanup, T1–T3 Terminal work, P0 cleanup, and G1 Connection complete; G2–G7 remain eligible with BR0 waived**。使用者明確允許不要卡在 BR0；BR0 保留為未完成 browser evidence 的 accepted risk，不標示 completed。R0 的非 browser baseline、D1 pure widget layout state、D2 `WorkspaceLayoutProvider`/hydration、D3 `WidgetHost`/16 個 layout-aware consumers、D4 Workspace/group wiring、B1 session/query boundary、M1–M3 shared Macro query/mutation/UI contract、Q2-cleanup、T1–T3 Terminal work、P0 unused-family cleanup，以及 G1 Connection frontend runtime 已完成；B1, M1, M2, M3, Q2-cleanup, T1, T2, T3, P0, and G1 phase deliveries are committed on the current feature branch。現行 API 是 `view`（`normal`／`collapsed`／`fullscreen`）與 `onViewChange(view)`；`minimized` 僅保留為既有 config persistence key，fullscreen 不寫入 config。現有 BR0 evidence 證明 connection、small upload、Run/Pause/Resume，Stop、jog、disconnect、large fixture、watch-tree、viewport 與新 selector browser evidence 延後至 R6。
 
 - 執行角色原指定為 Terra main loop + Luna implementation subagent。現有 main 為 root session、不是 Terra，這是執行限制；F1 worker 已結束，主控已完成獨立 source review。
 - F1 已完成版本、manifest、entrypoint、lint、production build 與 headless login baseline。FIX-001 移除 CNCjs app-level session store；FIX-002 吸收 `/home/cheton/Code/cncjs/webappengine` 的必要 host 行為並移除 dependency。Focused host/app tests pass; BR0-B05 已解阻，fresh `yarn dev` 已成功；`br0-20260913-191850` 證明 Luna medium 可完成 port selection、connection、small upload、Run/Pause/Resume，但後續 retries 分別卡在 browser backend 或錯誤 React Select locator，剩餘 BR0 gates 尚未驗證。
@@ -14,19 +14,19 @@
 - [EXECUTION](EXECUTION.md)：領取、blocking、驗收、停止與恢復程序。
 - [README](README.md)、[設計](00-design.md)、[inventory](inventory.md)：範圍與 source/API 基線。
 
-## 下一個可執行項目（依 STATUS 依賴計算，2026-09-18）
+## 下一個可執行項目（依 STATUS 依賴計算，2026-09-19）
 
-目前 **沒有** `in_progress`、也沒有未解 blocker。R1、R2、R3、U2、U3、B1、M1、M2、M3、Q2-cleanup、T1、T2、T3、P0 已完成；G8 Terminal work, Macro query/mutation/UI work, Q2 cleanup, and P0 cleanup are complete. G1–G7 are now dependency-eligible.
+目前 **沒有** `in_progress`、也沒有未解 blocker。G1 已完成（G1-B01 已解除）。R1、R2、R3、U2、U3、B1、M1、M2、M3、Q2-cleanup、T1、T2、T3、P0、G1 已完成。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **G1–G7** [一般 widgets](04-general-widgets.md) | U3 ✅, Q2-cleanup ✅ | widget migrations and behavior contracts | 否（unit; browser deferred） |
+| **G2–G7** [一般 widgets](04-general-widgets.md) | U3 ✅, Q2-cleanup ✅ | widget migrations and behavior contracts | 否（unit; browser deferred） |
 
-R1、R2、R3、U2、U3、B1、M1、M2、M3、Q2-cleanup、T1、T2、T3、P0 已完成。G8 Terminal work, Macro query/mutation/UI work, Q2 cleanup, and P0 cleanup are complete. 下一個推薦 task 是 **G1**，因為 Q2 已移除 XState dependencies 並驗證 Macro shared-cache synchronization；G1–G7 now have their required U3/Q2 prerequisites.
+下一個推薦 task 是 **G2（GCode）**，因為 G1 已完成且 G2–G7 共用相同前置（U3、Q2-cleanup）。G1 建立的 pattern 可沿用：`useConnection()` 這類單一 frontend hook owner、`useSyncExternalStore` 或等價的訂閱介面、以及 HTTP server state 走 TanStack Query。
 
-**要從哪裡開始？** 先領取 **G1**（推薦）。
+**要從哪裡開始？** 先領取 **G2**（推薦）。G2 的 U2 pilot UI 檢查必須併入本 task。
 
-注意：`G1`–`G7` 與 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過其前置 task。已完成的 crash 修正（`98ceb1f6`）不改變這些依賴狀態。
+注意：`S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過其前置 task。已完成的 crash 修正（`98ceb1f6`）不改變這些依賴狀態。
 
 ## Hard rules / current execution rules
 
@@ -99,7 +99,8 @@ Verification: R1 focused contract test passes 36/36; nearby Workspace/layout sui
 請從 docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md 接手。
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（目前 HEAD 應為最新 phase commit；不要 reset）。
-優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0 已完成；目前推薦先領取 G1，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
+優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0/G1 已完成；目前推薦先領取 G2，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
+G1 留下的可沿用 pattern：單一 frontend hook owner（`useConnection()`）、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、HANDOFF。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
 Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。

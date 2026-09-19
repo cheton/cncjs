@@ -915,3 +915,31 @@ Audit and behavior: repo-wide source/literal scans found no XState, Macro fetch 
 Verification: focused Macro query suite passed 15 tests; full `yarn test:frontend --runInBand --silent` passed 25 suites / 142 tests; `yarn remove xstate @xstate/react` completed with existing peer warnings; full ESLint exited 0 with 17 existing warnings; `yarn build-dev` compiled successfully; `git diff --check` passed.
 
 Status transition / blocker ID: Q2-cleanup `in_progress` → `completed`; no blocker. Phase commit: `730a0045`. Next eligible tasks are G1–G7.
+
+## G1 Connection — scope redefinition and completion 2026-09-19T20:08:32+08:00
+
+Task / session / timestamp: G1 / current root session / 2026-09-19T20:08:32+08:00.
+
+G1-B01 resolution path: adversarial review of the blocking contract produced a plan that required server changes (`src/server/**`, operation IDs, `connectionLifecycleMeta`, cancellation events). User direction reset the scope: frontend-only, existing Socket.IO protocol unchanged, keep `CNCJSController.open(controllerType, connectionType, options, callback)` and `CNCJSController.close(callback)`, do not add Redux actions/reducers/sagas. Blocker reasoning, rejected server-side options, and the accepted frontend design are captured in `docs/superpowers/plans/2026-09-19-connection-frontend-runtime.md`.
+
+Design: the server owns one global physical connection; Socket.IO lifecycle events are authoritative for every browser client. A local timeout settles only the caller promise. The runtime serializes local open/close until a server lifecycle result arrives or Socket.IO disconnects, which prevents a second local request from consuming the first request's late callback. A late `connection:open` always drives the snapshot to `connected`.
+
+Changed files / commit: `5b0c00e2`
+
+- `src/app/runtime/connectionRuntime.js` (new): controller-bound runtime with `getSnapshot()`/`subscribe()`, `open()`/`close()`/`command()`/`write()`/`writeln()`/`destroy()`; timeout, duplicate-request guard, and late-event authority.
+- `src/app/runtime/connectionRuntimeSingleton.js` (new): singleton bound to `@app/lib/controller`.
+- `src/app/context.jsx`: imports the singleton at the application root so initialization is not tied to the Connection widget mounting.
+- `src/app/hooks/useConnection.js` (new): `useSyncExternalStore` over the singleton; single public interface.
+- `src/app/queries/serialport.js` (new): TanStack Query hooks for `getPorts()` and `getBaudRates()`.
+- `src/app/widgets/Connection/Connection.jsx`: consumes `useConnection()` and the query hooks; Redux connection and serial-port action imports removed.
+- Tests: `src/app/runtime/__tests__/connectionRuntime.test.js`, `src/app/hooks/__tests__/useConnection.test.jsx`, `src/app/queries/__tests__/serialport.test.jsx`, `src/app/widgets/Connection/__tests__/Connection.test.jsx`.
+
+Scope boundary: `git diff 8121197d..HEAD -- src/server/ src/app/lib/controller/ src/app/reducers src/app/sagas src/app/actions` is empty. Redux connection state is untouched and still serves widgets not migrated in this slice.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/runtime/__tests__/connectionRuntime.test.js src/app/hooks/__tests__/useConnection.test.jsx src/app/queries/__tests__/serialport.test.jsx src/app/widgets/Connection/__tests__/Connection.test.jsx` / 0 / 4 suites and 16 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 29 suites and 158 tests passed; `yarn eslint` / 0 errors with 17 pre-existing warnings; `yarn build-dev` / 0; `git diff --check` / 0.
+
+Follow-up slice in the same G1 scope: the network (socket) selection test and the serial-refresh disabled-while-connected test were dropped during the runtime rewrite and were restored from the pre-rewrite suite (`bd19ed63`). `yarn build-dev` passed, `git diff --check` clean.
+
+Carry-forward: browser visual/focus evidence for the Connection widget remains deferred to R6 under the existing BR0 waiver. The intentional socket-port correction (`connection.socket.port` read as a number instead of the previous undefined `connection.serial.port`) is covered by the restored network test.
+
+Status transition / blocker ID: G1 `blocking` → `completed` (G1-B01 resolved). Next eligible tasks are G2–G7.
