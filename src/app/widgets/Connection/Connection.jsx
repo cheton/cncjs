@@ -30,11 +30,8 @@ import React, {
   useState,
 } from 'react';
 import { Form, Field, FormSpy } from 'react-final-form';
-import { connect } from 'react-redux';
 import Select, { components as SelectComponents } from 'react-select';
 import { useTransition, animated } from 'react-spring'; // TODO: remove
-import * as connectionActions from '@app/actions/connection';
-import * as serialportActions from '@app/actions/serialport';
 import {
   GRBL,
   MARLIN,
@@ -45,15 +42,17 @@ import {
   CONNECTION_TYPE_SERIAL,
   CONNECTION_TYPE_SOCKET,
   CONNECTION_STATE_CONNECTED,
-  CONNECTION_STATE_CONNECTING,
   CONNECTION_STATE_DISCONNECTED,
-  CONNECTION_STATE_DISCONNECTING,
 } from '@app/constants/connection';
-import useMount from '@app/hooks/useMount';
+import useConnection from '@app/hooks/useConnection';
 import usePrevious from '@app/hooks/usePrevious';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import portal from '@app/lib/portal';
+import {
+  useSerialBaudRatesQuery,
+  useSerialPortsQuery,
+} from '@app/queries/serialport';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 
@@ -268,21 +267,36 @@ function DismissibleTransition({
   );
 }
 
-function Connection({
-  connection,
-  isConnected,
-  isConnecting,
-  isDisconnected,
-  isDisconnecting,
-  isFetchingSerialPorts,
-  isFetchingSerialBaudRates,
-  serialPorts,
-  serialBaudRates,
-  openConnection,
-  closeConnection,
-  fetchSerialPorts,
-  fetchSerialBaudRates,
-}) {
+function Connection() {
+  const {
+    state: connectionState,
+    type,
+    ident,
+    options,
+    error,
+    isOpening,
+    isClosing,
+    open: openConnection,
+    close: closeConnection,
+  } = useConnection();
+  const {
+    data: ports,
+    isFetching: isFetchingSerialPorts,
+    refetch: fetchSerialPorts,
+  } = useSerialPortsQuery();
+  const {
+    data: baudRates,
+    isFetching: isFetchingSerialBaudRates,
+    refetch: fetchSerialBaudRates,
+  } = useSerialBaudRatesQuery();
+  const connection = { type, ident, options, error };
+  const serialPorts = ensureArray(ports);
+  const serialBaudRates = ensureArray(baudRates);
+  const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
+  const isConnecting = isOpening;
+  const isDisconnected = (connectionState === CONNECTION_STATE_DISCONNECTED) ||
+    (connectionState === 'error' && !isOpening && !isClosing);
+  const isDisconnecting = isClosing;
   const config = useWidgetConfig();
   const initialValues = getMemoizedInitialValues({ config, serialPorts, serialBaudRates });
   const canRefreshSerialPorts = isDisconnected && !isFetchingSerialPorts;
@@ -320,13 +334,6 @@ function Connection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.error]);
 
-  { // Fetch ports and baud rates only after the initial render
-    useMount(() => {
-      fetchSerialPorts();
-      fetchSerialBaudRates();
-    });
-  }
-
   { // Auto reconnect for serial connection
     useEffect(() => {
       const connectionType = config.get('connection.type');
@@ -358,7 +365,7 @@ function Connection({
       _set(options, 'connection.type', connectionType);
       _set(options, 'connection.options', { path, baudRate, rtscts, pin });
 
-      openConnection(options);
+      openConnection(options).catch(() => {});
 
       // Set autoReconnectedRef.current to true when attempting to connect.
       autoReconnectedRef.current = true;
@@ -396,7 +403,7 @@ function Connection({
       _set(options, 'connection.type', connectionType);
       _set(options, 'connection.options', { host, port });
 
-      openConnection(options);
+      openConnection(options).catch(() => {});
 
       // Set autoReconnectedRef.current to true when attempting to connect.
       autoReconnectedRef.current = true;
@@ -1021,7 +1028,7 @@ function Connection({
                       },
                     }[connectionType]));
 
-                    openConnection(options);
+                    openConnection(options).catch(() => {});
                   };
                   const confirmCloseConnection = (e) => {
                     portal(({ onClose }) => (
@@ -1049,7 +1056,7 @@ function Connection({
                               variant="primary"
                               onClick={chainedFunction(
                                 (e) => {
-                                  closeConnection();
+                                  closeConnection().catch(() => {});
                                   fetchSerialPorts();
                                   fetchSerialBaudRates();
                                 },
@@ -1110,47 +1117,7 @@ function Connection({
   );
 }
 
-const mapStateToProps = (store) => {
-  const connection = _get(store, 'connection', {});
-  const connectionState = _get(store, 'connection.state');
-  const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
-  const isConnecting = (connectionState === CONNECTION_STATE_CONNECTING);
-  const isDisconnected = (connectionState === CONNECTION_STATE_DISCONNECTED);
-  const isDisconnecting = (connectionState === CONNECTION_STATE_DISCONNECTING);
-  const isFetchingSerialPorts = _get(store, 'serialport.isFetchingPorts');
-  const isFetchingSerialBaudRates = _get(store, 'serialport.isFetchingBaudRates');
-  const serialPorts = ensureArray(_get(store, 'serialport.ports'));
-  const serialBaudRates = ensureArray(_get(store, 'serialport.baudRates'));
-
-  return {
-    connection, // requires deep comparison
-    isConnected,
-    isConnecting,
-    isDisconnected,
-    isDisconnecting,
-    isFetchingSerialPorts,
-    isFetchingSerialBaudRates,
-    serialPorts,
-    serialBaudRates,
-  };
-};
-
-const mapDispatchToProps = {
-  openConnection: connectionActions.openConnection,
-  closeConnection: connectionActions.closeConnection,
-  fetchSerialPorts: serialportActions.fetchPorts,
-  fetchSerialBaudRates: serialportActions.fetchBaudRates,
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  {
-    // Use isEqual to perform a deep comparison between objects.
-    areStatePropsEqual: _isEqual,
-  }
-)(Connection);
+export default Connection;
 
 function SerialPortOption({
   children,
