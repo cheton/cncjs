@@ -13,12 +13,15 @@ import pubsub from 'pubsub-js';
 import React, { useEffect } from 'react';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
 import { Route, Routes } from 'react-router-dom';
 import compose from 'recompose/compose';
 import settings from '@app/config/settings';
 import useToast from '@app/hooks/useToast';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
+import MacroQueryEvents from '@app/queries/MacroQueryEvents';
+import { createSessionQueryBoundary } from '@app/queries/session';
 import CorruptedWorkspaceSettingsModal from './modals/CorruptedWorkspaceSettingsModal';
 import LoginPage from './LoginPage';
 import MainPage from './MainPage';
@@ -83,6 +86,9 @@ function App({
 }) {
   const { productName, version } = settings;
   const toast = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => createSessionQueryBoundary(queryClient), [queryClient]);
 
   useEffect(() => {
     const taskMap = new Map();
@@ -195,28 +201,32 @@ function App({
     };
   }, [toast]);
 
-  if (isInitializing) {
-    return null;
-  }
-
-  if (promptUserForCorruptedWorkspaceSettings) {
-    return (
+  let content = null;
+  if (!isInitializing && promptUserForCorruptedWorkspaceSettings) {
+    content = (
       <Layout>
         <CorruptedWorkspaceSettingsModal />
+      </Layout>
+    );
+  } else if (!isInitializing) {
+    content = (
+      <Layout>
+        <Helmet>
+          <title>{`${productName} ${version}`}</title>
+        </Helmet>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={<MainPage />} />
+        </Routes>
       </Layout>
     );
   }
 
   return (
-    <Layout>
-      <Helmet>
-        <title>{`${productName} ${version}`}</title>
-      </Helmet>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/*" element={<MainPage />} />
-      </Routes>
-    </Layout>
+    <>
+      <MacroQueryEvents />
+      {content}
+    </>
   );
 }
 

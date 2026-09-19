@@ -63,34 +63,14 @@ class AxesWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
 
   state = this.getInitialState();
-
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
 
   actions = {
     openModal: (name = MODAL_NONE, params = {}) => {
@@ -645,13 +625,11 @@ class AxesWidget extends Component {
   componentDidUpdate(prevProps, prevState) {
     const {
       units,
-      minimized,
       axes,
       jog,
       mdi
     } = this.state;
 
-    this.config.set('minimized', minimized);
     this.config.set('axes', axes);
     this.config.set('jog.keypad', jog.keypad);
     if (units === IMPERIAL_UNITS) {
@@ -665,8 +643,6 @@ class AxesWidget extends Component {
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       canClick: true, // Defaults to true
       connected: !!controller.connection.ident,
       units: METRIC_UNITS,
@@ -814,8 +790,9 @@ class AxesWidget extends Component {
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, view, onViewChange } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
     const { units, machinePosition, workPosition } = this.state;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
     const config = this.config;
@@ -874,21 +851,21 @@ class AxesWidget extends Component {
                 <Space width={8} />
               </Widget.Button>
               <Widget.Button
-                aria-label={minimized ? 'Expand' : 'Collapse'}
-                aria-expanded={!minimized}
+                aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
-                title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                onClick={this.toggleMinimized}
+                title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
               >
-                {minimized &&
+                {isCollapsed &&
                   <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-                {!minimized &&
+                {!isCollapsed &&
                   <FontAwesomeIcon icon="chevron-up" fixedWidth />}
               </Widget.Button>
               {isFullscreen && (
                 <Widget.Button
                   title={i18n._('Exit Full Screen')}
-                  onClick={this.toggleFullscreen}
+                  onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
                 >
                   <FontAwesomeIcon icon="compress" fixedWidth />
                 </Widget.Button>
@@ -903,7 +880,7 @@ class AxesWidget extends Component {
                   if (eventKey === 'settings') {
                     actions.openModal(MODAL_SETTINGS);
                   } else if (eventKey === 'fullscreen') {
-                    this.toggleFullscreen();
+                    onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                   } else if (eventKey === 'fork') {
                     this.props.onFork();
                   } else if (eventKey === 'remove') {
@@ -940,10 +917,10 @@ class AxesWidget extends Component {
             </Widget.Controls>
           </Widget.Header>
           <Widget.Content
-            aria-hidden={minimized}
+            aria-hidden={isCollapsed}
             className={cx(
               styles['widget-content'],
-              { [styles.hidden]: minimized }
+              { [styles.hidden]: isCollapsed }
             )}
           >
             {state.modal.name === MODAL_SETTINGS && (

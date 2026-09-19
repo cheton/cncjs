@@ -55,6 +55,7 @@ import Notifications from './Notifications';
 import Loading from './Loading';
 import Rendering from './Rendering';
 import WatchDirectory from './WatchDirectory';
+import { isWebGLWarningSuppressed } from './webglWarning';
 import {
   CAMERA_MODE_PAN,
   CAMERA_MODE_ROTATE,
@@ -333,7 +334,7 @@ class VisualizerWidget extends Component {
         }
 
         setTimeout(() => {
-          this.visualizer.load(content, ({ bbox }) => {
+          this.visualizer.load(name, content, ({ bbox }) => {
             // Set gcode bounding box
             controller.context = {
               ...controller.context,
@@ -484,7 +485,9 @@ class VisualizerWidget extends Component {
     },
     toggle3DView: () => {
       if (!WebGL.isWebGLAvailable() && this.state.disabled) {
-        displayWebGLErrorMessage();
+        if (!isWebGLWarningSuppressed()) {
+          displayWebGLErrorMessage();
+        }
         return;
       }
 
@@ -885,7 +888,9 @@ class VisualizerWidget extends Component {
     );
 
     if (!WebGL.isWebGLAvailable() && !this.state.disabled) {
-      displayWebGLErrorMessage();
+      if (!isWebGLWarningSuppressed()) {
+        displayWebGLErrorMessage();
+      }
 
       setTimeout(() => {
         this.setState((state) => ({
@@ -1174,4 +1179,5 @@ class VisualizerWidget extends Component {
   }
 }
 
+export { VisualizerWidget as VisualizerWidgetClass };
 export default VisualizerWidget;

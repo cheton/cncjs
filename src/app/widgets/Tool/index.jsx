@@ -44,16 +44,9 @@ class ToolWidget extends PureComponent {
   static propTypes = {
     widgetId: PropTypes.string.isRequired,
     onRemove: PropTypes.func.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
@@ -64,15 +57,10 @@ class ToolWidget extends PureComponent {
 
   actions = {
     toggleFullscreen: () => {
-      const { minimized, isFullscreen } = this.state;
-      this.setState({
-        minimized: isFullscreen ? minimized : false,
-        isFullscreen: !isFullscreen
-      });
+      this.props.onViewChange(this.props.view === 'fullscreen' ? 'normal' : 'fullscreen');
     },
-    toggleMinimized: () => {
-      const { minimized } = this.state;
-      this.setState({ minimized: !minimized });
+    toggleCollapsed: () => {
+      this.props.onViewChange(this.props.view === 'collapsed' ? 'normal' : 'collapsed');
     },
     openModal: (name = MODAL_NONE, params = {}) => {
       this.setState({
@@ -392,12 +380,6 @@ class ToolWidget extends PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      minimized
-    } = this.state;
-
-    this.config.set('minimized', minimized);
-
     // Do not save config settings if the units did change between in and mm
     if (this.unitsDidChange) {
       this.unitsDidChange = false;
@@ -443,8 +425,6 @@ class ToolWidget extends PureComponent {
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       canClick: true, // Defaults to true
       connected: !!controller.connection.ident,
       units: METRIC_UNITS,
@@ -515,8 +495,9 @@ class ToolWidget extends PureComponent {
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
+    const { widgetId, view } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
     const state = {
       ...this.state,
       canClick: this.canClick()
@@ -552,18 +533,18 @@ class ToolWidget extends PureComponent {
                 />
               </Widget.Button>
               <Widget.Button
-                aria-label={minimized ? 'Expand' : 'Collapse'}
-                aria-expanded={!minimized}
+                aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
-                title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                onClick={actions.toggleMinimized}
+                title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                onClick={actions.toggleCollapsed}
               >
                 <i
                   aria-hidden="true"
                   className={classNames(
                     'fa',
-                    { 'fa-chevron-up': !minimized },
-                    { 'fa-chevron-down': minimized }
+                    { 'fa-chevron-up': !isCollapsed },
+                    { 'fa-chevron-down': isCollapsed }
                   )}
                 />
               </Widget.Button>
@@ -601,10 +582,10 @@ class ToolWidget extends PureComponent {
             </Widget.Controls>
           </Widget.Header>
           <Widget.Content
-            aria-hidden={minimized}
+            aria-hidden={isCollapsed}
             className={classNames(
               styles['widget-content'],
-              { [styles.hidden]: minimized }
+              { [styles.hidden]: isCollapsed }
             )}
           >
             <Tool

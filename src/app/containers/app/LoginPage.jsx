@@ -27,6 +27,7 @@ import x from '@app/lib/json-stringify';
 import log from '@app/lib/log';
 import * as user from '@app/lib/user';
 import config from '@app/store/config';
+import { useSigninMutation } from '@app/queries/session';
 
 const required = value => {
   return ensureString(value).trim().length > 0
@@ -39,6 +40,7 @@ const forgotPasswordLink = 'https://github.com/cncjs/cncjs/wiki/FAQ#forgot-your-
 const LoginPage = () => {
   const location = useLocation();
   const { from } = location.state || { from: { pathname: '/' } };
+  const signinMutation = useSigninMutation();
   const [state, setState] = useState({
     alertMessage: '',
     authenticating: false,
@@ -53,6 +55,10 @@ const LoginPage = () => {
   };
 
   const handleFormSubmit = async (values, form) => {
+    if (state.authenticating || signinMutation.isLoading) {
+      return;
+    }
+
     setState(prevState => ({
       ...prevState,
       alertMessage: '',
@@ -62,7 +68,20 @@ const LoginPage = () => {
 
     const name = _get(values, 'name');
     const password = _get(values, 'password');
-    const { authenticated } = await user.signin({ name, password });
+    let authenticated = false;
+    let token = null;
+
+    try {
+      ({ authenticated, token } = await signinMutation.mutateAsync({ name, password }));
+    } catch (error) {
+      setState(prevState => ({
+        ...prevState,
+        alertMessage: i18n._('Authentication failed.'),
+        authenticating: false,
+        redirectToReferrer: false
+      }));
+      return;
+    }
 
     if (!authenticated) {
       setState(prevState => ({
@@ -85,7 +104,7 @@ const LoginPage = () => {
 
     // Controller connection
     log.debug('Establishing controller connection');
-    const token = config.get('session.token');
+    token = token || config.get('session.token');
     const host = '';
     const options = {
       query: 'token=' + token
@@ -208,6 +227,7 @@ const LoginPage = () => {
                   </Box>
                   <Box>
                     <Button
+                      disabled={state.authenticating || signinMutation.isLoading}
                       variant="primary"
                       onClick={handleSubmit}
                     >

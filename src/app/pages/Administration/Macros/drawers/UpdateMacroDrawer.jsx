@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -33,13 +32,12 @@ import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
 import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
-  MACRO_VARIABLE_EXAMPLES,
-} from '../constants';
-import {
-  API_MACROS_QUERY_KEY,
   useReadMacroQuery,
   useUpdateMacroMutation,
-} from '../queries';
+} from '@app/queries/macros';
+import {
+  MACRO_VARIABLE_EXAMPLES,
+} from '../constants';
 import {
   insertAtCaret,
 } from '../utils';
@@ -53,7 +51,6 @@ const UpdateMacroDrawer = ({
 }) => {
   const gcodeInputRef = useRef();
   const { toasts, notify: notifyToast } = useInlineToasts();
-  const queryClient = useQueryClient();
   const readMacroQuery = useReadMacroQuery({
     meta: {
       id,
@@ -64,9 +61,6 @@ const UpdateMacroDrawer = ({
       if (typeof onClose === 'function') {
         onClose();
       }
-
-      // Invalidate `useFetchMacrosQuery`
-      queryClient.invalidateQueries({ queryKey: API_MACROS_QUERY_KEY });
     },
     onError: () => {
       notifyToast({

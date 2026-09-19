@@ -19,16 +19,9 @@ class CustomWidget extends Component {
     widgetId: PropTypes.string.isRequired,
     onFork: PropTypes.func.isRequired,
     onRemove: PropTypes.func.isRequired,
+    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
+    onViewChange: PropTypes.func.isRequired,
     sortable: PropTypes.object
-  };
-
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
   };
 
   config = new WidgetConfig(this.props.widgetId);
@@ -41,40 +34,25 @@ class CustomWidget extends Component {
     }));
   };
 
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
-
   componentDidUpdate(prevProps, prevState) {
     const {
       disabled,
-      minimized,
     } = this.state;
 
     this.config.set('disabled', disabled);
-    this.config.set('minimized', minimized);
   }
 
   getInitialState() {
     return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
       disabled: this.config.get('disabled'),
     };
   }
 
   render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen, disabled } = this.state;
+    const { widgetId, view, onViewChange } = this.props;
+    const isCollapsed = view === 'collapsed';
+    const isFullscreen = view === 'fullscreen';
+    const { disabled } = this.state;
     const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
     return (
@@ -130,21 +108,21 @@ class CustomWidget extends Component {
                           <FontAwesomeIcon icon="redo-alt" fixedWidth />
                         </Widget.Button>
                         <Widget.Button
-                          aria-label={minimized ? 'Expand' : 'Collapse'}
-                          aria-expanded={!minimized}
+                          aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                          aria-expanded={!isCollapsed}
                           disabled={isFullscreen}
-                          title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                          onClick={this.toggleMinimized}
+                          title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                          onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
                         >
-                          {minimized &&
+                          {isCollapsed &&
                             <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-                          {!minimized &&
+                          {!isCollapsed &&
                             <FontAwesomeIcon icon="chevron-up" fixedWidth />}
                         </Widget.Button>
                         {isFullscreen && (
                           <Widget.Button
                             title={i18n._('Exit Full Screen')}
-                            onClick={this.toggleFullscreen}
+                            onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
                           >
                             <FontAwesomeIcon icon="compress" fixedWidth />
                           </Widget.Button>
@@ -159,7 +137,7 @@ class CustomWidget extends Component {
                             if (eventKey === 'settings') {
                               openModal(SettingsModal);
                             } else if (eventKey === 'fullscreen') {
-                              this.toggleFullscreen();
+                              onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                             } else if (eventKey === 'fork') {
                               this.props.onFork();
                             } else if (eventKey === 'remove') {
@@ -196,9 +174,9 @@ class CustomWidget extends Component {
                       </Widget.Controls>
                     </Widget.Header>
                     <Widget.Content
-                      aria-hidden={minimized}
+                      aria-hidden={isCollapsed}
                       style={{
-                        display: (minimized ? 'none' : 'block'),
+                        display: (isCollapsed ? 'none' : 'block'),
                       }}
                     >
                       <Custom

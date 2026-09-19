@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -54,6 +55,7 @@ import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import log from '@app/lib/log';
 import * as user from '@app/lib/user';
+import { signoutAndClearSession } from '@app/queries/session';
 import config from '@app/store/config';
 import Avatar from './components/Avatar';
 import { ensureColorMode, getColorScheme, mapDisplayLanguageToLocaleString } from './utils';
@@ -228,6 +230,7 @@ const MainMenuItems = forwardRef((props, ref) => {
   const [colorStyle] = useColorStyle();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isUserAccountEnabled = config.get('session.enabled');
   const userAccountName = config.get('session.name');
   const appearance = config.get('settings.appearance') ?? 'auto';
@@ -344,12 +347,12 @@ const MainMenuItems = forwardRef((props, ref) => {
         <>
           <MenuDivider />
           <MenuItem
-            onClick={(event) => {
+            onClick={async (event) => {
               if (user.isAuthenticated()) {
                 log.debug('Destroy and cleanup the WebSocket connection');
                 controller.disconnect();
 
-                user.signout();
+                await signoutAndClearSession(queryClient);
 
                 // remember current location
                 const url = location.pathname;

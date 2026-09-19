@@ -17,6 +17,7 @@ import { CardProvider } from '@app/components/Card';
 import { Provider as GridSystemProvider } from '@app/components/GridSystem'; // TODO: remove this
 import colorStyle from '@app/config/color-style';
 import i18next from '@app/i18next';
+import '@app/runtime/connectionRuntimeSingleton';
 import config from '@app/store/config';
 import reduxStore from '@app/store/redux';
 
