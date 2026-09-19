@@ -21,9 +21,9 @@
 | HEAD | `06041616`（本檔自身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | 無 |
-| 最近完成 | **G1 Connection**（G1-B01 已解除） |
-| 下一步推薦 | **G2 GCode**（G2–G7 共用 U3、Q2-cleanup 前置） |
+| Active task | 無（G4 completed） |
+| 最近完成 | **G4 Laser**（G1-B01 已解除） |
+| 下一步推薦 | **G5 Probe**（G5–G7 共用 U3、Q2-cleanup 前置） |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-目前沒有 `in_progress`、也沒有未解 blocker。已完成：R0、D1–D4、R1、R2、R3、U2、U3、B1、M1–M3、Q2-cleanup、T1–T3、P0、G1。
+目前沒有 `in_progress`、也沒有未解 blocker。已完成：R0、D1–D4、R1、R2、R3、U2、U3、B1、M1–M3、Q2-cleanup、T1–T3、P0、G1–G4。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **G2–G7** [一般 widgets](plans/2026-09-07-tonic-ui-v2/04-general-widgets.md) | U3 ✅, Q2-cleanup ✅ | widget migrations and behavior contracts | 否（unit; browser deferred） |
+| **G5–G7** [一般 widgets](plans/2026-09-07-tonic-ui-v2/04-general-widgets.md) | U3 ✅, Q2-cleanup ✅ | widget migrations and behavior contracts | 否（unit; browser deferred） |
 
-**先領取 G2（GCode）**，G2 的 U2 pilot UI 檢查必須併入本 task。G1 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query。
+**先領取 G5（Probe）**。G1–G4 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
 
 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
 
@@ -73,7 +73,7 @@
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0/G1 已完成；目前推薦先領取 G2，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
+優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0/G1/G2/G3 已完成；目前推薦先領取 G4，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

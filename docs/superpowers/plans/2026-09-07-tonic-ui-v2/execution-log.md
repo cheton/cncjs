@@ -943,3 +943,93 @@ Follow-up slice in the same G1 scope: the network (socket) selection test and th
 Carry-forward: browser visual/focus evidence for the Connection widget remains deferred to R6 under the existing BR0 waiver. The intentional socket-port correction (`connection.socket.port` read as a number instead of the previous undefined `connection.serial.port`) is covered by the restored network test.
 
 Status transition / blocker ID: G1 `blocking` → `completed` (G1-B01 resolved). Next eligible tasks are G2–G7.
+
+## G2 GCode — started 2026-09-19T22:10:24+08:00
+
+Task / session / timestamp: G2 / current root session / 2026-09-19T22:10:24+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `7e83b629` / working tree clean before this checkpoint.
+
+Plan contract and baseline fixture: `04-general-widgets.md` Task G2 and `details/04b-widget-contracts.md`; source baseline is `GCode/index.jsx` class shell plus Redux-connected `GCodeStats.jsx`, with sender metadata available from `controller.sender.status` (`loaded`, `name`, `size`, `total`, `sent`, `received`, timing fields). The GCode test subtree is intentionally excluded from the graph index and will be verified from source and test output directly.
+
+Worker brief: model `gpt-5.6-luna`, reasoning `high`, `fork_turns: none` (host equivalent: `fork_context: false`). Selection reason: the G2 contract is fixed and local, with a direct Tonic primitive migration and bounded Redux presentation state; high effort is sufficient unless implementation reveals cross-widget ownership or lifecycle ambiguity. Worker owns only `src/app/widgets/GCode/`, its colocated test, and `index.styl`; worker must not modify ledger documents, commit, dispatch subagents, or run browser operations.
+
+Changed files / commit: pending. Focused baseline command pending before implementation worker dispatch.
+
+Verification: focused G2 tests, full frontend suite, ESLint, `yarn build-dev`, static legacy-import/React-class scans, and `git diff --check` are required. Browser evidence remains deferred to R6 under BR0 waiver.
+
+Status transition / blocker ID: G2 `todo` → `in_progress`; no blocker.
+
+## G2 GCode — completed 2026-09-19T22:34:42+08:00
+
+Task / session / timestamp: G2 / current root session / 2026-09-19T22:34:42+08:00.
+
+Changed files: `src/app/widgets/GCode/index.jsx`, `src/app/widgets/GCode/GCodeStats.jsx`, and new `src/app/widgets/GCode/__tests__/GCode.test.jsx`. The widget shell is function-based; stats use direct Tonic primitives; metadata, empty/loading state, units, counters, progress, timing, view callbacks, fork/remove, and zero-controller-command behavior are covered. No Stylus change and no server/controller/Redux workflow change. No commit or push.
+
+Review and correction: independent task review found three Important issues: the bytes label was not translated, the controller-import test did not fail on an accidental import, and Collapse/Expand callbacks were not exercised through the real controls. A failing test was added first for the translation issue; production then uses `i18n._('bytes')`. The controller mock now throws at module load, and the test clicks the real Collapse and Expand controls with rerender assertions. No unresolved review finding remains.
+
+Verification: focused GCode command / exit code / result: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/GCode/__tests__/GCode.test.jsx src/app/widgets/GCode/__tests__/GCodeStats.test.js` / 0 / 2 suites and 7 tests passed; full frontend / 0 / 30 suites and 164 tests passed; `yarn eslint` / 0 / 0 errors and 17 pre-existing warnings; `yarn build-dev` / 0 / compiled successfully; legacy-import/class scans / clean; `git diff --check` / 0. Build-generated locale entries were removed because they were outside G2 scope.
+
+Browser/simulator evidence remains deferred to R6 under the explicit BR0 waiver. Status transition / blocker ID: G2 `in_progress` → `completed`; no blocker. Next eligible task is G3 Spindle.
+
+## G3 Spindle — started 2026-09-19T22:37:02+08:00
+
+Task / session / timestamp: G3 / current root session / 2026-09-19T22:37:02+08:00.
+
+Plan contract: `04-general-widgets.md` Task G3 and `details/04b-widget-contracts.md`; controlled speed draft, distinct empty/zero behavior, M7/M8/M9 coolant, M3/M4/M5 spindle commands, disabled gates, and one controller command per action. Implementation brief: `.superpowers/sdd/04-general-widgets/task-3-brief.md`.
+
+Worker assignment: implementation worker will own only `src/app/widgets/Spindle/`, its colocated test, and relevant Stylus; no ledger edits, commit, subagents, or browser operations. The root session will review the resulting diff and run the required verification.
+
+Changed files / commit: pending. Baseline pending before implementation worker dispatch.
+
+Verification: focused Spindle tests, full frontend suite, ESLint, `yarn build-dev`, static migration scans, and `git diff --check` are required. Browser evidence remains deferred to R6 under BR0 waiver.
+
+Status transition / blocker ID: G3 `todo` → `in_progress`; no blocker.
+
+## G3 Spindle — completed 2026-09-19T22:53:16+08:00
+
+Task / session / timestamp: G3 / current root session / 2026-09-19T22:53:16+08:00.
+
+Implementation: `src/app/widgets/Spindle/Spindle.jsx` now owns a controlled speed draft and derives M3/M4 payloads from the current draft; empty and invalid values disable M3/M4, while zero sends bare M3/M4. M7/M8/M9 and M5 remain one-command actions. Speed changes persist through widget config without controller commands. `src/app/widgets/Spindle/index.jsx` is a function shell using direct Tonic content layout and preserves the host `view`/`onViewChange` contract. The colocated test covers commands, disabled gates, config persistence, current-draft behavior, empty/zero/invalid values, exact command counts, and host view dispatch. No Stylus file exists in the Spindle inventory. No server/controller transport/Redux workflow change. No commit or push.
+
+Worker note: the `gpt-5.6-luna` max implementation worker stopped after contributing the bounded test expansion without returning a completion report. The root session completed the source implementation, reviewed the diff, and retained only the approved Spindle changes.
+
+Review: independent `gpt-5.6-sol` medium review found one valid low-severity test gap—missing total command-count assertion—and one scope warning caused by the already-completed uncommitted G2 diff. The command-count assertion was added. The G2 files remain because they are the prior completed task in the same branch; no unrelated G3 production scope was added.
+
+Verification: focused Spindle command / exit code / result: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Spindle/__tests__/Spindle.test.jsx` / 0 / 1 suite and 7 tests passed; full frontend / 0 / 30 suites and 168 tests passed; `yarn eslint` / 0 / 0 errors and 17 pre-existing warnings; `yarn build-dev` / 0 / compiled successfully; production Spindle legacy import/class scan / clean; locale diff / clean after removing build-generated entries; `git diff --check` / 0.
+
+Browser/simulator evidence remains deferred to R6 under the explicit BR0 waiver. Status transition / blocker ID: G3 `in_progress` → `completed`; no blocker. Next eligible task is G4 Laser.
+
+## G4 Laser — started 2026-09-19T22:55:11+08:00
+
+Task / session / timestamp: G4 / current root session / 2026-09-19T22:55:11+08:00.
+
+Plan contract: `04-general-widgets.md` Task G4 and `details/04b-widget-contracts.md`; controlled LaserTest drafts, exact laser-test and spindle-override payloads, preserved repeat timing, singular timer ownership, and release/blur/disabled/unmount cleanup. Implementation brief: `.superpowers/sdd/04-general-widgets/task-4-brief.md`.
+
+Worker assignment: implementation worker will own only `src/app/widgets/Laser/`, its colocated tests, and relevant Stylus; no ledger edits, commit, subagents, or browser operations. The root session will review the resulting diff and run the required verification.
+
+Changed files / commit: pending. Baseline pending before implementation worker dispatch.
+
+Verification: focused Laser tests, full frontend suite, ESLint, `yarn build-dev`, static migration scans, and `git diff --check` are required. Browser evidence remains deferred to R6 under BR0 waiver.
+
+Status transition / blocker ID: G4 `todo` → `in_progress`; no blocker.
+
+## G4 Laser — completed 2026-09-19T23:16:41+08:00
+
+Task / session / timestamp: G4 / current root session / 2026-09-19T23:16:41+08:00.
+
+Implementation: `LaserTest`, `LaserIntensityOverride`, the Laser shell, and `OverrideReadout` use direct Tonic function components. LaserTest owns controlled power/duration/maxS drafts and sends exact `laser_test` payloads. Override controls preserve the 500ms delay and `floor(1000/15)` repeat interval; release, blur, disabled state, and unmount clean up timers. Enter/Space activation sends the corresponding one-shot override command. Local Tonic styling uses `sx`; the third-party slider is styled through an outer Tonic `sx` selector. No server/controller transport/Redux workflow change, commit, or push.
+
+Review and correction: independent review found missing keyboard activation and a Redux selector test seam. A failing keyboard test was added before the production key handler. The test connect mock now evaluates the production `connection.state` mapping, covering the disconnected gate. The plan and detailed contract now require `sx` for all local Tonic styling and prescribe an outer Tonic selector for third-party components.
+
+Verification: focused Laser command / exit code / result: `yarn test:frontend --runInBand --silent src/app/widgets/Laser/__tests__/Laser.test.jsx` / 0 / 1 suite and 7 tests passed; full frontend / 0 / 31 suites and 175 tests passed; `yarn eslint` / 0 / 0 errors and 17 pre-existing warnings; `yarn build-dev` / 0 / webpack compiled successfully; production inline-style and legacy-import/class scans / clean; locale diff clean after removing build-generated entries; `git diff --check` / 0.
+
+Browser/simulator evidence remains deferred to R6 under the explicit BR0 waiver. Status transition / blocker ID: G4 `in_progress` → `completed`; no blocker. Next eligible task is G5 Probe.
+
+## G5 Probe — started 2026-09-19T23:20:00+08:00
+
+Task / session / timestamp: G5 / current root session / 2026-09-19T23:20:00+08:00.
+
+Plan contract: `04-general-widgets.md` Task G5 and `details/04b-widget-contracts.md`; controlled ProbeModal parameters, preview, exact one-shot command, cancel/invalid/disconnected gates, and controller workflow gates. Source/contract discovery started. Per user direction, `resource.json` files are out of scope; do not run or clean generators that modify them.
+
+Status transition / blocker ID: G5 `todo` → `in_progress`; no blocker.

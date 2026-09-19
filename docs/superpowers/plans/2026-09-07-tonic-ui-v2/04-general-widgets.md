@@ -13,6 +13,7 @@
 ## Global Constraints
 
 - JavaScript only；不新增 TypeScript、CSS modules 或 Sass。自訂樣式使用既有 Stylus；Tonic 本身的 props/token/theme 照其 API 使用。
+- Tonic 元件的所有 local styling 一律使用 `sx`；不得傳 inline `style`。第三方元件需要樣式時，以外層 Tonic 元件的 `sx` selector 套用，避免新增 CSS 檔或例外。
 - 保留 Node >=18、React 18 與 Query v4；本輪不升 React 19 / Query v5，不升控制器協定與 Three.js。
 - 使用 i18next 處理所有新增／修改的使用者文字，含 aria-label。
 - 有 Tonic 對應的通用元件直接 import `@tonic-ui/react`；不能以永久 re-export 或自製同功能 wrapper 當作完成。
@@ -66,11 +67,15 @@ G1–G7 執行細節補充於 [04b](details/04b-widget-contracts.md)，包括 st
 **Create Test:** `src/app/widgets/GCode/__tests__/GCode.test.jsx`。
 **Specific acceptance:** 檔案 metadata、loading/empty、units/行數與原欄位；刷新/收合不丟失內容。U2 pilot 的 UI 檢查併入本 task。
 
+**Status:** ✅ completed 2026-09-19T22:34:42+08:00；focused 2 suites / 7 tests、full frontend 30 suites / 164 tests、ESLint 0 errors、development build compiled；browser evidence deferred to R6 under BR0 waiver。
+
 ## Task G3：Spindle
 
 **Modify:** `src/app/widgets/Spindle/` 的 inventory 全部來源與相關 Stylus。
 **Create Test:** `src/app/widgets/Spindle/__tests__/Spindle.test.jsx`。
 **Specific acceptance:** 轉速輸入、M3/M4/M5 原行為與 disabled gates，數字含零與空輸入；避免 change 與 submit 雙送。
+
+**Status:** ✅ completed 2026-09-19T22:53:16+08:00；focused 1 suite / 7 tests、full frontend 30 suites / 168 tests、ESLint 0 errors、development build compiled、production legacy scan and diff check clean；browser evidence deferred to R6 under BR0 waiver。
 
 ## Task G4：Laser
 
@@ -78,11 +83,15 @@ G1–G7 執行細節補充於 [04b](details/04b-widget-contracts.md)，包括 st
 **Create Test:** `src/app/widgets/Laser/__tests__/Laser.test.jsx`。
 **Specific acceptance:** 功率、測試脈衝、長按與 release；舊 RepeatableButton 的 500ms delay / floor(1000/15) interval 保留；disabled/blur/unmount 停止重複。
 
+**Status:** ✅ completed 2026-09-19T23:16:41+08:00；focused 1 suite / 7 tests、full frontend 31 suites / 175 tests、ESLint 0 errors、development build compiled、production inline-style/legacy-import/class scan and diff check clean；browser evidence deferred to R6 under BR0 waiver.
+
 ## Task G5：Probe
 
 **Modify:** `src/app/widgets/Probe/` 的 inventory 全部來源與相關 Stylus。
 **Create Test:** `src/app/widgets/Probe/__tests__/Probe.test.jsx`。
 **Specific acceptance:** Probe modal 開關、參數驗證、指令預覽與開始條件；cancel 不能發 probe，controller run/paused/disconnected gates 保留。
+
+**Status:** 🔄 in progress 2026-09-19T23:20:00+08:00；source/contract discovery started. `resource.json` files are out of scope for this slice.
 
 ## Task G6：Custom
 

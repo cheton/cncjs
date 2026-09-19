@@ -16,6 +16,10 @@ G1–G7、C1–C4 開始時先讀本文件。修改範圍與 test file 使用父
 | C1 Grbl | 延用原 store/controller shape；settings modal、override、tabs 分開 state；不新增第二份機器狀態 |
 | C2/C3/C4 | index 的 controller:settings/controller:state listeners 改 owner effects；先保存全部其他事件名稱及 payload，再搬移。type filter、connection switch、partial state merge、unmount 都測 |
 
+## Styling contract
+
+所有 Tonic component 的 local styling 使用 `sx`，不使用 inline `style`。包含尺寸、spacing、文字和色彩；既有 Stylus 仍是跨元件／共用樣式的唯一途徑。第三方 component 沒有 `sx` 時，用外層 Tonic component 的 `sx` selector 套用需要的樣式。
+
 ## 精確 command oracle
 
 下面區分 write/writeln/command，不可只比對字串忽略傳輸方法。控制器回報測試分別建 Grbl、Marlin、Smoothie、TinyG/g2core fixtures，不能共用 Grbl shape。

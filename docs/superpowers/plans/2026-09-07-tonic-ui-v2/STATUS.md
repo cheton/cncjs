@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **G1**（Connection；started 2026-09-19T10:37:18+08:00；completed 2026-09-19T20:08:32+08:00）→ 下一個 eligible task 是 **G2**，尚未領取。
+- Active task: **G5 Probe**（started 2026-09-19T23:20:00+08:00）。
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: **G2–G7**（一般 widgets）；G1 已完成，G1-B01 已由使用者重新界定 scope 後解除。無並行 task 授權。
+- Next eligible task: **G5**（Probe）。G1–G4 已完成，G1-B01 已由使用者重新界定 scope 後解除。無並行 task 授權。
 - Current blockers: 無。G1-B01 已解除，見下方記錄。BR0 依使用者明確指示為 `waived`（非 passed）。既有 browser evidence 仍只涵蓋 connection/upload/Run/Pause/Resume；剩餘 browser gaps 依 waiver 延後至 R6。System Chrome channel 仍不支援 screenshot。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -51,10 +51,10 @@
 | M3 | [Macro UI](details/03a-query-contract.md) | M2 | completed | root session / 2026-09-18T22:55:00+08:00 | Commit `db0db29e`; `Macro.test.jsx` and `MacroMutations.test.jsx` cover query view states, mutation failure retention, pending locks, and nested delete close order. Full frontend: 25 suites / 141 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. |
 | Q2-cleanup | [fetch machine 移除與跨畫面驗收](03-query-and-macro.md) | M3 | completed | root session / 2026-09-18T23:25:00+08:00 | Commit `730a0045`; removed `xstate` and `@xstate/react` after a clean repo-wide audit. Shared-cache regression proves unfiltered widget and paginated Administration observers refetch after one mutation. Full frontend: 25 suites / 142 tests; build-dev compiled; ESLint 0 errors / 17 existing warnings; diff check clean. |
 | G1 | [Connection](04-general-widgets.md) | U3, Q2-cleanup | completed | root session / 2026-09-19T20:08:32+08:00 | Commit `5b0c00e2` plus the follow-up test slice `5b0c00e2+`. Widget uses `useConnection()` (framework-independent runtime + `useSyncExternalStore` singleton started at app root) and TanStack Query for ports/baud rates; no Redux connection/serial-port imports remain. Runtime owns open/close timeout, duplicate-request guard, late-event authority, and Socket.IO disconnect release. Focused 4 suites / 16 tests; full frontend 29 suites / 158 tests; ESLint 0 errors / 17 pre-existing warnings; `yarn build-dev` exit 0; `git diff --check` clean. No `src/server/**`, `src/app/lib/controller/**`, reducer, saga, or action diff. Browser evidence remains R6. |
-| G2 | [GCode](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
-| G3 | [Spindle](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
-| G4 | [Laser](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
-| G5 | [Probe](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
+| G2 | [GCode](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T22:34:42+08:00 | Function shell and direct Tonic stats presentation; loaded metadata/empty state, units, line count, progress, timing, view interactions, fork/remove and zero-controller-command tests. Focused 2 suites / 7 tests; full frontend 30 suites / 164 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; diff check clean. Browser evidence remains R6 under BR0 waiver. |
+| G3 | [Spindle](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T22:53:16+08:00 | Controlled speed draft; M7/M8/M9 and M3/M4/M5 payloads, empty/zero/invalid gates, one-command actions, config persistence, and host view contract covered. Focused 1 suite / 7 tests; full frontend 30 suites / 168 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; production legacy scan and diff check clean. Browser evidence remains R6 under BR0 waiver. |
+| G4 | [Laser](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T23:16:41+08:00 | Direct Tonic function migration; controlled laser drafts, exact commands, repeat cleanup, keyboard controls, and host-view contract covered. Focused 1 suite / 7 tests; full frontend 31 suites / 175 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; no production inline style or legacy-import/class scan match; browser deferred to R6 under BR0 waiver. |
+| G5 | [Probe](04-general-widgets.md) | U3, Q2-cleanup | in_progress | current root session / 2026-09-19T23:20:00+08:00 | Source/contract discovery in progress. `resource.json` files are explicitly out of scope for this slice. |
 | G6 | [Custom](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | G7 | [Webcam](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | T1 | [Terminal baseline](details/04a-terminal-owner.md) | U3 | completed | root session / 2026-09-18T21:40:00+08:00 | `Console.test.jsx` covers all seven owner consumers, close ref shape, connection read/write/self-echo, resize, widget actions, and distinct sender ids. Focused 6/6; full frontend 21 suites/120 tests; build-dev, ESLint, and diff checks pass. No production change. |
