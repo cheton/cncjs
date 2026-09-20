@@ -1185,3 +1185,11 @@ Status transition: A2 `in_progress` → `completed`; A3a `todo` → `in_progress
 ## A3a Autolevel forms — started 2026-09-20
 
 Implementation checkpoint: StartProbeModal, StopProbeModal, and TestProbeModal are now JSDoc function components with explicit callback contracts. The safety confirmations use React Final Form and Tonic FormControl/Checkbox; start, test, and stop confirmation buttons use a same-tick submit lock. The owner passes the existing command actions as callbacks and supplies the existing validation gate. `ProbeDialogs.test.jsx` covers cancel, required confirmation, invalid-value gates, and duplicate confirmation prevention. ApplyView remains the next source slice; browser tooling and builds are prohibited by the current deferral.
+
+## A3a Autolevel forms — completed 2026-09-21
+
+Implementation: `ApplyView` is now a JSDoc function component using Tonic Box/Button/Text/CircularProgress/LinearProgress and explicit owner callbacks. It preserves the file reader pipeline, compensation progress/success/error callbacks, original-G-code retry, cached Blob export, clear's existing controller/PubSub owner action, and the exact paired `gcode:unload`/`gcode:load` subscriptions with cleanup. The event-facing pipeline ref prevents an immediate external unload after completion from leaving stale completed UI. Null probe positions retain the legacy insufficient-data behavior and errors retain the failed filename.
+
+Verification: `ProbeDialogs.test.jsx` passes 10 tests covering cancel, confirmation, invalid gates, same-tick duplicate prevention, PubSub subscribe/unsubscribe, null probe data, clear, retry, external unload reset, and compensation-originated G-code load preservation. Full `yarn test:frontend --runInBand --silent` passes 47 suites / 274 tests. Fresh `yarn lint` exits 0, and `git diff --check` passes. Browser tooling and builds were not run under the explicit R6 deferral.
+
+Status transition: A3a `in_progress` → `completed`; A3b is eligible but not started.

@@ -80,8 +80,8 @@
 **Modify:** `src/app/widgets/Autolevel/StartProbeModal.jsx`, `StopProbeModal.jsx`, `TestProbeModal.jsx`, `ApplyView.jsx` 及其 Tonic 重複 UI consumers。
 **Create Test:** `src/app/widgets/Autolevel/__tests__/ProbeDialogs.test.jsx`。
 
-- [ ] 改成 function、Tonic Modal/Progress/Checkbox/FormControl；表單使用 values/onChange。開始／停止／測試 actions 透過 callbacks，不經 refs。
-- [ ] 測 cancel 不啟動、confirm 只啟動一次、invalid grid/feed/depth 不送命令、busy 不可重送、gcode unload/load events 訂閱一次。
+- [x] 改成 function、Tonic Modal/Progress/Checkbox/FormControl；表單使用 values/onChange。開始／停止／測試 actions 透過 callbacks，不經 refs。
+- [x] 測 cancel 不啟動、confirm 只啟動一次、invalid grid/feed/depth 不送命令、busy 不可重送、gcode unload/load events 訂閱一次。
 
 ## Task A3b：Autolevel 工作流程
 

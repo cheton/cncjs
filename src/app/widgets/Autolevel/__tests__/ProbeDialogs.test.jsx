@@ -1,13 +1,22 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { renderAppUI } from '@app/test/render';
 import StartProbeModal from '../StartProbeModal';
 import StopProbeModal from '../StopProbeModal';
 import TestProbeModal from '../TestProbeModal';
+import ApplyView from '../ApplyView';
+
+const mockSubscribe = jest.fn();
+const mockUnsubscribe = jest.fn();
+
+jest.mock('pubsub-js', () => ({
+  subscribe: (...args) => mockSubscribe(...args),
+  unsubscribe: (...args) => mockUnsubscribe(...args),
+}));
 
 jest.mock('@app/lib/i18n', () => ({
   __esModule: true,
-  default: { _: (value, options = {}) => value.replace('{{count}}', options.count) },
+  default: { _: (value, options = {}) => value.replace(/{{(\w+)}}/g, (_match, key) => options[key]) },
 }));
 
 jest.mock('../ProbeAreaDiagram', () => () => null);
@@ -113,6 +122,201 @@ describe('Autolevel probe dialogs', () => {
       expect(onConfirm).toHaveBeenCalledTimes(1);
     } finally {
       view.dispose();
+    }
+  });
+});
+
+describe('Autolevel ApplyView lifecycle', () => {
+  beforeEach(() => {
+    mockSubscribe.mockReset();
+    mockUnsubscribe.mockReset();
+  });
+
+  test('subscribes to each G-code event once and cleans both subscriptions on unmount', () => {
+    mockSubscribe.mockImplementation(name => `${name}-token`);
+    const view = renderAppUI(
+      <ApplyView
+        onBack={jest.fn()}
+        onClear={jest.fn()}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{ probedPositions: [], probeStats: null, units: 'mm' }}
+      />,
+    );
+
+    try {
+      expect(mockSubscribe).toHaveBeenCalledTimes(2);
+      expect(mockSubscribe).toHaveBeenCalledWith('gcode:unload', expect.any(Function));
+      expect(mockSubscribe).toHaveBeenCalledWith('gcode:load', expect.any(Function));
+    } finally {
+      view.dispose();
+    }
+
+    expect(mockUnsubscribe).toHaveBeenCalledWith('gcode:unload-token');
+    expect(mockUnsubscribe).toHaveBeenCalledWith('gcode:load-token');
+  });
+
+  test('treats missing probe positions as insufficient data', () => {
+    const view = renderAppUI(
+      <ApplyView
+        onBack={jest.fn()}
+        onClear={jest.fn()}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{ probedPositions: null, probeStats: null, units: 'mm' }}
+      />,
+    );
+
+    try {
+      expect(screen.getByText('Insufficient probe data. At least 3 points are required for surface compensation.')).toBeInTheDocument();
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('keeps clear as an owner callback after a successful compensation', () => {
+    const onClear = jest.fn();
+    const originalFileReader = global.FileReader;
+    global.FileReader = jest.fn(() => ({
+      readAsText() {
+        this.onload({ target: { result: 'G1 X1' } });
+      },
+    }));
+    const view = renderAppUI(
+      <ApplyView
+        onApply={(_gcode, _name, onSuccess) => onSuccess('G1 X1\nG1 Z-1')}
+        onBack={jest.fn()}
+        onClear={onClear}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{
+          probeStats: { points: 3, minZ: -1, maxZ: 0, maxDeviation: 1 },
+          probedPositions: [{}, {}, {}],
+          units: 'mm',
+        }}
+      />,
+    );
+
+    try {
+      fireEvent.change(view.container.querySelector('input[type="file"]'), {
+        target: { files: [new File(['G1 X1'], 'part.gcode')] },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Clear G-code' }));
+      expect(onClear).toHaveBeenCalledTimes(1);
+    } finally {
+      view.dispose();
+      global.FileReader = originalFileReader;
+    }
+  });
+
+  test('preserves the original G-code and retries compensation after an error', () => {
+    const onApply = jest.fn((_gcode, _name, _onSuccess, onError) => onError('Compensation failed'));
+    const originalFileReader = global.FileReader;
+    global.FileReader = jest.fn(() => ({
+      readAsText() {
+        this.onload({ target: { result: 'G1 X1' } });
+      },
+    }));
+    const view = renderAppUI(
+      <ApplyView
+        onApply={onApply}
+        onBack={jest.fn()}
+        onClear={jest.fn()}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{
+          probeStats: { points: 3, minZ: -1, maxZ: 0, maxDeviation: 1 },
+          probedPositions: [{}, {}, {}],
+          units: 'mm',
+        }}
+      />,
+    );
+
+    try {
+      fireEvent.change(view.container.querySelector('input[type="file"]'), {
+        target: { files: [new File(['G1 X1'], 'part.gcode')] },
+      });
+      expect(screen.getByText('Compensation failed')).toBeInTheDocument();
+      expect(screen.getByText('Failed to compensate part.gcode')).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+      expect(onApply).toHaveBeenCalledTimes(2);
+      expect(onApply).toHaveBeenLastCalledWith('G1 X1', 'part.gcode', expect.any(Function), expect.any(Function), expect.any(Function));
+    } finally {
+      view.dispose();
+      global.FileReader = originalFileReader;
+    }
+  });
+
+  test('resets completed compensation when external G-code unloads', () => {
+    mockSubscribe.mockImplementation(name => `${name}-token`);
+    const originalFileReader = global.FileReader;
+    global.FileReader = jest.fn(() => ({
+      readAsText() {
+        this.onload({ target: { result: 'G1 X1' } });
+      },
+    }));
+    const view = renderAppUI(
+      <ApplyView
+        onApply={(_gcode, _name, onSuccess) => onSuccess('G1 X1\nG1 Z-1')}
+        onBack={jest.fn()}
+        onClear={jest.fn()}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{
+          probeStats: { points: 3, minZ: -1, maxZ: 0, maxDeviation: 1 },
+          probedPositions: [{}, {}, {}],
+          units: 'mm',
+        }}
+      />,
+    );
+
+    try {
+      fireEvent.change(view.container.querySelector('input[type="file"]'), {
+        target: { files: [new File(['G1 X1'], 'part.gcode')] },
+      });
+      expect(screen.getByRole('button', { name: 'Clear G-code' })).toBeInTheDocument();
+      const unload = mockSubscribe.mock.calls.find(([name]) => name === 'gcode:unload')[1];
+      act(unload);
+      expect(screen.queryByRole('button', { name: 'Clear G-code' })).not.toBeInTheDocument();
+    } finally {
+      view.dispose();
+      global.FileReader = originalFileReader;
+    }
+  });
+
+  test('keeps completed compensation when its own G-code load event is published', () => {
+    mockSubscribe.mockImplementation(name => `${name}-token`);
+    const originalFileReader = global.FileReader;
+    global.FileReader = jest.fn(() => ({
+      readAsText() {
+        this.onload({ target: { result: 'G1 X1' } });
+      },
+    }));
+    const view = renderAppUI(
+      <ApplyView
+        onApply={(_gcode, _name, onSuccess) => onSuccess('G1 X1\nG1 Z-1')}
+        onBack={jest.fn()}
+        onClear={jest.fn()}
+        onExport={jest.fn()}
+        onSaveProbeData={jest.fn()}
+        value={{
+          probeStats: { points: 3, minZ: -1, maxZ: 0, maxDeviation: 1 },
+          probedPositions: [{}, {}, {}],
+          units: 'mm',
+        }}
+      />,
+    );
+
+    try {
+      fireEvent.change(view.container.querySelector('input[type="file"]'), {
+        target: { files: [new File(['G1 X1'], 'part.gcode')] },
+      });
+      const load = mockSubscribe.mock.calls.find(([name]) => name === 'gcode:load')[1];
+      act(() => load('gcode:load', { isProbeCompensationApplied: true }));
+      expect(screen.getByRole('button', { name: 'Clear G-code' })).toBeInTheDocument();
+    } finally {
+      view.dispose();
+      global.FileReader = originalFileReader;
     }
   });
 });

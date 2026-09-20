@@ -77,14 +77,14 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 - **Widget owner pattern:** default to one function owner with controlled props. Add a widget-scoped provider and consumer hook only when sibling or deep consumers share the same domain state and named commands, as Axes does for `DisplayPanel`, `Keypad`, and `MDI`. The provider replaces real prop drilling or a cross-component `actions` bag; it is not a default migration wrapper. Marlin, Smoothie, and TinyG already use the function-owner/effect-cleanup half of this pattern without a widget context. Apply the same decision to later widgets only when their component tree needs shared ownership.
 - The Axes widget has no native `<div>` elements; its layout wrappers use Tonic `Box`.
 - The position draft is now owned above DisplayPanel through the reducer; DisplayPanel is controlled. PositionInput, PositionLabel, Fraction, Keypad, and KeypadOverlay use JSDoc-only interfaces; the Keypad path has no raw spans.
-- All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a remains separate and incomplete because its required function conversion and dialog action tests are still outstanding.
+- All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a is complete: its dialog forms use JSDoc functions, React Final Form/Tonic FormControl, explicit callbacks, and covered same-tick confirmation gates.
 - Latest focused verification: Axes/Settings/query/draft passes 4 suites / 29 tests, with targeted Axes ESLint and `git diff --check` clean. No browser tooling or build was run.
 
-## Active task — A3a Autolevel dialogs and forms
+## Current checkpoint — A3a Autolevel dialogs and forms complete
 
 - A2 is committed in `98396e35`. Its local Tool owner keeps query data separate from the editable draft, now updated directly with the existing Immer v9 `produce`; do not add a helper or upgrade Immer in this scope.
-- A3a scope is `StartProbeModal.jsx`, `StopProbeModal.jsx`, `TestProbeModal.jsx`, `ApplyView.jsx`, their owner call sites, and `__tests__/ProbeDialogs.test.jsx`. Convert dialogs to JSDoc functions, Tonic Modal/control primitives, React Final Form confirmation controls, and explicit callbacks. Preserve the existing start/stop/test command owners; confirmations must cancel without commands, block invalid values, and lock same-tick duplicate submits.
-- `ApplyView` remains in progress. Preserve its file-read pipeline, compensation callbacks, export/clear actions, and exactly one `gcode:unload` / `gcode:load` PubSub subscription with unmount cleanup. Do not begin A3b workflow ownership, browser tooling, or a build.
+- A3a converted `StartProbeModal.jsx`, `StopProbeModal.jsx`, `TestProbeModal.jsx`, `ApplyView.jsx`, their owner call sites, and `__tests__/ProbeDialogs.test.jsx`. Dialog confirmation forms use React Final Form with Tonic FormControl; commands retain their existing owners, cancel is command-free, invalid gates block dispatch, and a same-tick lock prevents duplicates.
+- ApplyView preserves its file-read pipeline, compensation callbacks, export/clear actions, and one paired `gcode:unload` / `gcode:load` PubSub subscription with unmount cleanup. It has focused 10-test coverage; full frontend passes 47 suites / 274 tests and `yarn lint` exits 0. Do not begin A3b workflow ownership, browser tooling, or a build without a new user instruction.
 
 ## 恢復 prompt
 

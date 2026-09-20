@@ -990,7 +990,17 @@ class AutolevelWidget extends PureComponent {
         )}
 
         {wizardView === VIEW_APPLY && (
-          <ApplyView state={state} actions={actions} />
+          <ApplyView
+            onApply={actions.applyToGcode}
+            onBack={actions.backToLanding}
+            onClear={() => {
+              controller.command('gcode:unload');
+              pubsub.publish('gcode:unload');
+            }}
+            onExport={actions.exportLevelledGcode}
+            onSaveProbeData={actions.saveProbeData}
+            value={state}
+          />
         )}
       </div>
     );
