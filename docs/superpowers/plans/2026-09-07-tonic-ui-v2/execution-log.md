@@ -1121,3 +1121,9 @@ Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/G
 Implementation: Marlin now uses function components with JSDoc interfaces, direct Tonic controls/modal/tabs/progress/accordion primitives, and a local Tonic-backed repeatable button. Controller settings/state listeners use effect setup/cleanup, preserve Marlin type filtering and partial-state merges, and disconnect resets the ready gate. The obsolete Marlin Stylus/layout and constants module, styled-components FadeInOut, legacy UI imports, classes, and PropTypes were removed.
 
 Verification: focused `Marlin.test.jsx` passed 1 suite / 8 tests. Full `yarn test:frontend --runInBand --silent` passed 39 suites / 208 tests. Targeted Marlin ESLint, legacy/class/PropTypes scan, and `git diff --check` passed. Browser tooling was not run; browser evidence remains deferred to R6. Status transition: C2 `in_progress` → `completed`; C3 is next.
+
+## C3 Smoothie — completed 2026-09-20
+
+Implementation: Smoothie now uses function hooks with effect-owned controller listeners and cleanup, Smoothie-specific type filtering, nested partial state/settings merges, disconnect reset, direct Tonic accordion/box/button/modal/tabs primitives, a local Tonic repeatable button, and JSDoc-only interfaces. Legacy UI imports, React classes, PropTypes, styled-components, unused constants, and widget Stylus were removed. Exact Smoothie write/command/writeln contracts and reported units were preserved.
+
+Verification: focused `Smoothie.test.jsx` plus `WidgetLayoutContract.test.jsx` passed 2 suites / 44 tests. Targeted Smoothie ESLint passed with 0 errors / 0 warnings; static forbidden-import/class/inline-style scan and `git diff --check` passed. Browser tooling and build-dev were not run; browser evidence remains deferred to R6. Status transition: C3 `in_progress` → `completed`; C4 is next.

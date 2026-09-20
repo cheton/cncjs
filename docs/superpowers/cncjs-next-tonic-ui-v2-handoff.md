@@ -21,9 +21,9 @@
 | HEAD | `06041616`（本檔自身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | **C3 Smoothie** |
+| Active task | **C4 TinyG/g2core** |
 | 最近完成 | **C1 Grbl**（G1-B01 已解除） |
-| 下一步推薦 | **C3 Smoothie** |
+| 下一步推薦 | **C4 TinyG/g2core** |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-Grbl C1 與 Marlin C2 已完成，沒有未解 blocker。Marlin focused 1 suite / 8 tests、full frontend 39 suites / 208 tests，及 targeted ESLint 均通過。Browser evidence 仍延後至 R6。下一個 task 是 C3 Smoothie。
+Grbl C1、Marlin C2 與 Smoothie C3 已完成，沒有未解 blocker。Smoothie focused controller/layout tests 2 suites / 44 tests，targeted ESLint 0 errors / 0 warnings。Browser evidence 仍延後至 R6。下一個 task 是 C4 TinyG/g2core。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **C3** [controller widgets](plans/2026-09-07-tonic-ui-v2/05-controller-widgets.md) | G4 ✅ | Smoothie migration and behavior contract | 否（unit; browser deferred） |
+| **C4** [controller widgets](plans/2026-09-07-tonic-ui-v2/05-controller-widgets.md) | G4 ✅ | TinyG/g2core migration and behavior contract | 否（unit; browser deferred） |
 
-**先領取 C3（Smoothie）**。G1–G7、C1、C2 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
+**先領取 C4（TinyG/g2core）**。G1–G7、C1–C3 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
 
 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
 

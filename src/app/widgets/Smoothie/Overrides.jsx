@@ -1,136 +1,76 @@
-import PropTypes from 'prop-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Box, Button, ButtonGroup, Space, Text } from '@tonic-ui/react';
 import React from 'react';
-import RepeatableButton from '@app/components/RepeatableButton';
 import controller from '@app/lib/controller';
+import i18n from '@app/lib/i18n';
 import DigitalReadout from './DigitalReadout';
-import styles from './index.styl';
+import RepeatableButton from './RepeatableButton';
 
-function Overrides(props) {
-  const { ovF, ovS } = props;
+const overrideSteps = [
+  { icon: 'arrow-down', value: -10 },
+  { icon: 'arrow-down', value: -1 },
+  { icon: 'arrow-up', value: 1 },
+  { icon: 'arrow-up', value: 10 },
+];
 
+/**
+ * @param {{ ovF?: number, ovS?: number }} props
+ */
+function Overrides({ ovF, ovS }) {
   if (!ovF && !ovS) {
     return null;
   }
 
   return (
-    <div className={styles.overrides}>
+    <Box>
       {!!ovF && (
-        <DigitalReadout label="F" value={ovF + '%'}>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('feed_override', -10);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-down" style={{ fontSize: 14 }} />
-            <span style={{ marginLeft: 5 }}>
-              -10%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('feed_override', -1);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-down" style={{ fontSize: 10 }} />
-            <span style={{ marginLeft: 5 }}>
-              -1%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('feed_override', 1);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-up" style={{ fontSize: 10 }} />
-            <span style={{ marginLeft: 5 }}>
-              1%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('feed_override', 10);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-up" style={{ fontSize: 14 }} />
-            <span style={{ marginLeft: 5 }}>
-              10%
-            </span>
-          </RepeatableButton>
-          <button
-            aria-label="Reset feed rate override"
-            type="button"
-            className="btn btn-default"
-            style={{ padding: 5 }}
-            onClick={() => {
-              controller.command('feed_override', 0);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-undo fa-fw" />
-          </button>
-        </DigitalReadout>
+        <OverrideControl
+          commandName="feed_override"
+          label="F"
+          resetLabel="Reset feed rate override"
+          value={ovF}
+        />
       )}
       {!!ovS && (
-        <DigitalReadout label="S" value={ovS + '%'}>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('spindle_override', -10);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-down" style={{ fontSize: 14 }} />
-            <span style={{ marginLeft: 5 }}>
-              -10%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('spindle_override', -1);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-down" style={{ fontSize: 10 }} />
-            <span style={{ marginLeft: 5 }}>
-              -1%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('spindle_override', 1);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-up" style={{ fontSize: 10 }} />
-            <span style={{ marginLeft: 5 }}>
-              1%
-            </span>
-          </RepeatableButton>
-          <RepeatableButton
-            onClick={() => {
-              controller.command('spindle_override', 10);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-arrow-up" style={{ fontSize: 14 }} />
-            <span style={{ marginLeft: 5 }}>
-              10%
-            </span>
-          </RepeatableButton>
-          <button
-            aria-label="Reset spindle override"
-            type="button"
-            className="btn btn-default"
-            style={{ padding: 5 }}
-            onClick={() => {
-              controller.command('spindle_override', 0);
-            }}
-          >
-            <i aria-hidden="true" className="fa fa-undo fa-fw" />
-          </button>
-        </DigitalReadout>
+        <OverrideControl
+          commandName="spindle_override"
+          label="S"
+          resetLabel="Reset spindle override"
+          value={ovS}
+        />
       )}
-    </div>
+    </Box>
   );
 }
 
-Overrides.propTypes = {
-  ovF: PropTypes.number,
-  ovS: PropTypes.number
-};
+/**
+ * @param {{ commandName: string, label: string, resetLabel: string, value: number }} props
+ */
+function OverrideControl({ commandName, label, resetLabel, value }) {
+  return (
+    <DigitalReadout label={label} value={`${value}%`}>
+      <ButtonGroup size="sm">
+        {overrideSteps.map(step => (
+          <RepeatableButton
+            key={step.value}
+            onClick={() => controller.command(commandName, step.value)}
+            sx={{ fontSize: Math.abs(step.value) === 1 ? '.66rem' : '.75rem' }}
+          >
+            <FontAwesomeIcon icon={step.icon} fixedWidth />
+            <Text>{i18n._(`${step.value}%`)}</Text>
+          </RepeatableButton>
+        ))}
+      </ButtonGroup>
+      <Space width="2x" />
+      <Button
+        aria-label={resetLabel}
+        variant="ghost"
+        onClick={() => controller.command(commandName, 0)}
+      >
+        <FontAwesomeIcon icon="undo" fixedWidth />
+      </Button>
+    </DigitalReadout>
+  );
+}
 
 export default Overrides;

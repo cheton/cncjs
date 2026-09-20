@@ -1,42 +1,34 @@
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
+import { Box, Space, Text } from '@tonic-ui/react';
 import React from 'react';
-import styles from './index.styl';
 
-function DigitalReadout(props) {
-  const { label, value, children } = props;
-
+/**
+ * @param {{ children: React.ReactNode, label: string, value: string }} props
+ */
+function DigitalReadout({ children, label, value }) {
   return (
-    <div className={classNames('row', 'no-gutters', styles.dro)}>
-      <div className="col col-xs-1">
-        <div className={styles.droLabel}>{label}</div>
-      </div>
-      <div className="col col-xs-2">
-        <div
-          className={classNames(
-            styles.well,
-            styles.droDisplay
-          )}
-        >
-          {value}
-        </div>
-      </div>
-      <div className="col col-xs-9">
-        <div className={styles.droBtnGroup}>
-          <div className="input-group input-group-sm">
-            <div className="input-group-btn">
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Box
+      alignItems="center" display="flex" justifyContent="center"
+      mb="2x"
+    >
+      <Text fontFamily="mono" fontSize="1.5rem">{label}</Text>
+      <Space width="2x" />
+      <Box
+        sx={{
+          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          display: 'inline-block',
+          fontSize: '.75rem',
+          fontWeight: 'bold',
+          padding: '.25rem',
+          textAlign: 'right',
+          width: '45px',
+        }}
+      >
+        {value}
+      </Box>
+      <Space width="2x" />
+      {children}
+    </Box>
   );
 }
-
-DigitalReadout.propTypes = {
-  label: PropTypes.string,
-  value: PropTypes.string
-};
 
 export default DigitalReadout;
