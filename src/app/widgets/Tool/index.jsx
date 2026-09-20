@@ -1,6 +1,7 @@
 import { Space } from '@tonic-ui/react';
 import classNames from 'classnames';
 import { ensureNumber, ensureString } from 'ensure-type';
+import produce from 'immer';
 import get from 'lodash/get';
 import includes from 'lodash/includes';
 import isEqual from 'lodash/isEqual';
@@ -203,8 +204,9 @@ function ToolWidget({
     if (isEqual(draftRef.current, nextDraft)) {
       return;
     }
-    draftRef.current = nextDraft;
-    setDraft(nextDraft);
+    const updatedDraft = produce(draftRef.current, draft => Object.assign(draft, nextDraft));
+    draftRef.current = updatedDraft;
+    setDraft(updatedDraft);
     setSaveVersion(version => version + 1);
   }, []);
 

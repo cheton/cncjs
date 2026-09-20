@@ -434,19 +434,31 @@ export function AxesWidgetContent({
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             <KeypadOverlay show={displayState.canClick && displayState.jog.keypad}>
-              <Widget.Button aria-label="Toggle keypad jogging" title={i18n._('Keypad jogging')} onClick={onToggleKeypadJogging} inverted={displayState.jog.keypad} disabled={!displayState.canClick}>
+              <Widget.Button
+                aria-label="Toggle keypad jogging" title={i18n._('Keypad jogging')} onClick={onToggleKeypadJogging}
+                inverted={displayState.jog.keypad} disabled={!displayState.canClick}
+              >
                 <FontAwesomeIcon icon="keyboard" fixedWidth />
               </Widget.Button>
             </KeypadOverlay>
-            <Widget.Button aria-label="Toggle manual data input mode" title={i18n._('Manual Data Input')} onClick={onToggleMDIMode} inverted={!displayState.mdi.disabled}>
+            <Widget.Button
+              aria-label="Toggle manual data input mode" title={i18n._('Manual Data Input')} onClick={onToggleMDIMode}
+              inverted={!displayState.mdi.disabled}
+            >
               <Space width={8} />{i18n._('MDI')}<Space width={8} />
             </Widget.Button>
-            <Widget.Button aria-label={isCollapsed ? 'Expand' : 'Collapse'} aria-expanded={!isCollapsed} disabled={isFullscreen} title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}>
+            <Widget.Button
+              aria-label={isCollapsed ? 'Expand' : 'Collapse'} aria-expanded={!isCollapsed} disabled={isFullscreen}
+              title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
+            >
               {isCollapsed && <FontAwesomeIcon icon="chevron-down" fixedWidth />}
               {!isCollapsed && <FontAwesomeIcon icon="chevron-up" fixedWidth />}
             </Widget.Button>
             {isFullscreen && <Widget.Button title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}><FontAwesomeIcon icon="compress" fixedWidth /></Widget.Button>}
-            <Widget.DropdownButton aria-label="More options" title={i18n._('More')} toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />} onSelect={onMoreOptionsSelect}>
+            <Widget.DropdownButton
+              aria-label="More options" title={i18n._('More')} toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
+              onSelect={onMoreOptionsSelect}
+            >
               <Widget.DropdownMenuItem eventKey="settings"><FontAwesomeIcon icon="cog" fixedWidth /><Space width={8} />{i18n._('Settings')}</Widget.DropdownMenuItem>
               <Widget.DropdownMenuItem eventKey="fullscreen"><FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth /><Space width={8} />{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</Widget.DropdownMenuItem>
               <Widget.DropdownMenuItem eventKey="fork"><FontAwesomeIcon icon="code-branch" fixedWidth /><Space width={8} />{i18n._('Fork Widget')}</Widget.DropdownMenuItem>
@@ -467,7 +479,8 @@ export function AxesWidgetContent({
             onSetWorkOffsets,
             onStepBackward,
             onStepForward,
-          }}>
+          }}
+          >
             <Axes />
           </AxesProvider>
         </Widget.Content>

@@ -1357,27 +1357,27 @@ function DisplayPanel() {
 
   return (
     <Panel className={styles.displayPanel}>
-        <table className="table-bordered">
-          <thead>
-            <tr>
-              <th title={i18n._('Axis')}>{i18n._('Axis')}</th>
-              <th title={i18n._('Machine Position')}>{i18n._('Machine Position')}</th>
-              <th title={i18n._('Work Position')}>{i18n._('Work Position')}</th>
-              <th className={styles.action}>
-                {renderActionDropdown({ wcs })}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {hasAxisE && renderAxis(AXIS_E)}
-            {hasAxisX && renderAxis(AXIS_X)}
-            {hasAxisY && renderAxis(AXIS_Y)}
-            {hasAxisZ && renderAxis(AXIS_Z)}
-            {hasAxisA && renderAxis(AXIS_A)}
-            {hasAxisB && renderAxis(AXIS_B)}
-            {hasAxisC && renderAxis(AXIS_C)}
-          </tbody>
-        </table>
+      <table className="table-bordered">
+        <thead>
+          <tr>
+            <th title={i18n._('Axis')}>{i18n._('Axis')}</th>
+            <th title={i18n._('Machine Position')}>{i18n._('Machine Position')}</th>
+            <th title={i18n._('Work Position')}>{i18n._('Work Position')}</th>
+            <th className={styles.action}>
+              {renderActionDropdown({ wcs })}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {hasAxisE && renderAxis(AXIS_E)}
+          {hasAxisX && renderAxis(AXIS_X)}
+          {hasAxisY && renderAxis(AXIS_Y)}
+          {hasAxisZ && renderAxis(AXIS_Z)}
+          {hasAxisA && renderAxis(AXIS_A)}
+          {hasAxisB && renderAxis(AXIS_B)}
+          {hasAxisC && renderAxis(AXIS_C)}
+        </tbody>
+      </table>
     </Panel>
   );
 }

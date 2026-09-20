@@ -1173,3 +1173,15 @@ Verification: focused Axes/Settings/Custom/Probe tests pass 8 suites / 39 tests;
 Implementation: `AxesWidgetContent` now owns domain state through `useReducer`; it uses stable named callbacks and a current-state ref for controller, combokey, and ShuttleControl event handlers. The effect creates and tears down one ShuttleControl/listener resource, preserving its `G91`, feed move, `G90` flush sequence. Disconnect resets owner state without losing shared MDI commands. `DisplayPanel` is now a direct `useAxes()` function component; Keypad and MDI remain direct consumers. No Axes UI has an `actions` bag, PropTypes, or native `div`/`span`; `ShuttleControl` remains the intentional non-React class.
 
 Verification: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Axes/__tests__/Axes.test.jsx src/app/widgets/Axes/__tests__/Settings.test.jsx src/app/widgets/Axes/__tests__/queries.test.jsx src/app/widgets/Axes/Settings/__tests__/draft.test.js` passed 4 suites / 29 tests. The focused cases cover reported drafts, all supported controller normalization, metric/imperial distance, X/Y/Z/additional-axis hotkeys, shuttle feed flush, MDI submission, editable/modal/keyup/blur hotkey rejection, disconnect safety, unmount callback removal, and stable subscriptions. Targeted Axes ESLint and `git diff --check` passed. Browser tooling and builds were not run under the explicit R6 deferral. Status transition: A1b `in_progress` → `completed`; A2 is next.
+
+## A2 Tool — completed 2026-09-20
+
+Implementation: commit `98396e35` migrates Tool to a local function owner with React Query query/mutation hooks, a separate editable display-unit draft, React Final Form/Tonic controls, direct textarea caret handling, controller listener cleanup, and debounced full-payload saves. The approved follow-up uses the existing Immer v9 `produce` directly in the owner callback; it adds no helper abstraction and does not upgrade the dependency. The Axes formatting regression discovered during A2 verification was repaired with ESLint in `DisplayPanel.jsx` and `Axes/index.jsx`.
+
+Verification: focused Tool tests passed 11/11. Fresh full `yarn test:frontend --runInBand --silent` passed 47 suites / 268 tests. Fresh `yarn lint` exited 0; only the known `DisplayPanel` max-lines warning remains. `git diff --check` passed. Browser tooling and builds were not run under the explicit R6 deferral.
+
+Status transition: A2 `in_progress` → `completed`; A3a `todo` → `in_progress`.
+
+## A3a Autolevel forms — started 2026-09-20
+
+Implementation checkpoint: StartProbeModal, StopProbeModal, and TestProbeModal are now JSDoc function components with explicit callback contracts. The safety confirmations use React Final Form and Tonic FormControl/Checkbox; start, test, and stop confirmation buttons use a same-tick submit lock. The owner passes the existing command actions as callbacks and supplies the existing validation gate. `ProbeDialogs.test.jsx` covers cancel, required confirmation, invalid-value gates, and duplicate confirmation prevention. ApplyView remains the next source slice; browser tooling and builds are prohibited by the current deferral.

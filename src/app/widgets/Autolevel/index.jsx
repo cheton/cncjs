@@ -958,22 +958,26 @@ class AutolevelWidget extends PureComponent {
       <div>
         {modal.name === MODAL_START_PROBE_CONFIRM && (
           <StartProbeModal
-            state={state}
-            actions={actions}
+            canConfirm={state.canClick}
+            onCancel={actions.closeModal}
+            onConfirm={actions.startProbing}
+            value={state}
           />
         )}
 
         {modal.name === MODAL_STOP_PROBE_CONFIRM && (
           <StopProbeModal
-            state={state}
-            actions={actions}
+            onCancel={actions.closeModal}
+            onConfirm={actions.stopProbing}
           />
         )}
 
         {modal.name === MODAL_TEST_PROBE_CONFIRM && (
           <TestProbeModal
-            state={state}
-            actions={actions}
+            canConfirm={state.canClick}
+            onCancel={actions.closeModal}
+            onConfirm={actions.startTestProbe}
+            value={state}
           />
         )}
 

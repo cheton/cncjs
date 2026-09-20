@@ -70,10 +70,10 @@
 **Modify:** `src/app/widgets/Tool/index.jsx`, `Tool.jsx` 與 inventory 其餘來源。
 **Create:** `src/app/widgets/Tool/queries.js`, `src/app/widgets/Tool/__tests__/Tool.test.jsx`。
 
-- [ ] `useToolConfigQuery()` 讀 api.getToolConfig 的 `res.body`；`useSaveToolConfigMutation()` 接既有完整 data payload，success invalidate `['api/tool']`。server data 與本地 draft 分開。
-- [ ] Tool 改 controlled `{ value, onChange }` 接收設定；移除 UNSAFE_componentWillReceiveProps，不在每個 query 更新重置表單。
-- [ ] `ReactDOM.findDOMNode(this.fields.toolProbeCustomCommands)` 改 textarea/input DOM ref，保留 selection/cursor 插入行為；不要暴露整個 fields instance 給父層。
-- [ ] 測保存成功/失敗、取消、tool change/probe 原 command sequence、延遲 timer 清理、disconnected/running gate、重複提交禁止。
+- [x] `useToolConfigQuery()` 讀 api.getToolConfig 的 `res.body`；`useSaveToolConfigMutation()` 接既有完整 data payload，success invalidate `['api/tool']`。server data 與本地 draft 分開。
+- [x] Tool 改 controlled `{ value, onChange }` 接收設定；移除 UNSAFE_componentWillReceiveProps，不在每個 query 更新重置表單。
+- [x] `ReactDOM.findDOMNode(this.fields.toolProbeCustomCommands)` 改 textarea/input DOM ref，保留 selection/cursor 插入行為；不要暴露整個 fields instance 給父層。
+- [x] 測保存成功/失敗、取消、tool change/probe 原 command sequence、延遲 timer 清理、disconnected/running gate、重複提交禁止。
 
 ## Task A3a：Autolevel 對話框與表單
 
