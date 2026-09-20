@@ -1115,3 +1115,9 @@ Build status: two `yarn build-dev` attempts completed Babel compilation (2, 6, a
 ## C1 Grbl — completed 2026-09-20
 
 Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Grbl/__tests__/Grbl.test.jsx` passed 1 suite / 7 tests. Full `yarn test:frontend --runInBand --silent` passed 38 suites / 200 tests. Targeted Grbl ESLint, legacy/PropTypes/inline-style static scan, and `git diff --check` passed. A Luna-medium build-only worker ran `yarn build-dev`: exit 0, Babel compilation complete, webpack 5.75.0 compiled successfully in 7877 ms; only Node deprecation warnings appeared. Browser tooling was not run; browser evidence remains deferred to R6. Status transition: C1 `in_progress` → `completed`; C2 is next.
+
+## C2 Marlin — completed 2026-09-20
+
+Implementation: Marlin now uses function components with JSDoc interfaces, direct Tonic controls/modal/tabs/progress/accordion primitives, and a local Tonic-backed repeatable button. Controller settings/state listeners use effect setup/cleanup, preserve Marlin type filtering and partial-state merges, and disconnect resets the ready gate. The obsolete Marlin Stylus/layout and constants module, styled-components FadeInOut, legacy UI imports, classes, and PropTypes were removed.
+
+Verification: focused `Marlin.test.jsx` passed 1 suite / 8 tests. Full `yarn test:frontend --runInBand --silent` passed 39 suites / 208 tests. Targeted Marlin ESLint, legacy/class/PropTypes scan, and `git diff --check` passed. Browser tooling was not run; browser evidence remains deferred to R6. Status transition: C2 `in_progress` → `completed`; C3 is next.
