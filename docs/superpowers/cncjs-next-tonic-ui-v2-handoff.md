@@ -86,6 +86,17 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 - A3a converted `StartProbeModal.jsx`, `StopProbeModal.jsx`, `TestProbeModal.jsx`, `ApplyView.jsx`, their owner call sites, and `__tests__/ProbeDialogs.test.jsx`. Dialog confirmation forms use React Final Form with Tonic FormControl; commands retain their existing owners, cancel is command-free, invalid gates block dispatch, and a same-tick lock prevents duplicates.
 - ApplyView preserves its file-read pipeline, compensation callbacks, export/clear actions, and one paired `gcode:unload` / `gcode:load` PubSub subscription with unmount cleanup. It has focused 10-test coverage; full frontend passes 47 suites / 274 tests and `yarn lint` exits 0. Do not begin A3b workflow ownership, browser tooling, or a build without a new user instruction.
 
+## Next implementation handoff — A3b Autolevel workflow
+
+Start only when the user authorizes A3b. Read the complete task contract in [06-motion-widgets](plans/2026-09-07-tonic-ui-v2/06-motion-widgets.md), then follow this order:
+
+1. **Test first.** Read the existing Autolevel source and derive a transition table from actual idle/probing/stopped/completed/error behavior. Add controller and Visualizer integration tests in `src/app/widgets/Autolevel/__tests__/Autolevel.test.jsx` before migration code. Run the new-contract tests against the legacy owner and record a red result before implementation. Do not claim test-first for a characterization test added after implementation.
+2. Keep state transitions separate from controller commands. A reducer must never send a command. Preserve exact probing command order, grid coordinates/units, stop behavior, error/disconnect cleanup, probe results, and Visualizer PubSub events.
+3. Add `src/app/queries/gcode.js` with `useLoadGCodeMutation()` that calls `api.loadGCode(meta, context)`. Compensation runs once from an explicit action; errors keep original G-code and probe data. Query functions must not probe or compensate.
+4. Run focused tests, the full frontend suite, `yarn lint`, and `git diff --check`. Browser tests, browser tooling, screenshots, and builds remain deferred to R6.
+
+At this handoff, `4d41a1ac` is the verified A3a checkpoint. The separate Prettier enhancement has uncommitted changes in `.prettierrc.json`, `package.json`, and `yarn.lock`; preserve them and do not include them in A3b staging unless the user explicitly combines the work.
+
 ## 恢復 prompt
 
 ```text
