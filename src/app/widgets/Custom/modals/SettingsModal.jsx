@@ -61,11 +61,7 @@ function SettingsModal({
 
             return (
               <>
-                <ModalHeader>
-                  <Text fontSize="lg" fontWeight="semibold">
-                    {i18n._('Settings')}
-                  </Text>
-                </ModalHeader>
+                <ModalHeader>{i18n._('Settings')}</ModalHeader>
                 <ModalBody>
                   <Field name="title">
                     {({ input, meta }) => (

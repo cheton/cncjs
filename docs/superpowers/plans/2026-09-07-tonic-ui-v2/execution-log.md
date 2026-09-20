@@ -1069,3 +1069,29 @@ Completion review: `Custom/index.jsx` is a function widget shell with controlled
 Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Custom/__tests__/Custom.test.jsx` / 0 / 1 suite and 5 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 34 suites and 186 tests passed; `yarn eslint` / 0 / 0 errors and 17 existing warnings; `git diff --check` / 0; Custom legacy/class/inline-style scans / clean. User-provided build evidence at 11:40: `yarn build-dev` compiled Babel sources and webpack 5.75.0 `compiled successfully in 8209 ms`. Browser/simulator evidence remains deferred to R6 under the explicit BR0 waiver. No `resource.json` diff is retained.
 
 Status transition / blocker ID: G6 `in_progress` → `completed`; no blocker. Next eligible task is G7 Webcam.
+
+## G7 Webcam — started 2026-09-20T11:40:00+08:00
+
+Task / session / timestamp: G7 / current root session / 2026-09-20T11:40:00+08:00.
+
+Plan contract: `04-general-widgets.md` Task G7 and `details/04b-widget-contracts.md`; `Webcam` resource ownership must preserve URL/media lifecycle across rotate, flip, crosshair, and mute settings. Settings own an unsubmitted URL draft. URL replacement, late load, timeout, and unmount must clean up resources. `Circle` and `Line` are function SVG geometry, not Tonic icon replacements. Browser evidence remains deferred to R6 under BR0 waiver.
+
+Worker assignment: `gpt-5.6-luna` / max because the existing Webcam component has asynchronous resource ownership and late-callback cleanup. The worker owns only `src/app/widgets/Webcam/`, `src/app/components/Webcam/`, and the G7 test path; it must not edit ledger/docs, commit, push, or use browser tooling. Terra/root will review and run completion gates.
+
+Routing override: user requested `gpt-5.6-terra` / medium after the Luna max assignment began. Luna was interrupted before integration; Terra medium now owns the same bounded source/test scope. This lowers the task-matrix default at explicit user direction; the root completion gate and browser ownership rule are unchanged.
+
+Browser instruction: user explicitly requested that no browser tests run. G7 will not invoke browser runner, Playwright, screenshots, accessible snapshots, or simulator browser procedures. All browser evidence is deferred to R6, when the user will select a different, cheaper model. Browser evidence remains deferred and is not claimed passed.
+
+Status transition / blocker ID: G7 `todo` → `in_progress`; no blocker.
+
+Checkpoint: function media ownership now stops late-resolving, replaced, and unmounted streams. `Circle` and `Line` are function SVG geometry. Webcam Settings uses a Tonic modal with an unsubmitted draft; its tests prove Cancel leaves config unchanged and Save writes the three settings. Focused command `yarn test:frontend --runInBand --silent src/app/widgets/Webcam/__tests__/Webcam.test.jsx src/app/widgets/Webcam/__tests__/SettingsModal.test.jsx` passed 2 suites / 5 tests. Targeted ESLint had 0 errors and 16 pre-existing repository warnings. Browser evidence remains deferred to R6.
+
+Modal-title audit: source-wide static scan of `src/app` found no `ModalHeader`, `ModalTitle`, or legacy `Modal.Header` / `Modal.Title` containing `Text` with explicit `fontSize` or `fontWeight`. The touched Webcam, Custom, and Probe modals use their header primitive directly. No browser tooling was used.
+
+## G7 Webcam — completed 2026-09-20
+
+Completion review: the shared media component is a function owner that releases active, replaced, late-resolving, and unmounted streams. The widget display/control layer uses Tonic `Box` and `Tooltip`; no legacy GridSystem, Anchor, Image, Tooltip, styled-components, `propTypes`, inline style, class component, or memo HOC remains in the G7 source. Circle and Line remain coordinate-preserving function SVG geometry. Settings retains its unsubmitted local draft until Save.
+
+Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Webcam/__tests__/Webcam.test.jsx src/app/widgets/Webcam/__tests__/SettingsModal.test.jsx src/app/widgets/Webcam/__tests__/Display.test.jsx` / 0 / 3 suites and 7 tests passed. Full `yarn test:frontend --runInBand --silent` / 0 / 37 suites and 193 tests passed. Targeted ESLint / 0 / 0 errors and 16 existing repository warnings. `yarn build-dev` / 0 / webpack 5.75.0 compiled successfully in 17036 ms. `git diff --check` and the G7 legacy/inline-style/PropTypes scan are clean. Generated i18n resources were restored and not retained. Browser evidence remains deferred to R6 and is not claimed passed.
+
+Status transition: G7 `in_progress` → `completed`; no blocker. Next eligible task is C1 Grbl.

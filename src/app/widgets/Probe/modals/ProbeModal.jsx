@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@tonic-ui/react';
 import React, { useRef } from 'react';
 import { Form, Field } from 'react-final-form';
@@ -67,11 +66,7 @@ function ProbeModal({
         >
           {({ form }) => (
             <>
-              <ModalHeader>
-                <Text fontSize="lg" fontWeight="semibold">
-                  {i18n._('Probe')}
-                </Text>
-              </ModalHeader>
+              <ModalHeader>{i18n._('Probe')}</ModalHeader>
               <ModalBody>
                 <Field name="probeSetter">
                   {({ input }) => {

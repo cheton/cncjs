@@ -21,9 +21,9 @@
 | HEAD | `06041616`（本檔自身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | 無（G6 completed） |
-| 最近完成 | **G6 Custom**（G1-B01 已解除） |
-| 下一步推薦 | **G7 Webcam**（共用 U3、Q2-cleanup 前置） |
+| Active task | 無（G7 completed） |
+| 最近完成 | **G7 Webcam**（G1-B01 已解除） |
+| 下一步推薦 | **C1 Grbl** |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-目前沒有 `in_progress`、也沒有未解 blocker。已完成：R0、D1–D4、R1、R2、R3、U2、U3、B1、M1–M3、Q2-cleanup、T1–T3、P0、G1–G6。
+目前沒有 `in_progress`、也沒有未解 blocker。已完成：R0、D1–D4、R1、R2、R3、U2、U3、B1、M1–M3、Q2-cleanup、T1–T3、P0、G1–G7。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **G7** [一般 widgets](plans/2026-09-07-tonic-ui-v2/04-general-widgets.md) | U3 ✅, Q2-cleanup ✅ | widget migration and behavior contract | 否（unit; browser deferred） |
+| **C1** [controller widgets](plans/2026-09-07-tonic-ui-v2/05-controller-widgets.md) | G4 ✅ | Grbl migration and behavior contract | 否（unit; browser deferred） |
 
-**先領取 G7（Webcam）**。G1–G6 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
+**先領取 C1（Grbl）**。G1–G7 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
 
 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
 
@@ -58,10 +58,11 @@
 
 完整執行規則見 [EXECUTION](plans/2026-09-07-tonic-ui-v2/EXECUTION.md)；以下是接手時最容易違反的摘要。
 
-1. **Browser ownership：** 所有 browser test／regression／screenshot／accessible snapshot／browser runner 操作，必須由 `gpt-5.6-luna` + `reasoning_effort: medium` 執行。主控不得代跑或改派模型。Luna medium 不可用時，gate 留在 `in_progress` 或記具名 blocker——不得以其他模型代跑後宣稱已驗證。
-2. **Browser 環境：** 用 Playwright bundled Chromium，不用 system Chrome screenshot channel。以 `SUPPRESS_WEBGL_WARNING=1` 啟動 dev build；production 永遠強制 `0`。
-3. **測試 config：** 唯一受版本控制的 reference 是 [`docs/testing/configs/browser-test.cncrc`](../testing/configs/browser-test.cncrc)。先複製到唯一 `/tmp` 路徑，再以 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` 啟動。不可用 repo 內檔案或使用者的 `~/.cncrc` 作 active config，不可提交 token／password／machine-specific config。
-4. **Simulator：** 只從 repo root 執行 `yarn dev`（同時啟動 simulator、frontend、backend）。不要另跑 `grbl-simulator/start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。結束只停自己啟動的程序，確認 ports 8000／8080 與 `/tmp/ttyGRBL` 已清理。
+1. **Browser evidence deferred：** 使用者已要求目前不要執行任何 browser test／regression／screenshot／accessible snapshot／browser runner 操作。所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model；在該指示前不得自行選模型、執行 browser tooling，或宣稱 browser gate 已驗證。
+2. **Project rules：** 修改 React interface、Tonic UI 或 runtime boundary 時，先讀取 [`.omp/RULES.md`](../../.omp/RULES.md)。
+3. **Browser 環境：** 用 Playwright bundled Chromium，不用 system Chrome screenshot channel。以 `SUPPRESS_WEBGL_WARNING=1` 啟動 dev build；production 永遠強制 `0`。
+4. **測試 config：** 唯一受版本控制的 reference 是 [`docs/testing/configs/browser-test.cncrc`](../testing/configs/browser-test.cncrc)。先複製到唯一 `/tmp` 路徑，再以 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` 啟動。不可用 repo 內檔案或使用者的 `~/.cncrc` 作 active config，不可提交 token／password／machine-specific config。
+5. **Simulator：** 只從 repo root 執行 `yarn dev`（同時啟動 simulator、frontend、backend）。不要另跑 `grbl-simulator/start-with-cncjs.sh`，避免搶占 `/tmp/ttyGRBL`。結束只停自己啟動的程序，確認 ports 8000／8080 與 `/tmp/ttyGRBL` 已清理。
 5. **狀態：** [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 是唯一 ledger；只有主控能改 STATUS／本檔／execution-log／plan checkboxes。沒有可重跑 evidence 的 browser gate 不得標 `completed`；不以 chat 或 worker 自評取代 evidence。可建立 local commit，**不得自行 push**（除本次另有授權）。
 6. **Migration intent：** 淘汰不支援 React 16–18 的舊 runtime library，特別是 Bootstrap family。不可保留或 re-export `react-bootstrap-buttons`。
 7. **Build：** 本地不要執行 `yarn build-prod`（由 CI 把關）。要驗證 development server 或 browser flow 時直接執行 `yarn dev`。
