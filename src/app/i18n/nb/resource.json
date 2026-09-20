@@ -772,5 +772,8 @@
   "Full Screen": "",
   "Spindle widget": "",
   "Webcam widget": "",
-  "Stream URL": ""
+  "Stream URL": "",
+  "Marlin controller data": "",
+  "Smoothie controller data": "",
+  "TinyG controller data": ""
 }
