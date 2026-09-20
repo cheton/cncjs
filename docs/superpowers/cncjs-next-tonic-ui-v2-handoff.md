@@ -80,6 +80,14 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 - All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a remains separate and incomplete because its required function conversion and dialog action tests are still outstanding.
 - Latest focused verification: Axes/Settings/query/draft passes 4 suites / 29 tests, with targeted Axes ESLint and `git diff --check` clean. No browser tooling or build was run.
 
+## Active task — A2 Tool settings and execution
+
+- A1b is committed in `c3d1167e`; the reusable widget-owner decision is recorded in `31b3459a`. The worktree was clean when A2 discovery began.
+- A2 scope is `src/app/widgets/Tool/index.jsx`, `Tool.jsx`, new `queries.js`, and new `__tests__/Tool.test.jsx`. It must remain a **local function owner with controlled props**, not an Axes-style provider: Tool has one owner and one form consumer, so a widget context would add indirection without shared sibling/deep state.
+- Current legacy behavior: `ToolWidget` is a `PureComponent` with an `ImmutableStore`, manual `api.getToolConfig()` / debounced `api.setToolConfig()`, controller listeners, unit conversion, and a broad `actions` bag. `Tool` is a `PureComponent` with `UNSAFE_componentWillReceiveProps`, `ReactDOM.findDOMNode`, a custom-command local edit/cancel flow, and a copied-feedback timer.
+- Required migration: `useToolConfigQuery()` returns `api.getToolConfig().body`; `useSaveToolConfigMutation()` preserves the existing full payload and invalidates `['api/tool']` only after success. Keep server query data separate from the editable draft. Controller listener setup/cleanup, copied-feedback timeout cleanup, connection/running gates, probe command ordering, and caret insertion must preserve behavior. Replace `findDOMNode` with a direct textarea ref; use JSDoc and Tonic primitives; do not add PropTypes, a raw `div`, unsupported Modal props, browser tooling, or a build.
+- Test-first contract: cover query response/invalidation, save success/failure/cancel and duplicate-submit protection, Tool change/probe command sequences, direct caret insertion, timer cleanup, and disconnected/running gates. No Tool tests existed at discovery. Read current source and establish its baseline before code changes.
+
 ## 恢復 prompt
 
 ```text
