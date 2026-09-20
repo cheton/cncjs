@@ -762,5 +762,18 @@
   "Clearance Z: {{value}} {{- units}}": "Z de dégagement : {{value}} {{- units}}",
   "Start Z: {{value}} {{- units}}": "Z de départ : {{value}} {{- units}}",
   "End Z: {{value}} {{- units}}": "Z de fin : {{value}} {{- units}}",
-  "None": ""
+  "None": "",
+  "Custom widget": "",
+  "Refresh content": "",
+  "More options": "",
+  "bytes": "",
+  "G-code progress": "",
+  "G-code widget": "",
+  "Grbl controller data": "",
+  "Laser widget": "",
+  "Probe widget": "",
+  "Full Screen": "",
+  "Spindle widget": "",
+  "Webcam widget": "",
+  "Stream URL": ""
 }

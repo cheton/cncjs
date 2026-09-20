@@ -759,5 +759,18 @@
   "Clearance Z: {{value}} {{- units}}": "Frihøyde Z: {{value}} {{- units}}",
   "Start Z: {{value}} {{- units}}": "Start-Z: {{value}} {{- units}}",
   "End Z: {{value}} {{- units}}": "Slutt-Z: {{value}} {{- units}}",
-  "None": ""
+  "None": "",
+  "Custom widget": "",
+  "Refresh content": "",
+  "More options": "",
+  "bytes": "",
+  "G-code progress": "",
+  "G-code widget": "",
+  "Grbl controller data": "",
+  "Laser widget": "",
+  "Probe widget": "",
+  "Full Screen": "",
+  "Spindle widget": "",
+  "Webcam widget": "",
+  "Stream URL": ""
 }

@@ -761,5 +761,18 @@
   "Clearance Z: {{value}} {{- units}}": "Clearance Z: {{value}} {{- units}}",
   "Start Z: {{value}} {{- units}}": "Start Z: {{value}} {{- units}}",
   "End Z: {{value}} {{- units}}": "End Z: {{value}} {{- units}}",
-  "None": "None"
+  "None": "None",
+  "Custom widget": "Custom widget",
+  "Refresh content": "Refresh content",
+  "More options": "More options",
+  "bytes": "bytes",
+  "G-code progress": "G-code progress",
+  "G-code widget": "G-code widget",
+  "Grbl controller data": "Grbl controller data",
+  "Laser widget": "Laser widget",
+  "Probe widget": "Probe widget",
+  "Full Screen": "Full Screen",
+  "Spindle widget": "Spindle widget",
+  "Webcam widget": "Webcam widget",
+  "Stream URL": "Stream URL"
 }

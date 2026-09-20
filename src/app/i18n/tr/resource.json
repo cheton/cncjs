@@ -759,5 +759,18 @@
   "Clearance Z: {{value}} {{- units}}": "Güvenlik Z: {{value}} {{- units}}",
   "Start Z: {{value}} {{- units}}": "Başlangıç Z: {{value}} {{- units}}",
   "End Z: {{value}} {{- units}}": "Bitiş Z: {{value}} {{- units}}",
-  "None": ""
+  "None": "",
+  "Custom widget": "",
+  "Refresh content": "",
+  "More options": "",
+  "bytes": "",
+  "G-code progress": "",
+  "G-code widget": "",
+  "Grbl controller data": "",
+  "Laser widget": "",
+  "Probe widget": "",
+  "Full Screen": "",
+  "Spindle widget": "",
+  "Webcam widget": "",
+  "Stream URL": ""
 }
