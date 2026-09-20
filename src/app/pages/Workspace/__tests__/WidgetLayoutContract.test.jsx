@@ -143,6 +143,12 @@ jest.mock('@app/components/Widget', () => {
   return Widget;
 });
 
+jest.mock('@tanstack/react-query', () => ({
+  useMutation: () => ({ mutate: jest.fn() }),
+  useQuery: () => ({ data: undefined, isFetching: false, refetch: jest.fn() }),
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
 
@@ -262,6 +268,7 @@ jest.mock('@app/widgets/Axes/KeypadOverlay', () => mockBody('axes'));
 jest.mock('@app/widgets/Axes/Settings', () => mockBody('axes'));
 jest.mock('@app/widgets/Axes/ShuttleControl', () => {
   class MockShuttleControl {
+    clear() {}
     on() {}
     removeAllListeners() {}
   }
