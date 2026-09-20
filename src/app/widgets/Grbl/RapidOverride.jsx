@@ -1,5 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Box,
+  Button,
+  ButtonGroup,
   Space,
   Text,
 } from '@tonic-ui/react';
@@ -7,15 +10,15 @@ import { ensurePositiveNumber } from 'ensure-type';
 import _get from 'lodash/get';
 import React from 'react';
 import { connect } from 'react-redux';
-import { ButtonGroup } from '@app/components/Buttons';
-import Center from '@app/components/Center';
-import Clickable from '@app/components/Clickable';
-import RepeatableButton from '@app/components/RepeatableButton';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import { none } from '@app/lib/utils';
 import OverrideReadout from './components/OverrideReadout';
+import RepeatableButton from './components/RepeatableButton';
 
+/**
+ * @param {{ value?: number }} props
+ */
 function RapidOverride({
   value,
 }) {
@@ -24,21 +27,21 @@ function RapidOverride({
   }
 
   return (
-    <Center vertical>
+    <Box alignItems="center" display="flex" justifyContent="center">
       <Text fontFamily="mono" fontSize="1.5rem">
         R
       </Text>
-      <Space width={8} />
+      <Space width="2x" />
       <OverrideReadout>
         {(value >= 0) ? `${value}%` : none}
       </OverrideReadout>
-      <Space width={8} />
-      <ButtonGroup sm>
+      <Space width="2x" />
+      <ButtonGroup size="sm">
         <RepeatableButton
           onClick={() => {
             controller.command('rapid_override', 25);
           }}
-          style={{ fontSize: '.75rem' }}
+          sx={{ fontSize: '.75rem' }}
         >
           <Text>{i18n._('25%')}</Text>
         </RepeatableButton>
@@ -46,7 +49,7 @@ function RapidOverride({
           onClick={() => {
             controller.command('rapid_override', 50);
           }}
-          style={{ fontSize: '.75rem' }}
+          sx={{ fontSize: '.75rem' }}
         >
           <Text>{i18n._('50%')}</Text>
         </RepeatableButton>
@@ -54,29 +57,22 @@ function RapidOverride({
           onClick={() => {
             controller.command('rapid_override', 100);
           }}
-          style={{ fontSize: '.75rem' }}
+          sx={{ fontSize: '.75rem' }}
         >
           <Text>{i18n._('100%')}</Text>
         </RepeatableButton>
       </ButtonGroup>
-      <Space width={8} />
-      <Clickable
+      <Space width="2x" />
+      <Button
+        aria-label="Reset rapid override"
+        variant="ghost"
         onClick={() => {
           controller.command('rapid_override', 0);
         }}
       >
-        {({ hovered }) => (
-          <FontAwesomeIcon
-            icon="undo"
-            fixedWidth
-            style={{
-              color: '#222',
-              opacity: hovered ? 1 : 0.5,
-            }}
-          />
-        )}
-      </Clickable>
-    </Center>
+        <FontAwesomeIcon icon="undo" fixedWidth />
+      </Button>
+    </Box>
   );
 }
 

@@ -21,9 +21,9 @@
 | HEAD | `06041616`（本檔自身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | 無（G7 completed） |
-| 最近完成 | **G7 Webcam**（G1-B01 已解除） |
-| 下一步推薦 | **C1 Grbl** |
+| Active task | **C2 Marlin** |
+| 最近完成 | **C1 Grbl**（G1-B01 已解除） |
+| 下一步推薦 | **C2 Marlin** |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-目前沒有 `in_progress`、也沒有未解 blocker。已完成：R0、D1–D4、R1、R2、R3、U2、U3、B1、M1–M3、Q2-cleanup、T1–T3、P0、G1–G7。
+Grbl C1 已完成，沒有未解 blocker。Grbl 的 function/Tonic/JSDoc migration 完成；focused 1 suite / 7 tests、full frontend 38 suites / 200 tests，及 `yarn build-dev`（webpack 5.75.0，7877 ms）均通過。Browser evidence 仍延後至 R6。下一個 task 是 C2 Marlin。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **C1** [controller widgets](plans/2026-09-07-tonic-ui-v2/05-controller-widgets.md) | G4 ✅ | Grbl migration and behavior contract | 否（unit; browser deferred） |
+| **C2** [controller widgets](plans/2026-09-07-tonic-ui-v2/05-controller-widgets.md) | G4 ✅ | Marlin migration and behavior contract | 否（unit; browser deferred） |
 
-**先領取 C1（Grbl）**。G1–G7 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
+**先領取 C2（Marlin）**。G1–G7 與 C1 建立的 pattern 可沿用：單一 frontend hook owner、`useSyncExternalStore` 或等價訂閱介面、HTTP server state 走 TanStack Query；Tonic local styling 使用 `sx`，不傳 inline `style`。
 
 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
 

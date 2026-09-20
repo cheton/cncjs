@@ -1095,3 +1095,23 @@ Completion review: the shared media component is a function owner that releases 
 Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Webcam/__tests__/Webcam.test.jsx src/app/widgets/Webcam/__tests__/SettingsModal.test.jsx src/app/widgets/Webcam/__tests__/Display.test.jsx` / 0 / 3 suites and 7 tests passed. Full `yarn test:frontend --runInBand --silent` / 0 / 37 suites and 193 tests passed. Targeted ESLint / 0 / 0 errors and 16 existing repository warnings. `yarn build-dev` / 0 / webpack 5.75.0 compiled successfully in 17036 ms. `git diff --check` and the G7 legacy/inline-style/PropTypes scan are clean. Generated i18n resources were restored and not retained. Browser evidence remains deferred to R6 and is not claimed passed.
 
 Status transition: G7 `in_progress` → `completed`; no blocker. Next eligible task is C1 Grbl.
+
+## C1 Grbl — started 2026-09-20
+
+Task / session: C1 / current root session. Inventory: `index.jsx` is the class shell and uses Redux only for `controller.type` and `connection.state`; child overrides/reports/modal groups are Redux-connected presentation/action consumers. Redux remains the sole machine-state owner. Direct transport contracts are `write('?')`, `writeln('$C')`, `command('homing'|'unlock'|'sleep')`, `writeln('$'|'$$'|'$#'|'$G'|'$I'|'$N')`, feed/spindle override `command` values `-10,-1,1,10,0`, rapid override `25,50,100,0`, and ControllerModal Refresh exactly `writeln('$#')` then `writeln('$$')`. No Grbl widget-local controller listener exists to migrate; test mount/unmount behavior through the real shell and mocked transport.
+
+Browser instruction remains unchanged: do not run browser tooling. Browser evidence is deferred to R6. Status transition: C1 `todo` → `in_progress`; no blocker.
+
+Baseline: `src/app/widgets/Grbl/__tests__/Grbl.test.jsx` uses the real Redux-connected override controls and ControllerModal with only the controller transport mocked. It proves exact feed/spindle/rapid payload sequences and ControllerModal Refresh ordering. Repeatable controls dispatch on mouseDown/mouseUp (`onHold`/`onRelease`), not a text click; preserve that interaction contract during Tonic migration. Focused baseline command passed 1 suite / 2 tests.
+
+## C1 Grbl — implementation checkpoint 2026-09-20
+
+Implementation: `index.jsx` is now a JSDoc-typed function shell; local state owns only ControllerModal visibility while Redux remains the sole owner of controller and connection data. The modal uses Tonic Modal/Tabs and preserves `$#` then `$$`. Feed, spindle, and rapid controls use direct Tonic Box/Button/ButtonGroup/Space plus a local Repeatable wrapper that retains mouse hold/release behavior. Queue, status, and modal-group reports use controlled Tonic accordion sections; `ensurePositiveNumber` stays at Grbl status-buffer boundaries and `ensureArray` stays at the untrusted coolant collection boundary. No Grbl `propTypes`, class component, legacy panel/form/grid/modal/navigation/control imports, or inline `style` remain.
+
+Tests: `Grbl.test.jsx` now has 7 assertions covering all controller menu payloads, all override values, refresh ordering, the disconnected command gate, accessible tab/reset controls, and controlled report expansion. Focused test passes 1 suite / 7 tests. Full `yarn test:frontend --runInBand --silent` passes 38 suites / 200 tests. Targeted ESLint has 0 errors and 16 existing repository warnings. `git diff --check` passes.
+
+Build status: two `yarn build-dev` attempts completed Babel compilation (2, 6, and 127 files) but did not return Webpack's final completion line within the 30-second command window. This is not recorded as a successful build; rerun it before C1 completion. Browser tooling was not run, per the explicit R6 deferral.
+
+## C1 Grbl — completed 2026-09-20
+
+Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Grbl/__tests__/Grbl.test.jsx` passed 1 suite / 7 tests. Full `yarn test:frontend --runInBand --silent` passed 38 suites / 200 tests. Targeted Grbl ESLint, legacy/PropTypes/inline-style static scan, and `git diff --check` passed. A Luna-medium build-only worker ran `yarn build-dev`: exit 0, Babel compilation complete, webpack 5.75.0 compiled successfully in 7877 ms; only Node deprecation warnings appeared. Browser tooling was not run; browser evidence remains deferred to R6. Status transition: C1 `in_progress` → `completed`; C2 is next.
