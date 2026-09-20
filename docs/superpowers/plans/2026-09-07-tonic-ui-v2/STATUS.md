@@ -6,9 +6,9 @@
 
 ## Current checkpoint
 
-- Active task: **C4 TinyG/g2core**。
+- Active task: **R5 command acceptance**。
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: **C4 TinyG/g2core**。G1–G7、C1–C3 已完成，G1-B01 已由使用者重新界定 scope 後解除。
+- Next eligible task: **R5 command acceptance**。G1–G7、C1–C4 已完成，G1-B01 已由使用者重新界定 scope 後解除。
 - Current blockers: 無。G1-B01 已解除，見下方記錄。BR0 依使用者明確指示為 `waived`（非 passed）。既有 browser evidence 仍只涵蓋 connection/upload/Run/Pause/Resume；剩餘 browser gaps 依 waiver 延後至 R6。System Chrome channel 仍不支援 screenshot。
 - Browser instruction: 2026-09-20，使用者要求不要執行 browser tests。G7 與後續工作不得啟動 browser runner、Playwright、screenshot、accessible snapshot 或 simulator browser procedure；所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model。未完成 browser evidence 保持 deferred，不能標為 passed。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
@@ -64,7 +64,7 @@
 | C1 | [Grbl](05-controller-widgets.md) | G4 | completed | current root session / 2026-09-20 | Function shell, direct Tonic controls/reports/modal, and JSDoc interfaces are implemented. `Grbl.test.jsx` covers all exact menu/override/refresh payloads, connection gate, and controlled report expansion. Focused: 1 suite / 7 tests; full frontend: 38 suites / 200 tests; targeted ESLint: 0 errors; `yarn build-dev`: webpack 5.75.0 compiled successfully in 7877 ms. Browser evidence remains deferred to R6. |
 | C2 | [Marlin](05-controller-widgets.md) | G4 | completed | current root session / 2026-09-20 | Function shell and direct Tonic heater, override, report, and modal UI. `Marlin.test.jsx` covers partial-state merge, wrong-controller filtering, listener cleanup, disconnect gating, M105/M114/M115, M104/M140 ordering, overrides, and modal refresh. Focused: 1 suite / 8 tests; full frontend: 39 suites / 208 tests; targeted ESLint: 0 errors; browser evidence remains deferred to R6. |
 | C3 | [Smoothie](05-controller-widgets.md) | G4 | completed | current root session / 2026-09-20 | Function shell preserves Smoothie controller state, units, tabs, panels, and command gates. `Smoothie.test.jsx` covers partial-state merge, wrong-controller filtering, disconnect/listener cleanup, exact command oracles, overrides, settings refresh, and modal tab behavior. Focused controller/layout tests: 2 suites / 44 tests; targeted ESLint: 0 errors / 0 warnings; browser evidence remains deferred to R6. |
-| C4 | [TinyG/g2core](05-controller-widgets.md) | G4 | todo | — | — |
+| C4 | [TinyG/g2core](05-controller-widgets.md) | G4 | completed | current root session / 2026-09-20 | Function shell preserves TinyG/g2core status/footer, progress, tabs, motors, overrides, units, and exact transport contracts. `TinyG.test.jsx` covers partial-state merge, wrong-controller filtering, disconnect/listener cleanup, queue flush/reset/unlock/status/settings commands, motor payloads, overrides, and modal tabs. Focused: 1 suite / 8 tests; full frontend: 41 suites / 224 tests; targeted ESLint: 0 errors; Luna-medium `yarn build-dev`: webpack 5.75.0 compiled successfully in 15321 ms. Browser evidence remains deferred to R6. |
 | S1 | [Settings draft](details/06a-controlled-settings.md) | U3, Q2-cleanup | todo | — | — |
 | S2 | [MDI query](details/06a-controlled-settings.md) | S1 | todo | — | — |
 | S3 | [Settings tabs](details/06a-controlled-settings.md) | S2 | todo | — | — |
