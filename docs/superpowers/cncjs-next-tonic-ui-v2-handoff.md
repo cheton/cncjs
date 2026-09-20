@@ -72,12 +72,12 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 
 ## Current implementation checkpoint — 2026-09-20
 
-- A1b remains **in progress**. Its focused unit coverage now proves that normalized Grbl/Marlin/Smoothie/TinyG reports retain a focused draft, metric/imperial jog distance selection is exact, Keypad forwards the selected distance, MDI emits the exact `gcode` command, and global jog handling rejects editable controls, an open modal, `keyup`, and `blur`.
-- `AxesProvider` now supplies state and named commands to Axes presentation consumers. `Axes`, `DisplayPanel`, `Keypad`, and `MDI` no longer pass or receive an `actions` bag. The legacy class is still the state/lifecycle owner; do not claim a reducer migration until that owner is a function component using `useReducer`.
+- A1b is **completed**. Its focused unit coverage proves that normalized Grbl/Marlin/Smoothie/TinyG reports retain a focused draft; X/Y/Z/additional-axis hotkeys use the selected distance; shuttle feed flushes the original exact command sequence; MDI emits the exact `gcode` command; and global jog handling rejects editable controls, an open modal, `keyup`, `blur`, disconnect, and unmount paths.
+- `AxesWidgetContent` is now a JSDoc function owner using `useReducer`, current-state refs, and paired controller/combokey/ShuttleControl effects. `DisplayPanel`, `Keypad`, and `MDI` directly consume `AxesProvider`; no Axes UI uses an `actions` bag or React class. `ShuttleControl` remains the intentional non-React resource class.
 - The Axes widget has no native `<div>` elements; its layout wrappers use Tonic `Box`.
 - The position draft is now owned above DisplayPanel through the reducer; DisplayPanel is controlled. PositionInput, PositionLabel, Fraction, Keypad, and KeypadOverlay use JSDoc-only interfaces; the Keypad path has no raw spans.
 - All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a remains separate and incomplete because its required function conversion and dialog action tests are still outstanding.
-- Latest focused verification: the broader 8-suite / 39-test checkpoint passes; the current Axes slice passes 11 tests, with targeted ESLint and `git diff --check` clean. No browser tooling or build was run.
+- Latest focused verification: Axes/Settings/query/draft passes 4 suites / 29 tests, with targeted Axes ESLint and `git diff --check` clean. No browser tooling or build was run.
 
 ## 恢復 prompt
 

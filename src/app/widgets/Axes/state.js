@@ -78,6 +78,11 @@ export const axesReducer = (state, action) => {
     return { ...state, mdi: { ...state.mdi, ...action.payload } };
   case 'SET_MODAL':
     return { ...state, modal: action.payload };
+  case 'RESET_CONNECTION':
+    return {
+      ...action.payload,
+      mdi: { ...action.payload.mdi, commands: state.mdi.commands },
+    };
   default:
     return state;
   }

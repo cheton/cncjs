@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { GRBL, MARLIN, SMOOTHIE, TINYG } from '@app/constants/controller';
 import { renderAppUI } from '@app/test/render';
 import DisplayPanel from '../DisplayPanel';
 import Keypad from '../Keypad';
 import PositionInput from '../components/PositionInput';
+import { AxesWidgetContent } from '../index';
 import {
   axesReducer,
   createAxesState,
@@ -17,15 +18,82 @@ import { subscribeAxesEvents } from '../subscriptions';
 import { AxesProvider, useAxes } from '../context';
 
 const mockCommand = jest.fn();
+const mockControllerListeners = {};
+const mockHotkeyListeners = {};
 
 jest.mock('@app/lib/controller', () => ({
   __esModule: true,
-  default: { command: (...args) => mockCommand(...args) },
+  default: {
+    command: (...args) => mockCommand(...args),
+    connection: { ident: 'test' },
+    workflow: { state: '' },
+    type: 'Marlin',
+    settings: {},
+    state: {},
+    addListener: jest.fn((eventName, callback) => {
+      mockControllerListeners[eventName] = callback;
+    }),
+    removeListener: jest.fn((eventName, callback) => {
+      if (mockControllerListeners[eventName] === callback) {
+        delete mockControllerListeners[eventName];
+      }
+    }),
+  },
 }));
+
+const mockController = require('@app/lib/controller').default;
+
+jest.mock('@app/lib/combokeys', () => ({
+  __esModule: true,
+  default: {
+    on: jest.fn((eventName, callback) => {
+      mockHotkeyListeners[eventName] = callback;
+    }),
+    removeListener: jest.fn((eventName, callback) => {
+      if (mockHotkeyListeners[eventName] === callback) {
+        delete mockHotkeyListeners[eventName];
+      }
+    }),
+  },
+}));
+
+const mockCombokeys = require('@app/lib/combokeys').default;
 
 jest.mock('@app/lib/i18n', () => ({
   __esModule: true,
   default: { _: value => value },
+}));
+
+jest.mock('@app/widgets/shared/WidgetConfig', () => ({
+  __esModule: true,
+  default: class MockWidgetConfig {
+    get(path, fallback) {
+      if (path === 'jog.metric.step') {
+        return 0;
+      }
+      if (path === 'jog.metric.distances') {
+        return [0.25];
+      }
+      return fallback;
+    }
+
+    set() {}
+  },
+}));
+
+jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
+  __esModule: true,
+  default: ({ children }) => children,
+}));
+
+jest.mock('../Settings', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
+jest.mock('../queries', () => ({
+  __esModule: true,
+  useMdiQuery: () => ({ data: { records: [] }, refetch: jest.fn() }),
 }));
 
 describe('Axes position input', () => {
@@ -90,6 +158,39 @@ describe('Axes position input', () => {
       view.dispose();
     }
   });
+
+  test('uses the provider jog callback for a visible axis movement', () => {
+    const onJog = jest.fn();
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x'],
+          machinePosition: { x: '1.000' },
+          workPosition: { x: '1.000' },
+          jog: { axis: '', keypad: false },
+          controller: { type: MARLIN },
+          positionInput: null,
+        },
+        onGetWorkCoordinateSystem: () => 'G54',
+        onGetJogDistance: () => 0.25,
+        onJog,
+        onSetPositionInput: jest.fn(),
+        onSetWorkOffsets: jest.fn(),
+      }}
+      >
+        <DisplayPanel />
+      </AxesProvider>
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Move X forward' }));
+      expect(onJog).toHaveBeenCalledWith({ x: 0.25 });
+    } finally {
+      view.dispose();
+    }
+  });
 });
 
 describe('Axes reported-position reducer', () => {
@@ -124,6 +225,23 @@ describe('Axes reported-position reducer', () => {
       const action = createControllerReportAction(state, type, controllerState, {});
       expect(action).toMatchObject({ type: 'REPORT_POSITION', payload: { machinePosition } });
       expect(axesReducer(state, action).positionInput).toEqual({ axis: 'x', value: '2.5' });
+    });
+  });
+
+  test('resets connection state without discarding shared MDI commands', () => {
+    const initialState = createAxesState({ get: (_key, fallback) => fallback });
+    const state = {
+      ...initialState,
+      connected: true,
+      mdi: { ...initialState.mdi, commands: [{ id: 'home', command: 'G28' }] },
+    };
+
+    expect(axesReducer(state, {
+      type: 'RESET_CONNECTION',
+      payload: initialState,
+    })).toMatchObject({
+      connected: false,
+      mdi: { commands: [{ id: 'home', command: 'G28' }] },
     });
   });
 });
@@ -242,6 +360,117 @@ describe('Axes event cleanup', () => {
     expect(hotkeys.removeListener).toHaveBeenCalledWith('JOG', shuttleControlEvents.JOG);
     expect(shuttleControl.clear).toHaveBeenCalledTimes(1);
     expect(shuttleControl.removeAllListeners).toHaveBeenCalledWith('flush');
+  });
+});
+
+describe('Axes owner lifecycle', () => {
+  beforeEach(() => {
+    Object.keys(mockControllerListeners).forEach(key => delete mockControllerListeners[key]);
+    Object.keys(mockHotkeyListeners).forEach(key => delete mockHotkeyListeners[key]);
+    mockCommand.mockClear();
+    mockController.addListener.mockClear();
+    mockController.removeListener.mockClear();
+    mockCombokeys.on.mockClear();
+    mockCombokeys.removeListener.mockClear();
+  });
+
+  test('subscribes through effects and removes the same controller callbacks on unmount', () => {
+    const view = renderAppUI(
+      <AxesWidgetContent widgetId="axes" sortable={{}} />
+    );
+
+    expect(mockController.addListener).toHaveBeenCalledWith(
+      'connection:change',
+      mockControllerListeners['connection:change']
+    );
+
+    view.dispose();
+
+    expect(mockController.removeListener).toHaveBeenCalledWith(
+      'connection:change',
+      expect.any(Function)
+    );
+    expect(mockControllerListeners['connection:change']).toBeUndefined();
+  });
+
+  test('does not jog after a disconnect event', () => {
+    const view = renderAppUI(
+      <AxesWidgetContent widgetId="axes" sortable={{}} />
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle keypad jogging' }));
+      const jog = mockHotkeyListeners.JOG;
+      const event = { type: 'keydown', target: document.body, preventDefault: jest.fn() };
+
+      act(() => jog(event, { axis: 'x' }));
+      expect(mockCommand).toHaveBeenCalledTimes(3);
+
+      act(() => mockControllerListeners['connection:change']({}, false));
+      act(() => jog(event, { axis: 'x' }));
+      expect(mockCommand).toHaveBeenCalledTimes(3);
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('maps X, Y, Z, and auxiliary hotkeys to the selected jog distance', () => {
+    const view = renderAppUI(
+      <AxesWidgetContent widgetId="axes" sortable={{}} />
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle keypad jogging' }));
+      const event = { type: 'keydown', target: document.body, preventDefault: jest.fn() };
+
+      act(() => mockHotkeyListeners.JOG(event, { axis: 'x' }));
+      act(() => mockHotkeyListeners.JOG(event, { axis: 'y' }));
+      act(() => mockHotkeyListeners.JOG(event, { axis: 'z' }));
+      act(() => mockHotkeyListeners.JOG(event, { axis: 'a' }));
+
+      expect(mockCommand).toHaveBeenNthCalledWith(2, 'gcode', 'G0 X0.25');
+      expect(mockCommand).toHaveBeenNthCalledWith(5, 'gcode', 'G0 Y0.25');
+      expect(mockCommand).toHaveBeenNthCalledWith(8, 'gcode', 'G0 Z0.25');
+      expect(mockCommand).toHaveBeenNthCalledWith(11, 'gcode', 'G0 A0.25');
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('flushes shuttle motion with the configured feed command sequence', () => {
+    jest.useFakeTimers();
+    const view = renderAppUI(
+      <AxesWidgetContent widgetId="axes" sortable={{}} />
+    );
+
+    try {
+      act(() => mockHotkeyListeners.SELECT_AXIS({}, { axis: 'x' }));
+      act(() => mockHotkeyListeners.SHUTTLE({}, { zone: 1 }));
+      act(() => jest.advanceTimersByTime(250));
+
+      expect(mockCommand).toHaveBeenNthCalledWith(1, 'gcode', 'G91');
+      expect(mockCommand).toHaveBeenNthCalledWith(2, 'gcode', 'G1 F500 X0.8333');
+      expect(mockCommand).toHaveBeenNthCalledWith(3, 'gcode', 'G90');
+    } finally {
+      view.dispose();
+      jest.useRealTimers();
+    }
+  });
+
+  test('keeps subscriptions attached when local widget state changes', () => {
+    const view = renderAppUI(
+      <AxesWidgetContent widgetId="axes" sortable={{}} />
+    );
+
+    try {
+      const subscriptionCount = mockController.addListener.mock.calls.length;
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle keypad jogging' }));
+
+      expect(mockController.addListener).toHaveBeenCalledTimes(subscriptionCount);
+      expect(mockController.removeListener).not.toHaveBeenCalled();
+    } finally {
+      view.dispose();
+    }
   });
 });
 

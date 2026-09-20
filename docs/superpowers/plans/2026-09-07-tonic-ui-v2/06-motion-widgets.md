@@ -60,10 +60,10 @@
 **Modify:** `src/app/widgets/Axes/index.jsx`, `DisplayPanel.jsx`, `Keypad.jsx`, `MDI.jsx`, `components/PositionInput.jsx` 與 inventory 其餘 UI 檔案。
 **Create Test:** `src/app/widgets/Axes/__tests__/Axes.test.jsx`。
 
-- [ ] index 的 domain state 用 reducer 區分 reported position、user input、jog settings；socket reported position 不覆蓋 focused/dirty PositionInput 草稿。
-- [ ] keyboard/combokeys/ShuttleControl 在 owner effect setup，cleanup 停止 repeat 與移除所有 callbacks。`ShuttleControl.js` 非 React class 保留。
-- [ ] 測 X/Y/Z/附加軸、metric/imperial、distance/feed、MDI submit/history；焦點在 input 或 modal 時 hotkeys 不意外 jog；keydown/keyup、blur、disconnect、unmount 後都沒有多餘 command。
-- [ ] 同步 MDI query cache 與 Settings 保存結果；不保留 index 手寫第二套 fetch/loading 狀態。
+- [x] index 的 domain state 用 reducer 區分 reported position、user input、jog settings；socket reported position 不覆蓋 focused/dirty PositionInput 草稿。
+- [x] keyboard/combokeys/ShuttleControl 在 owner effect setup，cleanup 停止 repeat 與移除所有 callbacks。`ShuttleControl.js` 非 React class 保留。
+- [x] 測 X/Y/Z/附加軸、metric/imperial、distance/feed、MDI submit/history；焦點在 input 或 modal 時 hotkeys 不意外 jog；keydown/keyup、blur、disconnect、unmount 後都沒有多餘 command。
+- [x] 同步 MDI query cache 與 Settings 保存結果；不保留 index 手寫第二套 fetch/loading 狀態。
 
 ## Task A2：Tool 設定與執行
 

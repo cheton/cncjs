@@ -2,7 +2,7 @@ import { ensureArray } from 'ensure-type';
 import { Box } from '@tonic-ui/react';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
-import React, { Component } from 'react';
+import React from 'react';
 import Dropdown, { MenuItem } from '@app/components/Dropdown';
 import Image from '@app/components/Image';
 import Tooltip from '@app/components/Tooltip';
@@ -31,7 +31,7 @@ import PositionLabel from './components/PositionLabel';
 import PositionInput from './components/PositionInput';
 import Taskbar from './components/Taskbar';
 import TaskbarButton from './components/TaskbarButton';
-import { AxesContext } from './context';
+import { useAxes } from './context';
 import iconMinus from './images/minus.svg';
 import iconPlus from './images/plus.svg';
 import iconHome from './images/home.svg';
@@ -148,28 +148,25 @@ const getAxisHomeCommand = (controllerType, axis) => {
 };
 
 /**
- * @extends {React.Component<{
- *   canClick?: boolean, units?: string, axes?: string[], machinePosition?: object,
- *   workPosition?: object, jog?: object, actions?: object, controllerType?: string
- * }>}
+ * @returns {JSX.Element}
  */
-class DisplayPanel extends Component {
-  static contextType = AxesContext;
-  handleSelect = (eventKey) => {
+function DisplayPanel() {
+  const context = useAxes();
+  const handleSelect = (eventKey) => {
     const commands = ensureArray(eventKey);
     commands.forEach(command => controller.command('gcode', command));
   };
 
-  showPositionInput = (axis, reportedValue) => () => {
-    this.context.onSetPositionInput({ axis, value: reportedValue });
+  const showPositionInput = (axis, reportedValue) => () => {
+    context.onSetPositionInput({ axis, value: reportedValue });
   };
 
-  hidePositionInput = () => {
-    this.context.onSetPositionInput(null);
+  const hidePositionInput = () => {
+    context.onSetPositionInput(null);
   };
 
-  renderActionDropdown = ({ wcs }) => {
-    const { canClick, controllerType, axes } = this.context.state;
+  const renderActionDropdown = ({ wcs }) => {
+    const { canClick, controllerType, axes } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -183,7 +180,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="Select work coordinate system"
@@ -310,13 +307,13 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisE = ({ wcs }) => {
+  const renderActionDropdownForAxisE = ({ wcs }) => {
     // TODO
     return null;
   };
 
-  renderActionDropdownForAxisX = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisX = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -330,7 +327,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="X axis actions"
@@ -457,8 +454,8 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisY = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisY = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -472,7 +469,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="Y axis actions"
@@ -599,8 +596,8 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisZ = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisZ = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -614,7 +611,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="Z axis actions"
@@ -741,8 +738,8 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisA = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisA = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -756,7 +753,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="A axis actions"
@@ -883,8 +880,8 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisB = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisB = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -898,7 +895,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="B axis actions"
@@ -1025,8 +1022,8 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderActionDropdownForAxisC = ({ wcs }) => {
-    const { canClick, controllerType } = this.context.state;
+  const renderActionDropdownForAxisC = ({ wcs }) => {
+    const { canClick, controllerType } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -1040,7 +1037,7 @@ class DisplayPanel extends Component {
     return (
       <Dropdown
         disabled={!canClick}
-        onSelect={this.handleSelect}
+        onSelect={handleSelect}
       >
         <Dropdown.Toggle
           aria-label="C axis actions"
@@ -1167,15 +1164,15 @@ class DisplayPanel extends Component {
     );
   };
 
-  renderAxis = (axis) => {
-    const { canClick, units, machinePosition, workPosition, jog, controllerType, positionInput } = this.context.state;
+  const renderAxis = (axis) => {
+    const { canClick, units, machinePosition, workPosition, jog, controllerType, positionInput } = context.state;
     const supportedCommands = SUPPORTED_COMMANDS[controllerType] || {};
     const {
       onGetJogDistance,
       onGetWorkCoordinateSystem,
       onJog,
       onSetWorkOffsets,
-    } = this.context;
+    } = context;
     const wcs = onGetWorkCoordinateSystem();
     const lengthUnits = (units === METRIC_UNITS) ? i18n._('mm') : i18n._('in');
     const degreeUnits = i18n._('deg');
@@ -1192,13 +1189,13 @@ class DisplayPanel extends Component {
       [AXIS_C]: degreeUnits
     }[axis] || '';
     const renderActionDropdown = {
-      [AXIS_E]: this.renderActionDropdownForAxisE,
-      [AXIS_X]: this.renderActionDropdownForAxisX,
-      [AXIS_Y]: this.renderActionDropdownForAxisY,
-      [AXIS_Z]: this.renderActionDropdownForAxisZ,
-      [AXIS_A]: this.renderActionDropdownForAxisA,
-      [AXIS_B]: this.renderActionDropdownForAxisB,
-      [AXIS_C]: this.renderActionDropdownForAxisC
+      [AXIS_E]: renderActionDropdownForAxisE,
+      [AXIS_X]: renderActionDropdownForAxisX,
+      [AXIS_Y]: renderActionDropdownForAxisY,
+      [AXIS_Z]: renderActionDropdownForAxisZ,
+      [AXIS_A]: renderActionDropdownForAxisA,
+      [AXIS_B]: renderActionDropdownForAxisB,
+      [AXIS_C]: renderActionDropdownForAxisC
     }[axis] || noop;
     const canZeroOutMachine = canClick && supportedCommands.canZeroOutMachine;
     const axisHomingCommand = getAxisHomeCommand(controllerType, axisLabel);
@@ -1206,7 +1203,7 @@ class DisplayPanel extends Component {
     const canMoveForward = canClick;
     const canZeroOutWorkOffsets = canClick;
     const canModifyWorkPosition = canClick && positionInput?.axis !== axis;
-    const showPositionInput = canClick && positionInput?.axis === axis;
+    const isPositionInputVisible = canClick && positionInput?.axis === axis;
     const highlightAxis = canClick && (jog.keypad || jog.axis === axis);
 
     return (
@@ -1257,19 +1254,19 @@ class DisplayPanel extends Component {
           </Taskbar>
         </td>
         <td className={styles.workPosition}>
-          {showPositionInput && (
+          {isPositionInputVisible && (
             <PositionInput
               style={{ margin: '5px 0' }}
               value={positionInput.value}
-              onChange={(value) => this.context.onSetPositionInput({ axis, value })}
+              onChange={(value) => context.onSetPositionInput({ axis, value })}
               onSave={(value) => {
                 onSetWorkOffsets(axis, value);
-                this.hidePositionInput();
+                hidePositionInput();
               }}
-              onCancel={this.hidePositionInput}
+              onCancel={hidePositionInput}
             />
           )}
-          {!showPositionInput &&
+          {!isPositionInputVisible &&
             <PositionLabel value={wpos} />}
           <Taskbar>
             <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -1325,9 +1322,9 @@ class DisplayPanel extends Component {
               </TaskbarButton>
               <TaskbarButton
                 aria-label={`Set ${axisLabel} work offsets`}
-                active={showPositionInput}
+                active={isPositionInputVisible}
                 disabled={!canModifyWorkPosition}
-                onClick={this.showPositionInput(axis, wpos)}
+                onClick={showPositionInput(axis, wpos)}
               >
                 <Tooltip
                   content={i18n._('Set Work Offsets')}
@@ -1348,19 +1345,18 @@ class DisplayPanel extends Component {
     );
   };
 
-  render() {
-    const { axes, machinePosition, workPosition } = this.context.state;
-    const wcs = this.context.onGetWorkCoordinateSystem();
-    const hasAxisE = (machinePosition.e !== undefined && workPosition.e !== undefined);
-    const hasAxisX = includes(axes, AXIS_X);
-    const hasAxisY = includes(axes, AXIS_Y);
-    const hasAxisZ = includes(axes, AXIS_Z);
-    const hasAxisA = includes(axes, AXIS_A);
-    const hasAxisB = includes(axes, AXIS_B);
-    const hasAxisC = includes(axes, AXIS_C);
+  const { axes, machinePosition, workPosition } = context.state;
+  const wcs = context.onGetWorkCoordinateSystem();
+  const hasAxisE = (machinePosition.e !== undefined && workPosition.e !== undefined);
+  const hasAxisX = includes(axes, AXIS_X);
+  const hasAxisY = includes(axes, AXIS_Y);
+  const hasAxisZ = includes(axes, AXIS_Z);
+  const hasAxisA = includes(axes, AXIS_A);
+  const hasAxisB = includes(axes, AXIS_B);
+  const hasAxisC = includes(axes, AXIS_C);
 
-    return (
-      <Panel className={styles.displayPanel}>
+  return (
+    <Panel className={styles.displayPanel}>
         <table className="table-bordered">
           <thead>
             <tr>
@@ -1368,23 +1364,22 @@ class DisplayPanel extends Component {
               <th title={i18n._('Machine Position')}>{i18n._('Machine Position')}</th>
               <th title={i18n._('Work Position')}>{i18n._('Work Position')}</th>
               <th className={styles.action}>
-                {this.renderActionDropdown({ wcs })}
+                {renderActionDropdown({ wcs })}
               </th>
             </tr>
           </thead>
           <tbody>
-            {hasAxisE && this.renderAxis(AXIS_E)}
-            {hasAxisX && this.renderAxis(AXIS_X)}
-            {hasAxisY && this.renderAxis(AXIS_Y)}
-            {hasAxisZ && this.renderAxis(AXIS_Z)}
-            {hasAxisA && this.renderAxis(AXIS_A)}
-            {hasAxisB && this.renderAxis(AXIS_B)}
-            {hasAxisC && this.renderAxis(AXIS_C)}
+            {hasAxisE && renderAxis(AXIS_E)}
+            {hasAxisX && renderAxis(AXIS_X)}
+            {hasAxisY && renderAxis(AXIS_Y)}
+            {hasAxisZ && renderAxis(AXIS_Z)}
+            {hasAxisA && renderAxis(AXIS_A)}
+            {hasAxisB && renderAxis(AXIS_B)}
+            {hasAxisC && renderAxis(AXIS_C)}
           </tbody>
         </table>
-      </Panel>
-    );
-  }
+    </Panel>
+  );
 }
 
 export default DisplayPanel;
