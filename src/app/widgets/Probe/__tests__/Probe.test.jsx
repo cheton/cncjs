@@ -65,11 +65,6 @@ jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   }),
 }));
 
-jest.mock('@app/components/Modal', () => ({
-  ModalProvider: ({ children }) => children,
-  ModalRoot: () => null,
-}));
-
 jest.mock('@app/components/CodePreview', () => ({
   __esModule: true,
   default: ({ data }) => <pre>{data}</pre>,
@@ -82,9 +77,6 @@ jest.mock('@app/components/GridSystem', () => {
 jest.mock('@app/components/Buttons', () => {
   const fail = () => {
     throw new Error('Probe widget must use Tonic Button primitives directly');
-  };
-  fail.propTypes = {
-    btnStyle: require('prop-types').string,
   };
   return { Button: fail, ButtonGroup: fail };
 });

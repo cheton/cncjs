@@ -2,9 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Space,
 } from '@tonic-ui/react';
-import PropTypes from 'prop-types';
-import React from 'react';
-import { ModalProvider, ModalConsumer, ModalRoot } from '@app/components/Modal';
+import React, { useState } from 'react';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
@@ -13,6 +11,9 @@ import WidgetEventProvider from '@app/widgets/shared/WidgetEventProvider';
 import Custom from './Custom';
 import SettingsModal from './modals/SettingsModal';
 
+/**
+ * @param {{widgetId: string, onFork: Function, onRemove: Function, view: string, onViewChange: Function, sortable: object, onOpenSettingsModal: Function, config: object, emitter: object}} props
+ */
 function CustomWidgetBody({
   widgetId,
   onFork,
@@ -20,7 +21,7 @@ function CustomWidgetBody({
   view,
   onViewChange,
   sortable,
-  openModal,
+  onOpenSettingsModal,
   config,
   emitter,
 }) {
@@ -32,7 +33,7 @@ function CustomWidgetBody({
 
   const select = (eventKey) => {
     if (eventKey === 'settings') {
-      openModal(SettingsModal);
+      onOpenSettingsModal();
     } else if (eventKey === 'fullscreen') {
       onViewChange(isFullscreen ? 'normal' : 'fullscreen');
     } else if (eventKey === 'fork') {
@@ -137,16 +138,9 @@ function CustomWidgetBody({
   );
 }
 
-CustomWidgetBody.propTypes = {
-  widgetId: PropTypes.string.isRequired,
-  onFork: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired,
-  view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
-  onViewChange: PropTypes.func.isRequired,
-  sortable: PropTypes.object.isRequired,
-  openModal: PropTypes.func.isRequired,
-};
-
+/**
+ * @param {{widgetId: string, onFork: Function, onRemove: Function, view: string, onViewChange: Function, sortable?: object}} props
+ */
 function CustomWidget({
   widgetId,
   onFork,
@@ -155,30 +149,30 @@ function CustomWidget({
   onViewChange,
   sortable = {},
 }) {
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   return (
     <WidgetConfigProvider key={widgetId} widgetId={widgetId}>
       <WidgetConfigConsumer>
         {config => (
           <WidgetEventProvider>
             {emitter => (
-              <ModalProvider>
-                <ModalRoot />
-                <ModalConsumer>
-                  {({ openModal }) => (
-                    <CustomWidgetBody
-                      widgetId={widgetId}
-                      onFork={onFork}
-                      onRemove={onRemove}
-                      view={view}
-                      onViewChange={onViewChange}
-                      sortable={sortable}
-                      openModal={openModal}
-                      config={config}
-                      emitter={emitter}
-                    />
-                  )}
-                </ModalConsumer>
-              </ModalProvider>
+              <>
+                <CustomWidgetBody
+                  widgetId={widgetId}
+                  onFork={onFork}
+                  onRemove={onRemove}
+                  view={view}
+                  onViewChange={onViewChange}
+                  sortable={sortable}
+                  onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+                  config={config}
+                  emitter={emitter}
+                />
+                {isSettingsModalOpen && (
+                  <SettingsModal onClose={() => setIsSettingsModalOpen(false)} />
+                )}
+              </>
             )}
           </WidgetEventProvider>
         )}
@@ -186,14 +180,5 @@ function CustomWidget({
     </WidgetConfigProvider>
   );
 }
-
-CustomWidget.propTypes = {
-  widgetId: PropTypes.string.isRequired,
-  onFork: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired,
-  view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
-  onViewChange: PropTypes.func.isRequired,
-  sortable: PropTypes.object,
-};
 
 export default CustomWidget;

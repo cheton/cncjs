@@ -1,8 +1,6 @@
-import chainedFunction from 'chained-function';
 import { ensureArray } from 'ensure-type';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Dropdown, { MenuItem } from '@app/components/Dropdown';
 import Image from '@app/components/Image';
@@ -15,7 +13,6 @@ import {
   AXIS_A,
   AXIS_B,
   AXIS_C,
-  IMPERIAL_UNITS,
   METRIC_UNITS,
 } from '@app/constants';
 import {
@@ -148,51 +145,24 @@ const getAxisHomeCommand = (controllerType, axis) => {
   return '';
 };
 
+/**
+ * @extends {React.Component<{
+ *   canClick?: boolean, units?: string, axes?: string[], machinePosition?: object,
+ *   workPosition?: object, jog?: object, actions?: object, controllerType?: string
+ * }>}
+ */
 class DisplayPanel extends Component {
-  static propTypes = {
-    canClick: PropTypes.bool,
-    units: PropTypes.oneOf([IMPERIAL_UNITS, METRIC_UNITS]),
-    axes: PropTypes.array,
-    machinePosition: PropTypes.object,
-    workPosition: PropTypes.object,
-    jog: PropTypes.object,
-    actions: PropTypes.object,
-    controllerType: PropTypes.string,
-  };
-
-  state = {
-    positionInput: {
-      [AXIS_E]: false,
-      [AXIS_X]: false,
-      [AXIS_Y]: false,
-      [AXIS_Z]: false,
-      [AXIS_A]: false,
-      [AXIS_B]: false,
-      [AXIS_C]: false
-    }
-  };
-
   handleSelect = (eventKey) => {
     const commands = ensureArray(eventKey);
     commands.forEach(command => controller.command('gcode', command));
   };
 
-  showPositionInput = (axis) => () => {
-    this.setState(state => ({
-      positionInput: {
-        ...state.positionInput,
-        [axis]: true
-      }
-    }));
+  showPositionInput = (axis, reportedValue) => () => {
+    this.props.onPositionInputChange({ axis, value: reportedValue });
   };
 
-  hidePositionInput = (axis) => () => {
-    this.setState(state => ({
-      positionInput: {
-        ...state.positionInput,
-        [axis]: false
-      }
-    }));
+  hidePositionInput = () => {
+    this.props.onPositionInputChange(null);
   };
 
   renderActionDropdown = ({ wcs }) => {
@@ -1195,7 +1165,7 @@ class DisplayPanel extends Component {
   };
 
   renderAxis = (axis) => {
-    const { canClick, units, machinePosition, workPosition, jog, controllerType } = this.props;
+    const { canClick, units, machinePosition, workPosition, jog, controllerType, positionInput } = this.props;
     const supportedCommands = SUPPORTED_COMMANDS[controllerType] || {};
     const { actions } = this.props;
     const wcs = actions.getWorkCoordinateSystem();
@@ -1227,8 +1197,8 @@ class DisplayPanel extends Component {
     const canMoveBackward = canClick;
     const canMoveForward = canClick;
     const canZeroOutWorkOffsets = canClick;
-    const canModifyWorkPosition = canClick && !this.state.positionInput[axis];
-    const showPositionInput = canClick && this.state.positionInput[axis];
+    const canModifyWorkPosition = canClick && positionInput?.axis !== axis;
+    const showPositionInput = canClick && positionInput?.axis === axis;
     const highlightAxis = canClick && (jog.keypad || jog.axis === axis);
 
     return (
@@ -1282,13 +1252,13 @@ class DisplayPanel extends Component {
           {showPositionInput && (
             <PositionInput
               style={{ margin: '5px 0' }}
-              onSave={chainedFunction(
-                (value) => {
-                  actions.setWorkOffsets(axis, value);
-                },
-                this.hidePositionInput(axis)
-              )}
-              onCancel={this.hidePositionInput(axis)}
+              value={positionInput.value}
+              onChange={(value) => this.props.onPositionInputChange({ axis, value })}
+              onSave={(value) => {
+                actions.setWorkOffsets(axis, value);
+                this.hidePositionInput();
+              }}
+              onCancel={this.hidePositionInput}
             />
           )}
           {!showPositionInput &&
@@ -1349,7 +1319,7 @@ class DisplayPanel extends Component {
                 aria-label={`Set ${axisLabel} work offsets`}
                 active={showPositionInput}
                 disabled={!canModifyWorkPosition}
-                onClick={this.showPositionInput(axis)}
+                onClick={this.showPositionInput(axis, wpos)}
               >
                 <Tooltip
                   content={i18n._('Set Work Offsets')}

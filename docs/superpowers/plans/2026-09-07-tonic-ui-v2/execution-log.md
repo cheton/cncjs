@@ -1133,3 +1133,37 @@ Verification: focused `Smoothie.test.jsx` plus `WidgetLayoutContract.test.jsx` p
 Implementation: TinyG now uses function hooks with effect-owned controller listeners and cleanup, TinyG/g2core type filtering, partial settings/state merges, disconnect reset, direct Tonic status/footer, progress, modal/tabs, motor and override controls, a local Tonic repeatable button, and JSDoc-only interfaces. Legacy UI imports, React classes, PropTypes, styled-components, unused constants, and widget Stylus were removed. Exact TinyG/g2core transport order and motor payload contracts were preserved.
 
 Verification: focused `TinyG.test.jsx` passed 1 suite / 8 tests. Full `yarn test:frontend --runInBand --silent` passed 41 suites / 224 tests. Targeted TinyG ESLint, static forbidden-import/class/inline-style scan, and `git diff --check` passed. Luna-medium `yarn build-dev` exited 0; webpack 5.75.0 compiled successfully in 15321 ms with only the Node `fs.Stats` deprecation warning. Browser tooling was not run and browser evidence remains deferred to R6. Status transition: C4 `in_progress` → `completed`; R5 is next.
+
+## R5 command acceptance — started 2026-09-20
+
+The prescribed R5 files are not yet present: `Visualizer/__tests__/WorkflowControl.test.jsx` and `Autolevel/__tests__/VisualizerIntegration.test.jsx`. Their plan dependencies `E4`, `A1b`, and `A3b` are still todo. A valid partial acceptance run was executed without browser tooling: `yarn test:frontend --runInBand --silent` with the Grbl, Marlin, Smoothie, TinyG, and Console test paths passed 5 suites / 37 tests. R5 remains `in_progress`; do not mark it completed until the missing WorkflowControl and Autolevel integration command/lifecycle cases are implemented and verified.
+
+## S1 Settings draft — completed 2026-09-20
+
+Implementation: added `src/app/widgets/Axes/Settings/draft.js` with the existing config defaults, editable jog-distance draft values, canonical X/Y/Z/A/B/C axis normalization, positive-distance normalization at save time, and cloned MDI records. No finite-number policy was added beyond the existing `Number(value) > 0` behavior.
+
+Verification: focused `draft.test.js` passed 4 tests. Targeted ESLint completed with 0 errors and `git diff --check` passed. Browser tooling was not run.
+
+## S2 MDI query — completed 2026-09-20
+
+Implementation: added `src/app/widgets/Axes/queries.js` with the `['api/mdi']` query key, `useMdiQuery`, and `useSaveMdiMutation`. The hooks use the existing `/api/mdi` GET and PUT wrappers, disable automatic retry, return response bodies, and invalidate the shared query only after a successful save.
+
+Verification: focused draft/query run passed 2 suites / 7 tests. Targeted ESLint completed with 0 errors and `git diff --check` passed. Browser tooling was not run. Status transition: S1/S2 `todo` → `completed`; S3 is next.
+
+## S3 Settings tabs — completed 2026-09-20
+
+Implementation: converted General, ShuttleXpress, MDI, record dialogs, and the MDI table to controlled function components. The tabs now receive value/callback contracts, preserve editable jog drafts and MDI order, create UUIDs only for new records, and use direct Tonic Input/Checkbox/Button/Grid primitives where applicable. Parent state/action objects, child instance refs, fetch state, classes, and PropTypes were removed from the migrated files; interfaces are documented with JSDoc.
+
+Verification: focused `Settings.test.jsx` passed 2 tests; the full frontend suite passed 44 suites / 233 tests. Targeted ESLint completed with 0 errors and `git diff --check` passed. Browser tooling was not run. Status transition: S3 `todo` → `completed`; S4 is next.
+
+## S4 Settings save — completed 2026-09-20
+
+Implementation: the Settings owner now owns the controlled draft and MDI query lifecycle. Save snapshots the draft, rejects missing MDI data, uses a synchronous submit lock plus mutation pending state, awaits the MDI PUT, writes normalized general and ShuttleXpress values only after success, and calls `onSave` once. Errors preserve the draft and perform no local writes; pending disables Save, Cancel, and modal close. The owner and all migrated Settings interfaces use JSDoc instead of PropTypes.
+
+Verification: focused Settings/draft/query tests passed 3 suites / 11 tests; the full frontend suite passed 44 suites / 235 tests. Targeted ESLint passed with 0 errors and `git diff --check` passed. Browser tooling was not run. Status transition: S4 `todo` → `completed`; A1b is next.
+
+## A1b Axes input — active checkpoint 2026-09-20
+
+Implementation so far: added focused Axes unit coverage for position drafts, report merging, metric/imperial jog distance selection, keypad action parameters, MDI command emission, and global jog gating. The position draft is now reducer-owned above controlled DisplayPanel, so a controller report cannot replace an active edit. The guard prevents a global jog from editable controls, an open modal, `keyup`, or `blur`; it permits background `keydown`. The editable position path uses direct Tonic InputGroup/Input/Button primitives; PositionLabel/Fraction, Keypad, and KeypadOverlay use Tonic Box and JSDoc instead of PropTypes/raw spans. Widget-modal source was normalized to the installed Tonic Modal composition and supported props; legacy widget Modal imports/APIs are absent.
+
+Verification: focused Axes/Settings/Custom/Probe tests pass 8 suites / 33 tests; the current Axes slice passes 8 tests; targeted ESLint has 0 errors; `git diff --check` passes. Browser tooling and builds were not run. A1b remains in progress: controller reports/events are not yet owned by the reducer, and command/disconnect/unmount cleanup coverage required by the task is still incomplete.

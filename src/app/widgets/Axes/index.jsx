@@ -8,9 +8,7 @@ import get from 'lodash/get';
 import includes from 'lodash/includes';
 import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import api from '@app/api';
+import React, { Component, useReducer } from 'react';
 import Widget from '@app/components/Widget';
 import combokeys from '@app/lib/combokeys';
 import controller from '@app/lib/controller';
@@ -57,17 +55,14 @@ import {
   DEFAULT_AXES
 } from './constants';
 import styles from './index.styl';
+import { useMdiQuery } from './queries';
+import { axesReducer, getJogDistance, shouldHandleJogEvent } from './state';
 
-class AxesWidget extends Component {
-  static propTypes = {
-    widgetId: PropTypes.string.isRequired,
-    onFork: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired,
-    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
-    onViewChange: PropTypes.func.isRequired,
-    sortable: PropTypes.object
-  };
-
+/**
+ * Legacy widget composition while controller event migration is in progress.
+ * @extends {React.Component<{ widgetId: string, mdiCommands?: object[] }>}
+ */
+class AxesWidgetContent extends Component {
   config = new WidgetConfig(this.props.widgetId);
 
   state = this.getInitialState();
@@ -100,32 +95,11 @@ class AxesWidget extends Component {
         }
       });
     },
+    setPositionInput: (positionInput = null) => {
+      this.props.onPositionInputChange(positionInput);
+    },
     getJogDistance: () => {
-      const { units } = this.state;
-
-      if (units === IMPERIAL_UNITS) {
-        const step = this.config.get('jog.imperial.step');
-        const imperialJogDistances = ensureArray(this.config.get('jog.imperial.distances', []));
-        const imperialJogSteps = [
-          ...imperialJogDistances,
-          ...IMPERIAL_STEPS
-        ];
-        const distance = Number(imperialJogSteps[step]) || 0;
-        return distance;
-      }
-
-      if (units === METRIC_UNITS) {
-        const step = this.config.get('jog.metric.step');
-        const metricJogDistances = ensureArray(this.config.get('jog.metric.distances', []));
-        const metricJogSteps = [
-          ...metricJogDistances,
-          ...METRIC_STEPS
-        ];
-        const distance = Number(metricJogSteps[step]) || 0;
-        return distance;
-      }
-
-      return 0;
+      return getJogDistance(this.state.jog, this.state.units);
     },
     getWorkCoordinateSystem: () => {
       const controllerType = this.state.controller.type;
@@ -339,7 +313,7 @@ class AxesWidget extends Component {
     JOG: (event, { axis = null, direction = 1, factor = 1 }) => {
       const { canClick, jog } = this.state;
 
-      if (!canClick) {
+      if (!canClick || !shouldHandleJogEvent(event, this.state.modal.name !== MODAL_NONE)) {
         return;
       }
 
@@ -415,7 +389,7 @@ class AxesWidget extends Component {
 
   controllerEvents = {
     'config:change': () => {
-      this.fetchMDICommands();
+      this.props.onMdiConfigChange?.();
     },
     'connection:open': () => {
       this.setState({ connected: true });
@@ -425,6 +399,7 @@ class AxesWidget extends Component {
         if (connected) {
           return { connected };
         }
+        this.shuttleControl?.clear();
         const initialState = this.getInitialState();
         return {
           ...initialState,
@@ -595,24 +570,7 @@ class AxesWidget extends Component {
 
   shuttleControl = null;
 
-  fetchMDICommands = async () => {
-    try {
-      let res;
-      res = await api.mdi.fetch();
-      const { records: commands } = res.body;
-      this.setState(state => ({
-        mdi: {
-          ...state.mdi,
-          commands: commands
-        }
-      }));
-    } catch (err) {
-      // Ignore error
-    }
-  };
-
   componentDidMount() {
-    this.fetchMDICommands();
     this.addControllerEvents();
     this.addShuttleControlEvents();
   }
@@ -675,6 +633,7 @@ class AxesWidget extends Component {
         b: '0.000',
         c: '0.000'
       },
+      positionInput: null,
       jog: {
         axis: '', // Defaults to empty
         keypad: this.config.get('jog.keypad'),
@@ -732,7 +691,8 @@ class AxesWidget extends Component {
       combokeys.removeListener(eventName, callback);
     });
 
-    this.shuttleControl.removeAllListeners('flush');
+    this.shuttleControl?.clear();
+    this.shuttleControl?.removeAllListeners('flush');
     this.shuttleControl = null;
   }
 
@@ -798,6 +758,11 @@ class AxesWidget extends Component {
     const config = this.config;
     const state = {
       ...this.state,
+      positionInput: this.props.positionInput,
+      mdi: {
+        ...this.state.mdi,
+        commands: this.props.mdiCommands || []
+      },
       // Determine if the motion button is clickable
       canClick: this.canClick(),
       // Output machine position with the display units
@@ -957,6 +922,28 @@ class AxesWidget extends Component {
       </WidgetConfigProvider>
     );
   }
+}
+
+/**
+ * Uses the shared MDI query cache. Controller config changes request a refetch
+ * instead of creating a second fetch/loading state in the widget.
+ * @param {object} props
+ * @returns {JSX.Element}
+ */
+function AxesWidget(props) {
+  const mdiQuery = useMdiQuery();
+  const [axesState, dispatch] = useReducer(axesReducer, { positionInput: null });
+  const mdiCommands = Array.isArray(mdiQuery.data?.records) ? mdiQuery.data.records : [];
+
+  return (
+    <AxesWidgetContent
+      {...props}
+      mdiCommands={mdiCommands}
+      onMdiConfigChange={() => mdiQuery.refetch()}
+      positionInput={axesState.positionInput}
+      onPositionInputChange={(positionInput) => dispatch({ type: 'SET_POSITION_INPUT', payload: positionInput })}
+    />
+  );
 }
 
 export default AxesWidget;

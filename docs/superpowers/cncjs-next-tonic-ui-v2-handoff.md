@@ -21,9 +21,9 @@
 | HEAD | `06041616`（本檔自身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | **R5 command acceptance** |
+| Active task | **A1b Axes input** |
 | 最近完成 | **C4 TinyG/g2core**（G1-B01 已解除） |
-| 下一步推薦 | **R5 command acceptance** |
+| 下一步推薦 | **A1b Axes input** |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成，沒有未解 blocker。C4 focused 1 suite / 8 tests、full frontend 41 suites / 224 tests、targeted ESLint 0 errors，及 Luna-medium `yarn build-dev`（webpack 5.75.0，15321 ms）均通過。Browser evidence 仍延後至 R6。下一個 task 是 R5 command acceptance。
+Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S2 MDI query、S3 controlled tabs 與 S4 single-save transaction 已完成；下一個可執行 task 是 A1b Axes input。R5 partial acceptance passed 5 suites / 37 tests, but the full R5 gate remains pending because WorkflowControl and Autolevel integration tests depend on E4/A1b/A3b. Browser evidence 仍延後至 R6。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **R5** [regression gates](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | C1–C4 ✅ | command acceptance across all controllers | 否（browser deferred） |
+| **A1b** [motion widgets](plans/2026-09-07-tonic-ui-v2/06-motion-widgets.md) | S4, G4 ✅ | Axes input/jog/MDI behavior | 否 |
 
-**先領取 R5 command acceptance**。G1–G7、C1–C4 建立的 controller command fixtures 可供彙整；browser evidence 仍依使用者指示延後至 R6。
+**先執行 A1b Axes input**。S1–S4 已完成；A1b 是 A3a/A3b 與後續 Visualizer/R5 gates 的前置。Browser evidence 仍依使用者指示延後至 R6。
 
 `S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
 
@@ -66,6 +66,15 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成，沒有未解 blocker�
 5. **狀態：** [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 是唯一 ledger；只有主控能改 STATUS／本檔／execution-log／plan checkboxes。沒有可重跑 evidence 的 browser gate 不得標 `completed`；不以 chat 或 worker 自評取代 evidence。可建立 local commit，**不得自行 push**（除本次另有授權）。
 6. **Migration intent：** 淘汰不支援 React 16–18 的舊 runtime library，特別是 Bootstrap family。不可保留或 re-export `react-bootstrap-buttons`。
 7. **Build：** 本地不要執行 `yarn build-prod`（由 CI 把關）。要驗證 development server 或 browser flow 時直接執行 `yarn dev`。
+8. **Component interfaces：** `propTypes` are prohibited for all new or migrated code. Use JSDoc for component interfaces and function defaults for runtime defaults. Do not reintroduce PropTypes while completing adjacent migration work.
+9. **Widget modals：** use only the installed Tonic Modal contract: `isOpen`, `onClose`, `size`, `isClosable`, `closeOnEsc`, and `closeOnInteractOutside`, with `ModalContent`/`ModalHeader`/`ModalBody`/`ModalFooter`. Do not use legacy `disableOverlay*`, `show`, or static Modal APIs.
+
+## Current implementation checkpoint — 2026-09-20
+
+- A1b remains **in progress**. Its focused unit coverage now proves that a reported position does not replace a focused draft, the reducer retains that draft, metric/imperial jog distance selection is exact, Keypad forwards the selected distance, MDI emits the exact `gcode` command, and global jog handling rejects editable controls, an open modal, `keyup`, and `blur`.
+- The position draft is now owned above DisplayPanel through the reducer; DisplayPanel is controlled. PositionInput, PositionLabel, Fraction, Keypad, and KeypadOverlay use JSDoc-only interfaces; the Keypad path has no raw spans.
+- All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a remains separate and incomplete because its required function conversion and dialog action tests are still outstanding.
+- Latest focused verification: the broader 8-suite / 33-test checkpoint still passes; the current Axes slice passes 8 tests, with targeted ESLint and `git diff --check` clean. No browser tooling or build was run.
 
 ## 恢復 prompt
 

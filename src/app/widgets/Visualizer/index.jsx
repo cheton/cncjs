@@ -4,16 +4,22 @@ import ExpressionEvaluator from 'expr-eval';
 import includes from 'lodash/includes';
 import get from 'lodash/get';
 import mapValues from 'lodash/mapValues';
-import PropTypes from 'prop-types';
 import pubsub from 'pubsub-js';
 import React, { Component } from 'react';
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+} from '@tonic-ui/react';
 import {
   UPDATE_BOUNDING_BOX,
 } from '@app/actions/controller';
 import Anchor from '@app/components/Anchor';
 import { Button } from '@app/components/Buttons';
 import ModalTemplate from '@app/components/ModalTemplate';
-import Modal from '@app/components/Modal';
 import Widget from '@app/components/Widget';
 import {
   IMPERIAL_UNITS,
@@ -105,41 +111,51 @@ const translateExpression = (function() {
 
 const displayWebGLErrorMessage = () => {
   portal(({ onClose }) => (
-    <Modal disableOverlayClick size="xs" onClose={onClose}>
-      <Modal.Header>
-        <Modal.Title>
+    <Modal
+      closeOnInteractOutside={false}
+      isClosable
+      isOpen
+      size="xs"
+      onClose={onClose}
+    >
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>
           WebGL Error Message
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <ModalTemplate type="warning">
-          {window.WebGLRenderingContext && (
-            <div>
-              Your graphics card does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
-              <br />
-              Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
-            </div>
-          )}
-          {!window.WebGLRenderingContext && (
-            <div>
-              Your browser does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
-              <br />
-              Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
-            </div>
-          )}
-        </ModalTemplate>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          onClick={onClose}
-        >
-          {i18n._('OK')}
-        </Button>
-      </Modal.Footer>
+        </ModalHeader>
+        <ModalBody>
+          <ModalTemplate type="warning">
+            {window.WebGLRenderingContext && (
+              <div>
+                Your graphics card does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
+                <br />
+                Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
+              </div>
+            )}
+            {!window.WebGLRenderingContext && (
+              <div>
+                Your browser does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
+                <br />
+                Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
+              </div>
+            )}
+          </ModalTemplate>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            onClick={onClose}
+          >
+            {i18n._('OK')}
+          </Button>
+        </ModalFooter>
+      </ModalContent>
     </Modal>
   ));
 };
 
+/**
+ * @param {{name?: string, isProbeCompensationApplied?: boolean, style?: object}} props
+ */
 function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   if (!name) {
     return null;
@@ -184,11 +200,8 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   );
 }
 
+/** @extends {Component<{widgetId: string}>} */
 class VisualizerWidget extends Component {
-  static propTypes = {
-    widgetId: PropTypes.string.isRequired
-  };
-
   config = new WidgetConfig(this.props.widgetId);
 
   state = this.getInitialState();
@@ -423,31 +436,38 @@ class VisualizerWidget extends Component {
         // M6 Tool Change
         if (notification.type === NOTIFICATION_M6_TOOL_CHANGE) {
           portal(({ onClose }) => (
-            <Modal disableOverlayClick size="xs" onClose={onClose}>
-              <Modal.Header>
-                <Modal.Title>
+            <Modal
+              closeOnInteractOutside={false}
+              isClosable
+              isOpen
+              size="xs"
+              onClose={onClose}
+            >
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>
                   {i18n._('Tool Change')}
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                {i18n._('Are you sure you want to resume program execution?')}
-              </Modal.Body>
-              <Modal.Footer>
-                <Button onClick={onClose}>
-                  {i18n._('No')}
-                </Button>
-                <Button
-                  btnStyle="primary"
-                  onClick={chainedFunction(
-                    () => {
-                      controller.command('sender_resume');
-                    },
-                    onClose
-                  )}
-                >
-                  {i18n._('Yes')}
-                </Button>
-              </Modal.Footer>
+                </ModalHeader>
+                <ModalBody>
+                  {i18n._('Are you sure you want to resume program execution?')}
+                </ModalBody>
+                <ModalFooter>
+                  <Button onClick={onClose}>
+                    {i18n._('No')}
+                  </Button>
+                  <Button
+                    btnStyle="primary"
+                    onClick={chainedFunction(
+                      () => {
+                        controller.command('sender_resume');
+                      },
+                      onClose
+                    )}
+                  >
+                    {i18n._('Yes')}
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
             </Modal>
           ));
 

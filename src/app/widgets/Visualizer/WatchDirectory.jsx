@@ -1,14 +1,18 @@
 import path from 'path';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import InfiniteTree from 'react-infinite-tree';
 import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Space,
 } from '@tonic-ui/react';
 import api from '@app/api';
-import Modal from '@app/components/Modal';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import log from '@app/lib/log';
@@ -16,12 +20,8 @@ import renderer from './renderer';
 import styles from './renderer.styl';
 import watchDirectoryStyles from './watch-directory.styl';
 
+/** @extends {Component<{state: object, actions: object}>} */
 class WatchDirectory extends Component {
-  static propTypes = {
-    state: PropTypes.object,
-    actions: PropTypes.object
-  };
-
   tableNode = null;
 
   treeNode = null;
@@ -272,167 +272,132 @@ class WatchDirectory extends Component {
 
     return (
       <Modal
-        disableOverlay
+        closeOnInteractOutside={false}
+        isClosable
+        isOpen
         size="md"
-        style={{ width: '80vw' }}
         onClose={actions.closeModal}
       >
-        <Modal.Header>
-          <Modal.Title>{i18n._('Watch Directory')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className={watchDirectoryStyles.toolbar}>
-            <input
+        <ModalOverlay />
+        <ModalContent style={{ width: '80vw' }}>
+          <ModalHeader>{i18n._('Watch Directory')}</ModalHeader>
+          <ModalBody>
+            <div className={watchDirectoryStyles.toolbar}>
+              <input
+                ref={(node) => {
+                  this.uploadInputEl = node;
+                }}
+                type="file"
+                multiple={true}
+                style={{ display: 'none' }}
+                onChange={this.handleChangeUploadFiles}
+              />
+              <button
+                type="button"
+                className="btn btn-default"
+                onClick={this.handleClickUpload}
+                disabled={uploading}
+              >
+                <i aria-hidden="true" className="fa fa-plus" />
+                <Space width="4" />
+                {i18n._('Add')}
+              </button>
+              {uploading && (
+                <i aria-hidden="true" className="fa fa-circle-o-notch fa-spin" style={{ marginLeft: 8 }} />
+              )}
+              <button
+                type="button"
+                className="btn btn-default"
+                style={{ marginLeft: 'auto' }}
+                title={i18n._('Refresh')}
+                aria-label={i18n._('Refresh')}
+                onClick={() => this.loadFiles()}
+              >
+                <i aria-hidden="true" className={classNames('fa fa-refresh', { 'fa-spin': refreshing })} />
+              </button>
+            </div>
+            <div
               ref={(node) => {
-                this.uploadInputEl = node;
+                this.dropzoneNode = node;
               }}
-              type="file"
-              multiple={true}
-              style={{ display: 'none' }}
-              onChange={this.handleChangeUploadFiles}
-            />
-            <button
-              type="button"
-              className="btn btn-default"
-              onClick={this.handleClickUpload}
-              disabled={uploading}
+              className={classNames(watchDirectoryStyles.dropzone, {
+                [watchDirectoryStyles.dropzoneOver]: dragging
+              })}
             >
-              <i aria-hidden="true" className="fa fa-plus" />
-              <Space width="4" />
-              {i18n._('Add')}
-            </button>
-            {uploading && (
-              <i aria-hidden="true" className="fa fa-circle-o-notch fa-spin" style={{ marginLeft: 8 }} />
-            )}
-            <button
-              type="button"
-              className="btn btn-default"
-              style={{ marginLeft: 'auto' }}
-              title={i18n._('Refresh')}
-              aria-label={i18n._('Refresh')}
-              onClick={() => this.loadFiles()}
-            >
-              <i aria-hidden="true" className={classNames('fa fa-refresh', { 'fa-spin': refreshing })} />
-            </button>
-          </div>
-          <div
-            ref={(node) => {
-              this.dropzoneNode = node;
-            }}
-            className={classNames(watchDirectoryStyles.dropzone, {
-              [watchDirectoryStyles.dropzoneOver]: dragging
-            })}
-          >
-            <table
-              ref={node => {
-                this.tableNode = node;
-              }}
-              style={{ width: '100%' }}
-            >
-              <thead>
-                <tr>
-                  <th style={{ paddingLeft: 20 }}>{i18n._('Name')}</th>
-                  <th>{i18n._('Date modified')}</th>
-                  <th>{i18n._('Type')}</th>
-                  <th>{i18n._('Size')}</th>
-                </tr>
-              </thead>
-            </table>
-            <InfiniteTree
-              style={{ height: 240 }}
-              ref={node => {
-                if (!this.treeNode) {
-                  this.treeNode = node;
-                  this.addColumnGroup();
-                }
-              }}
-              noDataClass={styles.noData}
-              togglerClass={styles.treeToggler}
-              autoOpen={true}
-              layout="table"
-              loadNodes={(parentNode, done) => {
-                api.watch.getFiles({ path: path.join(parentNode.props.path, parentNode.name) })
-                  .then((res) => {
-                    const body = res.body;
-                    const nodes = body.files.map((file) => {
-                      const { name, ...props } = file;
-                      return {
-                        id: path.join(body.path, name),
-                        name: name,
-                        props: {
-                          ...props,
-                          path: body.path || ''
-                        },
-                        loadOnDemand: props.type === 'd'
-                      };
-                    });
-                    done(null, nodes);
-                  })
-                  .catch((res) => {
+              <table
+                ref={node => {
+                  this.tableNode = node;
+                }}
+                style={{ width: '100%' }}
+              >
+                <thead>
+                  <tr>
+                    <th style={{ paddingLeft: 20 }}>{i18n._('Name')}</th>
+                    <th>{i18n._('Date modified')}</th>
+                    <th>{i18n._('Type')}</th>
+                    <th>{i18n._('Size')}</th>
+                  </tr>
+                </thead>
+              </table>
+              <InfiniteTree
+                style={{ height: 240 }}
+                ref={node => {
+                  if (!this.treeNode) {
+                    this.treeNode = node;
+                    this.addColumnGroup();
+                  }
+                }}
+                noDataClass={styles.noData}
+                togglerClass={styles.treeToggler}
+                autoOpen={true}
+                layout="table"
+                loadNodes={(parentNode, done) => {
+                  api.watch.getFiles({ path: path.join(parentNode.props.path, parentNode.name) })
+                    .then((res) => {
+                      const body = res.body;
+                      const nodes = body.files.map((file) => {
+                        const { name, ...props } = file;
+                        return {
+                          id: path.join(body.path, name),
+                          name: name,
+                          props: {
+                            ...props,
+                            path: body.path || ''
+                          },
+                          loadOnDemand: props.type === 'd'
+                        };
+                      });
+                      done(null, nodes);
+                    })
+                    .catch((res) => {
                     // Ignore error
-                  });
-              }}
-              rowRenderer={renderer}
-              shouldSelectNode={(node) => {
-                const tree = this.treeNode.tree;
-                if (!node || (node === tree.getSelectedNode())) {
-                  return false; // Prevent from deselecting the current node
-                }
-                return true;
-              }}
-              onContentDidUpdate={() => {
-                this.fitHeaderColumns();
-              }}
-              onKeyDown={(event) => {
+                    });
+                }}
+                rowRenderer={renderer}
+                shouldSelectNode={(node) => {
+                  const tree = this.treeNode.tree;
+                  if (!node || (node === tree.getSelectedNode())) {
+                    return false; // Prevent from deselecting the current node
+                  }
+                  return true;
+                }}
+                onContentDidUpdate={() => {
+                  this.fitHeaderColumns();
+                }}
+                onKeyDown={(event) => {
                 // Prevent the default scroll
-                event.preventDefault();
+                  event.preventDefault();
 
-                const tree = this.treeNode.tree;
-                const node = tree.getSelectedNode();
-                const nodeIndex = tree.getSelectedIndex();
-
-                if (event.keyCode === 13) { // Enter
-                  if (!node) {
-                    return;
-                  }
-                  if (node.props.type === 'd') {
-                    // Toggle expansion for directories
-                    if (node.state.open) {
-                      tree.closeNode(node);
-                    } else {
-                      tree.openNode(node);
-                    }
-                    return;
-                  }
-                  const file = path.join(node.props.path, node.name);
-                  actions.loadFile(file);
-                  actions.closeModal();
-                } else if (event.keyCode === 37) { // Left
-                  tree.closeNode(node);
-                } else if (event.keyCode === 38) { // Up
-                  const prevNode = tree.nodes[nodeIndex - 1] || node;
-                  tree.selectNode(prevNode);
-                } else if (event.keyCode === 39) { // Right
-                  tree.openNode(node);
-                } else if (event.keyCode === 40) { // Down
-                  const nextNode = tree.nodes[nodeIndex + 1] || node;
-                  tree.selectNode(nextNode);
-                }
-              }}
-              onSelectNode={(node) => {
-                actions.updateModalParams({ selectedNode: node });
-              }}
-              onDoubleClick={(event) => {
-                event.stopPropagation();
-
-                // Call setTimeout(fn, 0) to make sure it returns the last selected node
-                setTimeout(() => {
                   const tree = this.treeNode.tree;
                   const node = tree.getSelectedNode();
+                  const nodeIndex = tree.getSelectedIndex();
 
-                  if (node) {
+                  if (event.keyCode === 13) { // Enter
+                    if (!node) {
+                      return;
+                    }
                     if (node.props.type === 'd') {
-                      // Toggle expansion for directories
+                    // Toggle expansion for directories
                       if (node.state.open) {
                         tree.closeNode(node);
                       } else {
@@ -443,65 +408,102 @@ class WatchDirectory extends Component {
                     const file = path.join(node.props.path, node.name);
                     actions.loadFile(file);
                     actions.closeModal();
+                  } else if (event.keyCode === 37) { // Left
+                    tree.closeNode(node);
+                  } else if (event.keyCode === 38) { // Up
+                    const prevNode = tree.nodes[nodeIndex - 1] || node;
+                    tree.selectNode(prevNode);
+                  } else if (event.keyCode === 39) { // Right
+                    tree.openNode(node);
+                  } else if (event.keyCode === 40) { // Down
+                    const nextNode = tree.nodes[nodeIndex + 1] || node;
+                    tree.selectNode(nextNode);
                   }
-                }, 0);
-              }}
-            />
-            {dragging && (
-              <div className={watchDirectoryStyles.dropzoneHint}>
-                <i aria-hidden="true" className="fa fa-upload" />
-                <Space width="8" />
-                {i18n._('Upload G-code')}
-              </div>
-            )}
-            {uploading && (
-              <div className={watchDirectoryStyles.dropzoneHint}>
-                <div className={watchDirectoryStyles.progressLabel}>
-                  <i aria-hidden="true" className="fa fa-circle-o-notch fa-spin" />
-                  <Space width="8" />
-                  {i18n._('Upload G-code')} {uploadProgress}%
-                </div>
-                <div className="progress" style={{ marginBottom: 0 }}>
-                  <div
-                    className="progress-bar"
-                    role="progressbar"
-                    aria-label={i18n._('Upload G-code')}
-                    aria-valuenow={uploadProgress}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    style={{ width: uploadProgress + '%' }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <button
-            type="button"
-            className="btn btn-default"
-            onClick={actions.closeModal}
-          >
-            {i18n._('Cancel')}
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              const tree = this.treeNode.tree;
-              const node = tree.getSelectedNode();
+                }}
+                onSelectNode={(node) => {
+                  actions.updateModalParams({ selectedNode: node });
+                }}
+                onDoubleClick={(event) => {
+                  event.stopPropagation();
 
-              if (node) {
-                const file = path.join(node.props.path, node.name);
-                actions.loadFile(file);
-                actions.closeModal();
-              }
-            }}
-            disabled={!canUpload}
-          >
-            {i18n._('Load G-code')}
-          </button>
-        </Modal.Footer>
+                  // Call setTimeout(fn, 0) to make sure it returns the last selected node
+                  setTimeout(() => {
+                    const tree = this.treeNode.tree;
+                    const node = tree.getSelectedNode();
+
+                    if (node) {
+                      if (node.props.type === 'd') {
+                      // Toggle expansion for directories
+                        if (node.state.open) {
+                          tree.closeNode(node);
+                        } else {
+                          tree.openNode(node);
+                        }
+                        return;
+                      }
+                      const file = path.join(node.props.path, node.name);
+                      actions.loadFile(file);
+                      actions.closeModal();
+                    }
+                  }, 0);
+                }}
+              />
+              {dragging && (
+                <div className={watchDirectoryStyles.dropzoneHint}>
+                  <i aria-hidden="true" className="fa fa-upload" />
+                  <Space width="8" />
+                  {i18n._('Upload G-code')}
+                </div>
+              )}
+              {uploading && (
+                <div className={watchDirectoryStyles.dropzoneHint}>
+                  <div className={watchDirectoryStyles.progressLabel}>
+                    <i aria-hidden="true" className="fa fa-circle-o-notch fa-spin" />
+                    <Space width="8" />
+                    {i18n._('Upload G-code')} {uploadProgress}%
+                  </div>
+                  <div className="progress" style={{ marginBottom: 0 }}>
+                    <div
+                      className="progress-bar"
+                      role="progressbar"
+                      aria-label={i18n._('Upload G-code')}
+                      aria-valuenow={uploadProgress}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      style={{ width: uploadProgress + '%' }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <button
+              type="button"
+              className="btn btn-default"
+              onClick={actions.closeModal}
+            >
+              {i18n._('Cancel')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                const tree = this.treeNode.tree;
+                const node = tree.getSelectedNode();
+
+                if (node) {
+                  const file = path.join(node.props.path, node.name);
+                  actions.loadFile(file);
+                  actions.closeModal();
+                }
+              }}
+              disabled={!canUpload}
+            >
+              {i18n._('Load G-code')}
+            </button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     );
   }

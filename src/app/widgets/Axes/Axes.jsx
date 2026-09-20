@@ -1,9 +1,12 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import DisplayPanel from './DisplayPanel';
 import Keypad from './Keypad';
 import MDI from './MDI';
 
+/**
+ * @param {{ state: object, actions: object }} props
+ * @returns {JSX.Element}
+ */
 function Axes(props) {
   const { state, actions } = props;
 
@@ -15,6 +18,8 @@ function Axes(props) {
         axes={state.axes}
         machinePosition={state.machinePosition}
         workPosition={state.workPosition}
+        positionInput={state.positionInput}
+        onPositionInputChange={actions.setPositionInput}
         jog={state.jog}
         actions={actions}
         controllerType={state.controller.type}
@@ -33,10 +38,5 @@ function Axes(props) {
     </div>
   );
 }
-
-Axes.propTypes = {
-  state: PropTypes.object,
-  actions: PropTypes.object
-};
 
 export default Axes;

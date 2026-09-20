@@ -1,4 +1,5 @@
 import {
+  Box,
   Space,
 } from '@tonic-ui/react';
 import React from 'react';
@@ -12,6 +13,7 @@ const keypadInfotip = () => {
       textAlign: 'left',
     },
     axisDirection: {
+      display: 'inline-block',
       marginRight: 10
     },
     divider: {
@@ -35,7 +37,7 @@ const keypadInfotip = () => {
     <div style={styles.container}>
       <div style={{ textAlign: 'left' }}>
         <div>
-          <span style={styles.axisDirection}>X+</span>
+          <Box sx={styles.axisDirection}>X+</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-angle-right" style={styles.icon} />
           </kbd>
@@ -43,7 +45,7 @@ const keypadInfotip = () => {
           {i18n._('Right')}
         </div>
         <div>
-          <span style={styles.axisDirection}>X-</span>
+          <Box sx={styles.axisDirection}>X-</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-angle-left" style={styles.icon} />
           </kbd>
@@ -51,7 +53,7 @@ const keypadInfotip = () => {
           {i18n._('Left')}
         </div>
         <div>
-          <span style={styles.axisDirection}>Y+</span>
+          <Box sx={styles.axisDirection}>Y+</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-angle-up" style={styles.icon} />
           </kbd>
@@ -59,7 +61,7 @@ const keypadInfotip = () => {
           {i18n._('Up')}
         </div>
         <div>
-          <span style={styles.axisDirection}>Y-</span>
+          <Box sx={styles.axisDirection}>Y-</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-angle-down" style={styles.icon} />
           </kbd>
@@ -67,7 +69,7 @@ const keypadInfotip = () => {
           {i18n._('Down')}
         </div>
         <div>
-          <span style={styles.axisDirection}>Z+</span>
+          <Box sx={styles.axisDirection}>Z+</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-long-arrow-up" style={styles.icon} />
           </kbd>
@@ -75,7 +77,7 @@ const keypadInfotip = () => {
           {i18n._('Page Up')}
         </div>
         <div>
-          <span style={styles.axisDirection}>Z-</span>
+          <Box sx={styles.axisDirection}>Z-</Box>
           <kbd style={styles.kbd}>
             <i className="fa fa-long-arrow-down" style={styles.icon} />
           </kbd>
@@ -83,7 +85,7 @@ const keypadInfotip = () => {
           {i18n._('Page Down')}
         </div>
         <div>
-          <span style={styles.axisDirection}>A+</span>
+          <Box sx={styles.axisDirection}>A+</Box>
           <kbd style={styles.kbd}>
             {' ] '}
           </kbd>
@@ -91,7 +93,7 @@ const keypadInfotip = () => {
           {i18n._('Right Square Bracket')}
         </div>
         <div>
-          <span style={styles.axisDirection}>A-</span>
+          <Box sx={styles.axisDirection}>A-</Box>
           <kbd style={styles.kbd}>
             {' [ '}
           </kbd>
@@ -124,9 +126,11 @@ const keypadInfotip = () => {
   );
 };
 
-export default function(props) {
-  const { show, children } = { ...props };
-
+/**
+ * @param {{ show?: boolean, children?: React.ReactNode }} props
+ * @returns {JSX.Element|React.ReactNode}
+ */
+function KeypadOverlay({ show = false, children }) {
   if (!show) {
     return children;
   }
@@ -142,3 +146,5 @@ export default function(props) {
     </Infotip>
   );
 }
+
+export default KeypadOverlay;

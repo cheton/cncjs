@@ -14,11 +14,6 @@ jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
   default: ({ children }) => children,
 }));
 
-jest.mock('@app/components/Modal', () => ({
-  ModalProvider: ({ children }) => children,
-  ModalRoot: () => null,
-}));
-
 const ProbeWidget = require('../index').default;
 
 test('keeps the widget view controlled by the host', () => {
