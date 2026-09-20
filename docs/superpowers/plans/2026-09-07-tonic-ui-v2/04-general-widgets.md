@@ -91,13 +91,15 @@ G1–G7 執行細節補充於 [04b](details/04b-widget-contracts.md)，包括 st
 **Create Test:** `src/app/widgets/Probe/__tests__/Probe.test.jsx`。
 **Specific acceptance:** Probe modal 開關、參數驗證、指令預覽與開始條件；cancel 不能發 probe，controller run/paused/disconnected gates 保留。
 
-**Status:** 🔄 in progress 2026-09-19T23:20:00+08:00；source/contract discovery started. `resource.json` files are out of scope for this slice.
+**Status:** ✅ completed 2026-09-20T00:40:40+08:00；`Probe.jsx` now uses direct Tonic primitives and `sx`; controlled draft → preview data, exact WCS command, cancel, invalid/disconnected/active-workflow gates, and host view are covered. Focused 2 suites / 6 tests, full frontend 33 suites / 181 tests, ESLint 0 errors, and development build pass. Browser evidence is deferred to R6 under BR0 waiver. `resource.json` files are out of scope and unchanged.
 
 ## Task G6：Custom
 
 **Modify:** `src/app/widgets/Custom/` 的 inventory 全部來源與相關 Stylus。
 **Create Test:** `src/app/widgets/Custom/__tests__/Custom.test.jsx`。
 **Specific acceptance:** iframe URL 設定、save/cancel、load/error、fork 的 URL 隔離；不以 Tonic Box 取代 iframe 的 domain lifecycle。
+
+**Status:** ✅ completed 2026-09-20T11:40:00+08:00；function shell preserves controlled host view and per-fork config isolation. Settings save/cancel, iframe URL, load/message cleanup, and fork URL isolation are covered. Focused 1 suite / 5 tests, full frontend 34 suites / 186 tests, ESLint 0 errors, and user-provided `yarn build-dev` evidence shows webpack 5.75.0 compiled successfully. Browser evidence is deferred to R6 under BR0 waiver. `resource.json` files are out of scope and unchanged.
 
 ## Task G7：Webcam
 

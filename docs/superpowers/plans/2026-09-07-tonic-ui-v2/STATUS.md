@@ -1,14 +1,14 @@
 # Migration task status
 
-更新日期：2026-09-19。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-20。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) 是恢復起點，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: **G5 Probe**（started 2026-09-19T23:20:00+08:00；ProbeModal committed, form migration pending）。
+- Active task: 無（G6 Custom completed 2026-09-20T11:40:00+08:00）。
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: **G5**（Probe）。G1–G4 已完成，G1-B01 已由使用者重新界定 scope 後解除。無並行 task 授權。
+- Next eligible task: **G7**（Webcam）。G1–G6 已完成，G1-B01 已由使用者重新界定 scope 後解除。無並行 task 授權。
 - Current blockers: 無。G1-B01 已解除，見下方記錄。BR0 依使用者明確指示為 `waived`（非 passed）。既有 browser evidence 仍只涵蓋 connection/upload/Run/Pause/Resume；剩餘 browser gaps 依 waiver 延後至 R6。System Chrome channel 仍不支援 screenshot。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -54,8 +54,8 @@
 | G2 | [GCode](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T22:34:42+08:00 | Function shell and direct Tonic stats presentation; loaded metadata/empty state, units, line count, progress, timing, view interactions, fork/remove and zero-controller-command tests. Focused 2 suites / 7 tests; full frontend 30 suites / 164 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; diff check clean. Browser evidence remains R6 under BR0 waiver. |
 | G3 | [Spindle](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T22:53:16+08:00 | Controlled speed draft; M7/M8/M9 and M3/M4/M5 payloads, empty/zero/invalid gates, one-command actions, config persistence, and host view contract covered. Focused 1 suite / 7 tests; full frontend 30 suites / 168 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; production legacy scan and diff check clean. Browser evidence remains R6 under BR0 waiver. |
 | G4 | [Laser](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-19T23:16:41+08:00 | Direct Tonic function migration; controlled laser drafts, exact commands, repeat cleanup, keyboard controls, and host-view contract covered. Focused 1 suite / 7 tests; full frontend 31 suites / 175 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; no production inline style or legacy-import/class scan match; browser deferred to R6 under BR0 waiver. |
-| G5 | [Probe](04-general-widgets.md) | U3, Q2-cleanup | in_progress | current root session / 2026-09-19T23:20:00+08:00 | Source/contract discovery in progress. `resource.json` files are explicitly out of scope for this slice. |
-| G6 | [Custom](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
+| G5 | [Probe](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-20T00:40:40+08:00 | Direct Tonic migration for `Probe.jsx`; controlled form data opens the preview without sending G-code; invalid, disconnected, and active-workflow gates block it. Modal tests prove cancel sends no command and Run sends one complete WCS payload. Focused 2 suites / 6 tests; full frontend 33 suites / 181 tests; ESLint 0 errors / 17 existing warnings; build-dev compiled; production legacy/class/inline-style scan and diff check clean. Browser evidence remains deferred to R6 under BR0 waiver. No `resource.json` change is retained. |
+| G6 | [Custom](04-general-widgets.md) | U3, Q2-cleanup | completed | current root session / 2026-09-20T11:40:00+08:00 | Function shell preserves host view and per-fork config isolation. Settings save/cancel, iframe URL, load/message cleanup, and fork URL isolation are covered. Focused 1 suite / 5 tests; full frontend 34 suites / 186 tests; ESLint 0 errors / 17 existing warnings; user-provided `yarn build-dev` output records webpack 5.75.0 compiled successfully; static scans and diff check clean. Browser evidence remains deferred to R6 under BR0 waiver. No `resource.json` diff retained. |
 | G7 | [Webcam](04-general-widgets.md) | U3, Q2-cleanup | todo | — | — |
 | T1 | [Terminal baseline](details/04a-terminal-owner.md) | U3 | completed | root session / 2026-09-18T21:40:00+08:00 | `Console.test.jsx` covers all seven owner consumers, close ref shape, connection read/write/self-echo, resize, widget actions, and distinct sender ids. Focused 6/6; full frontend 21 suites/120 tests; build-dev, ESLint, and diff checks pass. No production change. |
 | T2 | [Terminal owner](details/04a-terminal-owner.md) | T1 | completed | root session / 2026-09-18T21:55:01+08:00 | `useTerminal` owns xterm/input/history/paste/resources; Terminal is a DOM view and Console uses the seven T1 actions. Focused 2 suites/9 tests; full frontend 22 suites/123 tests; build-dev, ESLint, and diff checks pass. T3 gates remain separate. |

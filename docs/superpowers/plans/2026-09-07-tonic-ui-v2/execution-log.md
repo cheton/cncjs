@@ -1035,3 +1035,37 @@ Plan contract: `04-general-widgets.md` Task G5 and `details/04b-widget-contracts
 Status transition / blocker ID: G5 `todo` → `in_progress`; no blocker.
 
 G5 partial checkpoint: commit `89e0517d` migrates `ProbeModal` to direct Tonic Modal/Button/ButtonGroup and adds two command-contract tests (cancel sends no command; Run sends one WCS preview command). The uncommitted `Probe/index.jsx` and its expanded test migrate only the host shell to a function and Tonic `Box`/`sx`; focused test passes 3/3 and lint exits 0 with 16 pre-existing warnings. `Probe.jsx` remains legacy and is the next required unit. `resource.json` remains out of scope; do not run generators that modify it.
+
+## G5 Probe — completed 2026-09-20T00:40:40+08:00
+
+Task / session / timestamp: G5 / current root session / 2026-09-20T00:40:40+08:00.
+
+Implementation: `Probe.jsx` now uses direct Tonic `Button`, `ButtonGroup`, `FormControl`, `FormHelperText`, `Input`, `InputGroup`, `InputGroupAddon`, and `Tooltip` primitives. React Final Form remains the draft owner; valid drafts open the existing `ProbeModal` preview and only the modal can send one `gcode` payload. Connection, idle-workflow, machine-state, and invalid-form gates remain in the Redux selector/form owner. No server, controller protocol, reducer, saga, action, or browser change was made.
+
+TDD / review: the new test first failed because `Probe.jsx` still imported legacy Buttons. It now covers real form draft changes, preview handoff without a command, disconnected/active-workflow/invalid gates, and the full literal WCS command. The host-view test was moved to `ProbeWidget.test.jsx` so legacy-import tripwires can exercise the real form. Self-review found the development build had generated tracked translation resources; all 17 generated `resource.json` changes were removed before completion, per user direction.
+
+Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Probe/__tests__/Probe.test.jsx src/app/widgets/Probe/__tests__/ProbeWidget.test.jsx` / 0 / 2 suites and 6 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 33 suites and 181 tests passed; `yarn eslint` / 0 / 0 errors and 17 existing warnings; `yarn build-dev` / 0 / webpack compiled; production legacy/class/inline-style scan / clean; `git diff --check` / 0. Browser/simulator evidence remains deferred to R6 under BR0 waiver. No `resource.json` diff remains.
+
+Status transition / blocker ID: G5 `in_progress` → `completed`; no blocker. Next eligible task is G6 Custom.
+
+## G6 Custom — started 2026-09-20T00:40:40+08:00
+
+Task / session / timestamp: G6 / current root session / 2026-09-20T00:40:40+08:00.
+
+Plan contract: `04-general-widgets.md` Task G6 and `details/04b-widget-contracts.md`; preserve iframe URL setting, save/cancel persistence, load/error lifecycle, and per-fork URL isolation. `resource.json` files are out of scope and must not be read, generated, modified, or cleaned. Browser evidence remains deferred to R6 under BR0 waiver.
+
+Status transition / blocker ID: G6 `todo` → `in_progress`; no blocker.
+
+G6 checkpoint: `Custom/index.jsx` is now a function shell that reads the per-widget config through its provider, writes disabled state directly to that config, and preserves the host `view` / `onViewChange(view)` contract. `Custom.jsx` retains the iframe domain lifecycle while replacing the styled-components wrapper and inline style with the colocated Stylus classes. Its refresh and PubSub listeners have explicit effect cleanup; iframe before-unload, unload, and error paths release the iframe ref and listener tokens. `Custom.test.jsx` covers Settings URL draft cancel/save behavior, fork URL isolation, iframe load callback cleanup, PubSub cleanup on unmount, and host collapse behavior.
+
+Verification checkpoint: focused `yarn test:frontend --runInBand --silent src/app/widgets/Custom/__tests__/Custom.test.jsx` / 0 / 1 suite and 5 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 34 suites and 186 tests passed; `yarn eslint` / 0 / 0 errors and 17 existing warnings; `git diff --check` / 0; Custom legacy/class/inline-style scans are clean. `yarn build-dev` was invoked twice but the available command runner returned after its Babel phase at about 30 seconds without webpack's final result or an exit status; this is not completion evidence. Browser/simulator evidence remains deferred to R6 under BR0 waiver.
+
+Next exact step: obtain a terminal `yarn build-dev` result, then review the G6 diff against the contract and update STATUS, the G6 plan checkbox, execution log, and handoff together only if all gates pass. Do not modify `resource.json` files.
+
+## G6 Custom — completed 2026-09-20T11:40:00+08:00
+
+Completion review: `Custom/index.jsx` is a function widget shell with controlled `view` / `onViewChange(view)`, per-fork `WidgetConfigProvider` isolation, config-backed disabled state, and preserved refresh/settings/fullscreen/fork/remove actions. `Custom.jsx` retains the iframe as the domain owner; its refresh and PubSub subscriptions have matching cleanup, and iframe before-unload, unload, and error paths release the iframe ref and listener tokens. The local styled-components wrapper and inline style are replaced by colocated Stylus. No server, controller protocol, reducer, saga, action, or browser source was changed.
+
+Verification: focused `yarn test:frontend --runInBand --silent src/app/widgets/Custom/__tests__/Custom.test.jsx` / 0 / 1 suite and 5 tests passed; full `yarn test:frontend --runInBand --silent` / 0 / 34 suites and 186 tests passed; `yarn eslint` / 0 / 0 errors and 17 existing warnings; `git diff --check` / 0; Custom legacy/class/inline-style scans / clean. User-provided build evidence at 11:40: `yarn build-dev` compiled Babel sources and webpack 5.75.0 `compiled successfully in 8209 ms`. Browser/simulator evidence remains deferred to R6 under the explicit BR0 waiver. No `resource.json` diff is retained.
+
+Status transition / blocker ID: G6 `in_progress` → `completed`; no blocker. Next eligible task is G7 Webcam.
