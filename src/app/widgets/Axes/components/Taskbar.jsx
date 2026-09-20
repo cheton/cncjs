@@ -1,9 +1,14 @@
 import React from 'react';
+import { Box } from '@tonic-ui/react';
 import TaskbarButton from './TaskbarButton';
 
+/**
+ * @param {{ children?: React.ReactNode, style?: object }} props
+ * @returns {JSX.Element}
+ */
 function Taskbar({ children, style, ...props }) {
   return (
-    <div
+    <Box
       {...props}
       style={{
         borderTop: '1px solid #ddd',
@@ -11,7 +16,7 @@ function Taskbar({ children, style, ...props }) {
       }}
     >
       {children}
-    </div>
+    </Box>
   );
 }
 

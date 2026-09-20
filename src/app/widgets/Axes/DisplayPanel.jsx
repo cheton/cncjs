@@ -1,4 +1,5 @@
 import { ensureArray } from 'ensure-type';
+import { Box } from '@tonic-ui/react';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
 import React, { Component } from 'react';
@@ -30,6 +31,7 @@ import PositionLabel from './components/PositionLabel';
 import PositionInput from './components/PositionInput';
 import Taskbar from './components/Taskbar';
 import TaskbarButton from './components/TaskbarButton';
+import { AxesContext } from './context';
 import iconMinus from './images/minus.svg';
 import iconPlus from './images/plus.svg';
 import iconHome from './images/home.svg';
@@ -152,21 +154,22 @@ const getAxisHomeCommand = (controllerType, axis) => {
  * }>}
  */
 class DisplayPanel extends Component {
+  static contextType = AxesContext;
   handleSelect = (eventKey) => {
     const commands = ensureArray(eventKey);
     commands.forEach(command => controller.command('gcode', command));
   };
 
   showPositionInput = (axis, reportedValue) => () => {
-    this.props.onPositionInputChange({ axis, value: reportedValue });
+    this.context.onSetPositionInput({ axis, value: reportedValue });
   };
 
   hidePositionInput = () => {
-    this.props.onPositionInputChange(null);
+    this.context.onSetPositionInput(null);
   };
 
   renderActionDropdown = ({ wcs }) => {
-    const { canClick, controllerType, axes } = this.props;
+    const { canClick, controllerType, axes } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -313,7 +316,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisX = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -455,7 +458,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisY = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -597,7 +600,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisZ = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -739,7 +742,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisA = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -881,7 +884,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisB = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -1023,7 +1026,7 @@ class DisplayPanel extends Component {
   };
 
   renderActionDropdownForAxisC = ({ wcs }) => {
-    const { canClick, controllerType } = this.props;
+    const { canClick, controllerType } = this.context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -1165,10 +1168,15 @@ class DisplayPanel extends Component {
   };
 
   renderAxis = (axis) => {
-    const { canClick, units, machinePosition, workPosition, jog, controllerType, positionInput } = this.props;
+    const { canClick, units, machinePosition, workPosition, jog, controllerType, positionInput } = this.context.state;
     const supportedCommands = SUPPORTED_COMMANDS[controllerType] || {};
-    const { actions } = this.props;
-    const wcs = actions.getWorkCoordinateSystem();
+    const {
+      onGetJogDistance,
+      onGetWorkCoordinateSystem,
+      onJog,
+      onSetWorkOffsets,
+    } = this.context;
+    const wcs = onGetWorkCoordinateSystem();
     const lengthUnits = (units === METRIC_UNITS) ? i18n._('mm') : i18n._('in');
     const degreeUnits = i18n._('deg');
     const mpos = machinePosition[axis] || '0.000';
@@ -1212,7 +1220,7 @@ class DisplayPanel extends Component {
         <td className={styles.machinePosition}>
           <PositionLabel value={mpos} />
           <Taskbar>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TaskbarButton
                 aria-label={`Go to zero: ${axisLabel}`}
                 disabled={!canZeroOutMachine}
@@ -1245,7 +1253,7 @@ class DisplayPanel extends Component {
                   <Image src={iconHome} width="14" height="14" />
                 </Tooltip>
               </TaskbarButton>
-            </div>
+            </Box>
           </Taskbar>
         </td>
         <td className={styles.workPosition}>
@@ -1253,9 +1261,9 @@ class DisplayPanel extends Component {
             <PositionInput
               style={{ margin: '5px 0' }}
               value={positionInput.value}
-              onChange={(value) => this.props.onPositionInputChange({ axis, value })}
+              onChange={(value) => this.context.onSetPositionInput({ axis, value })}
               onSave={(value) => {
-                actions.setWorkOffsets(axis, value);
+                onSetWorkOffsets(axis, value);
                 this.hidePositionInput();
               }}
               onCancel={this.hidePositionInput}
@@ -1264,13 +1272,13 @@ class DisplayPanel extends Component {
           {!showPositionInput &&
             <PositionLabel value={wpos} />}
           <Taskbar>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <TaskbarButton
                 aria-label={`Move ${axisLabel} backward`}
                 disabled={!canMoveBackward}
                 onClick={() => {
-                  const distance = actions.getJogDistance();
-                  actions.jog({ [axis]: -distance });
+                  const distance = onGetJogDistance();
+                  onJog({ [axis]: -distance });
                 }}
               >
                 <Tooltip
@@ -1286,8 +1294,8 @@ class DisplayPanel extends Component {
                 aria-label={`Move ${axisLabel} forward`}
                 disabled={!canMoveForward}
                 onClick={() => {
-                  const distance = actions.getJogDistance();
-                  actions.jog({ [axis]: distance });
+                  const distance = onGetJogDistance();
+                  onJog({ [axis]: distance });
                 }}
               >
                 <Tooltip
@@ -1303,7 +1311,7 @@ class DisplayPanel extends Component {
                 aria-label={`Zero out ${axisLabel} work offsets`}
                 disabled={!canZeroOutWorkOffsets}
                 onClick={() => {
-                  actions.setWorkOffsets(axis, 0);
+                  onSetWorkOffsets(axis, 0);
                 }}
               >
                 <Tooltip
@@ -1330,7 +1338,7 @@ class DisplayPanel extends Component {
                   <Image src={iconPencil} width="14" height="14" />
                 </Tooltip>
               </TaskbarButton>
-            </div>
+            </Box>
           </Taskbar>
         </td>
         <td className={styles.action}>
@@ -1341,8 +1349,8 @@ class DisplayPanel extends Component {
   };
 
   render() {
-    const { axes, machinePosition, workPosition } = this.props;
-    const wcs = this.props.actions.getWorkCoordinateSystem();
+    const { axes, machinePosition, workPosition } = this.context.state;
+    const wcs = this.context.onGetWorkCoordinateSystem();
     const hasAxisE = (machinePosition.e !== undefined && workPosition.e !== undefined);
     const hasAxisX = includes(axes, AXIS_X);
     const hasAxisY = includes(axes, AXIS_Y);

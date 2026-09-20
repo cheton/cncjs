@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
+import { GRBL, MARLIN, SMOOTHIE, TINYG } from '@app/constants/controller';
 import { renderAppUI } from '@app/test/render';
 import DisplayPanel from '../DisplayPanel';
 import Keypad from '../Keypad';
@@ -7,10 +8,13 @@ import PositionInput from '../components/PositionInput';
 import {
   axesReducer,
   createAxesState,
+  createControllerReportAction,
   getJogDistance,
   shouldHandleJogEvent,
 } from '../state';
 import MDI from '../MDI';
+import { subscribeAxesEvents } from '../subscriptions';
+import { AxesProvider, useAxes } from '../context';
 
 const mockCommand = jest.fn();
 
@@ -57,24 +61,26 @@ describe('Axes position input', () => {
   test('reports position-draft changes to its owner instead of retaining child state', () => {
     const onPositionInputChange = jest.fn();
     const view = renderAppUI(
-      <DisplayPanel
-        canClick
-        units="mm"
-        axes={['x']}
-        machinePosition={{ x: '1.000' }}
-        workPosition={{ x: '1.000' }}
-        jog={{ axis: '', keypad: false }}
-        controllerType="Grbl"
-        positionInput={null}
-        onPositionInputChange={onPositionInputChange}
-        actions={{
-          getWorkCoordinateSystem: () => 'G54',
-          getJogDistance: () => 1,
-          jog: jest.fn(),
-          move: jest.fn(),
-          setWorkOffsets: jest.fn(),
-        }}
-      />
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x'],
+          machinePosition: { x: '1.000' },
+          workPosition: { x: '1.000' },
+          jog: { axis: '', keypad: false },
+          controller: { type: 'Grbl' },
+          positionInput: null,
+        },
+        onGetWorkCoordinateSystem: () => 'G54',
+        onGetJogDistance: () => 1,
+        onJog: jest.fn(),
+        onSetPositionInput: onPositionInputChange,
+        onSetWorkOffsets: jest.fn(),
+      }}
+      >
+        <DisplayPanel />
+      </AxesProvider>
     );
 
     try {
@@ -101,6 +107,25 @@ describe('Axes reported-position reducer', () => {
       positionInput: { axis: 'x', value: '2.5' },
     });
   });
+
+  test('normalizes reports for each supported controller without touching the active draft', () => {
+    const state = {
+      ...createAxesState({ get: (_key, fallback) => fallback }),
+      positionInput: { axis: 'x', value: '2.5' },
+    };
+    const cases = [
+      [GRBL, { status: { mpos: { x: 1, a: 2 }, wpos: { x: 3, a: 4 } }, parserstate: { modal: { units: 'G21' } } }, { x: 1, a: 2 }],
+      [MARLIN, { pos: { y: 5, b: 6 }, modal: { units: 'G21' } }, { y: 5, b: 6 }],
+      [SMOOTHIE, { status: { mpos: { z: 7, c: 8 }, wpos: { z: 9, c: 10 } }, parserstate: { modal: { units: 'G21' } } }, { z: 7, c: 8 }],
+      [TINYG, { sr: { mpos: { x: 11, a: 12 }, wpos: { x: 13, a: 14 }, modal: { units: 'G21' } } }, { x: 11, a: 12 }],
+    ];
+
+    cases.forEach(([type, controllerState, machinePosition]) => {
+      const action = createControllerReportAction(state, type, controllerState, {});
+      expect(action).toMatchObject({ type: 'REPORT_POSITION', payload: { machinePosition } });
+      expect(axesReducer(state, action).positionInput).toEqual({ axis: 'x', value: '2.5' });
+    });
+  });
 });
 
 describe('Axes jog settings', () => {
@@ -117,32 +142,35 @@ describe('Axes jog settings', () => {
 
 describe('Axes keypad', () => {
   test('sends the selected metric distance to the X positive jog action', () => {
-    const actions = {
-      getJogDistance: () => 0.25,
-      jog: jest.fn(),
-      move: jest.fn(),
-      selectStep: jest.fn(),
-      stepBackward: jest.fn(),
-      stepForward: jest.fn(),
-    };
+    const onJog = jest.fn();
     const view = renderAppUI(
-      <Keypad
-        canClick
-        units="mm"
-        axes={['x', 'y', 'z']}
-        jog={{
-          axis: '',
-          keypad: false,
-          imperial: { step: 0, distances: [] },
-          metric: { step: 0, distances: [] },
-        }}
-        actions={actions}
-      />
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x', 'y', 'z'],
+          jog: {
+            axis: '',
+            keypad: false,
+            imperial: { step: 0, distances: [] },
+            metric: { step: 0, distances: [] },
+          },
+        },
+        onGetJogDistance: () => 0.25,
+        onJog,
+        onMove: jest.fn(),
+        onSelectStep: jest.fn(),
+        onStepBackward: jest.fn(),
+        onStepForward: jest.fn(),
+      }}
+      >
+        <Keypad />
+      </AxesProvider>
     );
 
     try {
       fireEvent.click(screen.getByRole('button', { name: 'Move X positive' }));
-      expect(actions.jog).toHaveBeenCalledWith({ X: 0.25 });
+      expect(onJog).toHaveBeenCalledWith({ X: 0.25 });
     } finally {
       view.dispose();
     }
@@ -154,7 +182,12 @@ describe('Axes MDI command contract', () => {
 
   test('submits the configured MDI command once', () => {
     const view = renderAppUI(
-      <MDI canClick mdi={{ disabled: false, commands: [{ id: 'home', name: 'Home', command: 'G28', grid: {} }] }} />
+      <AxesProvider value={{
+        state: { canClick: true, mdi: { disabled: false, commands: [{ id: 'home', name: 'Home', command: 'G28', grid: {} }] } },
+      }}
+      >
+        <MDI />
+      </AxesProvider>
     );
 
     try {
@@ -181,5 +214,56 @@ describe('Axes hotkey gate', () => {
 
   test('accepts a keydown from the widget background when no modal is open', () => {
     expect(shouldHandleJogEvent({ type: 'keydown', target: document.body }, false)).toBe(true);
+  });
+});
+
+describe('Axes event cleanup', () => {
+  test('removes controller and hotkey callbacks and clears pending shuttle work', () => {
+    const controllerEvents = { 'connection:open': jest.fn() };
+    const shuttleControlEvents = { JOG: jest.fn() };
+    const controllerClient = { addListener: jest.fn(), removeListener: jest.fn() };
+    const hotkeys = { on: jest.fn(), removeListener: jest.fn() };
+    const shuttleControl = { clear: jest.fn(), removeAllListeners: jest.fn() };
+
+    const cleanup = subscribeAxesEvents({
+      controller: controllerClient,
+      combokeys: hotkeys,
+      controllerEvents,
+      shuttleControlEvents,
+      shuttleControl,
+    });
+
+    expect(controllerClient.addListener).toHaveBeenCalledWith('connection:open', controllerEvents['connection:open']);
+    expect(hotkeys.on).toHaveBeenCalledWith('JOG', shuttleControlEvents.JOG);
+
+    cleanup();
+
+    expect(controllerClient.removeListener).toHaveBeenCalledWith('connection:open', controllerEvents['connection:open']);
+    expect(hotkeys.removeListener).toHaveBeenCalledWith('JOG', shuttleControlEvents.JOG);
+    expect(shuttleControl.clear).toHaveBeenCalledTimes(1);
+    expect(shuttleControl.removeAllListeners).toHaveBeenCalledWith('flush');
+  });
+});
+
+describe('Axes provider', () => {
+  test('provides state and named commands to a child consumer', () => {
+    function Consumer() {
+      const { state, onJog } = useAxes();
+      return <button type="button" onClick={() => onJog({ X: state.distance })}>Jog</button>;
+    }
+
+    const onJog = jest.fn();
+    const view = renderAppUI(
+      <AxesProvider value={{ state: { distance: 0.25 }, onJog }}>
+        <Consumer />
+      </AxesProvider>
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Jog' }));
+      expect(onJog).toHaveBeenCalledWith({ X: 0.25 });
+    } finally {
+      view.dispose();
+    }
   });
 });

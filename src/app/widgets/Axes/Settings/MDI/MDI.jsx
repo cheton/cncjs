@@ -1,5 +1,6 @@
 import findIndex from 'lodash/findIndex';
 import React, { useState } from 'react';
+import { Box } from '@tonic-ui/react';
 import { v4 as uuidv4 } from 'uuid';
 import CreateRecord from './CreateRecord';
 import UpdateRecord from './UpdateRecord';
@@ -46,7 +47,7 @@ function MDI({ records, onRecordsChange, loading = false, error = false }) {
   const removeRecord = id => onRecordsChange(records.filter(record => record.id !== id));
 
   return (
-    <div>
+    <Box>
       {modal.name === MODAL_CREATE_RECORD && (
         <CreateRecord
           onSave={createRecord}
@@ -69,7 +70,7 @@ function MDI({ records, onRecordsChange, loading = false, error = false }) {
         onUpdate={record => setModal({ name: MODAL_UPDATE_RECORD, record })}
         onRemove={removeRecord}
       />
-    </div>
+    </Box>
   );
 }
 

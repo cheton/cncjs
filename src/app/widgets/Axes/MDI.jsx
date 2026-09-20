@@ -1,14 +1,15 @@
-import { Button } from '@tonic-ui/react';
+import { Box, Button } from '@tonic-ui/react';
 import React from 'react';
 import controller from '@app/lib/controller';
+import { useAxes } from './context';
 
 const gapSize = 5;
 
 /**
- * @param {{ canClick?: boolean, mdi?: { disabled?: boolean, commands?: Array<{ id: string, name: string, command: string, grid?: object }> } }} props
  * @returns {JSX.Element|null}
  */
-function MDI({ canClick = false, mdi = { disabled: true, commands: [] } }) {
+function MDI() {
+  const { state: { canClick = false, mdi = { disabled: true, commands: [] } } } = useAxes();
   const commands = mdi.commands || [];
 
   if (mdi.disabled || commands.length === 0) {
@@ -16,7 +17,7 @@ function MDI({ canClick = false, mdi = { disabled: true, commands: [] } }) {
   }
 
   return (
-    <div
+    <Box
       style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -35,7 +36,7 @@ function MDI({ canClick = false, mdi = { disabled: true, commands: [] } }) {
         const flexBasis = `calc((100% - ${gapsPerRow * gapSize}px) / ${itemsPerRow})`;
 
         return (
-          <div
+          <Box
             key={c.id}
             style={{
               flexBasis: flexBasis,
@@ -57,10 +58,10 @@ function MDI({ canClick = false, mdi = { disabled: true, commands: [] } }) {
             >
               {c.name}
             </Button>
-          </div>
+          </Box>
         );
       })}
-    </div>
+    </Box>
   );
 }
 

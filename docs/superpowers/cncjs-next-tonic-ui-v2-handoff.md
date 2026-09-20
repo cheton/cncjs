@@ -68,13 +68,16 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 7. **Build：** 本地不要執行 `yarn build-prod`（由 CI 把關）。要驗證 development server 或 browser flow 時直接執行 `yarn dev`。
 8. **Component interfaces：** `propTypes` are prohibited for all new or migrated code. Use JSDoc for component interfaces and function defaults for runtime defaults. Do not reintroduce PropTypes while completing adjacent migration work.
 9. **Widget modals：** use only the installed Tonic Modal contract: `isOpen`, `onClose`, `size`, `isClosable`, `closeOnEsc`, and `closeOnInteractOutside`, with `ModalContent`/`ModalHeader`/`ModalBody`/`ModalFooter`. Do not use legacy `disableOverlay*`, `show`, or static Modal APIs.
+10. **Layout primitives：** use Tonic `Box` instead of native `<div>` in React code.
 
 ## Current implementation checkpoint — 2026-09-20
 
-- A1b remains **in progress**. Its focused unit coverage now proves that a reported position does not replace a focused draft, the reducer retains that draft, metric/imperial jog distance selection is exact, Keypad forwards the selected distance, MDI emits the exact `gcode` command, and global jog handling rejects editable controls, an open modal, `keyup`, and `blur`.
+- A1b remains **in progress**. Its focused unit coverage now proves that normalized Grbl/Marlin/Smoothie/TinyG reports retain a focused draft, metric/imperial jog distance selection is exact, Keypad forwards the selected distance, MDI emits the exact `gcode` command, and global jog handling rejects editable controls, an open modal, `keyup`, and `blur`.
+- `AxesProvider` now supplies state and named commands to Axes presentation consumers. `Axes`, `DisplayPanel`, `Keypad`, and `MDI` no longer pass or receive an `actions` bag. The legacy class is still the state/lifecycle owner; do not claim a reducer migration until that owner is a function component using `useReducer`.
+- The Axes widget has no native `<div>` elements; its layout wrappers use Tonic `Box`.
 - The position draft is now owned above DisplayPanel through the reducer; DisplayPanel is controlled. PositionInput, PositionLabel, Fraction, Keypad, and KeypadOverlay use JSDoc-only interfaces; the Keypad path has no raw spans.
 - All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a remains separate and incomplete because its required function conversion and dialog action tests are still outstanding.
-- Latest focused verification: the broader 8-suite / 33-test checkpoint still passes; the current Axes slice passes 8 tests, with targeted ESLint and `git diff --check` clean. No browser tooling or build was run.
+- Latest focused verification: the broader 8-suite / 39-test checkpoint passes; the current Axes slice passes 11 tests, with targeted ESLint and `git diff --check` clean. No browser tooling or build was run.
 
 ## 恢復 prompt
 

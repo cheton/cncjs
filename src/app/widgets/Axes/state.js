@@ -1,10 +1,13 @@
 import { ensureArray } from 'ensure-type';
+import mapValues from 'lodash/mapValues';
 import {
   IMPERIAL_UNITS,
   IMPERIAL_STEPS,
   METRIC_UNITS,
   METRIC_STEPS,
 } from '@app/constants';
+import { GRBL, MARLIN, SMOOTHIE, TINYG } from '@app/constants/controller';
+import { in2mm } from '@app/lib/units';
 import { DEFAULT_AXES, MODAL_NONE } from './constants';
 
 const initialPosition = {
@@ -78,6 +81,90 @@ export const axesReducer = (state, action) => {
   default:
     return state;
   }
+};
+
+/**
+ * Converts a controller state event into a reducer action without observing or
+ * replacing the editable position draft.
+ * @param {object} state
+ * @param {string} type
+ * @param {object} controllerState
+ * @param {object} controllerSettings
+ * @returns {{ type: 'REPORT_POSITION', payload: object }|null}
+ */
+export const createControllerReportAction = (state, type, controllerState, controllerSettings) => {
+  const payload = {
+    controller: {
+      ...state.controller,
+      type,
+      state: controllerState,
+    },
+  };
+
+  if (type === GRBL) {
+    const { status = {}, parserstate = {} } = controllerState;
+    const { mpos = {}, wpos = {} } = status;
+    const { modal = {} } = parserstate;
+    const units = { G20: IMPERIAL_UNITS, G21: METRIC_UNITS }[modal.units] || state.units;
+    const reportInInches = Number(controllerSettings?.settings?.$13) > 0;
+
+    return {
+      type: 'REPORT_POSITION',
+      payload: {
+        ...payload,
+        units,
+        machinePosition: mapValues({ ...state.machinePosition, ...mpos }, value => (reportInInches ? in2mm(value) : value)),
+        workPosition: mapValues({ ...state.workPosition, ...wpos }, value => (reportInInches ? in2mm(value) : value)),
+      },
+    };
+  }
+
+  if (type === MARLIN) {
+    const { pos = {}, modal = {} } = controllerState;
+    const units = { G20: IMPERIAL_UNITS, G21: METRIC_UNITS }[modal.units] || state.units;
+    return {
+      type: 'REPORT_POSITION',
+      payload: {
+        ...payload,
+        units,
+        machinePosition: { ...state.machinePosition, ...pos },
+        workPosition: { ...state.workPosition, ...pos },
+      },
+    };
+  }
+
+  if (type === SMOOTHIE) {
+    const { status = {}, parserstate = {} } = controllerState;
+    const { mpos = {}, wpos = {} } = status;
+    const { modal = {} } = parserstate;
+    const units = { G20: IMPERIAL_UNITS, G21: METRIC_UNITS }[modal.units] || state.units;
+    return {
+      type: 'REPORT_POSITION',
+      payload: {
+        ...payload,
+        units,
+        machinePosition: mapValues({ ...state.machinePosition, ...mpos }, value => (units === IMPERIAL_UNITS ? in2mm(value) : value)),
+        workPosition: mapValues({ ...state.workPosition, ...wpos }, value => (units === IMPERIAL_UNITS ? in2mm(value) : value)),
+      },
+    };
+  }
+
+  if (type === TINYG) {
+    const { sr = {} } = controllerState;
+    const { mpos = {}, wpos = {}, modal = {} } = sr;
+    const units = { G20: IMPERIAL_UNITS, G21: METRIC_UNITS }[modal.units] || state.units;
+    return {
+      type: 'REPORT_POSITION',
+      payload: {
+        ...payload,
+        units,
+        machinePosition: { ...state.machinePosition, ...mpos },
+        workPosition: mapValues({ ...state.workPosition, ...wpos }, value => (units === IMPERIAL_UNITS ? in2mm(value) : value)),
+      },
+    };
+  }
+
+  return null;
 };
 
 /**

@@ -20,6 +20,7 @@ import {
 } from '@app/constants';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
+import { useAxes } from './context';
 import styles from './index.styl';
 
 const KeypadText = styled(Box)`
@@ -39,10 +40,18 @@ const KeypadSubscriptText = styled(KeypadText)`
 `;
 
 /**
- * @param {{ canClick?: boolean, units?: string, axes?: string[], jog?: object, actions?: object }} props
  * @returns {JSX.Element}
  */
-function Keypad({ canClick = false, units, axes = [], jog, actions }) {
+function Keypad() {
+  const {
+    state: { canClick = false, units, axes = [], jog },
+    onGetJogDistance,
+    onJog,
+    onMove,
+    onSelectStep,
+    onStepBackward,
+    onStepForward,
+  } = useAxes();
   const renderImperialMenuItems = () => {
     const imperialJogDistances = ensureArray(jog.imperial.distances);
     const imperialJogSteps = [
@@ -122,31 +131,31 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
   const highlightZ = canClickZ && (jog.keypad || jog.axis === 'z');
 
   return (
-    <div className={styles.keypad}>
+    <Box className={styles.keypad}>
       <Flex>
         <Box flex="8 1 0%">
-          <div className={styles.rowSpace}>
+          <Box className={styles.rowSpace}>
             <Flex>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative Y positive"
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: -distance, Y: distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance, Y: distance });
                     }}
                     disabled={!canClickXY}
                     title={i18n._('Move X- Y+')}
                   >
                     <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Y positive"
                     btnStyle="default"
@@ -156,8 +165,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightY }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ Y: distance });
+                      const distance = onGetJogDistance();
+                      onJog({ Y: distance });
                     }}
                     disabled={!canClickY}
                     title={i18n._('Move Y+')}
@@ -165,28 +174,28 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>Y</KeypadText>
                     <KeypadDirectionText>+</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive Y positive"
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: distance, Y: distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance, Y: distance });
                     }}
                     disabled={!canClickXY}
                     title={i18n._('Move X+ Y+')}
                   >
                     <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Z positive"
                     btnStyle="default"
@@ -196,8 +205,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightZ }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ Z: distance });
+                      const distance = onGetJogDistance();
+                      onJog({ Z: distance });
                     }}
                     disabled={!canClickZ}
                     title={i18n._('Move Z+')}
@@ -205,14 +214,14 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>Z</KeypadText>
                     <KeypadDirectionText>+</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
             </Flex>
-          </div>
-          <div className={styles.rowSpace}>
+          </Box>
+          <Box className={styles.rowSpace}>
             <Flex>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative"
                     btnStyle="default"
@@ -222,8 +231,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightX }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: -distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance });
                     }}
                     disabled={!canClickX}
                     title={i18n._('Move X-')}
@@ -231,15 +240,15 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>X</KeypadText>
                     <KeypadDirectionText>-</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
-                    onClick={() => actions.move({ X: 0, Y: 0 })}
+                    onClick={() => onMove({ X: 0, Y: 0 })}
                     disabled={!canClickXY}
                     title={i18n._('Move To XY Zero (G0 X0 Y0)')}
                   >
@@ -248,10 +257,10 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>Y</KeypadText>
                     <KeypadSubscriptText>0</KeypadSubscriptText>
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive"
                     btnStyle="default"
@@ -261,8 +270,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightX }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance });
                     }}
                     disabled={!canClickX}
                     title={i18n._('Move X+')}
@@ -270,47 +279,47 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>X</KeypadText>
                     <KeypadDirectionText>+</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
-                    onClick={() => actions.move({ Z: 0 })}
+                    onClick={() => onMove({ Z: 0 })}
                     disabled={!canClickZ}
                     title={i18n._('Move To Z Zero (G0 Z0)')}
                   >
                     <KeypadText>Z</KeypadText>
                     <KeypadSubscriptText>0</KeypadSubscriptText>
                   </Button>
-                </div>
+                </Box>
               </Box>
             </Flex>
-          </div>
-          <div className={styles.rowSpace}>
+          </Box>
+          <Box className={styles.rowSpace}>
             <Flex>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative Y negative"
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: -distance, Y: -distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance, Y: -distance });
                     }}
                     disabled={!canClickXY}
                     title={i18n._('Move X- Y-')}
                   >
                     <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Y negative"
                     btnStyle="default"
@@ -320,8 +329,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightY }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ Y: -distance });
+                      const distance = onGetJogDistance();
+                      onJog({ Y: -distance });
                     }}
                     disabled={!canClickY}
                     title={i18n._('Move Y-')}
@@ -329,28 +338,28 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>Y</KeypadText>
                     <KeypadDirectionText>-</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive Y negative"
                     btnStyle="default"
                     compact
                     className={styles.btnKeypad}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ X: distance, Y: -distance });
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance, Y: -distance });
                     }}
                     disabled={!canClickXY}
                     title={i18n._('Move X+ Y-')}
                   >
                     <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
                   </Button>
-                </div>
+                </Box>
               </Box>
               <Box flex="1 1 0%">
-                <div className={styles.colSpace}>
+                <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Z negative"
                     btnStyle="default"
@@ -360,8 +369,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                       { [styles.highlight]: highlightZ }
                     )}
                     onClick={() => {
-                      const distance = actions.getJogDistance();
-                      actions.jog({ Z: -distance });
+                      const distance = onGetJogDistance();
+                      onJog({ Z: -distance });
                     }}
                     disabled={!canClickZ}
                     title={i18n._('Move Z-')}
@@ -369,13 +378,13 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                     <KeypadText>Z</KeypadText>
                     <KeypadDirectionText>-</KeypadDirectionText>
                   </Button>
-                </div>
+                </Box>
               </Box>
             </Flex>
-          </div>
+          </Box>
         </Box>
         <Box flex="4 1 0%">
-          <div className={styles.rowSpace}>
+          <Box className={styles.rowSpace}>
             <Dropdown
               style={{
                 width: '100%'
@@ -414,8 +423,8 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                 </MenuItem>
               </Dropdown.Menu>
             </Dropdown>
-          </div>
-          <div className={styles.rowSpace}>
+          </Box>
+          <Box className={styles.rowSpace}>
             {units === IMPERIAL_UNITS && (
               <Dropdown
                 style={{
@@ -424,7 +433,7 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                 disabled={!canChangeStep}
                 onSelect={(eventKey) => {
                   const step = eventKey;
-                  actions.selectStep(step);
+                  onSelectStep(step);
                 }}
               >
                 <Dropdown.Toggle
@@ -459,7 +468,7 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                 disabled={!canChangeStep}
                 onSelect={(eventKey) => {
                   const step = eventKey;
-                  actions.selectStep(step);
+                  onSelectStep(step);
                 }}
               >
                 <Dropdown.Toggle
@@ -486,15 +495,15 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                 </Dropdown.Menu>
               </Dropdown>
             )}
-          </div>
-          <div className={styles.rowSpace}>
+          </Box>
+          <Box className={styles.rowSpace}>
             <Flex>
               <Box flex="1 1 0%">
                 <RepeatableButton
                   aria-label="Decrease step size"
                   disabled={!canStepBackward}
                   style={{ marginRight: 2.5 }}
-                  onClick={actions.stepBackward}
+                  onClick={onStepBackward}
                 >
                   <i aria-hidden="true" className="fa fa-minus" />
                 </RepeatableButton>
@@ -503,16 +512,16 @@ function Keypad({ canClick = false, units, axes = [], jog, actions }) {
                 <RepeatableButton
                   aria-label="Increase step size"
                   disabled={!canStepForward}
-                  onClick={actions.stepForward}
+                  onClick={onStepForward}
                 >
                   <i aria-hidden="true" className="fa fa-plus" />
                 </RepeatableButton>
               </Box>
             </Flex>
-          </div>
+          </Box>
         </Box>
       </Flex>
-    </div>
+    </Box>
   );
 }
 

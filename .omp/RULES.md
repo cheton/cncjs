@@ -9,6 +9,7 @@
 
 ## Tonic UI migration
 
+- Use `Box` instead of native `<div>` elements in React code.
 - Before using an unfamiliar Tonic component or prop, read the installed Tonic source or an existing local use.
 - Widget modals must use `@tonic-ui/react` Modal and its supported props/composition. Use documented props such as `isOpen`, `onClose`, `size`, `isClosable`, `closeOnEsc`, and `closeOnInteractOutside`, with `ModalContent`, `ModalHeader`, `ModalBody`, and `ModalFooter`.
 - Do not use legacy Modal props or APIs in Tonic Modal call sites, including `disableOverlay*`, `show`, and static Modal subcomponents.
