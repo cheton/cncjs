@@ -328,7 +328,7 @@ Task / session / timestamp: D1 / root session / 2026-09-13T20:48:00+08:00.
 
 Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `39edd315` / `Connection.jsx` selector patch, R0 docs, and synthetic browser fixtures. D1 changed only `src/app/pages/Workspace/widgetRegistry.js`, `widgetUIState.js`, and `__tests__/widgetUIState.test.js`.
 
-Plan contract and baseline fixture: `details/02a-widget-state.md`; registry preserves the existing 17 widget mappings, Visualizer has `supportsChrome: false`, and controller widgets use the existing controller constants. Pure helpers do not import config, React, or controller state.
+Plan contract and baseline fixture: `details/02a-widget-state.md`; registry preserves the existing 17 widget mappings, Visualizer has `hasFrame: false`, and controller widgets use the existing controller constants. Pure helpers do not import config, React, or controller state.
 
 Implementation / review: the first test run correctly failed because the modules did not exist. A second run exposed that importing real widgets pulled `import.meta` from the development Redux store; the test now mocks all 17 widget modules. One over-broad unknown-id expectation was removed because filtering belongs to `selectVisibleWidgetIds`, while `setWidgetsMinimized` intentionally trusts pre-filtered ids. Final review confirms selected/domain object identity and memoized minimized snapshot behavior.
 
@@ -362,9 +362,9 @@ Status transition: D2 `in_progress` → `completed`; D3 `todo` → `in_progress`
 
 Task / session / timestamp: D3 / root session / 2026-09-13T21:50:00+08:00.
 
-Implementation: added the function-based `Widget.jsx` registry lookup and declarative widget-header-controls dispatch boundary. Widgets with header controls receive `minimized`, `isFullscreen`, `onMinimizedChange`, and `onToggleFullscreen`; Visualizer bypasses header controls; unknown widget ids return `null`; no component instance ref is registered. Added `WidgetChromeIntegration.test.jsx` with 3/3 tests covering widget-header-control props/actions, Visualizer bypass/unknown ids, and prop passthrough.
+Implementation: added the function-based `Widget.jsx` registry lookup and declarative widget-header-controls dispatch boundary. Widgets with header controls receive `minimized`, `isFullscreen`, `onMinimizedChange`, and `onToggleFullscreen`; Visualizer bypasses header controls; unknown widget ids return `null`; no component instance ref is registered. Added `WidgetHost.test.jsx` with 3/3 tests covering widget-header-control props/actions, Visualizer bypass/unknown ids, and prop passthrough.
 
-Naming decision: `WidgetChromeIntegration.test.jsx` remains the correct name while the test covers both host dispatch and widget-header-controls contract integration. If the remaining D3 scope is reduced to host dispatch only, rename it to `WidgetHost.test.jsx` and update `details/02a-widget-state.md`, `STATUS.md`, this log, and the prescribed test command together.
+Naming decision: the historical integration test was renamed to `WidgetHost.test.jsx` when the remaining D3 scope became host dispatch. The test still covers the widget-header-controls contract; its name reflects the current host boundary. References in `details/02a-widget-state.md`, `STATUS.md`, this log, and the prescribed test command were updated together.
 
 Verification: `yarn test:frontend --runInBand` / 0 / 9 suites and 24 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with 3 existing performance warnings plus the existing i18next scanner warning. The 16 widget shell migrations and D4 Workspace wiring are not complete; D3 remains `in_progress`.
 
@@ -376,13 +376,13 @@ Task / session / timestamp: D3 / root session / 2026-09-13T21:56:00+08:00.
 
 Implementation: completed the function-based `Widget.jsx` host and function `components/Widget/Widget.jsx` / `Button.jsx`. The host performs registry lookup, returns `null` for unknown ids, bypasses header controls for Visualizer, and memoizes `{ minimized, isFullscreen, onMinimizedChange, onToggleFullscreen }` for widgets with header controls without component refs. Migrated all 16 widget header-control shells: Axes, Autolevel, Tool, Marlin, Smoothie, TinyG, Connection, Console, Custom, GCode, Grbl, Laser, Macro, Probe, Spindle, and Webcam. Local minimized/fullscreen state and header-control persistence were removed while domain state, lifecycle, Macro services, and non-header-control config persistence were retained.
 
-Test coverage: `WidgetChromeIntegration.test.jsx` covers declarative host updates without body unmount, Visualizer bypass, unknown ids, prop passthrough, and real Connection/Autolevel shell action forwarding. The existing `Connection.jsx` selector/data-test patch remains in scope; the future Tonic Menu alternative remains deferred.
+Test coverage: `WidgetHost.test.jsx` covers declarative host updates without body unmount, Visualizer bypass, unknown ids, prop passthrough, and real Connection/Autolevel shell action forwarding. The existing `Connection.jsx` selector/data-test patch remains in scope; the future Tonic Menu alternative remains deferred.
 
-Verification: focused `yarn test:frontend --runInBand --runTestsByPath src/app/pages/Workspace/__tests__/WidgetChromeIntegration.test.jsx` / 0 / 5 tests passed; full `yarn test:frontend --runInBand` / 0 / 9 suites and 26 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing performance and i18next scanner warnings; `git diff --check` / 0. The static scan for local widget-header-controls state/methods in all 16 shell indexes returned no matches (expected `rg` exit 1).
+Verification: focused `yarn test:frontend --runInBand --runTestsByPath src/app/pages/Workspace/__tests__/WidgetHost.test.jsx` / 0 / 5 tests passed; full `yarn test:frontend --runInBand` / 0 / 9 suites and 26 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing performance and i18next scanner warnings; `git diff --check` / 0. The static scan for local widget-header-controls state/methods in all 16 shell indexes returned no matches (expected `rg` exit 1).
 
 Full server Jest was not used as a D3 gate: `SocketConnection` remains excluded per user direction, and the earlier sandbox `listen EPERM` server failure remains environmental evidence. No browser gate is claimed; BR0 is explicitly waived and its missing evidence remains a carry-forward to R6.
 
-Status transition: D3 `in_progress` → `completed`; D4 remains the next eligible task. The D3 test keeps the name `WidgetChromeIntegration.test.jsx` because it still covers shell widget-header-controls integration; rename to `WidgetHost.test.jsx` only if the remaining scope later becomes host dispatch alone, updating all references together.
+Status transition: D3 `in_progress` → `completed`; D4 remains the next eligible task. The D3 test is named `WidgetHost.test.jsx` because the remaining scope is host dispatch; its widget-header-controls integration coverage remains part of the host boundary.
 
 Next exact step: D4 group containers and Workspace toolbar wiring, including `WorkspaceRoot`, group-id hooks in the real containers, toolbar bulk actions, fork/remove/sort persistence, and removal of imperative `widgetMap`/component-instance control.
 
@@ -400,7 +400,7 @@ Implementation: added `WorkspaceRoot.jsx` as the `WidgetUIProvider` boundary and
 
 Test coverage: `WidgetGroups.test.jsx` uses a Sortable contract mock and real `Widget.jsx` registry dispatch to cover sort/order persistence, cross-column options, PubSub updates, fork/remove with native settings preservation, toolbar→group→Host→widget-header-controls behavior, Visualizer header-controls bypass, available controller filtering, and fullscreen cleanup.
 
-Verification: focused D4 command (`widgetUIState`, `WidgetUIProvider`, `WidgetChromeIntegration`, `WidgetGroups`, and hydration tests) / 0 / 5 suites and 22 tests passed; `yarn test:frontend --runInBand --silent` / 0 / 10 suites and 31 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing bundle-size and i18next scanner warnings; negative scan for `widgetMap|collapseAll|expandAll|useImperativeHandle` under `src/app/pages/Workspace` / no matches; `git diff --check` / 0.
+Verification: focused D4 command (`widgetUIState`, `WidgetUIProvider`, `WidgetHost`, `WidgetGroups`, and hydration tests) / 0 / 5 suites and 22 tests passed; `yarn test:frontend --runInBand --silent` / 0 / 10 suites and 31 tests passed; `yarn eslint` / 0 / 17 existing warnings, no errors; `yarn build` / 0 / webpack compiled with existing bundle-size and i18next scanner warnings; negative scan for `widgetMap|collapseAll|expandAll|useImperativeHandle` under `src/app/pages/Workspace` / no matches; `git diff --check` / 0.
 
 Browser status: no browser gate is claimed in D4. BR0 remains explicitly waived; its missing Stop/jog/disconnect/large/watch/viewport/selector evidence is carried to R6. SocketConnection remains excluded per user direction.
 
