@@ -94,11 +94,11 @@ createVisualizerEngine({ container, viewState, onError })
 | STL/texture pending | dispose 後回來的 geometry/texture 立刻釋放，不 attach scene，不 render，不 onError 再 setState |
 | PubSub/config | hook cleanup，engine 不直接 subscribe |
 
-- [ ] loadSTL/loadTexture 的 Promise 加入 loader onError→reject；成功/失敗都有可完成的 Promise，不掛住無限 loading。
-- [ ] 用 Promise.allSettled 或分資源 ownership 收集處理「一個 loader 成功、一個失敗」；不能只 Promise.all catch 而丟失已完成但未 attach 的 GPU 資源。engine disposed flag/asset generation gate 在 await 後、attach 前檢查。
-- [ ] 資源 late arrival 使用**目前** viewState 的位置、visible、profile，而不是 createScene 時解構的 stale objects。允許 assets 晚到，但不能重新建立 renderer。
-- [ ] dispose 可重複；第 2 次不再呼叫底層 dispose、不 render；RAF callback 若正執行，也先判 disposed 才 schedule 下一 frame。
-- [ ] 不升 Three.js，不把既有 Geometry 轉 BufferGeometry，不變更 arc sampling。
+- [x] loadSTL/loadTexture 的 Promise 加入 loader onError→reject；成功/失敗都有可完成的 Promise，不掛住無限 loading。
+- [x] 用 Promise.allSettled 或分資源 ownership 收集處理「一個 loader 成功、一個失敗」；不能只 Promise.all catch 而丟失已完成但未 attach 的 GPU 資源。engine disposed flag/asset generation gate 在 await 後、attach 前檢查。
+- [x] 資源 late arrival 使用**目前** viewState 的位置、visible、profile，而不是 createScene 時解構的 stale objects。允許 assets 晚到，但不能重新建立 renderer。
+- [x] dispose 可重複；第 2 次不再呼叫底層 dispose、不 render；RAF callback 若正執行，也先判 disposed 才 schedule 下一 frame。
+- [x] 不升 Three.js，不把既有 Geometry 轉 BufferGeometry，不變更 arc sampling。
 
 ## Task E4：hook、owner 與跨 widget events
 

@@ -1291,3 +1291,47 @@ Test-first and review evidence: the first new engine test was RED because the mo
 Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/VisualizerEngine.test.js src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/legacyLoad.test.jsx` passed 3 suites / 14 tests. Fresh full `yarn test:frontend --runInBand --silent` passed 53 suites / 314 tests. Targeted ESLint exited 0 with 13 pre-existing repository warnings; `git diff --check` passed. Browser, simulator, WebGL appearance, performance, and build procedures remain deferred to R6.
 
 Review: fresh `gpt-6-astra` review found no critical issue. Important findings on `sent`, sizing, initial positions, and production wrapper coverage were fixed and regression-tested. No staging, commit, or push occurred. Status transition: E2 `in_progress` → `completed`; E3 is next eligible and not started.
+
+## E3 resource ownership — started 2026-09-21
+
+Task / session / timestamp: E3 / current root session / 2026-09-21.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c7ed265fd81a538bb0996ff6b158ad65840cb567` / clean worktree before the claim. No reset, staging, commit, or push is implied by this task claim.
+
+Plan contract and baseline fixture: `details/07a-visualizer-engine.md` Task E3, bound by `00-design.md`, `07-visualizer.md`, `EXECUTION.md`, and `.omp/RULES.md`. E3 owns loader error completion, `allSettled`-safe partial asset cleanup, generation/disposal guards, idempotent renderer/controls/RAF cleanup, mesh resource disposal, and focused resource tests. E4 remains the only owner of the React hook, PubSub/config subscriptions, and resize throttle/window-listener cleanup. Browser, simulator, WebGL appearance/performance, and build procedures remain deferred to R6.
+
+Ownership ruling: E2's public `dispose()` baseline already cancels RAFs, removes controls listeners, disposes controls/renderer, and removes only its appended canvas. E3 will harden and prove this behavior, rather than move hook-owned cleanup into the engine. Cost if wrong: an E3 change could blur the hook boundary and require an E4 rework.
+
+Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. The contract is fixed, but the work has asynchronous asset races, GPU resource ownership, event cleanup, and a shared engine boundary; the execution matrix explicitly classifies E3 as Luna max. Root fixed the owner split before dispatch and remains the sole ledger writer and reviewer. No browser tooling is authorized.
+
+Worker brief: pending `/root/e3_resource_ownership`; allowed edits are `src/app/widgets/Visualizer/VisualizerEngine.js`, `helpers.js`, necessary `GCodeVisualizer.js`, and new `__tests__/VisualizerResources.test.js` only. The worker must first record a focused RED test, use real Three.js/GCodeVisualizer where practical, mock only renderer/assets/controls DOM, and leave an uncommitted diff. It may not edit React owners, PubSub/config/controller/Redux, docs/ledger, V1/E1 tests, protected Prettier paths, stage/commit/push, or run browser/simulator/build tooling.
+
+Status transition: E3 `todo` → `in_progress`; no blocker. Next exact step: write a failing resource-lifecycle contract that proves pending asset settlement and disposal behavior, then implement the smallest engine/helper cleanup changes.
+
+Review correction ruling: fresh review found that engine traversal would dispose Three.js shared sprite geometry; it also found that the excluded `ProbeVisualization` subtree leaks its `TextSprite` textures because its own disposer does not release them. E3 is extended narrowly to `ProbeVisualization.js` for its actual owned textures only. This preserves the plan's exclusive ProbeVisualization ownership instead of moving the cleanup into the engine. The same correction pass must remove lifetime strong references to already disposed resources and strengthen the current-generation asset and repeated-controls-start tests. Cost if wrong: either shared Three.js resources become unusable or probe textures leak until process exit.
+
+## E3 resource ownership — completed 2026-09-21
+
+Implementation: loader helpers now reject loader errors. The engine settles each cutting-tool asset independently, releases successful siblings on partial failure, and releases stale/disposed late arrivals without attach, render, or error reporting. It uses current view state when current-generation assets attach and never creates another renderer. Engine disposal owns renderer/canvas, controls/listeners, distinct agitation/control RAF loops, G-code resources, and engine scene resources; `ProbeVisualization` remains the exclusive owner of its subtree and now releases its label textures. Shared Three.js sprite geometry is deliberately excluded. Resource deduplication uses a `WeakSet`, so disposed coordinate and G-code resources do not remain strongly retained for the engine lifetime.
+
+Test-first evidence: the initial resource suite failed 8 of 10 cases because loader errors resolved, partial successful assets leaked, G-code resources were not released, and probe resources could be disposed twice. The first green run passed 10 tests. Fresh review then found shared sprite geometry disposal, probe label texture leaks, and strong resource-set retention. The correction suite was RED in those three cases and GREEN at 12 resource tests. A scoped re-review approved all Important corrections. It recorded one minor deferred test-accuracy note: the shared-sprite test changes units, which toggles visibility but does not itself rebuild coordinates; the source fix and disposal assertion remain valid.
+
+Verification: root independently ran focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/VisualizerResources.test.js src/app/widgets/Visualizer/__tests__/VisualizerEngine.test.js src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/legacyLoad.test.jsx`, passing 4 suites / 26 tests. Fresh full `yarn test:frontend --runInBand --silent` passed 54 suites / 326 tests. Targeted ESLint for all five E3 source/test files exited 0 with 13 pre-existing repository warnings and no E3 error; `git diff --check` passed. Browser, simulator, WebGL appearance/performance, and build procedures were not run under the R6 deferral.
+
+Review: fresh `gpt-6-astra` review found three Important ownership failures; the worker recorded RED→GREEN fixes, and its scoped re-review approved them with no Critical/Important remaining. Status transition: E3 `in_progress` → `completed`; E4 is next eligible. No staging, commit, or push was performed.
+
+## E4 Visualizer hook and owner integration — started 2026-09-21
+
+Task / session / timestamp: E4 / current root session / 2026-09-21.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `c7ed265fd81a538bb0996ff6b158ad65840cb567` / reviewed uncommitted E3 resource changes plus E3 ledger updates. E3 is accepted and must be preserved; no reset, staging, commit, or push is implied by this task claim.
+
+Plan contract and baseline fixture: `details/07a-visualizer-engine.md` Task E4, bound by `00-design.md`, `07-visualizer.md`, `EXECUTION.md`, and `.omp/RULES.md`. E4 creates `useVisualizer({ viewState, onError })`, makes `Visualizer.jsx` a DOM-only function view, and migrates the owner to stable hook actions instead of component instance refs. It preserves synchronous `actions.load({ name, content }) -> { bbox }`, one controller context/Redux bounding-box update, latest-only pending G-code before readiness, WebGL-unavailable metadata/state flow, and one PubSub/config/resize bridge with paired cleanup. E3 retains Three.js resource ownership; browser, simulator, WebGL appearance/performance, and build procedures remain deferred to R6.
+
+Ownership ruling: E4 owns the React lifecycle boundary: callback host ref, engine ref, 32ms throttled resize/window listener cleanup, config and four probe/resize PubSub subscriptions, and pending-document consumption. The engine must not receive PubSub/config/controller/Redux. Cost if wrong: a duplicated owner could double-dispatch a command or leave listeners/resources active after unmount.
+
+Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. E4 is a multi-file owner migration with React lifecycle, pending state, controller/Redux timing, config/PubSub cross-widget events, and a shared renderer boundary; the execution matrix explicitly classifies E4 as Luna max. The root session fixed the contract and remains sole ledger writer/reviewer. No browser tooling is authorized.
+
+Worker brief: pending `/root/e4_hook_owner`; allowed production scope is `src/app/widgets/Visualizer/useVisualizer.js`, `Visualizer.jsx`, and `index.jsx`; test scope is new `useVisualizer.test.jsx` plus necessary Visualizer-local existing test updates. The worker must record contract RED before source changes, leave E3 source intact, use real engine behavior where practical, and may not edit docs/ledger, E3 sources, backend/controller/Redux/config transport, child toolbar/view files, protected Prettier paths, stage/commit/push, browser/simulator, or build tooling.
+
+Status transition: E4 `todo` → `in_progress`; no blocker. Next exact step: derive the existing owner’s load, readiness, config/PubSub, and resize contracts, then write a failing hook/owner regression for latest-pending G-code and paired cleanup.

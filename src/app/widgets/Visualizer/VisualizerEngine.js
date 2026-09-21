@@ -103,6 +103,8 @@ class VisualizerEngine {
     this.onError = typeof onError === 'function' ? onError : () => {};
     this.disposed = false;
     this.assetGeneration = 0;
+    this.pendingAssetLoads = new Set();
+    this.disposedResources = new WeakSet();
     this.agitationAnimationFrame = null;
     this.controlsAnimationFrame = null;
     this.shouldAnimateControls = false;
@@ -401,22 +403,106 @@ class VisualizerEngine {
     this.scene.add(this.group);
   }
 
+  disposeResource(resource) {
+    if (!resource ||
+        (typeof resource !== 'object' && typeof resource !== 'function') ||
+        this.disposedResources.has(resource)) {
+      return;
+    }
+    this.disposedResources.add(resource);
+    if (typeof resource.dispose === 'function') {
+      resource.dispose();
+    }
+  }
+
+  disposeObjectResources(object, excludedObjects = new Set()) {
+    if (!object) {
+      return;
+    }
+
+    object.traverse(child => {
+      if (excludedObjects.has(child)) {
+        return;
+      }
+      if (child.geometry && !child.isSprite) {
+        this.disposeResource(child.geometry);
+      }
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach(material => {
+        if (!material) {
+          return;
+        }
+        Object.keys(material).forEach(key => {
+          const value = material[key];
+          if (value && value.isTexture) {
+            this.disposeResource(value);
+          }
+        });
+        this.disposeResource(material);
+      });
+    });
+  }
+
+  disposePendingAssets() {
+    this.pendingAssetLoads.forEach(load => {
+      load.resources.forEach(resource => this.disposeResource(resource));
+      load.resources.clear();
+    });
+    this.pendingAssetLoads.clear();
+  }
+
+  settleAsset(generation, load, promise) {
+    return Promise.resolve(promise).then(resource => {
+      if (this.disposed || generation !== this.assetGeneration) {
+        this.disposeResource(resource);
+      } else {
+        load.resources.add(resource);
+      }
+      return { status: 'fulfilled', value: resource };
+    }, reason => ({ status: 'rejected', reason }));
+  }
+
   loadCuttingTool(objects) {
     const generation = ++this.assetGeneration;
+    const load = { resources: new Set() };
+    this.pendingAssetLoads.add(load);
+
+    let geometryPromise;
+    let texturePromise;
+    try {
+      geometryPromise = loadSTL('assets/models/stl/bit.stl');
+    } catch (error) {
+      geometryPromise = Promise.reject(error);
+    }
+    try {
+      texturePromise = loadTexture('assets/textures/brushed-steel-texture.jpg');
+    } catch (error) {
+      texturePromise = Promise.reject(error);
+    }
+
     Promise.all([
-      loadSTL('assets/models/stl/bit.stl'),
-      loadTexture('assets/textures/brushed-steel-texture.jpg'),
-    ]).then(([geometry, texture]) => {
+      this.settleAsset(generation, load, geometryPromise),
+      this.settleAsset(generation, load, texturePromise),
+    ]).then(results => {
+      this.pendingAssetLoads.delete(load);
+      const resources = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => result.value);
+
       if (this.disposed || generation !== this.assetGeneration) {
-        if (geometry && typeof geometry.dispose === 'function') {
-          geometry.dispose();
-        }
-        if (texture && typeof texture.dispose === 'function') {
-          texture.dispose();
-        }
+        resources.forEach(resource => this.disposeResource(resource));
         return;
       }
 
+      const rejected = results.find(result => result.status === 'rejected');
+      if (rejected) {
+        resources.forEach(resource => this.disposeResource(resource));
+        this.onError(rejected.reason);
+        return;
+      }
+
+      const [geometry, texture] = resources;
+      load.resources.clear();
       geometry.rotateX(-Math.PI / 2);
       geometry.scale(0.5, 0.5, 0.5);
       geometry.computeBoundingBox();
@@ -431,8 +517,14 @@ class VisualizerEngine {
           opacity: 0.9,
           transparent: false
         });
+      } else {
+        this.disposeResource(texture);
       }
 
+      if (this.cuttingTool) {
+        this.group.remove(this.cuttingTool);
+        this.disposeObjectResources(this.cuttingTool);
+      }
       const object = new THREE.Object3D();
       object.add(new THREE.Mesh(geometry, material));
       this.cuttingTool = object;
@@ -441,10 +533,6 @@ class VisualizerEngine {
       this.group.add(this.cuttingTool);
       this.updateCuttingToolPosition();
       this.updateScene();
-    }).catch(error => {
-      if (!this.disposed && generation === this.assetGeneration) {
-        this.onError(error);
-      }
     });
   }
 
@@ -606,6 +694,7 @@ class VisualizerEngine {
       const object = this.group.getObjectByName(name);
       if (object) {
         this.group.remove(object);
+        this.disposeObjectResources(object);
       }
     });
 
@@ -663,6 +752,7 @@ class VisualizerEngine {
 
     if (this.limits) {
       this.group.remove(this.limits);
+      this.disposeObjectResources(this.limits);
       this.limits = null;
     }
 
@@ -757,7 +847,8 @@ class VisualizerEngine {
     controls.maxDistance = TRACKBALL_CONTROLS_MAX_DISTANCE;
 
     const animate = () => {
-      if (this.disposed) {
+      this.controlsAnimationFrame = null;
+      if (this.disposed || !this.shouldAnimateControls) {
         return;
       }
       controls.update();
@@ -768,6 +859,9 @@ class VisualizerEngine {
     };
 
     this.controlsStartHandler = () => {
+      if (this.shouldAnimateControls) {
+        return;
+      }
       this.shouldAnimateControls = true;
       animate();
     };
@@ -965,6 +1059,12 @@ class VisualizerEngine {
     const visualizerObject = this.group.getObjectByName('Visualizer');
     if (visualizerObject) {
       this.group.remove(visualizerObject);
+    }
+
+    if (this.gcodeVisualizer && typeof this.gcodeVisualizer.dispose === 'function') {
+      this.gcodeVisualizer.dispose(resource => this.disposeResource(resource));
+    } else if (visualizerObject) {
+      this.disposeObjectResources(visualizerObject);
     }
 
     this.gcodeVisualizer = null;
@@ -1260,13 +1360,29 @@ class VisualizerEngine {
     }
     this.disposed = true;
     this.assetGeneration += 1;
+    this.disposePendingAssets();
     this.cancelAgitation();
     this.cancelControlsAnimation();
     this.shouldAnimateControls = false;
 
+    const probeGroup = this.probeVisualization && this.probeVisualization.group;
+    const excludedObjects = new Set();
+    if (probeGroup) {
+      probeGroup.traverse(object => excludedObjects.add(object));
+    }
     if (this.probeVisualization && typeof this.probeVisualization.dispose === 'function') {
       this.probeVisualization.dispose();
     }
+    const visualizerObject = this.group.getObjectByName('Visualizer');
+    if (this.gcodeVisualizer && typeof this.gcodeVisualizer.dispose === 'function') {
+      this.gcodeVisualizer.dispose(resource => this.disposeResource(resource));
+    } else if (visualizerObject) {
+      this.disposeObjectResources(visualizerObject);
+    }
+    if (visualizerObject) {
+      this.group.remove(visualizerObject);
+    }
+    this.gcodeVisualizer = null;
     if (this.controls) {
       if (typeof this.controls.removeEventListener === 'function') {
         this.controls.removeEventListener('start', this.controlsStartHandler);
@@ -1277,6 +1393,7 @@ class VisualizerEngine {
         this.controls.dispose();
       }
     }
+    this.disposeObjectResources(this.group, excludedObjects);
     if (this.renderer && typeof this.renderer.dispose === 'function') {
       this.renderer.dispose();
     }
