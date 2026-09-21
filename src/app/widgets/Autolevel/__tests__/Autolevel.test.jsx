@@ -502,7 +502,7 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('uses Tonic chrome icons and Font Awesome only for unsupported commands', async () => {
+  test('uses Tonic widget header-control icons and Font Awesome only for unsupported commands', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
