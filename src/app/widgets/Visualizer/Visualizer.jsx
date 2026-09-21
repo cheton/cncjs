@@ -8,7 +8,6 @@ import colornames from 'colornames';
 import pubsub from 'pubsub-js';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import * as THREE from 'three';
 import {
   IMPERIAL_UNITS,
@@ -31,6 +30,7 @@ import PivotPoint3 from './PivotPoint3';
 import TextSprite from './TextSprite';
 import GCodeVisualizer from './GCodeVisualizer';
 import ProbeVisualization from './ProbeVisualization';
+import { createVisualizerEngine } from './VisualizerEngine';
 import {
   CAMERA_MODE_PAN,
   CAMERA_MODE_ROTATE
@@ -97,9 +97,55 @@ class Visualizer extends Component {
 
   node = null;
 
+  engine = null;
+
   setRef = (node) => {
     this.node = node;
   };
+
+  getEngineViewState() {
+    const state = this.props.state || {};
+    return {
+      show: this.props.show,
+      cameraPosition: this.props.cameraPosition,
+      projection: state.projection,
+      cameraMode: state.cameraMode,
+      units: state.units,
+      objects: state.objects,
+      machinePosition: state.machinePosition,
+      workPosition: state.workPosition,
+      isAgitated: state.isAgitated,
+      sent: _get(state, 'gcode.sent', 0),
+      machineProfile: config.get('workspace.machineProfile'),
+    };
+  }
+
+  syncEngineFields() {
+    if (!this.engine) {
+      return;
+    }
+
+    [
+      'renderer',
+      'scene',
+      'camera',
+      'controls',
+      'viewport',
+      'cuttingTool',
+      'cuttingPointer',
+      'limits',
+      'gcodeVisualizer',
+      'probeVisualization',
+      'group',
+      'pivotPoint',
+      'machineProfile',
+      'machinePosition',
+      'workPosition',
+      'isAgitated',
+    ].forEach((key) => {
+      this[key] = this.engine[key];
+    });
+  }
 
   throttledResize = _throttle(() => {
     this.resizeRenderer();
@@ -136,6 +182,12 @@ class Visualizer extends Component {
   // of truth and works the same way regardless of who triggered
   // changeMachineProfile (mount, store change, etc.).
   changeMachineProfile = () => {
+    if (this.engine) {
+      this.engine.update(this.getEngineViewState());
+      this.syncEngineFields();
+      return;
+    }
+
     const machineProfile = config.get('workspace.machineProfile');
     const nextMachineProfile = _get(machineProfile, 'id') ? { ...machineProfile } : null;
 
@@ -231,9 +283,12 @@ class Visualizer extends Component {
     this.addResizeEventListener();
     config.on('change', this.changeMachineProfile);
     if (this.node) {
-      const el = ReactDOM.findDOMNode(this.node);
-      this.createScene(el);
-      this.resizeRenderer();
+      this.engine = createVisualizerEngine({
+        container: this.node,
+        viewState: this.getEngineViewState(),
+        onError: (error) => log.error('[Visualizer] Asset loading failed:', error),
+      });
+      this.syncEngineFields();
     }
 
     // Apply any machine profile already in the store (e.g., hydrated from
@@ -244,6 +299,12 @@ class Visualizer extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    if (this.engine) {
+      this.engine.update(this.getEngineViewState());
+      this.syncEngineFields();
+      return;
+    }
+
     let forceUpdate = false;
     let needUpdateScene = false;
     const prevState = prevProps.state;
@@ -406,7 +467,12 @@ class Visualizer extends Component {
     this.unsubscribe();
     this.removeResizeEventListener();
     config.removeListener('change', this.changeMachineProfile);
-    this.clearScene();
+    if (this.engine) {
+      this.engine.dispose();
+      this.engine = null;
+    } else {
+      this.clearScene();
+    }
   }
 
   subscribe() {
@@ -462,6 +528,12 @@ class Visualizer extends Component {
   }
 
   showProbeVisualization(data) {
+    if (this.engine) {
+      this.engine.showProbe(data);
+      this.syncEngineFields();
+      return;
+    }
+
     const { probeData = [], config = {} } = data;
 
     log.debug('[Visualizer] showProbeVisualization', { probeData: probeData.length, config });
@@ -526,6 +598,12 @@ class Visualizer extends Component {
   }
 
   hideProbeVisualization() {
+    if (this.engine) {
+      this.engine.hideProbe();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.probeVisualization) {
       log.debug('[Visualizer] hideProbeVisualization');
 
@@ -570,7 +648,7 @@ class Visualizer extends Component {
   }
 
   getVisibleWidth() {
-    const el = ReactDOM.findDOMNode(this.node);
+    const el = this.node;
     const visibleWidth = Math.max(
       ensurePositiveNumber(el && el.parentNode && el.parentNode.clientWidth),
       360
@@ -580,7 +658,7 @@ class Visualizer extends Component {
   }
 
   getVisibleHeight() {
-    const el = ReactDOM.findDOMNode(this.node);
+    const el = this.node;
     const visibleHeight = ensurePositiveNumber(el && el.parentNode && el.parentNode.clientHeight);
 
     return visibleHeight;
@@ -595,6 +673,12 @@ class Visualizer extends Component {
   }
 
   resizeRenderer() {
+    if (this.engine) {
+      this.engine.resize();
+      this.syncEngineFields();
+      return;
+    }
+
     if (!(this.camera && this.renderer)) {
       return;
     }
@@ -1016,6 +1100,11 @@ class Visualizer extends Component {
   // @param [options] The options object.
   // @param [options.forceUpdate] Force rendering
   updateScene(options) {
+    if (this.engine) {
+      this.engine.updateScene(options);
+      return;
+    }
+
     const { forceUpdate = false } = { ...options };
     const needUpdateScene = this.props.show || forceUpdate;
 
@@ -1025,6 +1114,12 @@ class Visualizer extends Component {
   }
 
   clearScene() {
+    if (this.engine) {
+      this.engine.dispose();
+      this.syncEngineFields();
+      return;
+    }
+
     // Dispose probe visualization events before clearing
     if (this.probeVisualization && typeof this.probeVisualization.dispose === 'function') {
       this.probeVisualization.dispose();
@@ -1224,6 +1319,12 @@ class Visualizer extends Component {
 
   // Make the controls look at the center position
   lookAtCenter() {
+    if (this.engine) {
+      this.engine.lookAtCenter();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.viewport) {
       this.viewport.update();
     }
@@ -1234,6 +1335,15 @@ class Visualizer extends Component {
   }
 
   load(name, gcode, callback) {
+    if (this.engine) {
+      const result = this.engine.load({ name, content: gcode });
+      this.syncEngineFields();
+      if (typeof callback === 'function') {
+        callback(result);
+      }
+      return result;
+    }
+
     // Remove previous G-code object
     this.unload();
 
@@ -1282,9 +1392,16 @@ class Visualizer extends Component {
     this.updateScene();
 
     (typeof callback === 'function') && callback({ bbox: bbox });
+    return undefined;
   }
 
   unload() {
+    if (this.engine) {
+      this.engine.unload();
+      this.syncEngineFields();
+      return;
+    }
+
     const visualizerObject = this.group.getObjectByName('Visualizer');
     if (visualizerObject) {
       this.group.remove(visualizerObject);
@@ -1334,6 +1451,12 @@ class Visualizer extends Component {
   }
 
   setCameraMode(mode) {
+    if (this.engine) {
+      this.engine.setCameraMode(mode);
+      this.syncEngineFields();
+      return;
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
     // A number representing a given button:
     // 0: main button pressed, usually the left button or the un-initialized state
@@ -1350,6 +1473,12 @@ class Visualizer extends Component {
   }
 
   toTopView() {
+    if (this.engine) {
+      this.engine.toTopView();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.controls) {
       this.controls.reset();
     }
@@ -1367,6 +1496,12 @@ class Visualizer extends Component {
   }
 
   to3DView() {
+    if (this.engine) {
+      this.engine.to3DView();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.controls) {
       this.controls.reset();
     }
@@ -1384,6 +1519,12 @@ class Visualizer extends Component {
   }
 
   toFrontView() {
+    if (this.engine) {
+      this.engine.toFrontView();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.controls) {
       this.controls.reset();
     }
@@ -1401,6 +1542,12 @@ class Visualizer extends Component {
   }
 
   toLeftSideView() {
+    if (this.engine) {
+      this.engine.toLeftSideView();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.controls) {
       this.controls.reset();
     }
@@ -1417,6 +1564,12 @@ class Visualizer extends Component {
   }
 
   toRightSideView() {
+    if (this.engine) {
+      this.engine.toRightSideView();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.controls) {
       this.controls.reset();
     }
@@ -1434,6 +1587,12 @@ class Visualizer extends Component {
   }
 
   zoomFit() {
+    if (this.engine) {
+      this.engine.zoomFit();
+      this.syncEngineFields();
+      return;
+    }
+
     if (this.viewport) {
       this.viewport.update();
     }
@@ -1441,6 +1600,12 @@ class Visualizer extends Component {
   }
 
   zoomIn(delta = 0.1) {
+    if (this.engine) {
+      this.engine.zoomIn(delta);
+      this.syncEngineFields();
+      return;
+    }
+
     const { noZoom } = this.controls;
     if (noZoom) {
       return;
@@ -1454,6 +1619,12 @@ class Visualizer extends Component {
   }
 
   zoomOut(delta = 0.1) {
+    if (this.engine) {
+      this.engine.zoomOut(delta);
+      this.syncEngineFields();
+      return;
+    }
+
     const { noZoom } = this.controls;
     if (noZoom) {
       return;
@@ -1468,6 +1639,12 @@ class Visualizer extends Component {
 
   // deltaX and deltaY are in pixels; right and down are positive
   pan(deltaX, deltaY) {
+    if (this.engine) {
+      this.engine.pan(deltaX, deltaY);
+      this.syncEngineFields();
+      return;
+    }
+
     const eye = new THREE.Vector3();
     const pan = new THREE.Vector3();
     const objectUp = new THREE.Vector3();
@@ -1485,21 +1662,45 @@ class Visualizer extends Component {
 
   // http://stackoverflow.com/questions/18581225/orbitcontrol-or-trackballcontrol
   panUp() {
+    if (this.engine) {
+      this.engine.panUp();
+      this.syncEngineFields();
+      return;
+    }
+
     const { noPan, panSpeed } = this.controls;
     !noPan && this.pan(0, 1 * panSpeed);
   }
 
   panDown() {
+    if (this.engine) {
+      this.engine.panDown();
+      this.syncEngineFields();
+      return;
+    }
+
     const { noPan, panSpeed } = this.controls;
     !noPan && this.pan(0, -1 * panSpeed);
   }
 
   panLeft() {
+    if (this.engine) {
+      this.engine.panLeft();
+      this.syncEngineFields();
+      return;
+    }
+
     const { noPan, panSpeed } = this.controls;
     !noPan && this.pan(1 * panSpeed, 0);
   }
 
   panRight() {
+    if (this.engine) {
+      this.engine.panRight();
+      this.syncEngineFields();
+      return;
+    }
+
     const { noPan, panSpeed } = this.controls;
     !noPan && this.pan(-1 * panSpeed, 0);
   }
@@ -1513,7 +1714,9 @@ class Visualizer extends Component {
       <div
         aria-label="3D Visualizer"
         style={{
-          visibility: this.props.show ? 'visible' : 'hidden'
+          height: '100%',
+          visibility: this.props.show ? 'visible' : 'hidden',
+          width: '100%'
         }}
         ref={this.setRef}
       />

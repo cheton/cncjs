@@ -1267,3 +1267,27 @@ Source-drift ruling: the planned `load(content, callback)` defect was already re
 Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/legacyLoad.test.jsx src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/loadGCode.test.jsx` passed 3 suites / 10 tests. Fresh full `yarn test:frontend --runInBand --silent` passed 52 suites / 309 tests. Targeted ESLint exited 0 with 13 pre-existing repository warnings; `git diff --check` passed. Browser, simulator, WebGL, performance, and build procedures were not run under the R6 deferral.
 
 Status transition: E1 `in_progress` → `completed`; no blocker. E2 is next eligible but was not started because the current user authorization covered V1 and E1 only. No staging, commit, or push occurred.
+
+## E2 engine extraction — started 2026-09-21
+
+Task / session / timestamp: E2 / current root session / 2026-09-21.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `0a90e31f` / clean worktree. The V1/E1 checkpoint is committed. No reset, staging, commit, or push is implied by this task claim.
+
+Plan contract and scope: `details/07a-visualizer-engine.md` Task E2, bound by `00-design.md`, `07-visualizer.md`, and `.omp/RULES.md`. E2 creates the non-React `VisualizerEngine` and engine tests, with fixed synchronous `load({ name, content }) -> { bbox }` and bounded `viewState`. It preserves current scene, pivot, camera, visibility, probe, and parser algorithms. E3 retains resource/lifecycle cleanup; E4 retains the hook, owner, PubSub/config, and controller integration. Browser, simulator, performance, and build procedures remain deferred to R6.
+
+Execution ruling: use one `gpt-5.6-luna` / max worker for the isolated implementation, while the root session remains the sole ledger writer and reviewer. This follows the project execution matrix for E2 and does not create parallel implementation work. The engine boundary was fixed by root before dispatch; TDD remains mandatory. The task matrix classifies extraction as max-risk due to WebGL/RAF ownership, but no E3 cleanup behavior is included in E2.
+
+Worker brief: `/root/e2_engine_extraction` may modify only `VisualizerEngine.js`, `Visualizer.jsx` as a temporary compatibility delegate, and `VisualizerEngine.test.js`. It must preserve V1/E1 work, use real parser/Three.js geometry, mock only renderer/assets/controls DOM, preserve `load(name, gcode, callback)` at the wrapper until E4, and avoid React/config/PubSub/controller/Redux imports in the engine. Root owns all ledger files and performs review, full-suite verification, and completion transition.
+
+Status transition: E2 `todo` → `in_progress`; no blocker. Next exact step: map the current `Visualizer` class's scene, camera, pivot, load, and probe method dependencies; then write the engine contract regression before production extraction.
+
+## E2 engine extraction — completed 2026-09-21
+
+Implementation: created `VisualizerEngine.js`, a non-React Three.js engine with the fixed bounded-view-state factory API and synchronous `load({ name, content }) -> { bbox }`. `Visualizer.jsx` is a temporary class compatibility wrapper: it retains config/PubSub/resize ownership and existing `load(name, gcode, callback)` callers, but delegates scene, pivot, camera, probe, and G-code work to the engine. The host explicitly remains `visibility:hidden` when hidden while filling its available width and height. E3 owns full resource ownership/late-asset hardening; E4 owns function/hook and owner integration.
+
+Test-first and review evidence: the first new engine test was RED because the module did not exist. Fresh review identified top-level `sent` mismatch, zero-height host risk, and initial position synchronization. Each received a focused regression: `sent` changes rendered path progress, initial work position places the pointer, and the hidden host retains dimensions. A mounted wrapper regression proves callback compatibility runs through the engine. The reviewer classified basic asset-generation/dispose scaffolding as a minor E3-scope overlap; it is retained because E2's public `dispose()` requires a safe baseline, while E3 remains responsible for comprehensive asset/error/disposal tests.
+
+Verification: focused `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/VisualizerEngine.test.js src/app/widgets/Visualizer/__tests__/geometry.test.js src/app/widgets/Visualizer/__tests__/legacyLoad.test.jsx` passed 3 suites / 14 tests. Fresh full `yarn test:frontend --runInBand --silent` passed 53 suites / 314 tests. Targeted ESLint exited 0 with 13 pre-existing repository warnings; `git diff --check` passed. Browser, simulator, WebGL appearance, performance, and build procedures remain deferred to R6.
+
+Review: fresh `gpt-6-astra` review found no critical issue. Important findings on `sent`, sizing, initial positions, and production wrapper coverage were fixed and regression-tested. No staging, commit, or push occurred. Status transition: E2 `in_progress` → `completed`; E3 is next eligible and not started.

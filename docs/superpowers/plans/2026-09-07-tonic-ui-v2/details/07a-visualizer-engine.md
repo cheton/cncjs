@@ -72,11 +72,11 @@ createVisualizerEngine({ container, viewState, onError })
 | show/hide/updateProbeVisualization | showProbe/updateProbe/hideProbe；資料形狀不變 |
 | clearScene/unsubscribe/removeResize | engine dispose 只處理 scene 資源；event unsubscribe 屬 hook |
 
-- [ ] 將 group/pivot/machinePosition/workPosition 等欄位移到 engine；允許非 React class 保存 methods，沒有必要把 1500 行塞進 hook closure。
-- [ ] factory 使用傳入 container 取尺寸，移除全部 findDOMNode。render/show 隱藏語義仍 visibility:hidden，不能新改 display:none 卻把 canvas 尺寸歸零。
-- [ ] `load` 先卸載前 mesh、parse content、center/pivot/viewport update，最後 return `{bbox}`；frameIndex 仍由 sent update 控制，不改 Toolpath 演算法。
-- [ ] 初始 machineProfile 不預先設成相同值讓 equality guard 跳過；先 scene setup，再 apply profile pipeline。保留 profile / gcode 兩套 pivot 政策。
-- [ ] engine tests 使用真 THREE.Scene/Group/Geometry 與真 GCodeVisualizer，只 mock WebGLRenderer、assets 和 controls DOM；捕捉 renderer.render(scene,camera) 的參數作 oracle，不新增 production debug getter。
+- [x] 將 group/pivot/machinePosition/workPosition 等欄位移到 engine；允許非 React class 保存 methods，沒有必要把 1500 行塞進 hook closure。
+- [x] factory 使用傳入 container 取尺寸，移除全部 findDOMNode。render/show 隱藏語義仍 visibility:hidden，不能新改 display:none 卻把 canvas 尺寸歸零。
+- [x] `load` 先卸載前 mesh、parse content、center/pivot/viewport update，最後 return `{bbox}`；frameIndex 仍由 sent update 控制，不改 Toolpath 演算法。
+- [x] 初始 machineProfile 不預先設成相同值讓 equality guard 跳過；先 scene setup，再 apply profile pipeline。保留 profile / gcode 兩套 pivot 政策。
+- [x] engine tests 使用真 THREE.Scene/Group/Geometry 與真 GCodeVisualizer，只 mock WebGLRenderer、assets 和 controls DOM；捕捉 renderer.render(scene,camera) 的參數作 oracle，不新增 production debug getter。
 
 ## Task E3：精確資源 cleanup
 
