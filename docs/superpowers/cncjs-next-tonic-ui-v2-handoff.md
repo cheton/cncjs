@@ -31,15 +31,14 @@
 
 ## 下一個可執行項目
 
-Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S2 MDI query、S3 controlled tabs 與 S4 single-save transaction 已完成；下一個可執行 task 是 A1b Axes input。R5 partial acceptance passed 5 suites / 37 tests, but the full R5 gate remains pending because WorkflowControl and Autolevel integration tests depend on E4/A1b/A3b. Browser evidence 仍延後至 R6。
+A3b Autolevel workflow is complete. R5 partial acceptance remains 5 suites / 37 tests; its full gate awaits E4 and the prescribed WorkflowControl/Autolevel Visualizer-integration files. Browser evidence remains deferred to R6.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **A1b** [motion widgets](plans/2026-09-07-tonic-ui-v2/06-motion-widgets.md) | S4, G4 ✅ | Axes input/jog/MDI behavior | 否 |
+| **V1** [toolbar/watch directory](plans/2026-09-07-tonic-ui-v2/07-visualizer.md) | A3b, U3 ✅ | Visualizer toolbar/watch directory | 否 |
+| **E1** [load characterization](plans/2026-09-07-tonic-ui-v2/details/07a-visualizer-engine.md) | R3, A3b ✅ | Visualizer load characterization | 否 |
 
-**先執行 A1b Axes input**。S1–S4 已完成；A1b 是 A3a/A3b 與後續 Visualizer/R5 gates 的前置。Browser evidence 仍依使用者指示延後至 R6。
-
-`S1` 已取得 Q2-cleanup 前置；`V1` 仍依賴 `A3b`。不要跳過前置 task。
+Both tasks are eligible, but this authorization was limited to A3b. Do not start either one without a new user instruction. Browser evidence remains deferred to R6.
 
 ## 本輪交接重點（G1）
 
@@ -69,6 +68,7 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 8. **Component interfaces：** `propTypes` are prohibited for all new or migrated code. Use JSDoc for component interfaces and function defaults for runtime defaults. Do not reintroduce PropTypes while completing adjacent migration work.
 9. **Widget modals：** use only the installed Tonic Modal contract: `isOpen`, `onClose`, `size`, `isClosable`, `closeOnEsc`, and `closeOnInteractOutside`, with `ModalContent`/`ModalHeader`/`ModalBody`/`ModalFooter`. Do not use legacy `disableOverlay*`, `show`, or static Modal APIs.
 10. **Layout primitives：** use Tonic `Box` instead of native `<div>` in React code.
+11. **Widget-local layout:** use Tonic `sx` props. Do not add or retain a widget-local `index.styl` during a widget migration; apply this rule when each remaining widget is migrated, not as an unrelated bulk conversion.
 
 ## Current implementation checkpoint — 2026-09-20
 
@@ -80,22 +80,28 @@ Grbl C1、Marlin C2、Smoothie C3 與 TinyG C4 已完成。S1 Settings draft、S
 - All widget modal source imports have been migrated from the legacy app Modal to Tonic Modal composition. Static scans found no legacy Modal source import, `disableOverlay*`, legacy static Modal components, or legacy provider/root use in widget source. A3a is complete: its dialog forms use JSDoc functions, React Final Form/Tonic FormControl, explicit callbacks, and covered same-tick confirmation gates.
 - Latest focused verification: Axes/Settings/query/draft passes 4 suites / 29 tests, with targeted Axes ESLint and `git diff --check` clean. No browser tooling or build was run.
 
-## Current checkpoint — A3a Autolevel dialogs and forms complete
+## Current checkpoint — A3b Autolevel workflow complete
 
-- A2 is committed in `98396e35`. Its local Tool owner keeps query data separate from the editable draft, now updated directly with the existing Immer v9 `produce`; do not add a helper or upgrade Immer in this scope.
-- A3a converted `StartProbeModal.jsx`, `StopProbeModal.jsx`, `TestProbeModal.jsx`, `ApplyView.jsx`, their owner call sites, and `__tests__/ProbeDialogs.test.jsx`. Dialog confirmation forms use React Final Form with Tonic FormControl; commands retain their existing owners, cancel is command-free, invalid gates block dispatch, and a same-tick lock prevents duplicates.
-- ApplyView preserves its file-read pipeline, compensation callbacks, export/clear actions, and one paired `gcode:unload` / `gcode:load` PubSub subscription with unmount cleanup. It has focused 10-test coverage; full frontend passes 47 suites / 274 tests and `yarn lint` exits 0. Do not begin A3b workflow ownership, browser tooling, or a build without a new user instruction.
+- A3b migrated `src/app/widgets/Autolevel/index.jsx` to a JSDoc function/Tonic owner. A pure reducer owns the idle/probing/stopped/completed/error workflow; user and event handlers own controller commands. The owner preserves exact full-probe display-unit payloads, result/progress flow, one stop command, disconnected/error cleanup, Visualizer configuration/result sync, and the local fullscreen/layout contract. Its layout now uses `Box sx` only; `Autolevel/index.styl` is removed.
+- `src/app/queries/gcode.js` provides the explicit, non-retrying `useLoadGCodeMutation()` boundary for `api.loadGCode(meta, context)`. Compensation errors retain the original G-code and probe data; retry uses those original values.
+- Test-first evidence was recorded before each production slice: the legacy owner accepted an update after stop; the initial query module lacked the mutation hook; reviewer regressions lacked configuration sync, canonical unit persistence, and fullscreen styling; and raw icon markup lacked the Tonic/Font Awesome icon contract. The latest focused Autolevel validation passed 16 tests; full frontend passed 49 suites / 292 tests; `yarn lint` and `git diff --check` passed.
+- Autolevel uses Tonic `MenuIcon`, `MoreIcon`, chevrons, and `CloseIcon`. Only unavailable equivalents use explicit Font Awesome definitions: `faExpand`, `faCompress`, and `faCodeBranch`; do not depend on app-root Font Awesome library registration from an isolated widget.
+- No browser tooling, simulator browser procedure, or build was run. The mock controller fixture covers unavailable probe events; browser and simulator evidence remain deferred to R6. The protected Prettier paths `.prettierrc.json`, `package.json`, and `yarn.lock` are not changed or staged.
 
-## Next implementation handoff — A3b Autolevel workflow
+## Deferred widget icon migration TODO
 
-Start only when the user authorizes A3b. Read the complete task contract in [06-motion-widgets](plans/2026-09-07-tonic-ui-v2/06-motion-widgets.md), then follow this order:
+This is a follow-up inventory, not an authorization to batch-edit widgets or change the task ledger. Each item is a separate, test-first slice: add a consumer-visible icon contract, record RED against current markup, then replace only that slice and run its focused regression tests.
 
-1. **Test first.** Read the existing Autolevel source and derive a transition table from actual idle/probing/stopped/completed/error behavior. Add controller and Visualizer integration tests in `src/app/widgets/Autolevel/__tests__/Autolevel.test.jsx` before migration code. Run the new-contract tests against the legacy owner and record a red result before implementation. Do not claim test-first for a characterization test added after implementation.
-2. Keep state transitions separate from controller commands. A reducer must never send a command. Preserve exact probing command order, grid coordinates/units, stop behavior, error/disconnect cleanup, probe results, and Visualizer PubSub events.
-3. Add `src/app/queries/gcode.js` with `useLoadGCodeMutation()` that calls `api.loadGCode(meta, context)`. Compensation runs once from an explicit action; errors keep original G-code and probe data. Query functions must not probe or compensate.
-4. Run focused tests, the full frontend suite, `yarn lint`, and `git diff --check`. Browser tests, browser tooling, screenshots, and builds remain deferred to R6.
+**Icon rule:** prefer `@tonic-ui/react-icons` when it has a semantic equivalent. If it does not, use `FontAwesomeIcon` with a direct imported icon definition (for example `faExpand`), not a raw `<i className="fa …">` and not a string name that requires app-root library registration. Preserve Font Awesome when the Tonic catalogue has no equivalent or the UI needs a deliberate legacy visual distinction.
 
-At this handoff, `4d41a1ac` is the verified A3a checkpoint. The separate Prettier enhancement has uncommitted changes in `.prettierrc.json`, `package.json`, and `yarn.lock`; preserve them and do not include them in A3b staging unless the user explicitly combines the work.
+- [ ] **I1 — Autolevel child views:** replace raw icons in `ApplyView.jsx`, `SetupProbeView.jsx`, and `StopProbeModal.jsx`. Tonic equivalents exist for chevrons, download, folder-open, close, play, and stop.
+- [ ] **I2 — Axes:** replace raw icons in `DisplayPanel.jsx`, `Keypad.jsx`, `KeypadOverlay.jsx`, `Settings/MDI/TableRecords.jsx`, and `components/PositionInput.jsx`. Preserve rotation, spinning, and fixed-width behavior in the component props or `sx`; assess circular-arrow icons individually rather than substituting a non-equivalent arrow.
+- [ ] **I3 — Tool:** replace raw widget header controls and action icons in `index.jsx` and `Tool.jsx`; cover refresh's pending/spinning state as well as menu/collapse behavior.
+- [ ] **I4 — controller widgets:** replace raw icons in Grbl (`index.jsx`, `modals/ControllerModal.jsx`), Marlin (`index.jsx`, `Controller.jsx`, `Marlin.jsx`), Smoothie (`index.jsx`, `Controller.jsx`), and TinyG (`index.jsx`, `TinyG.jsx`, `Overrides.jsx`). Treat controller command grids, refresh, status, and battery indicators as distinct behavior contracts.
+- [ ] **I5 — Visualizer:** replace raw icons in `Loading.jsx`, `PrimaryToolbar.jsx`, `Rendering.jsx`, `WatchDirectory.jsx`, `WorkflowControl.jsx`, and the legacy renderer tree. Preserve busy/spinner state, file-tree icon semantics, toggles, and workflow action meaning.
+- [ ] **I6 — existing Font Awesome widget header controls:** audit the currently migrated string-based `FontAwesomeIcon` use in Axes, Connection, Console, Custom, GCode, Grbl, Laser, Macro, Marlin, Probe, Smoothie, Spindle, TinyG, and Webcam. Convert Tonic-equivalent menu/more/chevron/close icons; retain direct Font Awesome definitions only where no Tonic equivalent exists. Do not assume the app-root icon library is mounted in widget tests.
+
+Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/widgets/**/*.jsx`; re-run it before each slice because source may change. Browser evidence remains deferred to R6.
 
 ## 恢復 prompt
 

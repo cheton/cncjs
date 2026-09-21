@@ -10,8 +10,26 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => null,
 }));
 
+jest.mock('@tonic-ui/react', () => {
+  const React = require('react');
+  const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
+
+  return {
+    Box: Primitive,
+    Button: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    Menu: Primitive,
+    MenuButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    MenuItem: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    MenuList: Primitive,
+    Space: () => null,
+  };
+});
+
 jest.mock('@app/api', () => ({
   loadGCode: jest.fn(),
+}));
+jest.mock('@app/queries/gcode', () => ({
+  useLoadGCodeMutation: () => ({ mutate: jest.fn() }),
 }));
 jest.mock('@app/widgets/Axes', () => 'AxesWidget');
 jest.mock('@app/widgets/Console', () => 'ConsoleWidget');

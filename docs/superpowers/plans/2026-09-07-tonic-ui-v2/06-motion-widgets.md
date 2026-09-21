@@ -88,8 +88,8 @@
 **Modify:** `src/app/widgets/Autolevel/index.jsx` 與 inventory 其餘 domain/UI glue。
 **Create:** `src/app/queries/gcode.js`, `src/app/widgets/Autolevel/__tests__/Autolevel.test.jsx`；需要時 `src/app/widgets/Autolevel/useAutolevel.js`。
 
-- [ ] 整理原狀態與 transition 表（idle/probing/stopped/completed/error 等以來源實際值為準），將 event→state 純轉換與送 controller 指令拆開。不能為取代 fetch machine 而刪除探測 domain workflow。
-- [ ] probe start/stop/measurement/error 各送入 reducer 或明確 handler；指令在 user/event handler 執行，禁止 reducer 送指令。
-- [ ] `useLoadGCodeMutation()` 呼叫 `api.loadGCode(meta, context)`；套用補償只在明確操作時送一次，error 保留原 gcode 與資料。queryFn 不做補償／探測操作。
-- [ ] 精確比對原 probing command sequence、網格座標／units、停止後不再排後續點、error/斷線清理、probe results 與 Visualizer PubSub events；演算法不順便改寫。
-- [ ] 以現有 simulator 能支援的範圍執行；不支援的探測事件用 mock controller fixture，記錄模擬限制。A3b 與 V3 必須跑一次跨 widget 整合驗證。
+- [x] 整理原狀態與 transition 表（idle/probing/stopped/completed/error 等以來源實際值為準），將 event→state 純轉換與送 controller 指令拆開。不能為取代 fetch machine 而刪除探測 domain workflow。
+- [x] probe start/stop/measurement/error 各送入 reducer 或明確 handler；指令在 user/event handler 執行，禁止 reducer 送指令。
+- [x] `useLoadGCodeMutation()` 呼叫 `api.loadGCode(meta, context)`；套用補償只在明確操作時送一次，error 保留原 gcode 與資料。queryFn 不做補償／探測操作。
+- [x] 精確比對原 probing command sequence、網格座標／units、停止後不再排後續點、error/斷線清理、probe results 與 Visualizer PubSub events；演算法不順便改寫。
+- [x] 以 mock controller fixture 覆蓋不支援的探測事件並記錄 simulator 限制；A3b 本身的跨-widget Visualizer contract 已驗證。Simulator/browser procedure remains deferred to R6 by explicit instruction; V3's separate integration gate remains pending.

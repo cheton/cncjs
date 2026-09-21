@@ -151,10 +151,16 @@ jest.mock('@tanstack/react-query', () => ({
 
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
+  const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
 
   return {
     Space: ({ children }) => children || null,
-    Box: ({ children, ...props }) => React.createElement('div', props, children),
+    Box: Primitive,
+    Button: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    Menu: Primitive,
+    MenuButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    MenuItem: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    MenuList: Primitive,
   };
 });
 
@@ -442,7 +448,9 @@ const getCollapseButton = shell => Array.from(shell.querySelectorAll('button')).
 
 const getFullscreenMenuItem = shell => {
   const items = shell.querySelectorAll('button[data-event-key="fullscreen"]');
-  return items[items.length - 1];
+  return items[items.length - 1] || Array.from(shell.querySelectorAll('button')).find(button => (
+    /Full Screen/.test(button.textContent)
+  ));
 };
 
 const contentIsHidden = content => (

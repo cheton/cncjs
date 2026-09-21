@@ -1,15 +1,15 @@
 # Migration task status
 
-更新日期：2026-09-20。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-21。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) 是恢復起點，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: none — **A3a Autolevel forms** is complete; do not start A3b without a new user instruction.
+- Active task: none — **A3b Autolevel workflow** completed 2026-09-21 with its required non-browser evidence.
 - Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: **A3b Autolevel workflow**。S1–S4、A1b、A2 與 A3a 已完成；G1–G7、C1–C4 已完成，G1-B01 已由使用者重新界定 scope 後解除。
-- Current blockers: R5 的完整 gate 仍依賴 `E4` 與 `A3b`；這些 task 尚未完成，因此 WorkflowControl 與 Autolevel integration acceptance 尚未可執行。G1-B01 已解除，見下方記錄。BR0 依使用者明確指示為 `waived`（非 passed）。既有 browser evidence 仍只涵蓋 connection/upload/Run/Pause/Resume；剩餘 browser gaps 依 waiver 延後至 R6。System Chrome channel 仍不支援 screenshot。
+- Next eligible tasks: **V1 toolbar/watch directory** and **E1 load characterization**. A3b, S1–S4, A1b, A2, and A3a are complete. Do not start either task without a new user instruction.
+- Current blockers: R5's full gate still depends on `E4`; its prescribed `WorkflowControl.test.jsx` and `Autolevel/__tests__/VisualizerIntegration.test.jsx` are not yet present. A3b is complete. G1-B01 is resolved. BR0 remains `waived` (not passed); existing browser evidence only covers connection/upload/Run/Pause/Resume, and remaining browser gaps are deferred to R6. System Chrome channel still does not support screenshots.
 - Browser instruction: 2026-09-20，使用者要求不要執行 browser tests。G7 與後續工作不得啟動 browser runner、Playwright、screenshot、accessible snapshot 或 simulator browser procedure；所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model。未完成 browser evidence 保持 deferred，不能標為 passed。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI`/`chrome` names are not part of the active API.
 - Source inventory baseline: f301cde7；最近已見文件提交 e09a642c。接手時重新記錄 HEAD/worktree，不硬編碼此值為當前 HEAD。
@@ -72,7 +72,7 @@
 | A1b | [Axes input](06-motion-widgets.md) | S4, G4 | completed | current root session / 2026-09-20 | `AxesWidgetContent` is a JSDoc function owner with `useReducer`, current-state refs, and paired controller/combokey/ShuttleControl effects. `DisplayPanel`, Keypad, and MDI consume the provider directly; no `actions` bag or React class remains in Axes UI. Focused Axes/Settings/query/draft tests: 4 suites / 29 tests; targeted Axes ESLint and diff check pass. Browser evidence and builds were not run per the explicit deferral. |
 | A2 | [Tool](06-motion-widgets.md) | A1b | completed | current root session / 2026-09-20 | Commit `98396e35` replaces the ImmutableStore/class Tool widget with a local function owner, React Query boundary, React Final Form child, Tonic controls, direct textarea ref, and full-payload debounced mutation. Follow-up uses direct Immer v9 `produce` for the editable draft; no helper abstraction or dependency upgrade. Focused Tool tests: 11 passed; full frontend: 47 suites / 268 tests; `yarn lint` and `git diff --check` pass. |
 | A3a | [Autolevel forms](06-motion-widgets.md) | A1b | completed | current root session / 2026-09-21 | Start/Stop/Test dialogs and ApplyView are JSDoc function components with direct Tonic controls; confirmation uses React Final Form/FormControl and explicit callbacks. ApplyView preserves file reading, retries, cached export, clear ownership, and paired PubSub cleanup. Focused 10 tests; full frontend 47 suites / 274 tests; `yarn lint` and `git diff --check` pass. Browser/build remain deferred. |
-| A3b | [Autolevel workflow](06-motion-widgets.md) | A3a | todo | — | — |
+| A3b | [Autolevel workflow](06-motion-widgets.md) | A3a | completed | current root session / 2026-09-21T10:17:14+08:00 | Function/Tonic owner with a pure workflow reducer, exact probe command handlers, paired controller/PubSub cleanup, explicit non-retrying G-code mutation, Visualizer sync, `sx` layout, and Tonic/Font Awesome icon boundary. Test-first evidence: legacy contract RED (late update after stop), query-boundary RED, review-fix RED, and icon-contract RED; latest focused Autolevel test 16 passed, full frontend 49 suites / 292 tests, `yarn lint`, and `git diff --check` pass. Simulator/browser/build deferred per instruction; mock controller fixture covers unsupported probing events. Protected Prettier paths remain untouched and unstaged. |
 | R3 | [geometry baseline](09-regression-gates.md) | R0 | completed | root session / 2026-09-18T18:43:47+08:00 | Real `three` + `GCodeVisualizer` geometry, arc-plane samples, units, empty/reload/frame cases, and Visualizer pivot/profile transitions; focused 10/10 R3, Visualizer nearby 12/12, full frontend 15 suites/88 tests; ESLint clean. |
 | V1 | [toolbar/watch directory](07-visualizer.md) | A3b, U3 | todo | — | — |
 | E1 | [load characterization](details/07a-visualizer-engine.md) | R3, A3b | todo | — | — |
@@ -80,7 +80,7 @@
 | E3 | [engine ownership](details/07a-visualizer-engine.md) | E2 | todo | — | — |
 | E4 | [owner integration](details/07a-visualizer-engine.md) | E3, V1 | todo | — | — |
 | R4 | [resources 驗收](09-regression-gates.md) | E4, T3 | todo | — | — |
-| R5 | [commands 驗收](09-regression-gates.md) | E4, A1b, A3b, T3, C1, C2, C3, C4 | in_progress | current root session / 2026-09-20 | Partial acceptance run passed 5 suites / 37 tests: Grbl, Marlin, Smoothie, TinyG, and Console. Full R5 remains pending because the prescribed `WorkflowControl.test.jsx` and `Autolevel/__tests__/VisualizerIntegration.test.jsx` do not exist and dependencies E4/A1b/A3b are todo. Browser evidence remains deferred to R6. |
+| R5 | [commands 驗收](09-regression-gates.md) | E4, A1b, A3b, T3, C1, C2, C3, C4 | in_progress | current root session / 2026-09-21 | Partial acceptance run passed 5 suites / 37 tests: Grbl, Marlin, Smoothie, TinyG, and Console. Full R5 remains pending because `E4` and the prescribed `WorkflowControl.test.jsx` / `Autolevel/__tests__/VisualizerIntegration.test.jsx` are pending. A1b and A3b are complete. Browser evidence remains deferred to R6. |
 | W1 | [Workspace domain](08-workspace-and-cleanup.md) | G1, G2, G3, G4, G5, G6, G7, T3, C1, C2, C3, C4, A2, A3b, E4, B1 | todo | — | — |
 | P0 | [unused families](details/08a-component-families.md) | U3 | completed | root session / 2026-09-18T22:15:00+08:00 | Deleted all 14 P0 families after graph/literal zero-consumer audit. `Notifications/ToastNotification` remains separate P1 code. Full frontend 22 suites/126 tests; build-dev, ESLint, and diff checks pass. |
 | P1 | [overlays](details/08a-component-families.md) | W1, P0 | todo | — | — |
