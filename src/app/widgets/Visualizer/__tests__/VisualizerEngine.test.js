@@ -157,33 +157,22 @@ describe('VisualizerEngine', () => {
   });
 
   test('keeps the canvas host sized while hidden', () => {
-    const visualizer = new Visualizer({ show: false, state: viewState });
+    const visualizer = Visualizer({
+      containerRef: jest.fn(),
+      show: false,
+    });
 
-    expect(visualizer.render().props.style).toMatchObject({
+    expect(visualizer.props.style).toMatchObject({
       height: '100%',
       visibility: 'hidden',
       width: '100%',
     });
   });
 
-  test('mounted compatibility wrapper delegates the load callback to the engine', () => {
-    const container = document.createElement('div');
-    Object.defineProperty(container, 'clientWidth', { value: 640 });
-    Object.defineProperty(container, 'clientHeight', { value: 480 });
-    const visualizer = new Visualizer({ show: true, state: viewState });
-    const callback = jest.fn();
+  test('exposes only the supplied host ref on the view element', () => {
+    const containerRef = jest.fn();
+    const visualizer = Visualizer({ containerRef, show: true });
 
-    visualizer.node = container;
-    visualizer.componentDidMount();
-    visualizer.load('rectangle.gcode', rectangularFixture, callback);
-
-    expect(callback).toHaveBeenCalledWith({
-      bbox: {
-        min: { x: 10, y: 20, z: -2 },
-        max: { x: 50, y: 60, z: 0 },
-      },
-    });
-
-    visualizer.componentWillUnmount();
+    expect(visualizer.ref).toBe(containerRef);
   });
 });

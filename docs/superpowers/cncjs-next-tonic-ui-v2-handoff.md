@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-A3b Autolevel workflow, V1 toolbar/watch directory, E1 load characterization, and E2 engine extraction are complete. R5 partial acceptance remains 5 suites / 37 tests; its full gate awaits E4 and the prescribed WorkflowControl/Autolevel Visualizer-integration files. Browser evidence remains deferred to R6.
+A3b Autolevel workflow, V1 toolbar/watch directory, E1 load characterization, and E2–E4 Visualizer engine work are complete. R5 partial acceptance remains 5 suites / 37 tests; its full gate needs the prescribed WorkflowControl/Autolevel Visualizer-integration files. Browser evidence remains deferred to R6.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **E4** [owner integration](plans/2026-09-07-tonic-ui-v2/details/07a-visualizer-engine.md) | E3 ✅, V1 ✅ | Visualizer hook and owner integration | 否 |
+| **R5** [command acceptance](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | E4 ✅, A1b ✅, A3b ✅, T3 ✅, C1–C4 ✅ | Add and run the prescribed WorkflowControl/Autolevel Visualizer-integration command tests | 否 |
 
-V1 passed its non-browser gate on 2026-09-21: focused 2 suites / 16 tests, full frontend 51 suites / 308 tests, ESLint 0 errors (13 pre-existing warnings), static migration scan, and diff check. E1 added a real parser-backed owner-load regression: focused 3 suites / 10 tests and fresh full frontend 52 suites / 309 tests pass. E2 extracts a non-React engine with synchronous `load({ name, content }) -> { bbox }`; the class wrapper temporarily preserves current callers until E4. Review-fixed tests cover top-level `sent`, initial positions, host sizing, and mounted callback delegation. E3 hardens resource ownership with rejecting loaders, all-settlement cleanup, current-state late attachment, idempotent engine/G-code/probe disposal, shared-sprite safety, and resource regressions. Focused 4 suites / 26 tests and full frontend 54 suites / 326 tests pass; target ESLint has 0 errors with 13 pre-existing warnings. E4 hook and owner integration is now in progress. The 5,000-node browser p95 and all browser evidence remain deferred to R6.
+V1 passed its non-browser gate on 2026-09-21: focused 2 suites / 16 tests, full frontend 51 suites / 308 tests, ESLint 0 errors (13 pre-existing warnings), static migration scan, and diff check. E1 added a real parser-backed owner-load regression: focused 3 suites / 10 tests and fresh full frontend 52 suites / 309 tests pass. E2 extracts a non-React engine with synchronous `load({ name, content }) -> { bbox }`; E3 hardens resource ownership with rejecting loaders, all-settlement cleanup, current-state late attachment, idempotent engine/G-code/probe disposal, shared-sprite safety, and resource regressions. E4 now supplies a host-gated `useVisualizer` owner boundary, synchronous one-time bbox publication, latest-pending load handling, paired subscriptions/resize cleanup, and a DOM-only visualizer view. Its focused gate passed 7 suites / 42 tests and full frontend passed 55 suites / 339 tests; target ESLint has 0 errors with 13 pre-existing warnings and diff check passes. The 5,000-node browser p95 and all browser evidence remain deferred to R6.
 
 ## 本輪交接重點（G1）
 

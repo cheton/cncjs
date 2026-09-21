@@ -1,17 +1,54 @@
 import * as THREE from 'three';
-import config from '@app/store/config';
-import Visualizer from '../Visualizer';
+import { createVisualizerEngine } from '../VisualizerEngine';
 import {
-  disposeThreeObject,
   rectangularFixture,
 } from './fixtures';
 
-jest.mock('@app/store/config', () => ({
-  __esModule: true,
-  default: {
-    get: jest.fn(),
-  },
-}));
+const mockRenderer = {
+  clear: jest.fn(),
+  domElement: document.createElement('canvas'),
+  render: jest.fn(),
+  setClearColor: jest.fn(),
+  setPixelRatio: jest.fn(),
+  setSize: jest.fn(),
+  shadowMap: {},
+};
+
+jest.mock('three', () => {
+  const actual = jest.requireActual('three');
+  return {
+    ...actual,
+    WebGLRenderer: jest.fn(() => mockRenderer),
+  };
+});
+
+jest.mock('@app/lib/three/TrackballControls', () => {
+  const mockThree = jest.requireActual('three');
+  return jest.fn().mockImplementation(() => ({
+    addEventListener: jest.fn(),
+    dispose: jest.fn(),
+    handleResize: jest.fn(),
+    noPan: false,
+    noZoom: false,
+    object: { position: new mockThree.Vector3(), up: new mockThree.Vector3() },
+    panSpeed: 1,
+    reset: jest.fn(),
+    setMouseButtonState: jest.fn(),
+    target: new mockThree.Vector3(),
+    update: jest.fn(),
+    zoomIn: jest.fn(),
+    zoomOut: jest.fn(),
+  }));
+});
+
+jest.mock('../helpers', () => {
+  const actual = jest.requireActual('../helpers');
+  return {
+    ...actual,
+    loadSTL: jest.fn(() => new Promise(() => {})),
+    loadTexture: jest.fn(() => new Promise(() => {})),
+  };
+});
 
 const PROFILE_A = {
   id: 'profile-a',
@@ -55,38 +92,26 @@ const createState = () => ({
 
 const createHarness = () => {
   const renderedScenes = [];
-  const visualizer = new Visualizer({
-    show: true,
-    state: createState(),
+  mockRenderer.render.mockImplementation(scene => {
+    renderedScenes.push(scene);
   });
-
-  visualizer.scene = new THREE.Scene();
-  visualizer.scene.add(visualizer.group);
-  visualizer.renderer = {
-    render: jest.fn((scene) => {
-      renderedScenes.push(scene);
-    }),
-  };
-  visualizer.controls = {
-    reset: jest.fn(),
-  };
-  visualizer.viewport = {
-    reset: jest.fn(),
-    set: jest.fn(),
-  };
-  visualizer.rebuildCoordinateSystems = jest.fn();
-
-  return { renderedScenes, visualizer };
+  const container = document.createElement('div');
+  Object.defineProperty(container, 'clientWidth', { value: 640 });
+  Object.defineProperty(container, 'clientHeight', { value: 480 });
+  const engine = createVisualizerEngine({
+    container,
+    onError: jest.fn(),
+    viewState: {
+      ...createState(),
+      machineProfile: null,
+      show: true,
+    },
+  });
+  return { engine, renderedScenes };
 };
 
-const setMachineProfile = profile => {
-  config.get.mockImplementation(path => (
-    path === 'workspace.machineProfile' ? profile : undefined
-  ));
-};
-
-const expectPivot = (visualizer, expected) => {
-  const actual = visualizer.pivotPoint.get();
+const expectPivot = (engine, expected) => {
+  const actual = engine.pivotPoint.get();
 
   expect(actual.x).toBeCloseTo(expected.x, 6);
   expect(actual.y).toBeCloseTo(expected.y, 6);
@@ -107,123 +132,101 @@ const expectWorldCenter = (scene, expected) => {
 
 describe('Visualizer pivot geometry baseline', () => {
   let harness;
-  let models;
-  let detachedObjects;
+
+  beforeAll(() => {
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => ({
+      fillText: jest.fn(),
+      measureText: () => ({ width: 10 }),
+    }));
+  });
+
+  afterAll(() => {
+    HTMLCanvasElement.prototype.getContext.mockRestore();
+  });
 
   beforeEach(() => {
-    config.get.mockReset();
+    mockRenderer.render.mockClear();
     harness = createHarness();
-    models = [];
-    detachedObjects = [];
   });
 
   afterEach(() => {
-    detachedObjects.forEach(disposeThreeObject);
-
-    models.forEach((model) => {
-      disposeThreeObject(model.group);
-      if (model.geometry && typeof model.geometry.dispose === 'function') {
-        model.geometry.dispose();
-      }
-    });
-
-    if (harness) {
-      disposeThreeObject(harness.visualizer.group);
-    }
-    config.get.mockReset();
+    harness.engine.dispose();
   });
 
   test('machine profile and G-code transitions preserve the pivot contract', () => {
-    const { renderedScenes, visualizer } = harness;
+    const { engine, renderedScenes } = harness;
 
     const changeProfile = (profile) => {
-      if (visualizer.limits && !detachedObjects.includes(visualizer.limits)) {
-        detachedObjects.push(visualizer.limits);
-      }
-      setMachineProfile(profile);
-      visualizer.changeMachineProfile();
+      engine.update({ machineProfile: profile });
     };
 
     changeProfile(PROFILE_A);
-    expectPivot(visualizer, { x: 100, y: 0, z: 0 });
-    expect(visualizer.scene.getObjectByName('Visualizer')).toBeUndefined();
+    expectPivot(engine, { x: 100, y: 0, z: 0 });
+    expect(engine.scene.getObjectByName('Visualizer')).toBeUndefined();
 
-    visualizer.load('rectangle.gcode', rectangularFixture);
-    models.push(visualizer.gcodeVisualizer);
-    expectPivot(visualizer, { x: 30, y: 40, z: -1 });
+    engine.load({ name: 'rectangle.gcode', content: rectangularFixture });
+    expectPivot(engine, { x: 30, y: 40, z: -1 });
     expectWorldCenter(renderedScenes[renderedScenes.length - 1], { x: 0, y: 0, z: 0 });
 
     changeProfile(PROFILE_A);
-    expectPivot(visualizer, { x: 30, y: 40, z: -1 });
+    expectPivot(engine, { x: 30, y: 40, z: -1 });
     changeProfile(null);
-    expectPivot(visualizer, { x: 30, y: 40, z: -1 });
+    expectPivot(engine, { x: 30, y: 40, z: -1 });
     expectWorldCenter(renderedScenes[renderedScenes.length - 1], { x: 0, y: 0, z: 0 });
 
     changeProfile(PROFILE_B);
-    expectPivot(visualizer, { x: 30, y: 40, z: -1 });
+    expectPivot(engine, { x: 30, y: 40, z: -1 });
     expectWorldCenter(renderedScenes[renderedScenes.length - 1], { x: 0, y: 0, z: 0 });
 
-    visualizer.unload();
-    expectPivot(visualizer, { x: -50, y: 75, z: 0 });
-    expect(visualizer.scene.getObjectByName('Visualizer')).toBeUndefined();
+    engine.unload();
+    expectPivot(engine, { x: -50, y: 75, z: 0 });
+    expect(engine.scene.getObjectByName('Visualizer')).toBeUndefined();
 
     changeProfile(null);
-    expectPivot(visualizer, { x: 0, y: 0, z: 0 });
-    expect(visualizer.scene.getObjectByName('Visualizer')).toBeUndefined();
+    expectPivot(engine, { x: 0, y: 0, z: 0 });
+    expect(engine.scene.getObjectByName('Visualizer')).toBeUndefined();
 
-    visualizer.load('rectangle.gcode', rectangularFixture);
-    models.push(visualizer.gcodeVisualizer);
-    expectPivot(visualizer, { x: 30, y: 40, z: -1 });
+    engine.load({ name: 'rectangle.gcode', content: rectangularFixture });
+    expectPivot(engine, { x: 30, y: 40, z: -1 });
     expectWorldCenter(renderedScenes[renderedScenes.length - 1], { x: 0, y: 0, z: 0 });
   });
 
   test('same-content and different-content reloads replace one centered object', () => {
-    const { renderedScenes, visualizer } = harness;
+    const { renderedScenes, engine } = harness;
     const shorterFixture = [
       'G21', 'G90',
       'G0 X0 Y0 Z0',
       'G1 X5 Y5 Z0',
     ].join('\n');
 
-    setMachineProfile(PROFILE_A);
-    visualizer.changeMachineProfile();
+    engine.update({ machineProfile: PROFILE_A });
 
-    visualizer.load('first.gcode', rectangularFixture);
-    const firstModel = visualizer.gcodeVisualizer;
-    const firstObject = visualizer.scene.getObjectByName('Visualizer');
-    models.push(firstModel);
+    engine.load({ name: 'first.gcode', content: rectangularFixture });
+    const firstObject = engine.scene.getObjectByName('Visualizer');
 
-    let secondBounds;
-    visualizer.load('same.gcode', rectangularFixture, ({ bbox }) => {
-      secondBounds = bbox;
-    });
-    const secondModel = visualizer.gcodeVisualizer;
-    const secondObject = visualizer.scene.getObjectByName('Visualizer');
-    models.push(secondModel);
+    const secondResult = engine.load({ name: 'same.gcode', content: rectangularFixture });
+    const secondModel = engine.gcodeVisualizer;
+    const secondObject = engine.scene.getObjectByName('Visualizer');
 
     expect(secondObject).toBeDefined();
     expect(secondObject).not.toBe(firstObject);
-    expect(secondObject.parent).toBe(visualizer.group);
-    expect(visualizer.group.children.filter(child => child.name === 'Visualizer')).toHaveLength(1);
-    expect(secondBounds).toEqual({
+    expect(secondObject.parent).toBe(engine.group);
+    expect(engine.group.children.filter(child => child.name === 'Visualizer')).toHaveLength(1);
+    expect(secondResult.bbox).toEqual({
       min: { x: 10, y: 20, z: -2 },
       max: { x: 50, y: 60, z: 0 },
     });
     expect(secondModel.geometry.vertices).toHaveLength(5);
     expectWorldCenter(renderedScenes[renderedScenes.length - 1], { x: 0, y: 0, z: 0 });
 
-    let thirdBounds;
-    visualizer.load('different.gcode', shorterFixture, ({ bbox }) => {
-      thirdBounds = bbox;
-    });
-    const thirdModel = visualizer.gcodeVisualizer;
-    const thirdObject = visualizer.scene.getObjectByName('Visualizer');
-    models.push(thirdModel);
+    const thirdResult = engine.load({ name: 'different.gcode', content: shorterFixture });
+    const thirdModel = engine.gcodeVisualizer;
+    const thirdObject = engine.scene.getObjectByName('Visualizer');
 
     expect(thirdObject).toBeDefined();
     expect(thirdObject).not.toBe(secondObject);
-    expect(visualizer.group.children.filter(child => child.name === 'Visualizer')).toHaveLength(1);
-    expect(thirdBounds).toEqual({
+    expect(engine.group.children.filter(child => child.name === 'Visualizer')).toHaveLength(1);
+    expect(thirdResult.bbox).toEqual({
       min: { x: 0, y: 0, z: 0 },
       max: { x: 5, y: 5, z: 0 },
     });

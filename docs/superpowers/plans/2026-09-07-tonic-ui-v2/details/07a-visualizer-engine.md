@@ -107,13 +107,13 @@ createVisualizerEngine({ container, viewState, onError })
 
 **Hook interface:** `useVisualizer({ viewState, onError })` 回 `{ containerRef, isReady, actions }`；actions 與 engine 公開操作一致，但無 engine/scene instance 暴露給其他 widgets。isReady 代表 renderer/scene setup 完成，不等 STL 載完。
 
-- [ ] hook 用 callback DOM ref 或 state node 作 mount dependency，container 真正出現才建 engine；viewState 更新走 engine.update，不能列入 create/dispose effect dependencies。一個 canvas host 不因單純 rerender 重建。
-- [ ] actions 用穩定 callbacks 讀 engineRef；事件觸發時 call，不能為重複命令使用 render prop 累加 counter。engine 未 ready 時 toolbar actions disabled，G-code load 在 hook ready 後由 owner 明確處理當下最新 pending document 一次。
-- [ ] owner 的 loadGCode({name,content,isProbeCompensationApplied}) 在 ready 時同步 `actions.load({name,content})`，取得 bbox 後更新 controller.context/Redux UPDATE_BOUNDING_BOX/domain reducer 一次。刪原 setTimeout 和 React setState callback 排程。
-- [ ] WebGL unavailable 分支保留 ready/no-renderer 舊流程；G-code 仍可載入機器、顯示名稱／狀態，不因 engine 缺席永遠 loading。
-- [ ] 如果 load 在 engine 建立前抵達，只保留最新 pending `{id,name,content}`，unload 清 pending。ready effect 消耗一次並移除；同內容但不同使用者 load 事件可重新載入。
-- [ ] 既有 resize/PubSub 的四項 probe事件、config profile change 由 hook/owner 单一地方橋接。profile 使用目前 config snapshot；避免 engine 與 owner 各訂一次。
-- [ ] `Visualizer.jsx` 只接 `{ containerRef, show }` 渲染 DOM；不需要 forwardRef，不能加 useImperativeHandle。owner 拿的是 hook actions，不是子 React component methods。
-- [ ] Run/Pause/Stop 保留既有 command route，UI/state 更新本身不送機器指令。
+- [x] hook 用 callback DOM ref 或 state node 作 mount dependency，container 真正出現才建 engine；viewState 更新走 engine.update，不能列入 create/dispose effect dependencies。一個 canvas host 不因單純 rerender 重建。
+- [x] actions 用穩定 callbacks 讀 engineRef；事件觸發時 call，不能為重複命令使用 render prop 累加 counter。engine 未 ready 時 toolbar actions disabled，G-code load 在 hook ready 後由 owner 明確處理當下最新 pending document 一次。
+- [x] owner 的 loadGCode({name,content,isProbeCompensationApplied}) 在 ready 時同步 `actions.load({name,content})`，取得 bbox 後更新 controller.context/Redux UPDATE_BOUNDING_BOX/domain reducer 一次。刪原 setTimeout 和 React setState callback 排程。
+- [x] WebGL unavailable 分支保留 ready/no-renderer 舊流程；G-code 仍可載入機器、顯示名稱／狀態，不因 engine 缺席永遠 loading。
+- [x] 如果 load 在 engine 建立前抵達，只保留最新 pending `{id,name,content}`，unload 清 pending。ready effect 消耗一次並移除；同內容但不同使用者 load 事件可重新載入。
+- [x] 既有 resize/PubSub 的四項 probe事件、config profile change 由 hook/owner 单一地方橋接。profile 使用目前 config snapshot；避免 engine 與 owner 各訂一次。
+- [x] `Visualizer.jsx` 只接 `{ containerRef, show }` 渲染 DOM；不需要 forwardRef，不能加 useImperativeHandle。owner 拿的是 hook actions，不是子 React component methods。
+- [x] Run/Pause/Stop 保留既有 command route，UI/state 更新本身不送機器指令。
 
 **Gate:** R3/R4/R5 全過，真 browser WebGL 見 regression plan。V2 不可只以 mock load 回傳固定 bbox 宣稱功能相同。

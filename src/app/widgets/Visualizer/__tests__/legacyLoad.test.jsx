@@ -1,19 +1,81 @@
+import React from 'react';
+import { act } from '@testing-library/react';
 import { UPDATE_BOUNDING_BOX } from '@app/actions/controller';
-import controller from '@app/lib/controller';
-import reduxStore from '@app/store/redux';
+import { renderAppUI } from '@app/test/render';
 import GCodeVisualizer from '../GCodeVisualizer';
-import Visualizer from '../Visualizer';
-import { VisualizerWidgetClass } from '../index';
 import {
   disposeGCodeVisualizer,
   rectangularFixture,
 } from './fixtures';
+import { getBoundingBox } from '../helpers';
 
+const mockLoad = jest.fn();
+const mockActions = {
+  load: mockLoad,
+  unload: jest.fn(),
+  zoomFit: jest.fn(),
+  zoomIn: jest.fn(),
+  zoomOut: jest.fn(),
+  panUp: jest.fn(),
+  panDown: jest.fn(),
+  panLeft: jest.fn(),
+  panRight: jest.fn(),
+  lookAtCenter: jest.fn(),
+  resize: jest.fn(),
+  showProbe: jest.fn(),
+  updateProbe: jest.fn(),
+  hideProbe: jest.fn(),
+};
+const mockUseVisualizer = jest.fn(() => ({
+  actions: mockActions,
+  containerRef: jest.fn(),
+  isReady: true,
+}));
+const controllerListeners = {};
+const mockController = {
+  addListener: jest.fn((eventName, listener) => {
+    controllerListeners[eventName] = listener;
+  }),
+  command: jest.fn(),
+  connection: { ident: 'connection' },
+  context: {},
+  removeListener: jest.fn(),
+  settings: {},
+  state: {},
+  type: '',
+  workflow: { state: '' },
+};
+
+jest.mock('../useVisualizer', () => ({
+  __esModule: true,
+  default: (...args) => mockUseVisualizer(...args),
+}));
 jest.mock('@app/lib/portal', () => jest.fn());
+jest.mock('@app/lib/three/WebGL', () => ({
+  isWebGLAvailable: jest.fn(() => true),
+}));
+jest.mock('@app/lib/i18n', () => ({
+  __esModule: true,
+  default: {
+    _: value => value,
+    t: value => value,
+  },
+}));
+jest.mock('@app/lib/controller', () => ({
+  __esModule: true,
+  default: mockController,
+}));
 jest.mock('@app/store/config', () => ({
   __esModule: true,
   default: {
-    get: jest.fn((path, defaultValue) => defaultValue),
+    get: jest.fn((path, defaultValue) => {
+      if (path === 'workspace.machineProfile') {
+        return null;
+      }
+      return defaultValue;
+    }),
+    on: jest.fn(),
+    removeListener: jest.fn(),
     set: jest.fn(),
     unset: jest.fn(),
     updater: jest.fn(),
@@ -23,121 +85,51 @@ jest.mock('@app/store/redux', () => ({
   __esModule: true,
   default: { dispatch: jest.fn() },
 }));
-jest.mock('@app/lib/controller', () => ({
-  __esModule: true,
-  default: {
-    connection: {},
-    context: {},
-    settings: {},
-    state: {},
-    type: '',
-    workflow: { state: '' },
-  },
-}));
 
-global.TextEncoder = require('util').TextEncoder;
+const controller = require('@app/lib/controller').default;
+const reduxStore = require('@app/store/redux').default;
+const VisualizerWidget = require('../index').default;
 
-const createVisualizerState = () => ({
-  cameraMode: 'rotate',
-  gcode: { sent: 0 },
-  isAgitated: false,
-  machinePosition: { x: 0, y: 0, z: 0 },
-  objects: {
-    coordinateSystem: { visible: false },
-    cuttingTool: { visible: false },
-    gridLineNumbers: { visible: false },
-    limits: { visible: true },
-  },
-  projection: 'perspective',
-  units: 'metric',
-  workPosition: { x: 0, y: 0, z: 0 },
-});
-
-const expectedBoundingBox = {
-  min: { x: 10, y: 20, z: -2 },
-  max: { x: 50, y: 60, z: 0 },
-};
-
-describe('VisualizerWidget legacy G-code loading', () => {
-  let widget;
-  let visualizer;
-  let render;
-  let stateUpdates;
+describe('VisualizerWidget G-code loading characterization', () => {
+  let model;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.clearAllMocks();
+    Object.keys(controllerListeners).forEach(eventName => delete controllerListeners[eventName]);
     controller.context = {};
-    reduxStore.dispatch.mockClear();
-
-    widget = new VisualizerWidgetClass({
-      widgetId: 'visualizer',
+    const parser = new GCodeVisualizer();
+    const object = parser.render(rectangularFixture);
+    model = parser;
+    mockLoad.mockReturnValue({ bbox: getBoundingBox(object) });
+    mockUseVisualizer.mockReturnValue({
+      actions: mockActions,
+      containerRef: jest.fn(),
+      isReady: true,
     });
-    visualizer = new Visualizer({
-      show: true,
-      state: createVisualizerState(),
-    });
-
-    // load() does not need a mounted renderer for this characterization. Its
-    // scene setup and asset loaders are intentionally outside this test.
-    visualizer.rebuildCoordinateSystems = jest.fn();
-    widget.visualizer = visualizer;
-
-    stateUpdates = [];
-    widget.setState = (updater, callback) => {
-      const nextState = typeof updater === 'function' ? updater(widget.state) : updater;
-      stateUpdates.push(nextState);
-      widget.state = {
-        ...widget.state,
-        ...nextState,
-      };
-      if (callback) {
-        callback();
-      }
-    };
-
-    // This spy calls the real method, including the real Toolpath parser.
-    render = jest.spyOn(GCodeVisualizer.prototype, 'render');
   });
 
   afterEach(() => {
-    render.mockRestore();
-    if (visualizer && visualizer.gcodeVisualizer) {
-      disposeGCodeVisualizer(visualizer.gcodeVisualizer);
-    }
-    jest.useRealTimers();
+    disposeGCodeVisualizer(model);
   });
 
-  test('passes the exact load contract to the real parser and completes once', () => {
-    const load = jest.spyOn(visualizer, 'load');
+  test('passes the exact content to the owner action and completes one real parser bbox update', () => {
+    const { unmount } = renderAppUI(<VisualizerWidget widgetId="visualizer" />);
 
-    widget.actions.loadGCode({
+    act(() => {
+      controllerListeners['sender:load']({
+        name: 'rectangle.gcode',
+        content: rectangularFixture,
+      }, {});
+    });
+
+    const expectedBoundingBox = {
+      min: { x: 10, y: 20, z: -2 },
+      max: { x: 50, y: 60, z: 0 },
+    };
+    expect(mockLoad).toHaveBeenCalledTimes(1);
+    expect(mockLoad).toHaveBeenCalledWith({
       name: 'rectangle.gcode',
       content: rectangularFixture,
-    });
-
-    expect(widget.state.gcode).toMatchObject({
-      content: rectangularFixture,
-      rendering: true,
-      ready: false,
-    });
-
-    jest.runOnlyPendingTimers();
-
-    expect(load).toHaveBeenCalledTimes(1);
-    expect(load).toHaveBeenCalledWith(
-      'rectangle.gcode',
-      rectangularFixture,
-      expect.any(Function)
-    );
-    expect(render).toHaveBeenCalledTimes(1);
-    expect(render).toHaveBeenCalledWith(rectangularFixture);
-
-    // These values come from the real parser output, not a mocked load bbox.
-    expect(widget.state.gcode).toMatchObject({
-      loading: false,
-      rendering: false,
-      ready: true,
-      bbox: expectedBoundingBox,
     });
     expect(controller.context).toMatchObject({
       xmin: 10,
@@ -152,7 +144,7 @@ describe('VisualizerWidget legacy G-code loading', () => {
       type: UPDATE_BOUNDING_BOX,
       payload: { boundingBox: expectedBoundingBox },
     });
-    expect(stateUpdates).toHaveLength(2);
-    expect(jest.getTimerCount()).toBe(0);
+
+    unmount();
   });
 });
