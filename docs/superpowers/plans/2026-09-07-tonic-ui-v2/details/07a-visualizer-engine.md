@@ -22,18 +22,18 @@
 
 ## 已確認的既有缺陷，不可當 golden baseline
 
-`index.jsx` 呼叫 `this.visualizer.load(content, callback)`，但 `Visualizer.jsx` 宣告 `load(name, gcode, callback)`，內部使用第二個 gcode，第一個 name 未使用。這是來源可見的不一致；先用真正 parser 的測試重現後修正，不能用 mock load 任意回傳 bbox 隱藏錯誤。
+歷史版本曾有 `index.jsx` 呼叫 `this.visualizer.load(content, callback)`、而 `Visualizer.jsx` 宣告 `load(name, gcode, callback)` 的不一致。現行 source 已由 `52560a43 fix(visualizer): pass gcode content to renderer` 修正為 `this.visualizer.load(name, content, callback)`，與 child signature 一致。E1 不得回退或新增雙 API；應以真正 parser 的 characterization test 固定這個已修正的合約，並在 execution log 記錄此 source drift ruling。不能用 mock load 任意回傳 bbox 隱藏錯誤。
 
 `GCodeVisualizer.render(gcode)` 呼叫 loadFromStringSync，**G-code parse 目前同步**。初版計畫的 load callback race 描述太寬：真正非同步來源是 owner 的 setTimeout、STL/texture loaders、RAF 與 controller events。本版固定同步 engine.load 返回值，刪除不必要的 callback/setTimeout，不新增 worker 或 request queue。
 
 ## Task E1：舊版 characterization 與 load signature 修正
 
 **Create:** `src/app/widgets/Visualizer/__tests__/fixtures.js`, `geometry.test.js`, `legacyLoad.test.jsx`。
-**Modify only after failing regression:** `Visualizer.jsx` 的 load signature 改 `load(gcode, callback)`，或在同一 extraction patch 導入下述 object signature。
+**Modify only if current source violates the characterization:** `Visualizer.jsx` 的 load signature 改 `load(gcode, callback)`，或在同一 extraction patch 導入下述 object signature。現行 `load(name, gcode, callback)` 與 owner caller 已相符時，E1 只新增 characterization evidence；object signature 屬 E2，不能在 E1 提前導入。
 
-- [ ] 在改場景 methods 前完成 [regression gates](../09-regression-gates.md) 的 R0/R3 幾何與 pivot 基準。舊 class 可以在測試內用 ref 呼叫作 characterization；最終測試換 engine，不允許把 production component refs 保留。
-- [ ] `legacyLoad` 透過真 owner load action + 真 GCodeVisualizer parser，mock WebGLRenderer/asset network；斷言 parser 收到 G-code string，callback/bbox state 一次完成。先看到錯誤，再修正兩端合約。
-- [ ] 不把重現的 defect 當所有其他測試失敗的理由。幾何測試以直接正確的 parser input 作獨立 oracle。
+- [x] 在改場景 methods 前完成 [regression gates](../09-regression-gates.md) 的 R0/R3 幾何與 pivot 基準。舊 class 可以在測試內用 ref 呼叫作 characterization；最終測試換 engine，不允許把 production component refs 保留。
+- [x] `legacyLoad` 透過真 owner load action + 真 GCodeVisualizer parser，mock WebGLRenderer/asset network；斷言 parser 收到 G-code string，callback/bbox state 一次完成。現行 source 已符合合約，已記錄 passing characterization baseline 與修正 commit `52560a43`；沒有回退以人為製造 RED，也沒有提前導入 E2 object signature。
+- [x] 不把重現的 defect 當所有其他測試失敗的理由。幾何測試以直接正確的 parser input 作獨立 oracle。
 
 ## Task E2：抽出非 React engine，保留演算法
 

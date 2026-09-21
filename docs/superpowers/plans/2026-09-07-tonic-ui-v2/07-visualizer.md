@@ -46,12 +46,12 @@
 **Modify:** `PrimaryToolbar.jsx`, `SecondaryToolbar.jsx`, `Dashboard.jsx`, `WorkflowControl.jsx`, `WatchDirectory.jsx`（均在 `src/app/widgets/Visualizer/`）。
 **Create:** `src/app/widgets/Visualizer/queries.js`, `src/app/widgets/Visualizer/__tests__/Toolbars.test.jsx`, `WatchDirectory.test.jsx`。
 
-- [ ] Toolbar/WorkflowControl 改純 props/actions，Menu/Tooltip/Modal/Progress 直接 Tonic；run/pause/stop 不放任何 mount effect。
-- [ ] machine profile fetch 改 Administration/Machines 既有 Query hooks；updateMachineProfiles event invalidate 同一 prefix。使用者選擇的 profile id 在 config，server list 在 query，不能互相覆盖。
-- [ ] watch directory 依 normalized path 分 key並 lazy fetch。建立 `watchDirectoryQueryOptions(path)`；render 中的已展開 node 由子 function 呼叫 `useQuery(watchDirectoryQueryOptions(path))`，event handler 只更新 controlled expanded/selected state。需要 click 後立即預取時可呼叫 `queryClient.prefetchQuery` 同一 options，但不能建立第二組 key/queryFn。pending/error/retry 與目錄切換 race 都測。
-- [ ] 直接以 Tonic Tree controlled `expanded`、`selected`、`onNodeFocus`、`onNodeSelect`、`onNodeToggle` 取代 `react-infinite-tree`。Tonic Tree 不宣稱內建 virtualization；先以 R0 固定 5,000-node fixture 比較相同 browser 的選取、展開與 scroll p95。只有 p95 退步超過 20% 才保留／新增薄型 visible-row adapter，且 adapter 不擁有 selection、loading、query 或 component instance。
-- [ ] Dashboard/WatchDirectory 的 findDOMNode 改自己擁有的 DOM wrapper ref；virtual list scroll API 若是第三方 imperative resource，可以封在該元件內，不讓父層依賴 React instance。
-- [ ] 測 huge list scroll、selection/load、空目錄/錯誤、cancel modal、檔案下載 metadata/token、control disabled 與 exact commands。
+- [x] Toolbar/WorkflowControl 改純 props/actions，Menu/Tooltip/Modal/Progress 直接 Tonic；run/pause/stop 不放任何 mount effect。
+- [x] machine profile fetch 改 Administration/Machines 既有 Query hooks；updateMachineProfiles event invalidate 同一 prefix。使用者選擇的 profile id 在 config，server list 在 query，不能互相覆盖。
+- [x] watch directory 依 normalized path 分 key並 lazy fetch。建立 `watchDirectoryQueryOptions(path)`；render 中的已展開 node 由子 function 呼叫 `useQuery(watchDirectoryQueryOptions(path))`，event handler 只更新 controlled expanded/selected state。需要 click 後立即預取時可呼叫 `queryClient.prefetchQuery` 同一 options，但不能建立第二組 key/queryFn。pending/error/retry 與目錄切換 race 都測。
+- [x] 直接以 Tonic Tree controlled `expanded`、`selected`、`onNodeFocus`、`onNodeSelect`、`onNodeToggle` 取代 `react-infinite-tree`。Tonic Tree 不宣稱內建 virtualization；5,000-node browser selection/expansion/scroll p95 evidence remains deferred to R6, where the >20% adapter decision is made.
+- [x] Dashboard/WatchDirectory 的 findDOMNode 改自己擁有的 DOM wrapper ref；virtual list scroll API 若是第三方 imperative resource，可以封在該元件內，不讓父層依賴 React instance。
+- [x] Tested selection/load, empty/error/retry, cancel modal, Dashboard download handoff, control disabled, and exact commands. Huge-list browser scroll evidence remains deferred to R6.
 
 ## Task V2/V3：engine extraction 與 owner integration
 
