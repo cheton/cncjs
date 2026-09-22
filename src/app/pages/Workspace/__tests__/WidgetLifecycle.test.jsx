@@ -234,6 +234,7 @@ jest.mock('@app/components/GridSystem', () => {
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
   const Primitive = ({ as: Tag = 'div', children, ...props }) => React.createElement(Tag, props, children);
+  const Modal = ({ children, isOpen }) => isOpen && React.createElement('section', null, children);
   const Button = ({ children, ...props }) => React.createElement(
     'button',
     { type: 'button', ...props },
@@ -244,6 +245,12 @@ jest.mock('@tonic-ui/react', () => {
     Button,
     ButtonGroup: Primitive,
     Flex: Primitive,
+    Modal,
+    ModalBody: Primitive,
+    ModalContent: Primitive,
+    ModalFooter: Primitive,
+    ModalHeader: Primitive,
+    ModalOverlay: Primitive,
     Space: Primitive,
     Text: Primitive,
   };

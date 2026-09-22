@@ -1,13 +1,19 @@
-import chainedFunction from 'chained-function';
 import classNames from 'classnames';
 import { ensureArray } from 'ensure-type';
 import pubsub from 'pubsub-js';
-import PropTypes from 'prop-types';
 import React, { useEffect } from 'react';
 import Sortable from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
-import { Button } from '@app/components/Buttons';
-import Modal from '@app/components/Modal';
+import {
+  Box,
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+} from '@tonic-ui/react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import log from '@app/lib/log';
@@ -19,12 +25,23 @@ import { WIDGET_REGISTRY } from './widgetRegistry';
 import { selectVisibleWidgetIds } from './widgetLayoutState';
 import styles from './widgets.styl';
 
+const noop = () => {};
+
+/**
+ * @param {{
+ *   className?: string,
+ *   onForkWidget?: (widgetId: string) => void,
+ *   onRemoveWidget?: (widgetId: string) => void,
+ *   onDragStart?: () => void,
+ *   onDragEnd?: () => void,
+ * }} props Component props.
+ */
 const PrimaryWidgets = ({
-  className,
-  onForkWidget,
-  onRemoveWidget,
-  onDragStart,
-  onDragEnd,
+  className = '',
+  onForkWidget = noop,
+  onRemoveWidget = noop,
+  onDragStart = noop,
+  onDragEnd = noop,
 }) => {
   const { ids, setWidgetIds } = useWidgetGroup('primary');
 
@@ -40,28 +57,35 @@ const PrimaryWidgets = ({
 
   const forkWidget = widgetId => () => {
     portal(({ onClose }) => (
-      <Modal size="xs" onClose={onClose}>
-        <Modal.Header>
-          <Modal.Title>
-            {i18n._('Fork Widget')}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {i18n._('Are you sure you want to fork this widget?')}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            onClick={onClose}
-          >
-            {i18n._('Cancel')}
-          </Button>
-          <Button
-            btnStyle="primary"
-            onClick={chainedFunction(
-              () => {
+      <Modal
+        autoFocus
+        closeOnEsc={false}
+        closeOnInteractOutside
+        ensureFocus
+        isClosable
+        isOpen
+        onClose={onClose}
+        size="xs"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{i18n._('Fork Widget')}</ModalHeader>
+          <ModalBody>
+            {i18n._('Are you sure you want to fork this widget?')}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              onClick={onClose}
+            >
+              {i18n._('Cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
                 const name = widgetId.split(':')[0];
                 if (!name) {
                   log.error(`Failed to fork widget: widgetId=${widgetId}`);
+                  onClose();
                   return;
                 }
 
@@ -73,53 +97,59 @@ const PrimaryWidgets = ({
 
                 setWidgetIds([...ids, forkedWidgetId]);
                 onForkWidget(widgetId);
-              },
-              onClose
-            )}
-          >
-            {i18n._('OK')}
-          </Button>
-        </Modal.Footer>
+                onClose();
+              }}
+            >
+              {i18n._('OK')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     ));
   };
 
   const removeWidget = widgetId => () => {
     portal(({ onClose }) => (
-      <Modal size="xs" onClose={onClose}>
-        <Modal.Header>
-          <Modal.Title>
-            {i18n._('Remove Widget')}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {i18n._('Are you sure you want to remove this widget?')}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            onClick={onClose}
-          >
-            {i18n._('Cancel')}
-          </Button>
-          <Button
-            btnStyle="primary"
-            onClick={chainedFunction(
-              () => {
+      <Modal
+        autoFocus
+        closeOnEsc={false}
+        closeOnInteractOutside
+        ensureFocus
+        isClosable
+        isOpen
+        onClose={onClose}
+        size="xs"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{i18n._('Remove Widget')}</ModalHeader>
+          <ModalBody>
+            {i18n._('Are you sure you want to remove this widget?')}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              onClick={onClose}
+            >
+              {i18n._('Cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
                 setWidgetIds(ids.filter(id => id !== widgetId));
 
                 if (widgetId.match(/\w+:[\w\-]+/)) {
-                  // Remove forked widget settings
+                // Remove forked widget settings
                   config.unset(['widgets', widgetId]);
                 }
 
                 onRemoveWidget(widgetId);
-              },
-              onClose
-            )}
-          >
-            {i18n._('OK')}
-          </Button>
-        </Modal.Footer>
+                onClose();
+              }}
+            >
+              {i18n._('OK')}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     ));
   };
@@ -129,7 +159,7 @@ const PrimaryWidgets = ({
     controller.availableControllers,
     WIDGET_REGISTRY
   ).map(widgetId => (
-    <div data-widget-id={widgetId} key={widgetId}>
+    <Box data-widget-id={widgetId} key={widgetId}>
       <Widget
         widgetId={widgetId}
         onFork={forkWidget(widgetId)}
@@ -139,7 +169,7 @@ const PrimaryWidgets = ({
           filterClassName: 'sortable-filter'
         }}
       />
-    </div>
+    </Box>
   ));
 
   return (
@@ -168,14 +198,6 @@ const PrimaryWidgets = ({
       {widgets}
     </Sortable>
   );
-};
-
-PrimaryWidgets.propTypes = {
-  className: PropTypes.string,
-  onForkWidget: PropTypes.func.isRequired,
-  onRemoveWidget: PropTypes.func.isRequired,
-  onDragStart: PropTypes.func.isRequired,
-  onDragEnd: PropTypes.func.isRequired
 };
 
 export default PrimaryWidgets;

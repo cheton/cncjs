@@ -11,6 +11,7 @@ let mockListeners;
 let mockSortables;
 let mockPubsubSubscriptions;
 let mockPortalContent;
+let mockPortalClose;
 let mockConfig;
 let mockController;
 let mockWidgetRegistry;
@@ -116,7 +117,8 @@ jest.mock('@app/lib/log', () => ({
 jest.mock('@app/lib/portal', () => ({
   __esModule: true,
   default: jest.fn(callback => {
-    mockPortalContent = callback({ onClose: jest.fn() });
+    mockPortalClose = jest.fn();
+    mockPortalContent = callback({ onClose: mockPortalClose });
   }),
 }));
 
@@ -221,6 +223,28 @@ jest.mock('@app/components/GridSystem', () => {
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
   const Primitive = ({ as: Tag = 'div', children, ...props }) => React.createElement(Tag, props, children);
+  const Modal = ({
+    autoFocus,
+    children,
+    closeOnEsc,
+    closeOnInteractOutside,
+    ensureFocus,
+    isClosable,
+    isOpen,
+    ...props
+  }) => isOpen && React.createElement(
+    'section',
+    {
+      ...props,
+      'data-testid': 'widget-action-modal',
+      'data-auto-focus': String(autoFocus),
+      'data-close-on-esc': String(closeOnEsc),
+      'data-close-on-interact-outside': String(closeOnInteractOutside),
+      'data-ensure-focus': String(ensureFocus),
+      'data-is-closable': String(isClosable),
+    },
+    children
+  );
   const Button = ({ children, ...props }) => React.createElement(
     'button',
     { type: 'button', ...props },
@@ -231,6 +255,12 @@ jest.mock('@tonic-ui/react', () => {
     Button,
     ButtonGroup: Primitive,
     Flex: Primitive,
+    Modal,
+    ModalBody: Primitive,
+    ModalContent: Primitive,
+    ModalFooter: Primitive,
+    ModalHeader: Primitive,
+    ModalOverlay: Primitive,
     Space: Primitive,
     Text: Primitive,
   };
@@ -495,7 +525,13 @@ test('fork and remove persist settings while native widget settings remain untou
 
   fireEvent.click(screen.getByTestId('fork-axes'));
   const forkModal = render(mockPortalContent);
+  expect(screen.getByTestId('widget-action-modal')).toHaveAttribute('data-auto-focus', 'true');
+  expect(screen.getByTestId('widget-action-modal')).toHaveAttribute('data-ensure-focus', 'true');
+  expect(screen.getByTestId('widget-action-modal')).toHaveAttribute('data-is-closable', 'true');
+  expect(screen.getByTestId('widget-action-modal')).toHaveAttribute('data-close-on-esc', 'false');
+  expect(screen.getByTestId('widget-action-modal')).toHaveAttribute('data-close-on-interact-outside', 'true');
   fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+  expect(mockPortalClose).toHaveBeenCalledTimes(1);
   forkModal.unmount();
 
   const forkedWidgetId = mockConfig.read().workspace.container.primary.widgets[1];
