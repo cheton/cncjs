@@ -1409,3 +1409,11 @@ The widget manager is a controlled function owner with direct Tonic modal, grid,
 Verification: focused Workspace suite `yarn test:frontend --runInBand --silent --runTestsByPath $(rg --files src/app/pages/Workspace/__tests__ | sort)` passed 7 suites / 68 tests. Full `yarn test:frontend --runInBand --silent` passed 58 suites / 367 tests. Targeted ESLint and `git diff --check` passed. Browser, simulator, and build were not run under the standing R6 deferral.
 
 Checkpoints: `74fe926e` (Workspace hook owner), `1c8af004` (controlled Tonic widget manager), `6ce2c2dc` (query-mutation test fixture), and `a24f9460` (Tonic Workspace shell). Status transition: W1 `in_progress` → `completed`; P1 overlays is now eligible and is not started.
+
+## P1 actions, menu, modal, tooltip, notification — started 2026-09-22
+
+Scope is `details/08a-component-families.md` P1. The family contains twelve legacy component groups with consumers across app containers, Workspace, and widgets, so execution is split into independently verified consumer slices. The user authorized checkpoint commits. Browser, simulator, and build remain deferred to R6.
+
+Completed initial slices: `ab5dbc65` migrates Workspace feeder paused/wait/server-disconnected dialogs and `ModalTemplate` to direct Tonic modal composition; a new focused test proves the non-dismissible focus contract and feeder command-before-close ordering. Workspace suite passed 8 suites / 70 tests. `30825e14` migrates CorruptedWorkspaceSettingsModal to a non-dismissible direct Tonic dialog and preserves export URL plus restore-defaults → persist → reload ordering; focused app/config tests passed 2 suites / 6 tests. Targeted ESLint and diff checks passed for both slices.
+
+Status transition: P1 `todo` → `in_progress`. Remaining P1 work is deliberate: audit and migrate the remaining direct consumers for Anchor/Buttons/Clickable/IconButton, Dropdown/RootCloseWrapper, Modal/ModalTemplate, Tooltip/Infotip, and Notifications/InlineToasts before any shared family can be deleted. No full frontend, browser, simulator, build, package deletion, or push is claimed at this checkpoint.
