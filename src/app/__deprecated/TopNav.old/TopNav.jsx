@@ -1,4 +1,10 @@
 import {
+  Box,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  MenuToggle,
   Space,
   Text,
 } from '@tonic-ui/react';
@@ -10,9 +16,7 @@ import Push from 'push.js';
 import api from '@app/api';
 import Anchor from '@app/components/Anchor';
 import Badge from '@app/components/Badge';
-import { Button } from '@app/components/Buttons';
 import { Container, Row, Col } from '@app/components/GridSystem';
-import Dropdown, { MenuItem } from '@app/components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Hoverable from '@app/components/Hoverable';
 import Image from '@app/components/Image';
@@ -33,7 +37,7 @@ import QuickAccessToolbar from './QuickAccessToolbar';
 
 const releases = 'https://github.com/cncjs/cncjs/releases';
 
-const NavDropdownToggle = styled(Button)`
+const NavMenuToggle = styled(MenuToggle)`
     & {
         background: none;
         border: none;
@@ -269,7 +273,13 @@ class TopNav extends Component {
 
     return (
       <>
-        <MenuItem header>
+        <Box
+          px="3x"
+          py="2x"
+          role="heading"
+          fontSize="sm"
+          color="text.secondary"
+        >
           <Row
             style={{
               justifyContent: 'space-between',
@@ -294,7 +304,7 @@ class TopNav extends Component {
               )}
             </Col>
           </Row>
-        </MenuItem>
+        </Box>
         {commands.map(cmd => {
           let icon = null;
           let spin = false;
@@ -330,7 +340,7 @@ class TopNav extends Component {
             </MenuItem>
           );
         })}
-        <MenuItem divider />
+        <MenuDivider />
       </>
     );
   }
@@ -428,20 +438,21 @@ class TopNav extends Component {
               </Col>
               <Col width="auto">
                 {sessionEnabled && (
-                  <Dropdown
-                    pullRight
-                  >
-                    <Dropdown.Toggle
-                      componentClass={NavDropdownToggle}
-                      btnStyle="dark"
-                    >
+                  <Menu placement="bottom-end">
+                    <NavMenuToggle aria-label={i18n._('Account options')}>
                       <FontAwesomeIcon icon="user" />
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <MenuItem header>
+                    </NavMenuToggle>
+                    <MenuList>
+                      <Box
+                        px="3x"
+                        py="2x"
+                        role="heading"
+                        fontSize="sm"
+                        color="text.secondary"
+                      >
                         {i18n._('Signed in as {{name}}', { name: signedInName })}
-                      </MenuItem>
-                      <MenuItem divider />
+                      </Box>
+                      <MenuDivider />
                       <MenuItem
                         onClick={() => {
                           history.push('/settings/account');
@@ -468,16 +479,12 @@ class TopNav extends Component {
                         <Space width={8} />
                         {i18n._('Sign Out')}
                       </MenuItem>
-                    </Dropdown.Menu>
-                  </Dropdown>
+                    </MenuList>
+                  </Menu>
                 )}
-                <Dropdown
-                  pullRight
-                >
-                  <Dropdown.Toggle
-                    componentClass={NavDropdownToggle}
-                    btnStyle="dark"
-                    noCaret
+                <Menu placement="bottom-end">
+                  <NavMenuToggle
+                    aria-label={i18n._('Options')}
                     title={i18n._('Options')}
                   >
                     <FontAwesomeIcon icon="ellipsis-v" />
@@ -495,8 +502,8 @@ class TopNav extends Component {
                         {this.state.runningTasks.length}
                       </Badge>
                     )}
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu>
+                  </NavMenuToggle>
+                  <MenuList>
                     {(commands.length > 0) &&
                                         this.mapCommandsToMenuItems(commands)}
                     <MenuItem
@@ -515,8 +522,8 @@ class TopNav extends Component {
                     >
                       {i18n._('Report an issue')}
                     </MenuItem>
-                  </Dropdown.Menu>
-                </Dropdown>
+                  </MenuList>
+                </Menu>
               </Col>
             </Row>
           </Col>

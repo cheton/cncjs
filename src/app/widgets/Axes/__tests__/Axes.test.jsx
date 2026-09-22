@@ -226,6 +226,42 @@ describe('Axes position input', () => {
       view.dispose();
     }
   });
+
+  test('runs the selected work-coordinate command through the native menu', () => {
+    mockCommand.mockClear();
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x'],
+          machinePosition: { x: '1.000' },
+          workPosition: { x: '1.000' },
+          jog: { axis: '', keypad: false },
+          controller: { type: GRBL },
+          controllerType: GRBL,
+          positionInput: null,
+        },
+        onGetWorkCoordinateSystem: () => 'G54',
+        onGetJogDistance: () => 0.25,
+        onJog: jest.fn(),
+        onSetPositionInput: jest.fn(),
+        onSetWorkOffsets: jest.fn(),
+      }}
+      >
+        <DisplayPanel />
+      </AxesProvider>
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Select work coordinate system' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Go To Work Zero (G0 X0 Y0 Z0)' }));
+
+      expect(mockCommand).toHaveBeenCalledWith('gcode', 'G0 X0 Y0 Z0');
+    } finally {
+      view.dispose();
+    }
+  });
 });
 
 describe('Axes reported-position reducer', () => {

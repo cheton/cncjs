@@ -1,9 +1,16 @@
 import { ensureArray } from 'ensure-type';
-import { Box, Tooltip } from '@tonic-ui/react';
+import {
+  Box,
+  Menu,
+  MenuDivider,
+  MenuItem as TonicMenuItem,
+  MenuList,
+  MenuToggle,
+  Tooltip,
+} from '@tonic-ui/react';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
-import React from 'react';
-import Dropdown, { MenuItem } from '@app/components/Dropdown';
+import React, { Children, cloneElement, isValidElement } from 'react';
 import Image from '@app/components/Image';
 import {
   AXIS_E,
@@ -145,6 +152,107 @@ const getAxisHomeCommand = (controllerType, axis) => {
 
   return '';
 };
+
+/**
+ * @param {{ children?: React.ReactNode }} props
+ */
+function AxisCommandMenuToggle({ children }) {
+  return children;
+}
+
+/**
+ * @param {{ children?: React.ReactNode }} props
+ */
+function AxisCommandMenuList({ children }) {
+  return children;
+}
+
+/**
+ * @param {{
+ *   active?: boolean,
+ *   children?: React.ReactNode,
+ *   disabled?: boolean,
+ *   divider?: boolean,
+ *   eventKey?: string | string[],
+ *   header?: boolean,
+ *   onSelect?: (eventKey: string | string[]) => void,
+ * }} props
+ */
+function AxisCommandMenuItem({
+  active = false,
+  children,
+  disabled = false,
+  divider = false,
+  eventKey,
+  header = false,
+  onSelect,
+}) {
+  if (divider) {
+    return <MenuDivider />;
+  }
+
+  if (header) {
+    return (
+      <Box
+        px="3x"
+        py="2x"
+        role="heading"
+        fontSize="sm"
+        color="text.secondary"
+      >
+        {children}
+      </Box>
+    );
+  }
+
+  return (
+    <TonicMenuItem
+      disabled={disabled}
+      selected={active}
+      onClick={() => onSelect?.(eventKey)}
+    >
+      {children}
+    </TonicMenuItem>
+  );
+}
+
+/**
+ * @param {{
+ *   children: React.ReactNode,
+ *   disabled?: boolean,
+ *   onSelect?: (eventKey: string | string[]) => void,
+ * }} props
+ */
+function AxisCommandMenu({ children, disabled = false, onSelect }) {
+  const items = Children.toArray(children);
+  const toggle = items.find(child => isValidElement(child) && child.type === AxisCommandMenuToggle);
+  const list = items.find(child => isValidElement(child) && child.type === AxisCommandMenuList);
+
+  return (
+    <Menu>
+      <MenuToggle
+        aria-label={toggle.props['aria-label']}
+        className={toggle.props.className}
+        disabled={disabled}
+      >
+        {toggle.props.children}
+      </MenuToggle>
+      <MenuList>
+        {Children.map(list.props.children, child => (
+          isValidElement(child)
+            ? cloneElement(child, { onSelect })
+            : child
+        ))}
+      </MenuList>
+    </Menu>
+  );
+}
+
+AxisCommandMenu.Toggle = AxisCommandMenuToggle;
+AxisCommandMenu.Menu = AxisCommandMenuList;
+
+const Dropdown = AxisCommandMenu;
+const MenuItem = AxisCommandMenuItem;
 
 /**
  * @returns {JSX.Element}
