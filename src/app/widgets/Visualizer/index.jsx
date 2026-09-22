@@ -1,4 +1,3 @@
-import chainedFunction from 'chained-function';
 import { ensurePositiveNumber } from 'ensure-type';
 import ExpressionEvaluator from 'expr-eval';
 import includes from 'lodash/includes';
@@ -7,6 +6,9 @@ import mapValues from 'lodash/mapValues';
 import pubsub from 'pubsub-js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Box,
+  Button,
+  Link,
   Modal,
   ModalBody,
   ModalContent,
@@ -17,8 +19,6 @@ import {
 import {
   UPDATE_BOUNDING_BOX,
 } from '@app/actions/controller';
-import Anchor from '@app/components/Anchor';
-import { Button } from '@app/components/Buttons';
 import ModalTemplate from '@app/components/ModalTemplate';
 import Widget from '@app/components/Widget';
 import {
@@ -107,7 +107,10 @@ const translateExpression = (function() {
 const displayWebGLErrorMessage = () => {
   portal(({ onClose }) => (
     <Modal
+      autoFocus
+      closeOnEsc={false}
       closeOnInteractOutside={false}
+      ensureFocus
       isClosable
       isOpen
       size="xs"
@@ -121,18 +124,18 @@ const displayWebGLErrorMessage = () => {
         <ModalBody>
           <ModalTemplate type="warning">
             {window.WebGLRenderingContext && (
-              <div>
-                Your graphics card does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
+              <Box>
+                Your graphics card does not seem to support <Link href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Link>.
                 <br />
-                Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
-              </div>
+                Find out how to get it <Link href="http://get.webgl.org/">here</Link>.
+              </Box>
             )}
             {!window.WebGLRenderingContext && (
-              <div>
-                Your browser does not seem to support <Anchor href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Anchor>.
+              <Box>
+                Your browser does not seem to support <Link href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Link>.
                 <br />
-                Find out how to get it <Anchor href="http://get.webgl.org/">here</Anchor>.
-              </div>
+                Find out how to get it <Link href="http://get.webgl.org/">here</Link>.
+              </Box>
             )}
           </ModalTemplate>
         </ModalBody>
@@ -589,7 +592,10 @@ function VisualizerWidget({ widgetId }) {
       if (notification.type === NOTIFICATION_M6_TOOL_CHANGE) {
         portal(({ onClose }) => (
           <Modal
+            autoFocus
+            closeOnEsc={false}
             closeOnInteractOutside={false}
+            ensureFocus
             isClosable
             isOpen
             size="xs"
@@ -602,11 +608,11 @@ function VisualizerWidget({ widgetId }) {
               <ModalFooter>
                 <Button onClick={onClose}>{i18n._('No')}</Button>
                 <Button
-                  btnStyle="primary"
-                  onClick={chainedFunction(
-                    () => controller.command('sender_resume'),
-                    onClose
-                  )}
+                  variant="primary"
+                  onClick={() => {
+                    controller.command('sender_resume');
+                    onClose();
+                  }}
                 >
                   {i18n._('Yes')}
                 </Button>
