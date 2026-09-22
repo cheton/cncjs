@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Box,
   Button,
   Modal,
   ModalBody,
@@ -7,7 +9,6 @@ import {
   ModalOverlay,
 } from '@tonic-ui/react';
 import React from 'react';
-import ModalTemplate from '@app/components/ModalTemplate';
 import i18n from '@app/lib/i18n';
 
 const reloadPage = (forcedReload = true) => {
@@ -32,18 +33,10 @@ function ServerDisconnected() {
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
-          <ModalTemplate type="error">
-            {({ PrimaryMessage, DescriptiveMessage }) => (
-              <>
-                <PrimaryMessage>
-                  {i18n._('Server has stopped working')}
-                </PrimaryMessage>
-                <DescriptiveMessage>
-                  {i18n._('A problem caused the server to stop working correctly. Check out the server status and try again.')}
-                </DescriptiveMessage>
-              </>
-            )}
-          </ModalTemplate>
+          <Alert severity="error">
+            <Box fontWeight="bold">{i18n._('Server has stopped working')}</Box>
+            <Box>{i18n._('A problem caused the server to stop working correctly. Check out the server status and try again.')}</Box>
+          </Alert>
         </ModalBody>
         <ModalFooter>
           <Button onClick={reloadPage} variant="primary">

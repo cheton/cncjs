@@ -1,5 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Alert,
+  Box,
   Button,
   Flex,
   Link,
@@ -10,7 +12,6 @@ import {
   ModalOverlay,
 } from '@tonic-ui/react';
 import React, { useEffect, useState } from 'react';
-import ModalTemplate from '@app/components/ModalTemplate';
 import settings from '@app/config/settings';
 import i18n from '@app/lib/i18n';
 import config from '@app/store/config';
@@ -60,29 +61,23 @@ function CorruptedWorkspaceSettingsModal() {
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
-          <ModalTemplate type="error">
-            {({ PrimaryMessage, DescriptiveMessage }) => (
-              <>
-                <PrimaryMessage>
-                  {i18n._('Corrupted workspace settings')}
-                </PrimaryMessage>
-                <DescriptiveMessage>
-                  {i18n._('The workspace settings have become corrupted or invalid. Click Restore Defaults to restore default settings and continue.')}
-                  <Flex
-                    as={Link}
-                    align="center"
-                    download={filename}
-                    gap="2x"
-                    href={url}
-                    mt="2x"
-                  >
-                    <FontAwesomeIcon aria-hidden="true" icon="download" />
-                    {i18n._('Download workspace settings')}
-                  </Flex>
-                </DescriptiveMessage>
-              </>
-            )}
-          </ModalTemplate>
+          <Alert severity="error">
+            <Box fontWeight="bold">{i18n._('Corrupted workspace settings')}</Box>
+            <Box>
+              {i18n._('The workspace settings have become corrupted or invalid. Click Restore Defaults to restore default settings and continue.')}
+              <Flex
+                as={Link}
+                align="center"
+                download={filename}
+                gap="2x"
+                href={url}
+                mt="2x"
+              >
+                <FontAwesomeIcon aria-hidden="true" icon="download" />
+                {i18n._('Download workspace settings')}
+              </Flex>
+            </Box>
+          </Alert>
         </ModalBody>
         <ModalFooter>
           <Button onClick={restoreDefaults} variant="danger">

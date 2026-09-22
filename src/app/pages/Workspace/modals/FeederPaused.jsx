@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Box,
   Button,
   Modal,
   ModalBody,
@@ -8,7 +10,6 @@ import {
   Text,
 } from '@tonic-ui/react';
 import React from 'react';
-import ModalTemplate from '@app/components/ModalTemplate';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 
@@ -40,19 +41,13 @@ function FeederPaused({ title = '', message = '', onClose = () => {} }) {
       <ModalOverlay />
       <ModalContent>
         <ModalBody>
-          <ModalTemplate type="warning">
-            {({ PrimaryMessage, DescriptiveMessage }) => (
-              <>
-                <PrimaryMessage>
-                  <Text as="h5">{title}</Text>
-                  {message && <Text as="p">{message}</Text>}
-                </PrimaryMessage>
-                <DescriptiveMessage>
-                  {i18n._('Click the Continue button to resume execution.')}
-                </DescriptiveMessage>
-              </>
-            )}
-          </ModalTemplate>
+          <Alert severity="warning">
+            <Box fontWeight="bold">
+              <Text as="h5">{title}</Text>
+              {message && <Text as="p">{message}</Text>}
+            </Box>
+            <Box>{i18n._('Click the Continue button to resume execution.')}</Box>
+          </Alert>
         </ModalBody>
         <ModalFooter justify="space-between">
           <Button onClick={stop} variant="danger">

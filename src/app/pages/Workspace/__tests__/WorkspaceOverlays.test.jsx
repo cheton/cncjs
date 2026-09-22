@@ -18,6 +18,7 @@ jest.mock('@tonic-ui/react', () => {
   const Primitive = ({ children }) => React.createElement('div', null, children);
 
   return {
+    Alert: Primitive,
     Box: Primitive,
     Button: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     Flex: Primitive,
@@ -83,5 +84,4 @@ describe('Workspace overlays', () => {
     expect(mockCommand).toHaveBeenCalledWith('feeder_stop');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-
 });

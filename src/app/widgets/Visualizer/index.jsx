@@ -7,6 +7,7 @@ import pubsub from 'pubsub-js';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
+  Alert,
   Button,
   Link,
   Modal,
@@ -19,7 +20,6 @@ import {
 import {
   UPDATE_BOUNDING_BOX,
 } from '@app/actions/controller';
-import ModalTemplate from '@app/components/ModalTemplate';
 import Widget from '@app/components/Widget';
 import {
   IMPERIAL_UNITS,
@@ -122,7 +122,7 @@ const displayWebGLErrorMessage = () => {
           WebGL Error Message
         </ModalHeader>
         <ModalBody>
-          <ModalTemplate type="warning">
+          <Alert severity="warning">
             {window.WebGLRenderingContext && (
               <Box>
                 Your graphics card does not seem to support <Link href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">WebGL</Link>.
@@ -137,7 +137,7 @@ const displayWebGLErrorMessage = () => {
                 Find out how to get it <Link href="http://get.webgl.org/">here</Link>.
               </Box>
             )}
-          </ModalTemplate>
+          </Alert>
         </ModalBody>
         <ModalFooter>
           <Button onClick={onClose}>
