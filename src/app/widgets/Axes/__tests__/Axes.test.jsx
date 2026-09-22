@@ -191,6 +191,41 @@ describe('Axes position input', () => {
       view.dispose();
     }
   });
+
+  test('opens the work-offset tooltip on keyboard focus', async () => {
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x'],
+          machinePosition: { x: '1.000' },
+          workPosition: { x: '1.000' },
+          jog: { axis: '', keypad: false },
+          controller: { type: MARLIN },
+          positionInput: null,
+        },
+        onGetWorkCoordinateSystem: () => 'G54',
+        onGetJogDistance: () => 0.25,
+        onJog: jest.fn(),
+        onSetPositionInput: jest.fn(),
+        onSetWorkOffsets: jest.fn(),
+      }}
+      >
+        <DisplayPanel />
+      </AxesProvider>
+    );
+
+    try {
+      const button = screen.getByRole('button', { name: 'Set X work offsets' });
+      fireEvent.focus(button);
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('Set Work Offsets');
+      expect(button).toHaveAttribute('aria-describedby');
+    } finally {
+      view.dispose();
+    }
+  });
 });
 
 describe('Axes reported-position reducer', () => {

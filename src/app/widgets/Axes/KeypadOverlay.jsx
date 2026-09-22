@@ -1,9 +1,9 @@
 import {
   Box,
   Space,
+  Tooltip,
 } from '@tonic-ui/react';
 import React from 'react';
-import Infotip from '@app/components/Infotip';
 import i18n from '@app/lib/i18n';
 
 const keypadInfotip = () => {
@@ -136,14 +136,15 @@ function KeypadOverlay({ show = false, children }) {
   }
 
   return (
-    <Infotip
-      content={keypadInfotip()}
-      hideOnClick
+    <Tooltip
+      closeOnClick
+      enterDelay={0}
+      label={keypadInfotip()}
+      p={0}
       placement="bottom"
-      style={{ padding: 0 }}
     >
       {children}
-    </Infotip>
+    </Tooltip>
   );
 }
 
