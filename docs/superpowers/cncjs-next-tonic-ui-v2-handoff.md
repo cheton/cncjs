@@ -13,17 +13,17 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-09-19；本檔重整前的狀態）
+## 現況快照（2026-09-22）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `06041616`（本檔自身尚未 commit） |
+| HEAD | `df915229`（文件更新本身尚未 commit） |
 | 工作樹 | clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | **A1b Axes input** |
-| 最近完成 | **C4 TinyG/g2core**（G1-B01 已解除） |
-| 下一步推薦 | **A1b Axes input** |
+| Active task | **P1 overlays** |
+| 最近完成 | ModalTemplate family removal (`df915229`) |
+| 下一步推薦 | P1 InlineToasts consumers |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,13 @@
 
 ## 下一個可執行項目
 
-A3b Autolevel workflow, V1 toolbar/watch directory, E1 load characterization, E2–E4 Visualizer engine work, and R5 command acceptance are complete. Browser evidence remains deferred to R6.
+P1 is active; no downstream task is eligible until its zero-import gate is resolved. Browser evidence remains deferred to R6.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P1** [overlays](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | W1 ✅, P0 ✅ | Migrate the next bounded overlay component family | 否 |
+| **P1** [overlays](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | W1 ✅, P0 ✅ | Finish the remaining component-family zero-import work | 否 |
 
-V1 passed its non-browser gate on 2026-09-21: focused 2 suites / 16 tests, full frontend 51 suites / 308 tests, ESLint 0 errors (13 pre-existing warnings), static migration scan, and diff check. E1 added a real parser-backed owner-load regression: focused 3 suites / 10 tests and fresh full frontend 52 suites / 309 tests pass. E2 extracts a non-React engine with synchronous `load({ name, content }) -> { bbox }`; E3 hardens resource ownership with rejecting loaders, all-settlement cleanup, current-state late attachment, idempotent engine/G-code/probe disposal, shared-sprite safety, and resource regressions. E4 now supplies a host-gated `useVisualizer` owner boundary, synchronous one-time bbox publication, latest-pending load handling, paired subscriptions/resize cleanup, and a DOM-only visualizer view. R5 adds exact WorkflowControl command acceptance plus Autolevel-to-Visualizer metric/imperial, drag, command-order, and nonzero work-offset compensation acceptance. R4 adds one-frame RAF/stale-restart ownership, delayed assets/current view state, renderer reuse/remount, resize-throttle, xterm ownership, 20-cycle, and StrictMode acceptance; focused 3 suites / 33 tests and full frontend 57 suites / 364 tests pass. Target ESLint has 0 errors with 13 pre-existing warnings and diff check passes. The 5,000-node browser p95 and all browser evidence remain deferred to R6.
+P1 has migrated Workspace feeder/wait/disconnect and fork/remove dialogs, corrupted-settings and Visualizer dialog actions, workflow toast, app-chrome and Administration actions, Axes tooltip/infotip consumers, and has removed ModalTemplate with its assets. The last ModalTemplate focused regression passed 4 suites / 27 tests; the latest full frontend run passed 60 suites / 373 tests. Next, migrate the ten Administration `InlineToasts` drawer consumers to `@app/hooks/useToast`, remove the obsolete family, then address Dropdown/RootCloseWrapper. `DisplayPanel` retains a pre-existing max-lines lint warning.
 
 ## 本輪交接重點（G1）
 
@@ -109,7 +109,7 @@ Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/wi
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-優先恢復 in_progress；目前沒有 in_progress。依 STATUS 依賴計算，R1/R2/R3/U2/U3/B1/M1/M2/M3/Q2-cleanup/T1/T2/T3/P0/G1/G2/G3 已完成；目前推薦先領取 G4，不能跳過各自仍未完成的前置 task。若要 waived dependency 的下游，依 STATUS 的 waiver scope 繼續。
+優先恢復 in_progress 的 P1 overlays；下一個精確 slice 是 ten Administration InlineToasts drawers，改用 `@app/hooks/useToast` 後刪除 family，再處理 Dropdown/RootCloseWrapper。P2–P5 的 consumers 不可為了 P1 的 audit 而越界修改；若 P1 的 zero-import gate 與後續 family ownership 衝突，記錄到 STATUS 並請使用者決定。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。
