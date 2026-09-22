@@ -18,12 +18,12 @@
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `df915229`（文件更新本身尚未 commit） |
-| 工作樹 | clean |
+| HEAD | `3f2866c1`（文件更新本身尚未 commit） |
+| 工作樹 | source clean；本 handoff 更新本身尚未 commit |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
 | Active task | **P1 overlays** |
-| 最近完成 | ModalTemplate family removal (`df915229`) |
-| 下一步推薦 | P1 Axes DisplayPanel command menus |
+| 最近完成 | DisplayPanel/TopNav menu migration and Dropdown/RootCloseWrapper removal (`3f2866c1`) |
+| 下一步推薦 | Audit the next remaining P1 component family |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -37,7 +37,7 @@ P1 is active; no downstream task is eligible until its zero-import gate is resol
 | --- | --- | --- | --- |
 | **P1** [overlays](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | W1 ✅, P0 ✅ | Finish the remaining component-family zero-import work | 否 |
 
-P1 has migrated Workspace feeder/wait/disconnect and fork/remove dialogs, corrupted-settings and Visualizer dialog actions, workflow toast, app-chrome and Administration actions, Axes tooltip/infotip consumers, all ten Administration `InlineToasts` drawers, the shared Widget dropdown adapter, and Axes Keypad menus. `ModalTemplate` and the entire `InlineToasts` family are deleted. The Widget adapter now uses Tonic `Menu` primitives while preserving current widget `eventKey`/`onSelect` calls; its regression covers selection cardinality, disabled items, Escape/focus return, and outside-focus closure. The Keypad regression proves its selected metric menu item sends the exact index to the existing owner. The last full frontend run before this Keypad slice passed 62 suites / 377 tests; the Keypad focused suite passes 1 suite / 20 tests. Next, migrate the DisplayPanel command menus. `DisplayPanel` retains a pre-existing max-lines lint warning.
+P1 has migrated Workspace feeder/wait/disconnect and fork/remove dialogs, corrupted-settings and Visualizer dialog actions, workflow toast, app-chrome and Administration actions, Axes tooltip/infotip consumers, all ten Administration `InlineToasts` drawers, the shared Widget dropdown adapter, Axes Keypad menus, DisplayPanel CNC command menus, and the deprecated TopNav menus. `ModalTemplate`, `InlineToasts`, `Dropdown`, and `RootCloseWrapper` are deleted. The Widget adapter preserves widget `eventKey`/`onSelect` calls and its regression covers selection cardinality, disabled items, Escape/focus return, and outside-focus closure. The DisplayPanel regression proves the exact work-zero command reaches the CNC command owner. The pre-deletion and post-deletion full frontend runs each passed 62 suites / 379 tests. Targeted ESLint has 0 errors and 12 pre-existing warnings; `DisplayPanel` retains its pre-existing max-lines warning. Next, audit the remaining P1 Anchor/Buttons/Clickable/IconButton, Tooltip/Infotip, Modal, and Notifications consumers before choosing the next zero-import family slice.
 
 ## 本輪交接重點（G1）
 
@@ -109,7 +109,7 @@ Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/wi
 請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-優先恢復 in_progress 的 P1 overlays；下一個精確 slice 是 Axes DisplayPanel command menus。P2–P5 的 consumers 不可為了 P1 的 audit 而越界修改；若 P1 的 zero-import gate 與後續 family ownership 衝突，記錄到 STATUS 並請使用者決定。
+優先恢復 in_progress 的 P1 overlays；下一個精確 slice 是審計剩餘 Anchor/Buttons/Clickable/IconButton、Tooltip/Infotip、Modal 與 Notifications consumers，選定一個零 import family slice。P2–P5 的 consumers 不可為了 P1 的 audit 而越界修改；若 P1 的 zero-import gate 與後續 family ownership 衝突，記錄到 STATUS 並請使用者決定。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

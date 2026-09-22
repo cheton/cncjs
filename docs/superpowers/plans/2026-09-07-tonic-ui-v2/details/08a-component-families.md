@@ -47,7 +47,7 @@
 **Create/Modify Tests:** 各 consumer 既有 tests；若尚無，建立 `src/app/components/__tests__/overlays.test.jsx` 只測共用 modal/menu contract，並在 domain consumer 測 action。
 
 - [ ] Anchor/Buttons/Clickable/IconButton 改 Tonic `Button`、`ButtonBase`、`Link`；保留 `type="submit"`、disabled、keyboard activation、aria-label。toolbar spacing 用 `Flex/Stack`，不留 Bootstrap size/bsStyle props。
-- [ ] Dropdown/RootCloseWrapper 改 Tonic Menu。每個 MenuItem 自己處理 onClick；測 disabled item、Esc、outside interaction、focus return 與一次 callback。
+- [x] Dropdown/RootCloseWrapper 改 Tonic Menu。每個 MenuItem 自己處理 onClick；測 disabled item、Esc、outside interaction、focus return 與一次 callback。Widget adapter regression covers disabled/Escape/outside/focus-return/single callback; DisplayPanel regression covers the exact work-zero CNC command; deprecated TopNav now uses Tonic Menu. `3f2866c1` deletes both complete families after a zero-import audit and 62-suite/379-test frontend run.
 - [ ] Modal/ModalTemplate 改 Tonic modal primitives。每個 dialog 明確設定 `autoFocus`、`ensureFocus`、`closeOnEsc`、`closeOnInteractOutside`；danger/cancel/submit 的 close 順序由 domain test 決定。最後 consumer 清空才移除 `ModalProvider/ModalRoot/useModal`。
 - [ ] Tooltip/Infotip 改 Tonic Tooltip；含互動內容的 Infotip 改 Popover。確認 hover、focus、aria-describedby 與 portal layering，再移除 `rc-trigger`。
 - [ ] Notifications/InlineToasts 以 Tonic Toast/Alert 呈現；只保留 notification timeout、OS notification 與 queue policy 為純 domain helper。錯誤訊息需 i18next 且不被 modal unmount 提前清掉。
