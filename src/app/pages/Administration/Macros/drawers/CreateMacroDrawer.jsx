@@ -22,11 +22,7 @@ import {
 import React, { useCallback, useRef } from 'react';
 import { Form } from 'react-final-form';
 import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
@@ -47,7 +43,7 @@ const CreateMacroDrawer = ({
   ...rest
 }) => {
   const gcodeInputRef = useRef();
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const createMacroMutation = useCreateMacroMutation({
     onSuccess: () => {
       if (typeof onClose === 'function') {
@@ -97,9 +93,6 @@ const CreateMacroDrawer = ({
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New Macro')}

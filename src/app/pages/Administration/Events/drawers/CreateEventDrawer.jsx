@@ -19,11 +19,7 @@ import {
 import React, { useCallback } from 'react';
 import { Field, Form } from 'react-final-form';
 import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
@@ -38,7 +34,7 @@ const CreateEventDrawer = ({
   onClose,
   ...rest
 }) => {
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const queryClient = useQueryClient();
   const createEventMutation = useCreateEventMutation({
     onSuccess: () => {
@@ -95,9 +91,6 @@ const CreateEventDrawer = ({
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New Event')}
