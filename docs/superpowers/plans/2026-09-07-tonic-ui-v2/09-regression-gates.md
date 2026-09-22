@@ -137,13 +137,13 @@ test('known path preserves machine-coordinate bounds', () => {
 
 **Create:** `src/app/widgets/Visualizer/__tests__/WorkflowControl.test.jsx`, `src/app/widgets/Autolevel/__tests__/VisualizerIntegration.test.jsx`, `src/app/widgets/Console/__tests__/Console.test.jsx`。
 
-- [ ] spy `controller.command`、`controller.write` 保存原始參數與順序；使用固定 connection/controller/workflow fixtures，不連真機器。
-- [ ] WorkflowControl baseline：idle ready click Run→`sender_start` 一次；running Pause→`sender_pause`；paused Stop→`sender_stop`, `{force:true}`；idle Close→`sender_unload`。Resume 保留既有確認條件，再斷言 `sender_resume`。
-- [ ] disconnected、not ready、各 controller alarm/locked 狀態阻擋；重構不得只保留 disabled 外觀卻讓 keyboard/onClick 可呼叫 action。
-- [ ] view toggle、profile change、camera change、resize、refetch、rerender、StrictMode mount **零 command/write**。
-- [ ] Axes jog 的長按/release、失焦、modal/input focus、disconnect、unmount 不重送；這由 A1b+RepeatableButton tests 覆蓋，R6 引用結果。
-- [ ] Autolevel show/update/hide probe visualization→drag bounds 回傳→start/stop→compensation load，驗證原 PubSub payload/units/offset 與 controller command 次序。
-- [ ] Console 的 sender id 排除自己 echo；外部 read/write 仍顯示一次；onConnectionClose 應 clear/release 資源、不 throw。`term.current.clear` 的 throw 已由 `98ceb1f6` 修正並以 `Console/__tests__/Console.test.jsx` 覆蓋；本項仍未驗證的是 sender echo 過濾與外部 read/write 單次顯示。
+- [x] spy `controller.command`、`controller.write` 保存原始參數與順序；使用固定 connection/controller/workflow fixtures，不連真機器。
+- [x] WorkflowControl baseline：idle ready click Run→`sender_start` 一次；running Pause→`sender_pause`；paused Stop→`sender_stop`, `{force:true}`；idle Close→`sender_unload`。Resume 保留既有確認條件，再斷言 `sender_resume`。
+- [x] disconnected、not ready、各 controller alarm/locked 狀態阻擋；重構不得只保留 disabled 外觀卻讓 keyboard/onClick 可呼叫 action。
+- [x] view toggle、profile change、camera change、resize、refetch、rerender、StrictMode mount **零 command/write**。
+- [x] Axes jog 的長按/release、失焦、modal/input focus、disconnect、unmount 不重送；這由 A1b+RepeatableButton tests 覆蓋，R6 引用結果。
+- [x] Autolevel show/update/hide probe visualization→drag bounds 回傳→start/stop→compensation load，驗證原 PubSub payload/units/offset 與 controller command 次序。
+- [x] Console 的 sender id 排除自己 echo；外部 read/write 仍顯示一次；onConnectionClose 應 clear/release 資源、不 throw。`term.current.clear` 的 throw 已由 `98ceb1f6` 修正並以 `Console/__tests__/Console.test.jsx` 覆蓋；該 suite 也覆蓋 sender echo 過濾與外部 read/write 單次顯示。
 
 ## Task R6：真 browser、效能與最終門檻
 
