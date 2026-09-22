@@ -1,6 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
+  Button,
+  ButtonGroup,
   Flex,
   Space,
   Text,
@@ -12,7 +14,6 @@ import _pick from 'lodash/pick';
 import _pullAll from 'lodash/pullAll';
 import _size from 'lodash/size';
 import _throttle from 'lodash/throttle';
-import cx from 'classnames';
 import Dropzone from 'react-dropzone';
 import pubsub from 'pubsub-js';
 import React, {
@@ -24,9 +25,6 @@ import React, {
 } from 'react';
 import { connect } from 'react-redux';
 import compose from 'recompose/compose';
-import styled from 'styled-components';
-import { Button, ButtonGroup } from '@app/components/Buttons';
-import { Row, Col } from '@app/components/GridSystem';
 import withRouter from '@app/components/withRouter'; // withRouter is deprecated
 import {
   CONNECTION_STATE_CONNECTED,
@@ -425,7 +423,7 @@ const Workspace = ({
   const hideSecondaryContainer = !showSecondaryContainer;
 
     return (
-      <div className={cx(className, styles.workspace)} {...props}>
+      <Box className={`${className || ''} ${styles.workspace}`.trim()} {...props}>
         {modal.name === MODAL_FEEDER_PAUSED && (
           <FeederPaused
             title={modal.params.title}
@@ -466,31 +464,40 @@ const Workspace = ({
           }) => (
             <Box {...getRootProps()}>
               {isDragActive && (
-                <DropzoneOverlay disabled={!isConnected}>
+                <Flex
+                  align="center"
+                  bottom="0"
+                  justify="center"
+                  left="60px"
+                  pointerEvents="none"
+                  position="fixed"
+                  right="0"
+                  sx={{
+                    backgroundColor: 'rgba(255, 255, 255, .7)',
+                    border: `4px dashed ${!isConnected ? 'rgba(0, 0, 0, .2)' : '#1e90ff'}`,
+                  }}
+                  textAlign="center"
+                  top="48px"
+                  zIndex="1000"
+                >
                   <Text
                     color="#666"
                     size="4xl"
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                    }}
                   >
                     {isConnected && (
                       <>
                         <FontAwesomeIcon icon="file-upload" size="2x" />
-                        <div>{i18n._('Drop file here')}</div>
+                        <Box>{i18n._('Drop file here')}</Box>
                       </>
                     )}
                     {!isConnected && (
                       <>
                         <FontAwesomeIcon icon="times-circle" color="#db3d44" size="2x" />
-                        <div>{i18n._('You cannot upload files to the workspace when the connection is not established.')}</div>
+                        <Box>{i18n._('You cannot upload files to the workspace when the connection is not established.')}</Box>
                       </>
                     )}
                   </Text>
-                </DropzoneOverlay>
+                </Flex>
               )}
               {/* The app header is 48px tall — keep in sync with $navbar-height (styles/variables.styl). */}
               <Box height="calc(100vh - 48px)">
@@ -506,50 +513,41 @@ const Workspace = ({
                     borderRight="1px solid #ccc"
                   >
                     <Box px="3x" py="3x" flex="none">
-                      <Row>
-                        <Col width="auto">
+                      <Flex align="center" gap="2x">
+                        <Button
+                          aria-label={i18n._('Hide left panel')}
+                          onClick={togglePrimaryContainer}
+                          size="sm"
+                        >
+                          <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
+                        </Button>
+                        <Button
+                          flex="auto"
+                          onClick={updateWidgetsForPrimaryContainer}
+                          size="sm"
+                          width="100%"
+                        >
+                          <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
+                          <Space width={8} />
+                          {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        </Button>
+                        <ButtonGroup size="sm">
                           <Button
-                            aria-label="Hide left panel"
-                            sm
-                            onClick={togglePrimaryContainer}
+                            aria-label={i18n._('Collapse all left panel widgets')}
+                            title={i18n._('Collapse All')}
+                            onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, true)}
                           >
-                            <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
+                            <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                           </Button>
-                          <Space width={10} />
-                        </Col>
-                        <Col>
                           <Button
-                            block
-                            sm
-                            onClick={updateWidgetsForPrimaryContainer}
+                            aria-label={i18n._('Expand all left panel widgets')}
+                            title={i18n._('Expand All')}
+                            onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, false)}
                           >
-                            <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
-                            <Space width={8} />
-                            {i18n._('Manage Widgets ({{inactiveCount}})', {
-                              inactiveCount: inactiveCount
-                            })}
+                            <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                           </Button>
-                        </Col>
-                        <Col width="auto">
-                          <Space width={10} />
-                          <ButtonGroup sm>
-                            <Button
-                              aria-label="Collapse all left panel widgets"
-                              title={i18n._('Collapse All')}
-                              onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, true)}
-                            >
-                              <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
-                            </Button>
-                            <Button
-                              aria-label="Expand all left panel widgets"
-                              title={i18n._('Expand All')}
-                              onClick={() => workspaceLayout.setWidgetsCollapsed(primaryWidgetIds, false)}
-                            >
-                              <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
-                            </Button>
-                          </ButtonGroup>
-                        </Col>
-                      </Row>
+                        </ButtonGroup>
+                      </Flex>
                     </Box>
                     <Box
                       flex="auto"
@@ -575,9 +573,9 @@ const Workspace = ({
                       borderRight="1px solid #ccc"
                     >
                       <Button
-                        aria-label="Show left panel"
-                        sm
+                        aria-label={i18n._('Show left panel')}
                         onClick={togglePrimaryContainer}
+                        size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="chevron-right" fixedWidth />
                       </Button>
@@ -602,9 +600,9 @@ const Workspace = ({
                       borderLeft="1px solid #ccc"
                     >
                       <Button
-                        aria-label="Show right panel"
-                        sm
+                        aria-label={i18n._('Show right panel')}
                         onClick={toggleSecondaryContainer}
+                        size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
                       </Button>
@@ -621,50 +619,41 @@ const Workspace = ({
                     borderLeft="1px solid #ccc"
                   >
                     <Box px="3x" py="3x" flex="none">
-                      <Row>
-                        <Col width="auto">
-                          <ButtonGroup sm>
-                            <Button
-                              aria-label="Collapse all right panel widgets"
-                              title={i18n._('Collapse All')}
-                              onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, true)}
-                            >
-                              <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
-                            </Button>
-                            <Button
-                              aria-label="Expand all right panel widgets"
-                              title={i18n._('Expand All')}
-                              onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, false)}
-                            >
-                              <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
-                            </Button>
-                          </ButtonGroup>
-                          <Space width={10} />
-                        </Col>
-                        <Col>
+                      <Flex align="center" gap="2x">
+                        <ButtonGroup size="sm">
                           <Button
-                            block
-                            sm
-                            onClick={updateWidgetsForSecondaryContainer}
+                            aria-label={i18n._('Collapse all right panel widgets')}
+                            title={i18n._('Collapse All')}
+                            onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, true)}
                           >
-                            <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
-                            <Space width={8} />
-                            {i18n._('Manage Widgets ({{inactiveCount}})', {
-                              inactiveCount: inactiveCount
-                            })}
+                            <FontAwesomeIcon aria-hidden="true" icon="chevron-up" fixedWidth />
                           </Button>
-                        </Col>
-                        <Col width="auto">
-                          <Space width={10} />
                           <Button
-                            aria-label="Hide right panel"
-                            sm
-                            onClick={toggleSecondaryContainer}
+                            aria-label={i18n._('Expand all right panel widgets')}
+                            title={i18n._('Expand All')}
+                            onClick={() => workspaceLayout.setWidgetsCollapsed(secondaryWidgetIds, false)}
                           >
-                            <FontAwesomeIcon aria-hidden="true" icon="chevron-right" fixedWidth />
+                            <FontAwesomeIcon aria-hidden="true" icon="chevron-down" fixedWidth />
                           </Button>
-                        </Col>
-                      </Row>
+                        </ButtonGroup>
+                        <Button
+                          flex="auto"
+                          onClick={updateWidgetsForSecondaryContainer}
+                          size="sm"
+                          width="100%"
+                        >
+                          <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
+                          <Space width={8} />
+                          {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        </Button>
+                        <Button
+                          aria-label={i18n._('Hide right panel')}
+                          onClick={toggleSecondaryContainer}
+                          size="sm"
+                        >
+                          <FontAwesomeIcon aria-hidden="true" icon="chevron-right" fixedWidth />
+                        </Button>
+                      </Flex>
                     </Box>
                     <Box
                       flex="auto"
@@ -685,7 +674,7 @@ const Workspace = ({
             </Box>
           )}
         </Dropzone>
-      </div>
+      </Box>
     );
 };
 
@@ -726,18 +715,3 @@ export default compose(
     };
   }),
 )(WorkspaceWithLayout);
-
-const DropzoneOverlay = styled(
-  ({ disabled, ...props }) => <div {...props} />
-)`
-    position: fixed;
-    top: 48px; // app header height, keep in sync with $navbar-height (styles/variables.styl)
-    bottom: 0;
-    left: 60px;
-    right: 0;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, .7);
-    border: 4px dashed ${props => (props.disabled ? 'rgba(0, 0, 0, .2)' : '#1e90ff')};
-    text-align: center;
-    pointer-events: none;
-`;

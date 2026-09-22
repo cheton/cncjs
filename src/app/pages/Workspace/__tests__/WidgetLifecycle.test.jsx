@@ -234,7 +234,19 @@ jest.mock('@app/components/GridSystem', () => {
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
   const Primitive = ({ as: Tag = 'div', children, ...props }) => React.createElement(Tag, props, children);
-  return { Box: Primitive, Flex: Primitive, Space: Primitive, Text: Primitive };
+  const Button = ({ children, ...props }) => React.createElement(
+    'button',
+    { type: 'button', ...props },
+    children
+  );
+  return {
+    Box: Primitive,
+    Button,
+    ButtonGroup: Primitive,
+    Flex: Primitive,
+    Space: Primitive,
+    Text: Primitive,
+  };
 });
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
