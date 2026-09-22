@@ -1,76 +1,59 @@
-import {
-  Space,
-} from '@tonic-ui/react';
-import PropTypes from 'prop-types';
+import { Box, Flex } from '@tonic-ui/react';
 import React from 'react';
-import styled from 'styled-components';
-import { Container, Row, Col } from '@app/components/GridSystem';
 import iconError from './icon-error-48.png';
-import iconWarning from './icon-warning-48.png';
 import iconInfo from './icon-info-48.png';
 import iconSuccess from './icon-success-48.png';
+import iconWarning from './icon-warning-48.png';
 
-const Icon = styled.i`
-    vertical-align: top;
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-    background-repeat: no-repeat;
-`;
+const iconByType = {
+  error: iconError,
+  info: iconInfo,
+  success: iconSuccess,
+  warning: iconWarning,
+};
 
-const Error = styled(Icon)`
-    background-image: url(${iconError});
-`;
-
-const Warning = styled(Icon)`
-    background-image: url(${iconWarning});
-`;
-
-const Info = styled(Icon)`
-    background-image: url(${iconInfo});
-`;
-
-const Success = styled(Icon)`
-    background-image: url(${iconSuccess});
-`;
-
-const PrimaryMessage = styled.div`
-    font-weight: bold;
-    padding-bottom: .25rem;
-`;
-
-const DescriptiveMessage = styled.div`
-    font-weight: normal;
-`;
-
-function ModalTemplate({ type, children, style }) {
-  return (
-    <Container>
-      <Row>
-        <Col width="auto">
-          {type === 'error' && <Error />}
-          {type === 'warning' && <Warning />}
-          {type === 'info' && <Info />}
-          {type === 'success' && <Success />}
-          <Space width={16} />
-        </Col>
-        <Col style={{ paddingTop: 4, ...style }}>
-          {(typeof children === 'function')
-            ? children({ PrimaryMessage, DescriptiveMessage })
-            : children}
-        </Col>
-      </Row>
-    </Container>
-  );
+/**
+ * @param {{ children?: React.ReactNode }} props
+ * @returns {JSX.Element}
+ */
+function PrimaryMessage({ children = null }) {
+  return <Box fontWeight="bold" pb="1x">{children}</Box>;
 }
 
-ModalTemplate.propTypes = {
-  type: PropTypes.oneOf([
-    'error',
-    'warning',
-    'info',
-    'success'
-  ])
-};
+/**
+ * @param {{ children?: React.ReactNode }} props
+ * @returns {JSX.Element}
+ */
+function DescriptiveMessage({ children = null }) {
+  return <Box>{children}</Box>;
+}
+
+/**
+ * @param {{ children?: React.ReactNode|Function, style?: Object, type?: 'error'|'warning'|'info'|'success' }} props
+ * @returns {JSX.Element}
+ */
+function ModalTemplate({ children = null, style = {}, type = undefined }) {
+  const icon = iconByType[type];
+
+  return (
+    <Flex align="flex-start" gap="4x">
+      {icon && (
+        <Box
+          aria-hidden="true"
+          as="i"
+          flex="none"
+          height="48px"
+          sx={{ backgroundImage: `url(${icon})`, backgroundRepeat: 'no-repeat' }}
+          width="48px"
+        />
+      )}
+      <Box flex="auto" pt="1x" sx={style}>
+        {typeof children === 'function'
+          ? children({ PrimaryMessage, DescriptiveMessage })
+          : children}
+      </Box>
+    </Flex>
+  );
+}
 
 export default ModalTemplate;
