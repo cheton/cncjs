@@ -1,7 +1,6 @@
-import { Box } from '@tonic-ui/react';
+import { Box, Link } from '@tonic-ui/react';
 import cx from 'classnames';
 import React from 'react';
-import Anchor from '../Anchor';
 import styles from './index.styl';
 
 function Sortable(props) {
@@ -9,9 +8,9 @@ function Sortable(props) {
 
   return (
     <Box className={cx(className, styles.widgetSortable)} style={style}>
-      <Anchor {...rest}>
+      <Link {...rest}>
         {children}
-      </Anchor>
+      </Link>
     </Box>
   );
 }

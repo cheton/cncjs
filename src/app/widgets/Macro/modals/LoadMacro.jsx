@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Modal,
   ModalBody,
   ModalContent,
@@ -9,7 +10,6 @@ import {
   Text,
 } from '@tonic-ui/react';
 import React from 'react';
-import { Button } from '@app/components/Buttons';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import x from '@app/lib/json-stringify';
@@ -75,7 +75,7 @@ function LoadMacro({
             {i18n._('No')}
           </Button>
           <Button
-            btnStyle="primary"
+            variant="primary"
             onClick={handleLoadMacro}
           >
             {i18n._('Yes')}

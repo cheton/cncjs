@@ -1,5 +1,6 @@
 import {
   Box,
+  Button as TonicButton,
   Flex,
   Menu,
   MenuButton,
@@ -13,7 +14,6 @@ import _includes from 'lodash/includes';
 import _uniqueId from 'lodash/uniqueId';
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@app/components/Buttons';
 import RepeatableButton from '@app/components/RepeatableButton';
 import {
   IMPERIAL_UNITS,
@@ -41,6 +41,19 @@ const KeypadSubscriptText = styled(KeypadText)`
     font-size: 80%;
     line-height: 0;
 `;
+
+/**
+ * @param {{ btnStyle?: string, compact?: boolean }} props
+ */
+function Button({ btnStyle, compact, ...props }) {
+  return (
+    <TonicButton
+      {...props}
+      size={compact ? 'sm' : 'md'}
+      variant={btnStyle === 'primary' ? 'primary' : 'default'}
+    />
+  );
+}
 
 /**
  * @returns {JSX.Element}

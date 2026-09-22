@@ -1,40 +1,33 @@
-import React, { useContext } from 'react';
+import { ButtonBase } from '@tonic-ui/react';
+import React, { useContext, useState } from 'react';
 import Card from '@app/components/Card';
-import Clickable from '@app/components/Clickable';
 import { CollapsibleCardContext } from './context';
 
 function Header({ children, style, ...props }) {
   const { collapsed, collapsing, toggle } = useContext(CollapsibleCardContext);
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <Clickable
-      role="button"
-      tabIndex={0}
+    <ButtonBase
       aria-expanded={!collapsed}
       onClick={toggle}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          toggle();
-        }
-      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{ width: '100%' }}
     >
-      {({ hovered }) => (
-        <Card.Header
-          {...props}
-          style={{
-            backgroundColor: hovered ? 'rgba(0, 0, 0, 0.075)' : 'rgba(0, 0, 0, 0.05)',
-            borderBottomWidth: (collapsed && !collapsing) ? 0 : 1,
-            ...style,
-          }}
-        >
-          {typeof children === 'function'
-            ? children({ collapsed, collapsing, toggle, hovered })
-            : children}
-        </Card.Header>
-      )}
-    </Clickable>
+      <Card.Header
+        {...props}
+        style={{
+          backgroundColor: hovered ? 'rgba(0, 0, 0, 0.075)' : 'rgba(0, 0, 0, 0.05)',
+          borderBottomWidth: (collapsed && !collapsing) ? 0 : 1,
+          ...style,
+        }}
+      >
+        {typeof children === 'function'
+          ? children({ collapsed, collapsing, toggle, hovered })
+          : children}
+      </Card.Header>
+    </ButtonBase>
   );
 }
 

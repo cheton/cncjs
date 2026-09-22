@@ -179,12 +179,6 @@ jest.mock('@app/components/GridSystem', () => {
   };
 });
 
-jest.mock('@app/components/Modal', () => ({
-  ModalProvider: ({ children }) => children,
-  ModalRoot: () => null,
-  ModalConsumer: ({ children }) => children({ openModal: jest.fn() }),
-}));
-
 jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({ children }) => children);
 jest.mock('@app/widgets/shared/WidgetConfigConsumer', () => ({ children }) => (
   children({ get: (_path, defaultValue) => defaultValue })

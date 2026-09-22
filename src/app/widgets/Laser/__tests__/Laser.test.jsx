@@ -87,10 +87,6 @@ jest.mock('@app/components/Center', () => {
   throw new Error('Laser must use Tonic Flex primitives directly');
 });
 
-jest.mock('@app/components/Clickable', () => {
-  throw new Error('Laser must use Tonic Button primitives directly');
-});
-
 jest.mock('@app/components/RepeatableButton', () => {
   throw new Error('Laser must own repeat behavior on Tonic Button');
 });

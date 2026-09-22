@@ -1,5 +1,6 @@
 import {
   Box,
+  ButtonBase,
   Menu,
   MenuDivider,
   MenuItem,
@@ -7,6 +8,7 @@ import {
   MenuToggle,
   Space,
   Text,
+  Tooltip,
 } from '@tonic-ui/react';
 import React, { Fragment, Component } from 'react';
 import semverLt from 'semver/functions/lt';
@@ -14,13 +16,11 @@ import styled from 'styled-components';
 import _without from 'lodash/without';
 import Push from 'push.js';
 import api from '@app/api';
-import Anchor from '@app/components/Anchor';
 import Badge from '@app/components/Badge';
 import { Container, Row, Col } from '@app/components/GridSystem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Hoverable from '@app/components/Hoverable';
 import Image from '@app/components/Image';
-import Tooltip from '@app/components/Tooltip';
 import withRouter from '@app/components/withRouter'; // withRouter is deprecated
 import settings from '@app/config/settings';
 import {
@@ -295,12 +295,12 @@ class TopNav extends Component {
                 <FontAwesomeIcon icon="bell" fixedWidth />
               )}
               {(this.state.pushPermission === Push.Permission.DEFAULT) && (
-                <Anchor
+                <ButtonBase
                   onClick={this.actions.requestPushPermission}
                   title={i18n._('Show notifications')}
                 >
                   <FontAwesomeIcon icon="bell" fixedWidth />
-                </Anchor>
+                </ButtonBase>
               )}
             </Col>
           </Row>
@@ -403,7 +403,7 @@ class TopNav extends Component {
               )}
             </Hoverable>
             {newUpdateAvailable && (
-              <Tooltip content={i18n._('New update available')}>
+              <Tooltip label={i18n._('New update available')}>
                 <Badge
                   style={{
                     position: 'absolute',

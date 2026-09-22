@@ -26,10 +26,6 @@ jest.mock('@app/lib/i18n', () => ({
   },
 }));
 
-jest.mock('@app/components/Buttons', () => {
-  throw new Error('SettingsModal must use Tonic Button directly');
-});
-
 jest.mock('@app/components/FormControl/Input', () => {
   throw new Error('SettingsModal must use Tonic Input directly');
 });
@@ -40,10 +36,6 @@ jest.mock('@app/components/FormGroup', () => {
 
 jest.mock('@app/components/InlineError', () => {
   throw new Error('SettingsModal must use Tonic form feedback directly');
-});
-
-jest.mock('@app/components/Modal', () => {
-  throw new Error('SettingsModal must use Tonic modal primitives directly');
 });
 
 const SettingsModal = require('../modals/SettingsModal').default;

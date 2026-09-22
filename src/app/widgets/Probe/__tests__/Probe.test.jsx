@@ -74,13 +74,6 @@ jest.mock('@app/components/GridSystem', () => {
   throw new Error('Probe widget must use Tonic Box directly');
 });
 
-jest.mock('@app/components/Buttons', () => {
-  const fail = () => {
-    throw new Error('Probe widget must use Tonic Button primitives directly');
-  };
-  return { Button: fail, ButtonGroup: fail };
-});
-
 jest.mock('@app/components/FormControl/Input', () => {
   throw new Error('Probe widget must use Tonic Input directly');
 });
@@ -99,10 +92,6 @@ jest.mock('@app/components/InlineError', () => {
 
 jest.mock('@app/components/InputGroup', () => {
   throw new Error('Probe widget must use Tonic InputGroup directly');
-});
-
-jest.mock('@app/components/Infotip', () => {
-  throw new Error('Probe widget must use Tonic Tooltip directly');
 });
 
 jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({

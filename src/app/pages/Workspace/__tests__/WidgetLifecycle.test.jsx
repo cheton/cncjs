@@ -214,17 +214,6 @@ jest.mock('../widgetRegistry', () => {
   };
 });
 
-jest.mock('@app/components/Buttons', () => {
-  const React = require('react');
-  const Button = ({ children, btnStyle, sm, block, ...props }) => React.createElement(
-    'button',
-    { type: 'button', ...props },
-    children
-  );
-  const ButtonGroup = ({ children }) => React.createElement('div', null, children);
-  return { Button, ButtonGroup };
-});
-
 jest.mock('@app/components/GridSystem', () => {
   const React = require('react');
   const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
@@ -282,17 +271,6 @@ jest.mock('../widget-manager', () => ({
 jest.mock('../modals/FeederPaused', () => () => null);
 jest.mock('../modals/FeederWait', () => () => null);
 jest.mock('../modals/ServerDisconnected', () => () => null);
-
-jest.mock('@app/components/Modal', () => {
-  const React = require('react');
-  const Primitive = ({ children }) => React.createElement('div', null, children);
-  const Modal = Primitive;
-  Modal.Header = Primitive;
-  Modal.Title = Primitive;
-  Modal.Body = Primitive;
-  Modal.Footer = Primitive;
-  return { __esModule: true, default: Modal };
-});
 
 const { hydrateConfig } = require('@app/store/config/hydration');
 const { WorkspaceLayoutProvider } = require('../WorkspaceLayoutProvider');
