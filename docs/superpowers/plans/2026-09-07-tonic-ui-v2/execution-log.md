@@ -1355,3 +1355,47 @@ Test/review evidence: the required paths were initially absent (RED). A dispatch
 Verification: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/WorkflowControl.test.jsx src/app/widgets/Autolevel/__tests__/VisualizerIntegration.test.jsx src/app/widgets/Autolevel/__tests__/Autolevel.test.jsx src/app/widgets/Console/__tests__/Console.test.jsx` passed 4 suites / 38 tests. Fresh full `yarn test:frontend --runInBand --silent` passed 57 suites / 355 tests. Targeted ESLint had 0 R5 errors and 13 pre-existing repository warnings; `git diff --check` passed. No browser, simulator, or build procedure ran under the explicit R6 deferral.
 
 Status transition: R5 `in_progress` → `completed`. R4 is next eligible; no staging, commit, or push is implied by this log entry.
+
+## R4 renderer, terminal, and asynchronous-resource acceptance — started 2026-09-22
+
+Task / session / timestamp: R4 / current root session / 2026-09-22.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `e0b58067b2f34eba574bb2cf3b1a87f70ce3f1e3` / clean worktree before this ledger claim. No reset, staging, commit, or push is authorized.
+
+Plan contract and baseline fixture: `09-regression-gates.md` Task R4, constrained by `details/07a-visualizer-engine.md`, `details/04a-terminal-owner.md`, `00-design.md`, `EXECUTION.md`, and `.omp/RULES.md`. Add acceptance coverage for one-frame agitation and controls-drag RAF ownership; post-disposal late callbacks and resize-throttle cancellation; all deferred STL/texture settlement combinations and current profile/visibility; renderer reuse versus remount cleanup; terminal/addon/scrollbar/paste/event disposable ownership; and 20-cycle plus StrictMode paired cleanup. Production changes are permitted only when a new test isolates an ownership defect. Browser, simulator, WebGL appearance/performance, and build procedures remain deferred to R6.
+
+Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. The contract is fixed, but it combines external resources, asynchronous settlement, RAF timing, React lifecycle, xterm ownership, and shared renderer boundaries; the execution matrix classifies R4 as Luna max. Current root is not Terra, a pre-existing execution-environment limitation recorded in STATUS; it remains the sole ledger writer and reviewer. No Sol decision is currently required.
+
+Worker brief: `/root/r4_resource_acceptance` / `gpt-5.6-luna` / max; allowed scope is `src/app/widgets/Visualizer/__tests__/VisualizerResources.test.js`, `src/app/widgets/Visualizer/__tests__/useVisualizer.test.jsx`, `src/app/widgets/Console/__tests__/useTerminal.test.jsx`, and the minimum implicated Visualizer/Console production files only after a failing test establishes a concrete defect. The worker must not edit docs/ledger, backend/controller/Redux/config transport, unrelated widgets, protected Prettier paths, stage/commit/push, or run browser/simulator/build tooling. It must report first RED coverage (where gaps exist), final focused commands/exit codes, changed files, untested paths, and any ownership decision requiring root review.
+
+Status transition: R4 `todo` → `in_progress`; no blocker. Next exact step: inspect current focused suites and resource owners, map each R4 bullet to existing coverage, and add the smallest missing acceptance tests.
+
+## R4 renderer, terminal, and asynchronous-resource acceptance — completed 2026-09-22
+
+Task / session / timestamp: R4 / current root session / 2026-09-22.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `e0b58067b2f34eba574bb2cf3b1a87f70ce3f1e3` / inherited R4 test and ledger edits were preserved; no reset, staging, commit, or push.
+
+Plan contract and baseline fixture: `09-regression-gates.md` R4, `details/07a-visualizer-engine.md` E3/E4, and `details/04a-terminal-owner.md` T3. The acceptance suites now exercise one RAF frame at a time, duplicate-start prevention, post-dispose and post-restart stale callbacks, deferred STL/texture success/failure/disposal paths, current profile/visibility, renderer reuse/remount, resize-throttle cancellation, terminal/addon/scrollbar/paste/disposable ownership, 20 lifecycle cycles, and StrictMode pairing.
+
+Changed files / before / after: `VisualizerEngine.js` now assigns a generation to each agitation and controls RAF chain. Previously a canceled callback that arrived after a stop/start could clear the current RAF ID and schedule a second chain; stale callbacks now return before touching the current chain. The three prescribed suites add the acceptance coverage. The terminal fake models xterm's addon manager so explicit addon disposal unregisters it before terminal disposal, proving one disposal rather than relying on an inert mock. No backend, controller, Redux, config transport, browser, simulator, or build changes were made.
+
+Command / exit code / tested working tree: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Visualizer/__tests__/VisualizerResources.test.js src/app/widgets/Visualizer/__tests__/useVisualizer.test.jsx src/app/widgets/Console/__tests__/useTerminal.test.jsx` / 0 / 3 suites, 33 tests. `yarn test:frontend --runInBand --silent` / 0 / 57 suites, 364 tests. `yarn eslint src/app/widgets/Visualizer/VisualizerEngine.js src/app/widgets/Visualizer/useVisualizer.js src/app/widgets/Console/useTerminal.js src/app/widgets/Visualizer/__tests__/VisualizerResources.test.js src/app/widgets/Visualizer/__tests__/useVisualizer.test.jsx src/app/widgets/Console/__tests__/useTerminal.test.jsx` / 0 / 13 pre-existing warnings, 0 errors. `git diff --check` / 0.
+
+Review findings and resolutions: inspected the installed xterm source: `Terminal.dispose()` delegates to its addon manager, while explicit addon disposal unregisters the addon; the cleanup order is safe. The first terminal mock did not model this, so it was tightened. The production RAF fix is constrained to canceled-callback identity and is covered for both chains.
+
+Remaining untested paths: real-browser WebGL appearance/performance, simulator, and browser resource diagnostics remain explicitly deferred to R6; no build was run.
+
+Status transition / next exact step: R4 `in_progress` → `completed`; W1 Workspace domain is now eligible. Read its contract, verify dependencies/source baseline, record its `in_progress` claim, then establish its test-first scope.
+
+## W1 Workspace domain — started 2026-09-22
+
+Task / session / timestamp: W1 / current root session / 2026-09-22.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `e0b58067b2f34eba574bb2cf3b1a87f70ce3f1e3` / preserved the uncommitted R4 diff and ledger records. No reset, staging, commit, or push is authorized.
+
+Plan contract and baseline fixture: `08-workspace-and-cleanup.md` W1, `00-design.md`, `WorkspaceLayoutProvider` / controlled `view` contract, and `.omp/RULES.md`. Preserve sorting, visibility filtering, fork/remove persistence, load-G-code metadata/error behavior, and route cleanup while removing remaining Workspace/widget-manager class and legacy UI ownership. Browser, simulator, and build remain deferred to R6.
+
+Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. The contract is fixed but crosses Workspace state, persistence, drag/drop, modal state, controlled layout, Query mutation boundaries, and multiple widget consumers; the execution matrix classifies W1 as Luna max. Terra/root owns all contract decisions, diff review, and ledger updates.
+
+Status transition: W1 `todo` → `in_progress`; user explicitly overrode the personal post-shipping pause for W1. Next exact step: read the complete W1 source and tests, map each required behavior to current coverage, then prepare a bounded worker brief.

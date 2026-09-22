@@ -125,13 +125,13 @@ test('known path preserves machine-coordinate bounds', () => {
 
 **Create:** `Visualizer/__tests__/VisualizerResources.test.js`, `useVisualizer.test.jsx`, `Console/__tests__/useTerminal.test.jsx`。
 
-- [ ] 假 RAF scheduler 保存 callback/id；advance 一 frame，不 runAllTimers 造成自我排程無限循環。分別檢查 agitation 和 controls-drag loops；連續 start 仍各至多一條。
-- [ ] dispose 後兩條 RAF 都 cancel；晚到 callback 不 render、不 reschedule；32ms throttle cancel。
-- [ ] deferred STL/texture：成功/成功、失敗/成功、成功/失敗、卸載後成功。已取得而不使用的資源每份 dispose 一次；不吞 rejected Promise。
-- [ ] profile/visibility 在 asset pending 時改變，晚到 tool 採最新值；不得把初始舊 profile 寫回。
-- [ ] 一般 rerender/show 切換不新建 renderer。route unmount/remount 可新建，但舊 canvas 被移除、舊 scene 無活躍 listeners。
-- [ ] xterm onKey/onResize disposable、paste handler、PerfectScrollbar、FitAddon/Terminal ownership 清理完整。term dispose 與 addon.dispose 的責任核對 xterm 實作，避免重複 dispose。
-- [ ] 使用 listener/spies 斷言 20 次 mount/unmount 後活躍資源為 0；StrictMode 不以總 setup 次數要求 1，而要求每次 setup 都匹配 cleanup。
+- [x] 假 RAF scheduler 保存 callback/id；advance 一 frame，不 runAllTimers 造成自我排程無限循環。分別檢查 agitation 和 controls-drag loops；連續 start 仍各至多一條。
+- [x] dispose 後兩條 RAF 都 cancel；晚到 callback 不 render、不 reschedule；32ms throttle cancel。
+- [x] deferred STL/texture：成功/成功、失敗/成功、成功/失敗、卸載後成功。已取得而不使用的資源每份 dispose 一次；不吞 rejected Promise。
+- [x] profile/visibility 在 asset pending 時改變，晚到 tool 採最新值；不得把初始舊 profile 寫回。
+- [x] 一般 rerender/show 切換不新建 renderer。route unmount/remount 可新建，但舊 canvas 被移除、舊 scene 無活躍 listeners。
+- [x] xterm onKey/onResize disposable、paste handler、PerfectScrollbar、FitAddon/Terminal ownership 清理完整。term dispose 與 addon.dispose 的責任核對 xterm 實作，避免重複 dispose。
+- [x] 使用 listener/spies 斷言 20 次 mount/unmount 後活躍資源為 0；StrictMode 不以總 setup 次數要求 1，而要求每次 setup 都匹配 cleanup。
 
 ## Task R5：輸入／流程／命令序列零意外變更
 
