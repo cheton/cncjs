@@ -125,6 +125,10 @@ jest.mock('@app/api', () => ({
   default: { loadGCode: jest.fn() },
 }));
 
+jest.mock('@app/queries/gcode', () => ({
+  useLoadGCodeMutation: () => ({ mutate: jest.fn() }),
+}));
+
 jest.mock('pubsub-js', () => ({
   __esModule: true,
   default: {
