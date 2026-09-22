@@ -914,13 +914,34 @@ class ProbeVisualization {
   dispose() {
     this.unbindEvents();
 
+    const disposedResources = new Set();
+    const disposeResource = resource => {
+      if (!resource || disposedResources.has(resource)) {
+        return;
+      }
+      disposedResources.add(resource);
+      if (typeof resource.dispose === 'function') {
+        resource.dispose();
+      }
+    };
+
     this.group.traverse(obj => {
-      if (obj.geometry) {
-        obj.geometry.dispose();
+      if (obj.geometry && !obj.isSprite) {
+        disposeResource(obj.geometry);
       }
-      if (obj.material) {
-        obj.material.dispose();
-      }
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+      materials.forEach(material => {
+        if (!material) {
+          return;
+        }
+        Object.keys(material).forEach(key => {
+          const value = material[key];
+          if (value && value.isTexture) {
+            disposeResource(value);
+          }
+        });
+        disposeResource(material);
+      });
     });
   }
 }

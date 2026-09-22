@@ -1,33 +1,56 @@
-import cx from 'classnames';
+import { ButtonLink, LinkButton } from '@tonic-ui/react';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Anchor from '../Anchor';
-import styles from './index.styl';
+import React from 'react';
 
-class Button extends Component {
-  static propTypes = {
-    ...Anchor.propTypes,
-    inverted: PropTypes.bool
-  };
+function Button({ disabled, href, inverted, onClick, sx, ...props }) {
+  const Component = href ? ButtonLink : LinkButton;
 
-  static defaultProps = {
-    ...Anchor.defaultProps,
-    inverted: false
-  };
+  return (
+    <Component
+      {...props}
+      disabled={disabled}
+      href={href}
+      onClick={(event) => {
+        if (disabled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
 
-  render() {
-    const { inverted, className, ...props } = this.props;
-
-    return (
-      <Anchor
-        {...props}
-        className={cx(className, styles.widgetButton, {
-          [styles.disabled]: !!props.disabled,
-          [styles.inverted]: inverted
-        })}
-      />
-    );
-  }
+        onClick?.(event);
+      }}
+      sx={{
+        alignItems: 'center',
+        display: 'inline-flex',
+        justifyContent: 'center',
+        padding: '2px 8px',
+        ...(inverted && {
+          backgroundColor: 'gray:80',
+          color: 'white:primary',
+          _disabled: { opacity: 0.4 },
+          _hover: { backgroundColor: 'gray:90' },
+        }),
+        ...sx,
+      }}
+    />
+  );
 }
+
+Button.propTypes = {
+  disabled: PropTypes.bool,
+  href: PropTypes.string,
+  onClick: PropTypes.func,
+  role: PropTypes.string,
+  style: PropTypes.object,
+  tabIndex: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string
+  ]),
+  inverted: PropTypes.bool
+};
+
+Button.defaultProps = {
+  inverted: false
+};
 
 export default Button;

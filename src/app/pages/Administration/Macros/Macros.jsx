@@ -1,7 +1,7 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
+  ButtonBase,
   Checkbox,
   Divider,
   Flex,
@@ -24,21 +24,19 @@ import qs from 'qs';
 import React, { useCallback, useMemo, useState } from 'react';
 import BaseTable from '@app/components/BaseTable';
 import CodePreview from '@app/components/CodePreview';
-import IconButton from '@app/components/IconButton';
 import TablePagination from '@app/components/TablePagination';
 import {
   DEFAULT_ROWS_PER_PAGE_OPTIONS,
 } from '@app/components/TablePagination/constants';
 import i18n from '@app/lib/i18n';
+import {
+  useFetchMacrosQuery,
+  useBulkDeleteMacrosMutation,
+} from '@app/queries/macros';
 import TableRowToggleIcon from '../components/TableRowToggleIcon';
 import ConfirmBulkDeleteRecordsModal from '../modals/ConfirmBulkDeleteRecordsModal';
 import CreateMacroDrawer from './drawers/CreateMacroDrawer';
 import UpdateMacroDrawer from './drawers/UpdateMacroDrawer';
-import {
-  API_MACROS_QUERY_KEY,
-  useFetchMacrosQuery,
-  useBulkDeleteMacrosMutation,
-} from './queries';
 
 const Macros = () => {
   // pagination
@@ -52,7 +50,6 @@ const Macros = () => {
     setRowSelection({});
   }, []);
 
-  const queryClient = useQueryClient();
   const fetchMacrosQuery = useFetchMacrosQuery({
     meta: {
       query: qs.stringify({
@@ -62,12 +59,7 @@ const Macros = () => {
       }),
     },
   });
-  const bulkDeleteMacrosMutation = useBulkDeleteMacrosMutation({
-    onSuccess: () => {
-      // Invalidate `useFetchMacrosQuery`
-      queryClient.invalidateQueries({ queryKey: API_MACROS_QUERY_KEY });
-    },
-  });
+  const bulkDeleteMacrosMutation = useBulkDeleteMacrosMutation();
   const portal = usePortalManager();
   const [colorMode] = useColorMode();
   const selectedRowCount = Object.keys(rowSelection).length;
@@ -331,14 +323,27 @@ const Macros = () => {
             columnGap="2x"
           >
             <Tooltip label={i18n._('Refresh')}>
-              <IconButton
+              <ButtonBase
+                aria-label={i18n._('Refresh')}
+                border={1}
+                borderColor="transparent"
+                color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                lineHeight={1}
                 onClick={handleClickRefresh}
+                px="2x"
+                py="2x"
+                transition="all .2s"
+                _active={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focus={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focusActive={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focusHover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
+                _hover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
               >
                 <Icon
                   as={RefreshIcon}
                   spin={fetchMacrosQuery.isFetching}
                 />
-              </IconButton>
+              </ButtonBase>
             </Tooltip>
           </Flex>
         </Flex>

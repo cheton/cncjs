@@ -1,8 +1,8 @@
 import chainedFunction from 'chained-function';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
+import { Link } from '@tonic-ui/react';
 import React, { Component } from 'react';
-import Anchor from '@app/components/Anchor';
 import styles from './index.styl';
 
 class NavItem extends Component {
@@ -70,9 +70,10 @@ class NavItem extends Component {
         )}
         style={style}
       >
-        <Anchor
+        <Link
           {...props}
           disabled={disabled}
+          tabIndex={disabled ? -1 : undefined}
           onClick={chainedFunction(onClick, this.actions.handleClick)}
         />
       </li>

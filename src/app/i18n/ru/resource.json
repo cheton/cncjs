@@ -765,5 +765,21 @@
   "Clearance Z: {{value}} {{- units}}": "Высота подъёма Z: {{value}} {{- units}}",
   "Start Z: {{value}} {{- units}}": "Начальная Z: {{value}} {{- units}}",
   "End Z: {{value}} {{- units}}": "Конечная Z: {{value}} {{- units}}",
-  "None": ""
+  "None": "",
+  "Custom widget": "",
+  "Refresh content": "",
+  "More options": "",
+  "bytes": "",
+  "G-code progress": "",
+  "G-code widget": "",
+  "Grbl controller data": "",
+  "Laser widget": "",
+  "Probe widget": "",
+  "Full Screen": "",
+  "Spindle widget": "",
+  "Webcam widget": "",
+  "Stream URL": "",
+  "Marlin controller data": "",
+  "Smoothie controller data": "",
+  "TinyG controller data": ""
 }

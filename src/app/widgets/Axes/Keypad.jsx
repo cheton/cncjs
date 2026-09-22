@@ -1,18 +1,19 @@
 import {
   Box,
+  Button as TonicButton,
   Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Space,
 } from '@tonic-ui/react';
 import cx from 'classnames';
 import { ensureArray } from 'ensure-type';
-import frac from 'frac';
 import _includes from 'lodash/includes';
 import _uniqueId from 'lodash/uniqueId';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { Button } from '@app/components/Buttons';
-import Dropdown, { MenuItem } from '@app/components/Dropdown';
 import RepeatableButton from '@app/components/RepeatableButton';
 import {
   IMPERIAL_UNITS,
@@ -22,10 +23,10 @@ import {
 } from '@app/constants';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
-import Fraction from './components/Fraction';
+import { useAxes } from './context';
 import styles from './index.styl';
 
-const KeypadText = styled.span`
+const KeypadText = styled(Box)`
     position: relative;
     display: inline-block;
     vertical-align: baseline;
@@ -41,46 +42,33 @@ const KeypadSubscriptText = styled(KeypadText)`
     line-height: 0;
 `;
 
-class Keypad extends Component {
-  static propTypes = {
-    canClick: PropTypes.bool,
-    units: PropTypes.oneOf([IMPERIAL_UNITS, METRIC_UNITS]),
-    axes: PropTypes.array,
-    jog: PropTypes.object,
-    actions: PropTypes.object
-  };
+/**
+ * @param {{ btnStyle?: string, compact?: boolean }} props
+ */
+function Button({ btnStyle, compact, ...props }) {
+  return (
+    <TonicButton
+      {...props}
+      size={compact ? 'sm' : 'md'}
+      variant={btnStyle === 'primary' ? 'primary' : 'default'}
+    />
+  );
+}
 
-  handleSelect = (eventKey) => {
-    const commands = ensureArray(eventKey);
-    commands.forEach(command => controller.command('gcode', command));
-  };
-
-  renderRationalNumberWithBoundedDenominator(value) {
-    // https://github.com/SheetJS/frac
-    const denominatorDigits = 4;
-    const maximumDenominator = 10 ** (Number(denominatorDigits) || 0) - 1; // 10^4 - 1 = 9999
-    const [quot, numerator, denominator] = frac(value, maximumDenominator, true);
-
-    if (numerator > 0) {
-      return (
-        <span>
-          {quot > 0 ? quot : ''}
-          <Space width={2} />
-          <Fraction
-            numerator={numerator}
-            denominator={denominator}
-          />
-        </span>
-      );
-    }
-
-    return (
-      <span>{quot > 0 ? quot : ''}</span>
-    );
-  }
-
-  renderImperialMenuItems() {
-    const { jog } = this.props;
+/**
+ * @returns {JSX.Element}
+ */
+function Keypad() {
+  const {
+    state: { canClick = false, units, axes = [], jog },
+    onGetJogDistance,
+    onJog,
+    onMove,
+    onSelectStep,
+    onStepBackward,
+    onStepForward,
+  } = useAxes();
+  const renderImperialMenuItems = () => {
     const imperialJogDistances = ensureArray(jog.imperial.distances);
     const imperialJogSteps = [
       ...imperialJogDistances,
@@ -94,19 +82,18 @@ class Keypad extends Component {
       return (
         <MenuItem
           key={_uniqueId()}
-          eventKey={key}
-          active={active}
+          onClick={() => onSelectStep(key)}
+          selected={active}
         >
           {value}
           <Space width={4} />
-          <sub>{i18n._('in')}</sub>
+          <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
         </MenuItem>
       );
     });
-  }
+  };
 
-  renderMetricMenuItems() {
-    const { jog } = this.props;
+  const renderMetricMenuItems = () => {
     const metricJogDistances = ensureArray(jog.metric.distances);
     const metricJogSteps = [
       ...metricJogDistances,
@@ -120,441 +107,445 @@ class Keypad extends Component {
       return (
         <MenuItem
           key={_uniqueId()}
-          eventKey={key}
-          active={active}
+          onClick={() => onSelectStep(key)}
+          selected={active}
         >
           {value}
           <Space width={4} />
-          <sub>{i18n._('mm')}</sub>
+          <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
         </MenuItem>
       );
     });
-  }
+  };
 
-  render() {
-    const { canClick, units, axes, jog, actions } = this.props;
-    const canChangeUnits = canClick;
-    const canChangeStep = canClick;
-    const imperialJogDistances = ensureArray(jog.imperial.distances);
-    const metricJogDistances = ensureArray(jog.metric.distances);
-    const imperialJogSteps = [
-      ...imperialJogDistances,
-      ...IMPERIAL_STEPS
-    ];
-    const metricJogSteps = [
-      ...metricJogDistances,
-      ...METRIC_STEPS
-    ];
-    const canStepForward = canChangeStep && (
-      (units === IMPERIAL_UNITS && (jog.imperial.step < imperialJogSteps.length - 1)) ||
+  const canChangeUnits = canClick;
+  const canChangeStep = canClick;
+  const imperialJogDistances = ensureArray(jog.imperial.distances);
+  const metricJogDistances = ensureArray(jog.metric.distances);
+  const imperialJogSteps = [
+    ...imperialJogDistances,
+    ...IMPERIAL_STEPS
+  ];
+  const metricJogSteps = [
+    ...metricJogDistances,
+    ...METRIC_STEPS
+  ];
+  const canStepForward = canChangeStep && (
+    (units === IMPERIAL_UNITS && (jog.imperial.step < imperialJogSteps.length - 1)) ||
             (units === METRIC_UNITS && (jog.metric.step < metricJogSteps.length - 1))
-    );
-    const canStepBackward = canChangeStep && (
-      (units === IMPERIAL_UNITS && (jog.imperial.step > 0)) ||
+  );
+  const canStepBackward = canChangeStep && (
+    (units === IMPERIAL_UNITS && (jog.imperial.step > 0)) ||
             (units === METRIC_UNITS && (jog.metric.step > 0))
-    );
-    const canClickX = canClick && _includes(axes, 'x');
-    const canClickY = canClick && _includes(axes, 'y');
-    const canClickXY = canClickX && canClickY;
-    const canClickZ = canClick && _includes(axes, 'z');
-    const highlightX = canClickX && (jog.keypad || jog.axis === 'x');
-    const highlightY = canClickY && (jog.keypad || jog.axis === 'y');
-    const highlightZ = canClickZ && (jog.keypad || jog.axis === 'z');
+  );
+  const canClickX = canClick && _includes(axes, 'x');
+  const canClickY = canClick && _includes(axes, 'y');
+  const canClickXY = canClickX && canClickY;
+  const canClickZ = canClick && _includes(axes, 'z');
+  const highlightX = canClickX && (jog.keypad || jog.axis === 'x');
+  const highlightY = canClickY && (jog.keypad || jog.axis === 'y');
+  const highlightZ = canClickZ && (jog.keypad || jog.axis === 'z');
 
-    return (
-      <div className={styles.keypad}>
-        <Flex>
-          <Box flex="8 1 0%">
-            <div className={styles.rowSpace}>
-              <Flex>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X negative Y positive"
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: -distance, Y: distance });
-                      }}
-                      disabled={!canClickXY}
-                      title={i18n._('Move X- Y+')}
-                    >
-                      <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
-                    </Button>
-                  </div>
+  return (
+    <Box className={styles.keypad}>
+      <Flex>
+        <Box flex="8 1 0%">
+          <Box className={styles.rowSpace}>
+            <Flex>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X negative Y positive"
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance, Y: distance });
+                    }}
+                    disabled={!canClickXY}
+                    title={i18n._('Move X- Y+')}
+                  >
+                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
+                  </Button>
                 </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move Y positive"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightY }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ Y: distance });
-                      }}
-                      disabled={!canClickY}
-                      title={i18n._('Move Y+')}
-                    >
-                      <KeypadText>Y</KeypadText>
-                      <KeypadDirectionText>+</KeypadDirectionText>
-                    </Button>
-                  </div>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move Y positive"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightY }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ Y: distance });
+                    }}
+                    disabled={!canClickY}
+                    title={i18n._('Move Y+')}
+                  >
+                    <KeypadText>Y</KeypadText>
+                    <KeypadDirectionText>+</KeypadDirectionText>
+                  </Button>
                 </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X positive Y positive"
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: distance, Y: distance });
-                      }}
-                      disabled={!canClickXY}
-                      title={i18n._('Move X+ Y+')}
-                    >
-                      <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
-                    </Button>
-                  </div>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X positive Y positive"
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance, Y: distance });
+                    }}
+                    disabled={!canClickXY}
+                    title={i18n._('Move X+ Y+')}
+                  >
+                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
+                  </Button>
                 </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move Z positive"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightZ }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ Z: distance });
-                      }}
-                      disabled={!canClickZ}
-                      title={i18n._('Move Z+')}
-                    >
-                      <KeypadText>Z</KeypadText>
-                      <KeypadDirectionText>+</KeypadDirectionText>
-                    </Button>
-                  </div>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move Z positive"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightZ }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ Z: distance });
+                    }}
+                    disabled={!canClickZ}
+                    title={i18n._('Move Z+')}
+                  >
+                    <KeypadText>Z</KeypadText>
+                    <KeypadDirectionText>+</KeypadDirectionText>
+                  </Button>
                 </Box>
-              </Flex>
-            </div>
-            <div className={styles.rowSpace}>
-              <Flex>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X negative"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightX }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: -distance });
-                      }}
-                      disabled={!canClickX}
-                      title={i18n._('Move X-')}
-                    >
-                      <KeypadText>X</KeypadText>
-                      <KeypadDirectionText>-</KeypadDirectionText>
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => actions.move({ X: 0, Y: 0 })}
-                      disabled={!canClickXY}
-                      title={i18n._('Move To XY Zero (G0 X0 Y0)')}
-                    >
-                      <KeypadText>X</KeypadText>
-                      <KeypadSubscriptText>0</KeypadSubscriptText>
-                      <KeypadText>Y</KeypadText>
-                      <KeypadSubscriptText>0</KeypadSubscriptText>
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X positive"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightX }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: distance });
-                      }}
-                      disabled={!canClickX}
-                      title={i18n._('Move X+')}
-                    >
-                      <KeypadText>X</KeypadText>
-                      <KeypadDirectionText>+</KeypadDirectionText>
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => actions.move({ Z: 0 })}
-                      disabled={!canClickZ}
-                      title={i18n._('Move To Z Zero (G0 Z0)')}
-                    >
-                      <KeypadText>Z</KeypadText>
-                      <KeypadSubscriptText>0</KeypadSubscriptText>
-                    </Button>
-                  </div>
-                </Box>
-              </Flex>
-            </div>
-            <div className={styles.rowSpace}>
-              <Flex>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X negative Y negative"
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: -distance, Y: -distance });
-                      }}
-                      disabled={!canClickXY}
-                      title={i18n._('Move X- Y-')}
-                    >
-                      <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move Y negative"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightY }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ Y: -distance });
-                      }}
-                      disabled={!canClickY}
-                      title={i18n._('Move Y-')}
-                    >
-                      <KeypadText>Y</KeypadText>
-                      <KeypadDirectionText>-</KeypadDirectionText>
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move X positive Y negative"
-                      btnStyle="default"
-                      compact
-                      className={styles.btnKeypad}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ X: distance, Y: -distance });
-                      }}
-                      disabled={!canClickXY}
-                      title={i18n._('Move X+ Y-')}
-                    >
-                      <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
-                    </Button>
-                  </div>
-                </Box>
-                <Box flex="1 1 0%">
-                  <div className={styles.colSpace}>
-                    <Button
-                      aria-label="Move Z negative"
-                      btnStyle="default"
-                      compact
-                      className={cx(
-                        styles.btnKeypad,
-                        { [styles.highlight]: highlightZ }
-                      )}
-                      onClick={() => {
-                        const distance = actions.getJogDistance();
-                        actions.jog({ Z: -distance });
-                      }}
-                      disabled={!canClickZ}
-                      title={i18n._('Move Z-')}
-                    >
-                      <KeypadText>Z</KeypadText>
-                      <KeypadDirectionText>-</KeypadDirectionText>
-                    </Button>
-                  </div>
-                </Box>
-              </Flex>
-            </div>
+              </Box>
+            </Flex>
           </Box>
-          <Box flex="4 1 0%">
-            <div className={styles.rowSpace}>
-              <Dropdown
+          <Box className={styles.rowSpace}>
+            <Flex>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X negative"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightX }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance });
+                    }}
+                    disabled={!canClickX}
+                    title={i18n._('Move X-')}
+                  >
+                    <KeypadText>X</KeypadText>
+                    <KeypadDirectionText>-</KeypadDirectionText>
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => onMove({ X: 0, Y: 0 })}
+                    disabled={!canClickXY}
+                    title={i18n._('Move To XY Zero (G0 X0 Y0)')}
+                  >
+                    <KeypadText>X</KeypadText>
+                    <KeypadSubscriptText>0</KeypadSubscriptText>
+                    <KeypadText>Y</KeypadText>
+                    <KeypadSubscriptText>0</KeypadSubscriptText>
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X positive"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightX }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance });
+                    }}
+                    disabled={!canClickX}
+                    title={i18n._('Move X+')}
+                  >
+                    <KeypadText>X</KeypadText>
+                    <KeypadDirectionText>+</KeypadDirectionText>
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => onMove({ Z: 0 })}
+                    disabled={!canClickZ}
+                    title={i18n._('Move To Z Zero (G0 Z0)')}
+                  >
+                    <KeypadText>Z</KeypadText>
+                    <KeypadSubscriptText>0</KeypadSubscriptText>
+                  </Button>
+                </Box>
+              </Box>
+            </Flex>
+          </Box>
+          <Box className={styles.rowSpace}>
+            <Flex>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X negative Y negative"
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: -distance, Y: -distance });
+                    }}
+                    disabled={!canClickXY}
+                    title={i18n._('Move X- Y-')}
+                  >
+                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move Y negative"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightY }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ Y: -distance });
+                    }}
+                    disabled={!canClickY}
+                    title={i18n._('Move Y-')}
+                  >
+                    <KeypadText>Y</KeypadText>
+                    <KeypadDirectionText>-</KeypadDirectionText>
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move X positive Y negative"
+                    btnStyle="default"
+                    compact
+                    className={styles.btnKeypad}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ X: distance, Y: -distance });
+                    }}
+                    disabled={!canClickXY}
+                    title={i18n._('Move X+ Y-')}
+                  >
+                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
+                  </Button>
+                </Box>
+              </Box>
+              <Box flex="1 1 0%">
+                <Box className={styles.colSpace}>
+                  <Button
+                    aria-label="Move Z negative"
+                    btnStyle="default"
+                    compact
+                    className={cx(
+                      styles.btnKeypad,
+                      { [styles.highlight]: highlightZ }
+                    )}
+                    onClick={() => {
+                      const distance = onGetJogDistance();
+                      onJog({ Z: -distance });
+                    }}
+                    disabled={!canClickZ}
+                    title={i18n._('Move Z-')}
+                  >
+                    <KeypadText>Z</KeypadText>
+                    <KeypadDirectionText>-</KeypadDirectionText>
+                  </Button>
+                </Box>
+              </Box>
+            </Flex>
+          </Box>
+        </Box>
+        <Box flex="4 1 0%">
+          <Box className={styles.rowSpace}>
+            <Menu
+              style={{
+                width: '100%'
+              }}
+            >
+              <MenuButton
+                disabled={!canChangeUnits}
+                style={{
+                  textAlign: 'right',
+                  width: '100%'
+                }}
+              >
+                {units === IMPERIAL_UNITS && i18n._('G20 (inch)')}
+                {units === METRIC_UNITS && i18n._('G21 (mm)')}
+              </MenuButton>
+              <MenuList>
+                <Box
+                  px="3x"
+                  py="2x"
+                  role="heading"
+                  fontSize="sm"
+                  color="text.secondary"
+                >
+                  {i18n._('Units')}
+                </Box>
+                <MenuItem
+                  selected={units === IMPERIAL_UNITS}
+                  onClick={() => {
+                    controller.command('gcode', 'G20');
+                  }}
+                >
+                  {i18n._('G20 (inch)')}
+                </MenuItem>
+                <MenuItem
+                  selected={units === METRIC_UNITS}
+                  onClick={() => {
+                    controller.command('gcode', 'G21');
+                  }}
+                >
+                  {i18n._('G21 (mm)')}
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </Box>
+          <Box className={styles.rowSpace}>
+            {units === IMPERIAL_UNITS && (
+              <Menu
                 style={{
                   width: '100%'
                 }}
-                disabled={!canChangeUnits}
               >
-                <Dropdown.Toggle
-                  btnStyle="default"
+                <MenuButton
+                  disabled={!canChangeStep}
                   style={{
                     textAlign: 'right',
                     width: '100%'
                   }}
                 >
-                  {units === IMPERIAL_UNITS && i18n._('G20 (inch)')}
-                  {units === METRIC_UNITS && i18n._('G21 (mm)')}
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <MenuItem header>
-                    {i18n._('Units')}
-                  </MenuItem>
-                  <MenuItem
-                    active={units === IMPERIAL_UNITS}
-                    onSelect={() => {
-                      controller.command('gcode', 'G20');
-                    }}
-                  >
-                    {i18n._('G20 (inch)')}
-                  </MenuItem>
-                  <MenuItem
-                    active={units === METRIC_UNITS}
-                    onSelect={() => {
-                      controller.command('gcode', 'G21');
-                    }}
-                  >
-                    {i18n._('G21 (mm)')}
-                  </MenuItem>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
-            <div className={styles.rowSpace}>
-              {units === IMPERIAL_UNITS && (
-                <Dropdown
+                  {imperialJogSteps[jog.imperial.step]}
+                  <Space width={4} />
+                  <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
+                </MenuButton>
+                <MenuList
                   style={{
-                    width: '100%'
-                  }}
-                  disabled={!canChangeStep}
-                  onSelect={(eventKey) => {
-                    const step = eventKey;
-                    actions.selectStep(step);
+                    maxHeight: 150,
+                    overflowY: 'auto'
                   }}
                 >
-                  <Dropdown.Toggle
-                    btnStyle="default"
-                    style={{
-                      textAlign: 'right',
-                      width: '100%'
-                    }}
+                  <Box
+                    px="3x"
+                    py="2x"
+                    role="heading"
+                    fontSize="sm"
+                    color="text.secondary"
                   >
-                    {imperialJogSteps[jog.imperial.step]}
-                    <Space width={4} />
-                    <sub>{i18n._('in')}</sub>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu
-                    style={{
-                      maxHeight: 150,
-                      overflowY: 'auto'
-                    }}
-                  >
-                    <MenuItem header>
-                      {i18n._('Imperial')}
-                    </MenuItem>
-                    {this.renderImperialMenuItems()}
-                  </Dropdown.Menu>
-                </Dropdown>
-              )}
-              {units === METRIC_UNITS && (
-                <Dropdown
+                    {i18n._('Imperial')}
+                  </Box>
+                  {renderImperialMenuItems()}
+                </MenuList>
+              </Menu>
+            )}
+            {units === METRIC_UNITS && (
+              <Menu
+                style={{
+                  width: '100%'
+                }}
+              >
+                <MenuButton
+                  disabled={!canChangeStep}
                   style={{
+                    textAlign: 'right',
                     width: '100%'
                   }}
-                  disabled={!canChangeStep}
-                  onSelect={(eventKey) => {
-                    const step = eventKey;
-                    actions.selectStep(step);
+                >
+                  {metricJogSteps[jog.metric.step]}
+                  <Space width={4} />
+                  <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
+                </MenuButton>
+                <MenuList
+                  style={{
+                    maxHeight: 150,
+                    overflowY: 'auto'
                   }}
                 >
-                  <Dropdown.Toggle
-                    btnStyle="default"
-                    style={{
-                      textAlign: 'right',
-                      width: '100%'
-                    }}
+                  <Box
+                    px="3x"
+                    py="2x"
+                    role="heading"
+                    fontSize="sm"
+                    color="text.secondary"
                   >
-                    {metricJogSteps[jog.metric.step]}
-                    <Space width={4} />
-                    <sub>{i18n._('mm')}</sub>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu
-                    style={{
-                      maxHeight: 150,
-                      overflowY: 'auto'
-                    }}
-                  >
-                    <MenuItem header>
-                      {i18n._('Metric')}
-                    </MenuItem>
-                    {this.renderMetricMenuItems()}
-                  </Dropdown.Menu>
-                </Dropdown>
-              )}
-            </div>
-            <div className={styles.rowSpace}>
-              <Flex>
-                <Box flex="1 1 0%">
-                  <RepeatableButton
-                    aria-label="Decrease step size"
-                    disabled={!canStepBackward}
-                    style={{ marginRight: 2.5 }}
-                    onClick={actions.stepBackward}
-                  >
-                    <i aria-hidden="true" className="fa fa-minus" />
-                  </RepeatableButton>
-                </Box>
-                <Box flex="1 1 0%">
-                  <RepeatableButton
-                    aria-label="Increase step size"
-                    disabled={!canStepForward}
-                    onClick={actions.stepForward}
-                  >
-                    <i aria-hidden="true" className="fa fa-plus" />
-                  </RepeatableButton>
-                </Box>
-              </Flex>
-            </div>
+                    {i18n._('Metric')}
+                  </Box>
+                  {renderMetricMenuItems()}
+                </MenuList>
+              </Menu>
+            )}
           </Box>
-        </Flex>
-      </div>
-    );
-  }
+          <Box className={styles.rowSpace}>
+            <Flex>
+              <Box flex="1 1 0%">
+                <RepeatableButton
+                  aria-label="Decrease step size"
+                  disabled={!canStepBackward}
+                  style={{ marginRight: 2.5 }}
+                  onClick={onStepBackward}
+                >
+                  <i aria-hidden="true" className="fa fa-minus" />
+                </RepeatableButton>
+              </Box>
+              <Box flex="1 1 0%">
+                <RepeatableButton
+                  aria-label="Increase step size"
+                  disabled={!canStepForward}
+                  onClick={onStepForward}
+                >
+                  <i aria-hidden="true" className="fa fa-plus" />
+                </RepeatableButton>
+              </Box>
+            </Flex>
+          </Box>
+        </Box>
+      </Flex>
+    </Box>
+  );
 }
 
 export default Keypad;

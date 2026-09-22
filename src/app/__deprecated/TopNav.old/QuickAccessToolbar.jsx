@@ -1,9 +1,11 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Button,
+  ButtonGroup,
+  Flex,
   Space,
 } from '@tonic-ui/react';
 import React, { Component } from 'react';
-import { ButtonToolbar, ButtonGroup, Button } from '@app/components/Buttons';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 
@@ -31,10 +33,10 @@ class QuickAccessToolbar extends Component {
 
   render() {
     return (
-      <ButtonToolbar>
+      <Flex alignItems="center">
         <ButtonGroup>
           <Button
-            btnStyle="default"
+            variant="default"
             onClick={this.command.cycle_start}
             title={i18n._('Cycle Start')}
           >
@@ -43,7 +45,7 @@ class QuickAccessToolbar extends Component {
             {i18n._('Cycle Start')}
           </Button>
           <Button
-            btnStyle="default"
+            variant="default"
             onClick={this.command.feed_hold}
             title={i18n._('Feedhold')}
           >
@@ -55,7 +57,7 @@ class QuickAccessToolbar extends Component {
         <Space width={12} />
         <ButtonGroup>
           <Button
-            btnStyle="primary"
+            variant="primary"
             onClick={this.command.homing}
             title={i18n._('Homing')}
           >
@@ -64,7 +66,7 @@ class QuickAccessToolbar extends Component {
             {i18n._('Homing')}
           </Button>
           <Button
-            btnStyle="success"
+            variant="default"
             onClick={this.command.sleep}
             title={i18n._('Sleep')}
           >
@@ -73,7 +75,7 @@ class QuickAccessToolbar extends Component {
             {i18n._('Sleep')}
           </Button>
           <Button
-            btnStyle="warning"
+            variant="default"
             onClick={this.command.unlock}
             title={i18n._('Unlock')}
           >
@@ -82,7 +84,7 @@ class QuickAccessToolbar extends Component {
             {i18n._('Unlock')}
           </Button>
           <Button
-            btnStyle="danger"
+            variant="emphasis"
             onClick={this.command.reset}
             title={i18n._('Reset')}
           >
@@ -91,7 +93,7 @@ class QuickAccessToolbar extends Component {
             {i18n._('Reset')}
           </Button>
         </ButtonGroup>
-      </ButtonToolbar>
+      </Flex>
     );
   }
 }

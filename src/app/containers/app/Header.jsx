@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -43,7 +44,6 @@ import React, {
 } from 'react';
 import FocusLock from 'react-focus-lock';
 import { useLocation, useNavigate } from 'react-router-dom';
-import IconButton from '@app/components/IconButton';
 import env from '@app/config/env';
 import layout from '@app/config/layout';
 import { mapRoutePathToPageTitle } from '@app/config/routes';
@@ -54,6 +54,7 @@ import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import log from '@app/lib/log';
 import * as user from '@app/lib/user';
+import { signoutAndClearSession } from '@app/queries/session';
 import config from '@app/store/config';
 import Avatar from './components/Avatar';
 import { ensureColorMode, getColorScheme, mapDisplayLanguageToLocaleString } from './utils';
@@ -228,6 +229,7 @@ const MainMenuItems = forwardRef((props, ref) => {
   const [colorStyle] = useColorStyle();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const isUserAccountEnabled = config.get('session.enabled');
   const userAccountName = config.get('session.name');
   const appearance = config.get('settings.appearance') ?? 'auto';
@@ -344,12 +346,12 @@ const MainMenuItems = forwardRef((props, ref) => {
         <>
           <MenuDivider />
           <MenuItem
-            onClick={(event) => {
+            onClick={async (event) => {
               if (user.isAuthenticated()) {
                 log.debug('Destroy and cleanup the WebSocket connection');
                 controller.disconnect();
 
-                user.signout();
+                await signoutAndClearSession(queryClient);
 
                 // remember current location
                 const url = location.pathname;
@@ -377,6 +379,7 @@ const Header = forwardRef((
   },
   ref,
 ) => {
+  const [colorMode] = useColorMode();
   const [colorStyle] = useColorStyle();
   const location = useLocation();
   const [menu, setMenu] = useState('main');
@@ -406,13 +409,36 @@ const Header = forwardRef((
         alignItems="center"
         px="4x"
       >
-        <IconButton
+        <ButtonBase
+          aria-label={i18n._('Toggle navigation')}
+          border={1}
+          borderColor="transparent"
+          color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+          lineHeight={1}
+          px="2x"
+          py="2x"
+          transition="all .2s"
           width="10x"
           height="10x"
           onClick={onToggle}
+          _active={{
+            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+          }}
+          _focus={{
+            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+          }}
+          _focusActive={{
+            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+          }}
+          _focusHover={{
+            color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+          }}
+          _hover={{
+            color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+          }}
         >
           <Icon as={MenuIcon} size="6x" />
-        </IconButton>
+        </ButtonBase>
         <Space minWidth="2x" />
         <ButtonBase
           aria-label={`${settings.productName} ${settings.version} - View release notes`}

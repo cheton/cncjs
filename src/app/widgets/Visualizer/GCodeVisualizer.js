@@ -11,6 +11,41 @@ const motionColor = {
   'G3': new THREE.Color(colornames('deepskyblue'))
 };
 
+const disposeObjectResources = (object, disposedResources = new Set(), disposeResource) => {
+  const dispose = resource => {
+    if (!resource || disposedResources.has(resource)) {
+      return;
+    }
+    disposedResources.add(resource);
+    if (typeof disposeResource === 'function') {
+      disposeResource(resource);
+    } else if (typeof resource.dispose === 'function') {
+      resource.dispose();
+    }
+  };
+
+  object.traverse(child => {
+    if (child.geometry && !child.isSprite) {
+      dispose(child.geometry);
+    }
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    materials.forEach(material => {
+      if (!material) {
+        return;
+      }
+      Object.keys(material).forEach(key => {
+        const value = material[key];
+        if (value && value.isTexture) {
+          dispose(value);
+        }
+      });
+      dispose(material);
+    });
+  });
+
+  return disposedResources;
+};
+
 class GCodeVisualizer {
   constructor() {
     this.group = new THREE.Object3D();
@@ -89,7 +124,7 @@ class GCodeVisualizer {
     while (this.group.children.length > 0) {
       const child = this.group.children[0];
       this.group.remove(child);
-      child.geometry.dispose();
+      disposeObjectResources(child);
     }
 
     toolpath.loadFromStringSync(gcode, (line, index) => {
@@ -121,6 +156,25 @@ class GCodeVisualizer {
     });
 
     return this.group;
+  }
+
+  dispose(disposeResource) {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+    const disposedResources = disposeObjectResources(
+      this.group,
+      new Set(),
+      disposeResource
+    );
+    if (this.geometry && !disposedResources.has(this.geometry)) {
+      if (typeof disposeResource === 'function') {
+        disposeResource(this.geometry);
+      } else if (typeof this.geometry.dispose === 'function') {
+        this.geometry.dispose();
+      }
+    }
   }
 
   setFrameIndex(frameIndex) {

@@ -18,7 +18,6 @@ import { MenuIcon } from '@tonic-ui/react-icons';
 import { ensureArray, ensureString } from 'ensure-type';
 import React, { forwardRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import IconButton from '@app/components/IconButton';
 import layout from '@app/config/layout';
 import { routes, mapRoutePathToPageTitle } from '@app/config/routes';
 import settings from '@app/config/settings';
@@ -83,13 +82,36 @@ const SideNav = forwardRef((
           px="4x"
           mb="2x"
         >
-          <IconButton
+          <ButtonBase
+            aria-label="Close navigation"
+            border={1}
+            borderColor="transparent"
+            color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+            lineHeight={1}
+            px="2x"
+            py="2x"
+            transition="all .2s"
             width="10x"
             height="10x"
             onClick={onClose}
+            _active={{
+              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            }}
+            _focus={{
+              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            }}
+            _focusActive={{
+              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            }}
+            _focusHover={{
+              color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+            }}
+            _hover={{
+              color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+            }}
           >
             <Icon as={MenuIcon} size="6x" />
-          </IconButton>
+          </ButtonBase>
           <Space minWidth="2x" />
           <ButtonBase
             onClick={handleViewReleases}

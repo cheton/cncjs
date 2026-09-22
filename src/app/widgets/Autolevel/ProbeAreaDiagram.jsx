@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import i18n from '@app/lib/i18n';
 import { toDisplayUnits } from '@app/lib/units';
@@ -10,6 +9,9 @@ const AREA_TOP = 10;
 const AREA_WIDTH = 160;
 const AREA_HEIGHT = 100;
 
+/**
+ * @param {{startX?: number, startY?: number, endX?: number, endY?: number, stepX?: number, stepY?: number, units?: string}} props
+ */
 const ProbeAreaDiagram = ({
   startX,
   startY,
@@ -58,9 +60,9 @@ const ProbeAreaDiagram = ({
       />
 
       {/* Grid dots */}
-      {dots.map((dot, idx) => (
+      {dots.map(dot => (
         <circle
-          key={idx}
+          key={`${dot.x}-${dot.y}`}
           cx={dot.x}
           cy={dot.y}
           r={dotRadius}
@@ -131,16 +133,6 @@ const ProbeAreaDiagram = ({
       </text>
     </svg>
   );
-};
-
-ProbeAreaDiagram.propTypes = {
-  startX: PropTypes.number,
-  startY: PropTypes.number,
-  endX: PropTypes.number,
-  endY: PropTypes.number,
-  stepX: PropTypes.number,
-  stepY: PropTypes.number,
-  units: PropTypes.string,
 };
 
 export default ProbeAreaDiagram;

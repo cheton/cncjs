@@ -137,6 +137,7 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+      SUPPRESS_WEBGL_WARNING: '0',
       BUILD_VERSION: buildVersion,
       LANGUAGES: buildConfig.languages,
       TRACKING_ID: buildConfig.analytics.trackingId,

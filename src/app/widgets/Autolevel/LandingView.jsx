@@ -1,51 +1,46 @@
-import PropTypes from 'prop-types';
+import { Box, Button, Text } from '@tonic-ui/react';
 import React from 'react';
-import { Button } from '@app/components/Buttons';
 import i18n from '@app/lib/i18n';
 import styles from './LandingView.styl';
 
-const LandingView = ({ actions }) => {
+/**
+ * @param {{onStartNewProbe?: Function, onLoadProbeFile?: Function}} props
+ */
+function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} }) {
   return (
-    <div className={styles.landingView}>
-      <div className={styles.pathCard}>
-
-        <div className={styles.pathTitle}>
-          <span role="img" aria-label="Target" style={{ fontSize: 22 }}>🎯</span>
-          {i18n._('PROBE NEW SURFACE')}
-        </div>
-        <div className={styles.pathDescription}>
-          {i18n._('Set up the probe area and probe the work surface to generate height compensation data.')}
-        </div>
-        <Button
-          btnStyle="flat"
-          onClick={actions.startNewProbe}
+    <Box className={styles.landingView}>
+      <Box className={styles.pathCard}>
+        <Box
+          alignItems="center" className={styles.pathTitle} display="flex"
+          gap="1x"
         >
+          <span aria-label={i18n._('Target')} role="img" style={{ fontSize: 22 }}>🎯</span>
+          {i18n._('PROBE NEW SURFACE')}
+        </Box>
+        <Text className={styles.pathDescription}>
+          {i18n._('Set up the probe area and probe the work surface to generate height compensation data.')}
+        </Text>
+        <Button onClick={onStartNewProbe} variant="ghost">
           {i18n._('Start New Probe')}
         </Button>
-      </div>
-
-      <div className={styles.pathCard}>
-        <div className={styles.pathTitle}>
-          <span role="img" aria-label="Wrench" style={{ fontSize: 22 }}>🔧</span>
-          {i18n._('APPLY COMPENSATION')}
-        </div>
-        <div className={styles.pathDescription}>
-          {i18n._('Load a previously saved .probe file and apply it to your G-code.')}
-        </div>
-        <Button
-          btnStyle="flat"
-          onClick={actions.loadProbeFile}
+      </Box>
+      <Box className={styles.pathCard}>
+        <Box
+          alignItems="center" className={styles.pathTitle} display="flex"
+          gap="1x"
         >
+          <span aria-label={i18n._('Wrench')} role="img" style={{ fontSize: 22 }}>🔧</span>
+          {i18n._('APPLY COMPENSATION')}
+        </Box>
+        <Text className={styles.pathDescription}>
+          {i18n._('Load a previously saved .probe file and apply it to your G-code.')}
+        </Text>
+        <Button onClick={onLoadProbeFile} variant="ghost">
           {i18n._('Load Probe Data')}
         </Button>
-      </div>
-
-    </div>
+      </Box>
+    </Box>
   );
-};
-
-LandingView.propTypes = {
-  actions: PropTypes.object.isRequired,
-};
+}
 
 export default LandingView;

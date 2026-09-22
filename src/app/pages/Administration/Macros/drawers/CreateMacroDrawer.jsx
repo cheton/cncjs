@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -23,23 +22,18 @@ import {
 import React, { useCallback, useRef } from 'react';
 import { Form } from 'react-final-form';
 import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
 import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
+  useCreateMacroMutation,
+} from '@app/queries/macros';
+import {
   MACRO_VARIABLE_EXAMPLES,
 } from '../constants';
-import {
-  API_MACROS_QUERY_KEY,
-  useCreateMacroMutation,
-} from '../queries';
 import {
   insertAtCaret,
 } from '../utils';
@@ -49,16 +43,12 @@ const CreateMacroDrawer = ({
   ...rest
 }) => {
   const gcodeInputRef = useRef();
-  const { toasts, notify: notifyToast } = useInlineToasts();
-  const queryClient = useQueryClient();
+  const notifyToast = useToast();
   const createMacroMutation = useCreateMacroMutation({
     onSuccess: () => {
       if (typeof onClose === 'function') {
         onClose();
       }
-
-      // Invalidate `useFetchMacrosQuery`
-      queryClient.invalidateQueries({ queryKey: API_MACROS_QUERY_KEY });
     },
     onError: () => {
       notifyToast({
@@ -103,9 +93,6 @@ const CreateMacroDrawer = ({
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New Macro')}

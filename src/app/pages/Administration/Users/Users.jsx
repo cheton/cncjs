@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
+  ButtonBase,
   Checkbox,
   Flex,
   Icon,
@@ -10,6 +11,7 @@ import {
   Switch,
   Text,
   Tooltip,
+  useColorMode,
   usePortalManager,
 } from '@tonic-ui/react';
 import {
@@ -20,7 +22,6 @@ import { ensureArray } from 'ensure-type';
 import qs from 'qs';
 import React, { useCallback, useMemo, useState } from 'react';
 import BaseTable from '@app/components/BaseTable';
-import IconButton from '@app/components/IconButton';
 import TablePagination from '@app/components/TablePagination';
 import {
   DEFAULT_ROWS_PER_PAGE_OPTIONS,
@@ -40,6 +41,7 @@ import {
 } from './queries';
 
 const Users = () => {
+  const [colorMode] = useColorMode();
   // pagination
   const rowsPerPageOptions = ensureArray(DEFAULT_ROWS_PER_PAGE_OPTIONS);
   const [page, setPage] = useState(1);
@@ -333,14 +335,27 @@ const Users = () => {
             columnGap="2x"
           >
             <Tooltip label={i18n._('Refresh')}>
-              <IconButton
+              <ButtonBase
+                aria-label={i18n._('Refresh')}
+                border={1}
+                borderColor="transparent"
+                color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                lineHeight={1}
                 onClick={handleClickRefresh}
+                px="2x"
+                py="2x"
+                transition="all .2s"
+                _active={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focus={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focusActive={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
+                _focusHover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
+                _hover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
               >
                 <Icon
                   as={RefreshIcon}
                   spin={fetchUsersQuery.isFetching}
                 />
-              </IconButton>
+              </ButtonBase>
             </Tooltip>
           </Flex>
         </Flex>
