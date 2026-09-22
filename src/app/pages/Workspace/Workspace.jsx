@@ -15,11 +15,16 @@ import _throttle from 'lodash/throttle';
 import cx from 'classnames';
 import Dropzone from 'react-dropzone';
 import pubsub from 'pubsub-js';
-import React, { Component } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { connect } from 'react-redux';
 import compose from 'recompose/compose';
 import styled from 'styled-components';
-import api from '@app/api';
 import { Button, ButtonGroup } from '@app/components/Buttons';
 import { Row, Col } from '@app/components/GridSystem';
 import withRouter from '@app/components/withRouter'; // withRouter is deprecated
@@ -32,6 +37,7 @@ import {
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import log from '@app/lib/log';
+import { useLoadGCodeMutation } from '@app/queries/gcode';
 import config from '@app/store/config';
 import * as widgetManager from './widget-manager';
 import DefaultWidgets from './DefaultWidgets';
@@ -65,98 +71,94 @@ const stopWaiting = () => {
   root.classList.remove('wait');
 };
 
-class Workspace extends Component {
-  state = {
-    modal: {
+/**
+ * Owns Workspace-level modal, panel, drag/drop, and controller lifecycle state.
+ *
+ * @param {Object} props Workspace view props.
+ * @returns {JSX.Element}
+ */
+const Workspace = ({
+  isConnected,
+  className,
+  workspaceLayout,
+  primaryWidgetIds,
+  secondaryWidgetIds,
+  location,
+  ...props
+}) => {
+  const [modal, setModal] = useState({
+    name: MODAL_NONE,
+    params: {}
+  });
+  const [isDraggingWidget, setIsDraggingWidget] = useState(false);
+  const [, setIsUploading] = useState(false);
+  const [showPrimaryContainer, setShowPrimaryContainer] = useState(
+    () => config.get('workspace.container.primary.show')
+  );
+  const [showSecondaryContainer, setShowSecondaryContainer] = useState(
+    () => config.get('workspace.container.secondary.show')
+  );
+  const [inactiveCount, setInactiveCount] = useState(
+    () => _size(widgetManager.getInactiveWidgets())
+  );
+  const loadGCodeMutation = useLoadGCodeMutation();
+  const mountedRef = useRef(false);
+  const layoutRef = useRef({
+    showPrimaryContainer,
+    showSecondaryContainer,
+  });
+  const locationRef = useRef(location);
+  layoutRef.current = {
+    showPrimaryContainer,
+    showSecondaryContainer,
+  };
+  locationRef.current = location;
+
+  const openModal = useCallback((name = MODAL_NONE, params = {}) => {
+    setModal({ name, params });
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModal({
       name: MODAL_NONE,
       params: {}
-    },
-    isDraggingWidget: false,
-    isUploading: false,
-    showPrimaryContainer: config.get('workspace.container.primary.show'),
-    showSecondaryContainer: config.get('workspace.container.secondary.show'),
-    inactiveCount: _size(widgetManager.getInactiveWidgets())
-  };
+    });
+  }, []);
 
-  action = {
-    openModal: (name = MODAL_NONE, params = {}) => {
-      this.setState(state => ({
-        modal: {
-          name: name,
-          params: params
-        }
-      }));
-    },
-    closeModal: () => {
-      this.setState(state => ({
-        modal: {
-          name: MODAL_NONE,
-          params: {}
-        }
-      }));
-    },
-    updateModalParams: (params = {}) => {
-      this.setState(state => ({
-        modal: {
-          ...state.modal,
-          params: {
-            ...state.modal.params,
-            ...params
-          }
-        }
-      }));
-    }
-  };
+  const handleFeederStatus = useCallback((status) => {
+    const { hold, holdReason } = { ...status };
 
-  controllerEvents = {
-    'connect': () => {
-      if (controller.connected) {
-        this.action.closeModal();
-      } else {
-        this.action.openModal(MODAL_SERVER_DISCONNECTED);
-      }
-    },
-    'connect_error': () => {
-      if (controller.connected) {
-        this.action.closeModal();
-      } else {
-        this.action.openModal(MODAL_SERVER_DISCONNECTED);
-      }
-    },
-    'disconnect': () => {
-      if (controller.connected) {
-        this.action.closeModal();
-      } else {
-        this.action.openModal(MODAL_SERVER_DISCONNECTED);
-      }
-    },
-    'feeder:status': (status) => {
-      const { modal } = this.state;
-      const { hold, holdReason } = { ...status };
-
+    setModal(currentModal => {
       if (!hold) {
-        if (_includes([MODAL_FEEDER_PAUSED, MODAL_FEEDER_WAIT], modal.name)) {
-          this.action.closeModal();
+        if (_includes([MODAL_FEEDER_PAUSED, MODAL_FEEDER_WAIT], currentModal.name)) {
+          return {
+            name: MODAL_NONE,
+            params: {}
+          };
         }
-        return;
+        return currentModal;
       }
 
       const { err, data, msg } = { ...holdReason };
 
       if (err) {
-        this.action.openModal(MODAL_FEEDER_PAUSED, {
-          title: i18n._('Error'),
-          message: msg,
-        });
-        return;
+        return {
+          name: MODAL_FEEDER_PAUSED,
+          params: {
+            title: i18n._('Error'),
+            message: msg,
+          }
+        };
       }
 
       if (data === WAIT) {
-        this.action.openModal(MODAL_FEEDER_WAIT, {
-          title: '%wait',
-          message: msg,
-        });
-        return;
+        return {
+          name: MODAL_FEEDER_WAIT,
+          params: {
+            title: '%wait',
+            message: msg,
+          }
+        };
       }
 
       const title = {
@@ -169,59 +171,72 @@ class Workspace extends Component {
         'M190': i18n._('M190 Set Heated Bed Temperature')
       }[data] || data;
 
-      this.action.openModal(MODAL_FEEDER_PAUSED, {
-        title: title,
-        message: msg,
+      return {
+        name: MODAL_FEEDER_PAUSED,
+        params: {
+          title,
+          message: msg,
+        }
+      };
+    });
+  }, []);
+
+  const controllerEvents = useMemo(() => ({
+    connect: () => {
+      if (controller.connected) {
+        closeModal();
+      } else {
+        openModal(MODAL_SERVER_DISCONNECTED);
+      }
+    },
+    connect_error: () => {
+      if (controller.connected) {
+        closeModal();
+      } else {
+        openModal(MODAL_SERVER_DISCONNECTED);
+      }
+    },
+    disconnect: () => {
+      if (controller.connected) {
+        closeModal();
+      } else {
+        openModal(MODAL_SERVER_DISCONNECTED);
+      }
+    },
+    'feeder:status': handleFeederStatus,
+  }), [closeModal, handleFeederStatus, openModal]);
+
+  useEffect(() => {
+    Object.keys(controllerEvents).forEach(eventName => {
+      controller.addListener(eventName, controllerEvents[eventName]);
+    });
+
+    return () => {
+      Object.keys(controllerEvents).forEach(eventName => {
+        controller.removeListener(eventName, controllerEvents[eventName]);
       });
-    }
-  };
+    };
+  }, [controllerEvents]);
 
-  widgetEventHandler = {
-    onForkWidget: (widgetId) => {
-      // TODO
-    },
-    onRemoveWidget: (widgetId) => {
-      const inactiveWidgets = widgetManager.getInactiveWidgets();
-      this.setState({ inactiveCount: inactiveWidgets.length });
-    },
-    onDragStart: () => {
-      const { isDraggingWidget } = this.state;
-      if (!isDraggingWidget) {
-        this.setState({ isDraggingWidget: true });
-      }
-    },
-    onDragEnd: () => {
-      const { isDraggingWidget } = this.state;
-      if (isDraggingWidget) {
-        this.setState({ isDraggingWidget: false });
-      }
-    }
-  };
+  useEffect(() => {
+    mountedRef.current = true;
 
-  togglePrimaryContainer = () => {
-    const { showPrimaryContainer } = this.state;
-    this.setState({ showPrimaryContainer: !showPrimaryContainer });
+    return () => {
+      mountedRef.current = false;
+      stopWaiting();
+    };
+  }, []);
 
-    // Publish a 'resize' event
-    pubsub.publish('resize'); // Also see "widgets/Visualizer"
-  };
-
-  toggleSecondaryContainer = () => {
-    const { showSecondaryContainer } = this.state;
-    this.setState({ showSecondaryContainer: !showSecondaryContainer });
-
-    // Publish a 'resize' event
-    pubsub.publish('resize'); // Also see "widgets/Visualizer"
-  };
-
-  publishResizeEvent = () => {
-    const { showPrimaryContainer, showSecondaryContainer } = this.state;
+  const publishResizeEvent = useCallback(() => {
+    const {
+      showPrimaryContainer: showPrimary,
+      showSecondaryContainer: showSecondary,
+    } = layoutRef.current;
 
     { // Mobile-Friendly View
-      const { location } = this.props;
-      const disableHorizontalScroll = !(showPrimaryContainer && showSecondaryContainer);
+      const disableHorizontalScroll = !(showPrimary && showSecondary);
 
-      if (location.pathname === '/workspace' && disableHorizontalScroll) {
+      if (locationRef.current?.pathname === '/workspace' && disableHorizontalScroll) {
         // Disable horizontal scroll
         document.body.scrollLeft = 0;
         document.body.style.overflowX = 'hidden';
@@ -236,17 +251,50 @@ class Workspace extends Component {
     // are toggled. Publishing 'resize' lets the visualizer re-measure its
     // canvas against the new width.
     pubsub.publish('resize'); // Also see "widgets/Visualizer"
-  };
+  }, []);
 
-  onDrop = (files) => {
-    let file = files[0];
-    let reader = new FileReader();
+  const didMountLayoutRef = useRef(false);
+  useEffect(() => {
+    if (didMountLayoutRef.current) {
+      config.set('workspace.container.primary.show', showPrimaryContainer);
+      config.set('workspace.container.secondary.show', showSecondaryContainer);
+    } else {
+      didMountLayoutRef.current = true;
+    }
+
+    publishResizeEvent();
+  }, [publishResizeEvent, showPrimaryContainer, showSecondaryContainer]);
+
+  useEffect(() => {
+    const onResizeThrottled = _throttle(publishResizeEvent, 50);
+    const timeoutId = setTimeout(publishResizeEvent, 0);
+    window.addEventListener('resize', onResizeThrottled);
+
+    return () => {
+      window.removeEventListener('resize', onResizeThrottled);
+      onResizeThrottled.cancel();
+      clearTimeout(timeoutId);
+      document.body.style.overflowX = '';
+    };
+  }, [publishResizeEvent]);
+
+  const onDrop = useCallback((files) => {
+    const file = files[0];
+    if (!file || !mountedRef.current) {
+      return;
+    }
+
+    const reader = new FileReader();
 
     reader.onloadend = (event) => {
       const { result, error } = event.target;
 
       if (error) {
         log.error(error);
+        return;
+      }
+
+      if (!mountedRef.current) {
         return;
       }
 
@@ -260,25 +308,31 @@ class Workspace extends Component {
       ]));
 
       startWaiting();
-      this.setState({ isUploading: true });
+      setIsUploading(true);
 
       const meta = {
         name: file.name,
         content: result,
       };
 
-      api.loadGCode(meta)
-        .then((res) => {
-          const { name } = { ...res.body };
+      loadGCodeMutation.mutate({
+        meta,
+        context: controller.context,
+      }, {
+        onSuccess: response => {
+          const { name } = { ...(response?.body || response) };
           log.debug(`Loaded a G-code file: name=${name}`);
-        })
-        .catch((res) => {
+        },
+        onError: () => {
           log.error('Failed to upload G-code file');
-        })
-        .then(() => {
+        },
+        onSettled: () => {
           stopWaiting();
-          this.setState({ isUploading: false });
-        });
+          if (mountedRef.current) {
+            setIsUploading(false);
+          }
+        },
+      });
     };
 
     try {
@@ -286,9 +340,9 @@ class Workspace extends Component {
     } catch (err) {
       // Ignore error
     }
-  };
+  }, [loadGCodeMutation, mountedRef]);
 
-  updateWidgetsForPrimaryContainer = () => {
+  const updateWidgetsForPrimaryContainer = useCallback(() => {
     widgetManager.show(({ activeWidgets, inactiveWidgets }) => {
       const widgets = Object.keys(config.get('widgets', {}))
         .filter(widgetId => {
@@ -311,11 +365,11 @@ class Workspace extends Component {
       pubsub.publish('updateSecondaryWidgets', secondaryWidgets);
 
       // Update inactive count
-      this.setState({ inactiveCount: _size(inactiveWidgets) });
+      setInactiveCount(_size(inactiveWidgets));
     });
-  };
+  }, []);
 
-  updateWidgetsForSecondaryContainer = () => {
+  const updateWidgetsForSecondaryContainer = useCallback(() => {
     widgetManager.show(({ activeWidgets, inactiveWidgets }) => {
       const widgets = Object.keys(config.get('widgets', {}))
         .filter(widgetId => {
@@ -338,73 +392,37 @@ class Workspace extends Component {
       pubsub.publish('updatePrimaryWidgets', primaryWidgets);
 
       // Update inactive count
-      this.setState({ inactiveCount: _size(inactiveWidgets) });
+      setInactiveCount(_size(inactiveWidgets));
     });
-  };
+  }, []);
 
-  componentDidMount() {
-    this.addControllerEvents();
-    this.addResizeEventListener();
+  const togglePrimaryContainer = useCallback(() => {
+    setShowPrimaryContainer(value => !value);
+  }, []);
 
-    setTimeout(() => {
-      this.publishResizeEvent();
-    }, 0);
-  }
+  const toggleSecondaryContainer = useCallback(() => {
+    setShowSecondaryContainer(value => !value);
+  }, []);
 
-  componentWillUnmount() {
-    this.removeControllerEvents();
-    this.removeResizeEventListener();
-  }
+  const onForkWidget = useCallback((widgetId) => {
+    // TODO
+  }, []);
 
-  componentDidUpdate() {
-    config.set('workspace.container.primary.show', this.state.showPrimaryContainer);
-    config.set('workspace.container.secondary.show', this.state.showSecondaryContainer);
+  const onRemoveWidget = useCallback((widgetId) => {
+    const inactiveWidgets = widgetManager.getInactiveWidgets();
+    setInactiveCount(inactiveWidgets.length);
+  }, []);
 
-    this.publishResizeEvent();
-  }
+  const onDragStart = useCallback(() => {
+    setIsDraggingWidget(true);
+  }, []);
 
-  addControllerEvents() {
-    Object.keys(this.controllerEvents).forEach(eventName => {
-      const callback = this.controllerEvents[eventName];
-      controller.addListener(eventName, callback);
-    });
-  }
+  const onDragEnd = useCallback(() => {
+    setIsDraggingWidget(false);
+  }, []);
 
-  removeControllerEvents() {
-    Object.keys(this.controllerEvents).forEach(eventName => {
-      const callback = this.controllerEvents[eventName];
-      controller.removeListener(eventName, callback);
-    });
-  }
-
-  addResizeEventListener() {
-    this.onResizeThrottled = _throttle(this.publishResizeEvent, 50);
-    window.addEventListener('resize', this.onResizeThrottled);
-  }
-
-  removeResizeEventListener() {
-    window.removeEventListener('resize', this.onResizeThrottled);
-    this.onResizeThrottled = null;
-  }
-
-  render() {
-    const {
-      isConnected,
-      className,
-      workspaceLayout,
-      primaryWidgetIds,
-      secondaryWidgetIds,
-      ...props
-    } = this.props;
-    const {
-      modal,
-      isDraggingWidget,
-      showPrimaryContainer,
-      showSecondaryContainer,
-      inactiveCount
-    } = this.state;
-    const hidePrimaryContainer = !showPrimaryContainer;
-    const hideSecondaryContainer = !showSecondaryContainer;
+  const hidePrimaryContainer = !showPrimaryContainer;
+  const hideSecondaryContainer = !showSecondaryContainer;
 
     return (
       <div className={cx(className, styles.workspace)} {...props}>
@@ -412,14 +430,14 @@ class Workspace extends Component {
           <FeederPaused
             title={modal.params.title}
             message={modal.params.message}
-            onClose={this.action.closeModal}
+            onClose={closeModal}
           />
         )}
         {modal.name === MODAL_FEEDER_WAIT && (
           <FeederWait
             title={modal.params.title}
             message={modal.params.message}
-            onClose={this.action.closeModal}
+            onClose={closeModal}
           />
         )}
         {modal.name === MODAL_SERVER_DISCONNECTED &&
@@ -439,7 +457,7 @@ class Workspace extends Component {
               return;
             }
 
-            this.onDrop(acceptedFiles);
+            onDrop(acceptedFiles);
           }}
         >
           {({
@@ -493,7 +511,7 @@ class Workspace extends Component {
                           <Button
                             aria-label="Hide left panel"
                             sm
-                            onClick={this.togglePrimaryContainer}
+                            onClick={togglePrimaryContainer}
                           >
                             <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
                           </Button>
@@ -503,7 +521,7 @@ class Workspace extends Component {
                           <Button
                             block
                             sm
-                            onClick={this.updateWidgetsForPrimaryContainer}
+                            onClick={updateWidgetsForPrimaryContainer}
                           >
                             <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                             <Space width={8} />
@@ -540,10 +558,10 @@ class Workspace extends Component {
                       px="3x"
                     >
                       <PrimaryWidgets
-                        onForkWidget={this.widgetEventHandler.onForkWidget}
-                        onRemoveWidget={this.widgetEventHandler.onRemoveWidget}
-                        onDragStart={this.widgetEventHandler.onDragStart}
-                        onDragEnd={this.widgetEventHandler.onDragEnd}
+                        onForkWidget={onForkWidget}
+                        onRemoveWidget={onRemoveWidget}
+                        onDragStart={onDragStart}
+                        onDragEnd={onDragEnd}
                       />
                     </Box>
                   </Box>
@@ -559,7 +577,7 @@ class Workspace extends Component {
                       <Button
                         aria-label="Show left panel"
                         sm
-                        onClick={this.togglePrimaryContainer}
+                        onClick={togglePrimaryContainer}
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="chevron-right" fixedWidth />
                       </Button>
@@ -586,7 +604,7 @@ class Workspace extends Component {
                       <Button
                         aria-label="Show right panel"
                         sm
-                        onClick={this.toggleSecondaryContainer}
+                        onClick={toggleSecondaryContainer}
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
                       </Button>
@@ -627,7 +645,7 @@ class Workspace extends Component {
                           <Button
                             block
                             sm
-                            onClick={this.updateWidgetsForSecondaryContainer}
+                            onClick={updateWidgetsForSecondaryContainer}
                           >
                             <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                             <Space width={8} />
@@ -641,7 +659,7 @@ class Workspace extends Component {
                           <Button
                             aria-label="Hide right panel"
                             sm
-                            onClick={this.toggleSecondaryContainer}
+                            onClick={toggleSecondaryContainer}
                           >
                             <FontAwesomeIcon aria-hidden="true" icon="chevron-right" fixedWidth />
                           </Button>
@@ -655,10 +673,10 @@ class Workspace extends Component {
                       px="3x"
                     >
                       <SecondaryWidgets
-                        onForkWidget={this.widgetEventHandler.onForkWidget}
-                        onRemoveWidget={this.widgetEventHandler.onRemoveWidget}
-                        onDragStart={this.widgetEventHandler.onDragStart}
-                        onDragEnd={this.widgetEventHandler.onDragEnd}
+                        onForkWidget={onForkWidget}
+                        onRemoveWidget={onRemoveWidget}
+                        onDragStart={onDragStart}
+                        onDragEnd={onDragEnd}
                       />
                     </Box>
                   </Box>
@@ -669,8 +687,7 @@ class Workspace extends Component {
         </Dropzone>
       </div>
     );
-  }
-}
+};
 
 const WorkspaceWithLayout = props => {
   const workspaceLayout = useWorkspaceLayout();

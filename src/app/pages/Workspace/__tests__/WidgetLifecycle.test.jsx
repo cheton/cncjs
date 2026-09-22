@@ -167,6 +167,10 @@ jest.mock('@app/api', () => ({
   default: { loadGCode: jest.fn() },
 }));
 
+jest.mock('@app/queries/gcode', () => ({
+  useLoadGCodeMutation: () => ({ mutate: jest.fn() }),
+}));
+
 jest.mock('react-sortablejs', () => {
   const React = require('react');
 
