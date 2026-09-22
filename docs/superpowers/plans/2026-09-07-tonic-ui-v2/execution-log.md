@@ -1399,3 +1399,13 @@ Plan contract and baseline fixture: `08-workspace-and-cleanup.md` W1, `00-design
 Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. The contract is fixed but crosses Workspace state, persistence, drag/drop, modal state, controlled layout, Query mutation boundaries, and multiple widget consumers; the execution matrix classifies W1 as Luna max. Terra/root owns all contract decisions, diff review, and ledger updates.
 
 Status transition: W1 `todo` → `in_progress`; user explicitly overrode the personal post-shipping pause for W1. Next exact step: read the complete W1 source and tests, map each required behavior to current coverage, then prepare a bounded worker brief.
+
+## W1 Workspace domain — completed 2026-09-22
+
+Workspace lifecycle ownership is now hook-based: controller listeners, resize/throttle cleanup, mounted upload settlement guards, panel visibility, modal state, and inactive-widget count are owned by `Workspace`. Uploads use the shared non-retrying `useLoadGCodeMutation` with the existing file metadata and controller context. Its shell now uses direct Tonic `Box`, `Flex`, `Button`, and `ButtonGroup`; the legacy Buttons/GridSystem imports, styled dropzone overlay, and native layout wrappers were removed.
+
+The widget manager is a controlled function owner with direct Tonic modal, grid, button, and checkbox primitives. Controller-specific filtering and active/inactive output are preserved; child items no longer retain their own visibility state. Existing primary/secondary/default group wiring was reverified rather than rewritten: sortable metadata and persisted group order, hidden-controller filtering, fork/remove persistence, fullscreen/collapse behavior, and unmount/re-entry cleanup remain covered.
+
+Verification: focused Workspace suite `yarn test:frontend --runInBand --silent --runTestsByPath $(rg --files src/app/pages/Workspace/__tests__ | sort)` passed 7 suites / 68 tests. Full `yarn test:frontend --runInBand --silent` passed 58 suites / 367 tests. Targeted ESLint and `git diff --check` passed. Browser, simulator, and build were not run under the standing R6 deferral.
+
+Checkpoints: `74fe926e` (Workspace hook owner), `1c8af004` (controlled Tonic widget manager), `6ce2c2dc` (query-mutation test fixture), and `a24f9460` (Tonic Workspace shell). Status transition: W1 `in_progress` → `completed`; P1 overlays is now eligible and is not started.

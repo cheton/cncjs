@@ -30,12 +30,12 @@
 **Modify:** `src/app/pages/Workspace/Workspace.jsx`, `Widget.jsx`, `PrimaryWidgets.jsx`, `SecondaryWidgets.jsx`, `DefaultWidgets.jsx`, `widget-manager/WidgetManager.jsx`, `widget-manager/WidgetListItem.jsx`, `widget-manager/index.jsx`；檢查其餘 Workspace helpers/styles。
 **Create Test:** `src/app/pages/Workspace/__tests__/Workspace.test.jsx`。
 
-- [ ] D4 已完成 Primary/Secondary/Default 的 function 接線；只複核其 regression，不重寫已完成內容。將 Workspace 剩餘 class domain state/lifecycle 改 function。沿 U1a `useWorkspaceLayout()` 的 actions 控制 primary/secondary，而非 refs；Widget registry 保留名字與 unknown→null 行為。
-- [ ] 保留 Sortable drag handle/filter/data-widget-id、availableControllers filter、排序持久化與 fork/remove callback；控制器不支援而隱藏的 widgets 不被批次收合操作意外改設定。
-- [ ] fork 複製原 config 的 existing semantics，layout config entry 以新 widgetId 初始化；remove 移除對應 config entry，但只依原行為處理持久化 config，不能擅自多刪使用者資料。
-- [ ] Workspace `api.loadGCode(meta)` 改共享 `useLoadGCodeMutation`；保持失敗 notification、drag/drop file metadata/context；與 Autolevel 共用 transport，不共用 in-flight mutation state。
-- [ ] manager 的選取項目是 controlled state，不能用 child.state/list item refs 讀值。Grid/Modal/Buttons/Checkbox/Menu 直接用 Tonic。
-- [ ] 測新增/移除/fork/排序、reload persistence、不同 container collapse all、單個 expand、fullscreen 收合策略、hidden controller widgets、兩個 forked widget 狀態獨立、route 離開/re-enter 清理。
+- [x] D4 已完成 Primary/Secondary/Default 的 function 接線；只複核其 regression，不重寫已完成內容。將 Workspace 剩餘 class domain state/lifecycle 改 function。沿 U1a `useWorkspaceLayout()` 的 actions 控制 primary/secondary，而非 refs；Widget registry 保留名字與 unknown→null 行為。
+- [x] 保留 Sortable drag handle/filter/data-widget-id、availableControllers filter、排序持久化與 fork/remove callback；控制器不支援而隱藏的 widgets 不被批次收合操作意外改設定。
+- [x] fork 複製原 config 的 existing semantics，layout config entry 以新 widgetId 初始化；remove 移除對應 config entry，但只依原行為處理持久化 config，不能擅自多刪使用者資料。
+- [x] Workspace `api.loadGCode(meta)` 改共享 `useLoadGCodeMutation`；保持失敗 notification、drag/drop file metadata/context；與 Autolevel 共用 transport，不共用 in-flight mutation state。
+- [x] manager 的選取項目是 controlled state，不能用 child.state/list item refs 讀值。Grid/Modal/Buttons/Checkbox/Menu 直接用 Tonic。
+- [x] 測新增/移除/fork/排序、reload persistence、不同 container collapse all、單個 expand、fullscreen 收合策略、hidden controller widgets、兩個 forked widget 狀態獨立、route 離開/re-enter 清理。
 
 ## Task W2：剩餘元件與非 widget consumers
 
