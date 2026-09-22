@@ -1,6 +1,10 @@
 import {
   Box,
   Flex,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Space,
 } from '@tonic-ui/react';
 import cx from 'classnames';
@@ -10,7 +14,6 @@ import _uniqueId from 'lodash/uniqueId';
 import React from 'react';
 import styled from 'styled-components';
 import { Button } from '@app/components/Buttons';
-import Dropdown, { MenuItem } from '@app/components/Dropdown';
 import RepeatableButton from '@app/components/RepeatableButton';
 import {
   IMPERIAL_UNITS,
@@ -66,8 +69,8 @@ function Keypad() {
       return (
         <MenuItem
           key={_uniqueId()}
-          eventKey={key}
-          active={active}
+          onClick={() => onSelectStep(key)}
+          selected={active}
         >
           {value}
           <Space width={4} />
@@ -91,8 +94,8 @@ function Keypad() {
       return (
         <MenuItem
           key={_uniqueId()}
-          eventKey={key}
-          active={active}
+          onClick={() => onSelectStep(key)}
+          selected={active}
         >
           {value}
           <Space width={4} />
@@ -385,14 +388,13 @@ function Keypad() {
         </Box>
         <Box flex="4 1 0%">
           <Box className={styles.rowSpace}>
-            <Dropdown
+            <Menu
               style={{
                 width: '100%'
               }}
-              disabled={!canChangeUnits}
             >
-              <Dropdown.Toggle
-                btnStyle="default"
+              <MenuButton
+                disabled={!canChangeUnits}
                 style={{
                   textAlign: 'right',
                   width: '100%'
@@ -400,44 +402,45 @@ function Keypad() {
               >
                 {units === IMPERIAL_UNITS && i18n._('G20 (inch)')}
                 {units === METRIC_UNITS && i18n._('G21 (mm)')}
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <MenuItem header>
+              </MenuButton>
+              <MenuList>
+                <Box
+                  px="3x"
+                  py="2x"
+                  role="heading"
+                  fontSize="sm"
+                  color="text.secondary"
+                >
                   {i18n._('Units')}
-                </MenuItem>
+                </Box>
                 <MenuItem
-                  active={units === IMPERIAL_UNITS}
-                  onSelect={() => {
+                  selected={units === IMPERIAL_UNITS}
+                  onClick={() => {
                     controller.command('gcode', 'G20');
                   }}
                 >
                   {i18n._('G20 (inch)')}
                 </MenuItem>
                 <MenuItem
-                  active={units === METRIC_UNITS}
-                  onSelect={() => {
+                  selected={units === METRIC_UNITS}
+                  onClick={() => {
                     controller.command('gcode', 'G21');
                   }}
                 >
                   {i18n._('G21 (mm)')}
                 </MenuItem>
-              </Dropdown.Menu>
-            </Dropdown>
+              </MenuList>
+            </Menu>
           </Box>
           <Box className={styles.rowSpace}>
             {units === IMPERIAL_UNITS && (
-              <Dropdown
+              <Menu
                 style={{
                   width: '100%'
                 }}
-                disabled={!canChangeStep}
-                onSelect={(eventKey) => {
-                  const step = eventKey;
-                  onSelectStep(step);
-                }}
               >
-                <Dropdown.Toggle
-                  btnStyle="default"
+                <MenuButton
+                  disabled={!canChangeStep}
                   style={{
                     textAlign: 'right',
                     width: '100%'
@@ -446,33 +449,34 @@ function Keypad() {
                   {imperialJogSteps[jog.imperial.step]}
                   <Space width={4} />
                   <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
-                </Dropdown.Toggle>
-                <Dropdown.Menu
+                </MenuButton>
+                <MenuList
                   style={{
                     maxHeight: 150,
                     overflowY: 'auto'
                   }}
                 >
-                  <MenuItem header>
+                  <Box
+                    px="3x"
+                    py="2x"
+                    role="heading"
+                    fontSize="sm"
+                    color="text.secondary"
+                  >
                     {i18n._('Imperial')}
-                  </MenuItem>
+                  </Box>
                   {renderImperialMenuItems()}
-                </Dropdown.Menu>
-              </Dropdown>
+                </MenuList>
+              </Menu>
             )}
             {units === METRIC_UNITS && (
-              <Dropdown
+              <Menu
                 style={{
                   width: '100%'
                 }}
-                disabled={!canChangeStep}
-                onSelect={(eventKey) => {
-                  const step = eventKey;
-                  onSelectStep(step);
-                }}
               >
-                <Dropdown.Toggle
-                  btnStyle="default"
+                <MenuButton
+                  disabled={!canChangeStep}
                   style={{
                     textAlign: 'right',
                     width: '100%'
@@ -481,19 +485,25 @@ function Keypad() {
                   {metricJogSteps[jog.metric.step]}
                   <Space width={4} />
                   <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
-                </Dropdown.Toggle>
-                <Dropdown.Menu
+                </MenuButton>
+                <MenuList
                   style={{
                     maxHeight: 150,
                     overflowY: 'auto'
                   }}
                 >
-                  <MenuItem header>
+                  <Box
+                    px="3x"
+                    py="2x"
+                    role="heading"
+                    fontSize="sm"
+                    color="text.secondary"
+                  >
                     {i18n._('Metric')}
-                  </MenuItem>
+                  </Box>
                   {renderMetricMenuItems()}
-                </Dropdown.Menu>
-              </Dropdown>
+                </MenuList>
+              </Menu>
             )}
           </Box>
           <Box className={styles.rowSpace}>

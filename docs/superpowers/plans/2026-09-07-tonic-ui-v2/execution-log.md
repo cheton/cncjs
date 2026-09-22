@@ -1417,3 +1417,45 @@ Scope is `details/08a-component-families.md` P1. The family contains twelve lega
 Completed initial slices: `ab5dbc65` migrates Workspace feeder paused/wait/server-disconnected dialogs and `ModalTemplate` to direct Tonic modal composition; a new focused test proves the non-dismissible focus contract and feeder command-before-close ordering. Workspace suite passed 8 suites / 70 tests. `30825e14` migrates CorruptedWorkspaceSettingsModal to a non-dismissible direct Tonic dialog and preserves export URL plus restore-defaults → persist → reload ordering; focused app/config tests passed 2 suites / 6 tests. Targeted ESLint and diff checks passed for both slices.
 
 Status transition: P1 `todo` → `in_progress`. Remaining P1 work is deliberate: audit and migrate the remaining direct consumers for Anchor/Buttons/Clickable/IconButton, Dropdown/RootCloseWrapper, Modal/ModalTemplate, Tooltip/Infotip, and Notifications/InlineToasts before any shared family can be deleted. No full frontend, browser, simulator, build, package deletion, or push is claimed at this checkpoint.
+
+## P1 InlineToasts drawer consumers — resumed 2026-09-22
+
+Task / session / timestamp: P1 / current root session / 2026-09-22.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `92f149dc22caed6bb09d96dd5ce8d9263e3b640b` / clean worktree. The Tonic UI v3 alpha upgrade is deferred until existing P1 work is complete; it is not part of this substep. No reset, staging, commit, push, browser, simulator, or build operation is authorized.
+
+Plan contract and baseline fixture: `details/08a-component-families.md` P1, `00-design.md`, `.omp/RULES.md`, and `src/app/hooks/useToast.js`. Migrate the ten Administration create/update drawers under `Commands`, `Events`, `Machines`, `Macros`, and `Users` from their local `InlineToasts` queue to the shared `useToast` callback. Preserve each mutation's exact error appearance, i18next content, and `duration: undefined` persistence policy. The error notification must outlive a drawer unmount. Delete `src/app/components/InlineToasts/` only after its production imports are zero. Do not modify query ownership, mutation payloads, drawer close/invalidation ordering, backend/controller/Redux/config transport, or unrelated P1 consumers.
+
+Model / reasoning_effort / selection reason: `gpt-5.6-luna` / max. The replacement is repetitive but spans ten mutation owners, shared notification lifecycle, a family-deletion import gate, and a new cross-consumer regression. P1 is classified as Luna max in the execution matrix; the root session remains the sole ledger writer and diff reviewer. No browser tooling is authorized.
+
+Worker brief: pending `/root/p1_inline_toasts` / allowed production files are the ten identified Administration drawer files and `src/app/components/InlineToasts/` deletion after a zero-import audit. Allowed test scope is a new Administration drawer regression plus necessary local test fixtures. Write the failure first: capture every create/update mutation's `onError`, invoke it, and prove all ten call the global `useToast` callback with the existing error contract; then make the minimal migration. Do not edit docs/ledger, package files, source outside the bounded scope, protected Prettier paths, stage/commit/push, or use browser/simulator/build tooling. Return changed files, RED and GREEN commands/exit codes, zero-import audit, untested paths, and any decision requiring root review.
+
+Status transition: P1 remains `in_progress`; no blocker. Next exact step: dispatch the bounded worker, then independently review its test-first evidence, actual diff, and family import audit before integrating the slice.
+
+## P1 InlineToasts drawer consumers — accepted 2026-09-22
+
+Implementation: all ten Administration create/update drawers now call the shared `useToast` hook on mutation error, retaining `appearance: 'error'`, the existing i18next message, and `duration: undefined`. Their local `InlineToastContainer` render blocks are removed. The now-zero-consumer `src/app/components/InlineToasts/` family, including `InlineToastContainer.jsx`, is deleted.
+
+Test-first / review: the new `InlineToastsMigration.test.jsx` initially failed because no drawer called the mocked shared `useToast` callback. After the migration it renders every drawer with a captured mutation hook, invokes each `onError`, and verifies ten global persistent error notifications. Review found that `InlineToastContainer.jsx` had remained after the initial deletion; it was deleted and the audit re-run. The test also preserves every drawer's mutation ownership, close/invalidation callback order, and API because it changes only the error notification owner.
+
+Verification: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/pages/Administration/__tests__/InlineToastsMigration.test.jsx` passed 1 suite / 1 test. `rg -n '@app/components/InlineToasts|InlineToastContainer|InlineToasts|useInlineToasts' src/app --glob '*.{js,jsx}'` returned no matches (exit 1 expected). Targeted ESLint had 0 errors and 14 existing repository warnings. `git diff --check` passed. Fresh `yarn test:frontend --runInBand --silent` passed 61 suites / 374 tests. Browser, simulator, and build checks remain deferred to R6; no staging, commit, or push occurred.
+
+Status transition: P1 remains `in_progress`. Next exact step: map each `Dropdown` and `RootCloseWrapper` consumer to its menu contract, then write the first focused keyboard/outside-interaction/focus-return regression before migrating that family.
+
+## P1 Widget dropdown adapter — completed 2026-09-22
+
+Implementation: replaced `Widget.DropdownButton`'s dependency on the legacy Dropdown family with direct Tonic `Menu`, `MenuToggle`, and `MenuList` composition. A new local `DropdownMenuItem` maps existing widget `eventKey`, `onSelect`, `disabled`, `divider`, `header`, and `active` usage to Tonic `MenuItem`, `MenuDivider`, and `Box`. The existing 19 menu instances across 15 widgets keep their current handler interface and CNC-command payloads unchanged.
+
+Test-first / review: the new adapter regression initially failed against the legacy menu because its selectable nodes were not native `menuitem` controls and Escape left the menu open. It now proves one parent callback for an enabled selection, no callback for a disabled item, Escape close with focus returned to the toggle, and closure when focus moves outside. A literal import audit confirms Widget and all widget consumers no longer import `@app/components/Dropdown`; only the two direct Axes files and deprecated TopNav remain.
+
+Verification: `yarn test:frontend --runInBand --silent --runTestsByPath src/app/components/Widget/__tests__/DropdownButton.test.jsx` passed 1 suite / 3 tests. Targeted ESLint exited 0 with 14 existing repository warnings and no new errors after the local JSX warning was corrected. `git diff --check` passed. Fresh `yarn test:frontend --runInBand --silent` passed 62 suites / 377 tests. Browser, simulator, and build remain deferred to R6; no staging, commit, or push occurred.
+
+Status transition: P1 remains `in_progress`. Next exact step: migrate the direct Axes `DisplayPanel` and `Keypad` Dropdown consumers, preserving their CNC command and unit-step-selection contracts before removing the legacy Dropdown and RootCloseWrapper families.
+
+## P1 Axes Keypad menus — completed 2026-09-22
+
+Implementation: replaced the Keypad unit, imperial-step, and metric-step Dropdown compositions with direct Tonic `Menu`, `MenuButton`, `MenuList`, `MenuItem`, and heading `Box` primitives. The current unit commands remain `G20` and `G21`; each selected step now calls the existing `onSelectStep(index)` owner directly.
+
+Test-first / verification: the added metric-step case was RED under the legacy Dropdown because its items were not accessible `menuitem` controls. After migration, `yarn test:frontend --runInBand --silent --runTestsByPath src/app/widgets/Axes/__tests__/Axes.test.jsx` passed 1 suite / 20 tests and proves selecting `1 mm` calls `onSelectStep(12)`. Targeted ESLint passed with 0 target errors and 13 pre-existing warnings; `git diff --check` passed. The Dropdown import audit now has only `Axes/DisplayPanel.jsx` and deprecated TopNav. Full frontend verification is pending the current DisplayPanel slice; browser, simulator, and build remain deferred to R6.
+
+Status transition: P1 remains `in_progress`. Next exact step: migrate DisplayPanel's work-coordinate and per-axis CNC command menus, then re-run the full frontend suite before deleting the legacy Dropdown and RootCloseWrapper families.

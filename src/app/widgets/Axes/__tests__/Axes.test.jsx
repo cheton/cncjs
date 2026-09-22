@@ -328,6 +328,44 @@ describe('Axes keypad', () => {
       view.dispose();
     }
   });
+
+  test('selects a metric step through the native menu', () => {
+    const onSelectStep = jest.fn();
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x', 'y', 'z'],
+          jog: {
+            axis: '',
+            keypad: false,
+            imperial: { step: 0, distances: [] },
+            metric: { step: 0, distances: [] },
+          },
+        },
+        onGetJogDistance: () => 0.001,
+        onJog: jest.fn(),
+        onMove: jest.fn(),
+        onSelectStep,
+        onStepBackward: jest.fn(),
+        onStepForward: jest.fn(),
+      }}
+      >
+        <Keypad />
+      </AxesProvider>
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: /0\.001/ }));
+      fireEvent.click(screen.getByRole('menuitem', { name: '1 mm' }));
+
+      expect(onSelectStep).toHaveBeenCalledTimes(1);
+      expect(onSelectStep).toHaveBeenCalledWith(12);
+    } finally {
+      view.dispose();
+    }
+  });
 });
 
 describe('Axes MDI command contract', () => {
