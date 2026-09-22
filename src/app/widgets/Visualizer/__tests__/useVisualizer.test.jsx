@@ -231,6 +231,94 @@ describe('useVisualizer', () => {
     expect(mockEngine.dispose).toHaveBeenCalledTimes(1);
   });
 
+  test('cancels a pending 32ms resize throttle on unmount', () => {
+    jest.useFakeTimers();
+    try {
+      const { unmount } = render(<Harness />);
+      const resizeListener = windowAddEventListener.mock.calls.find(([name]) => name === 'resize')[1];
+
+      resizeListener();
+      resizeListener();
+      expect(mockEngine.resize).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(1);
+
+      unmount();
+      jest.advanceTimersByTime(32);
+
+      expect(mockEngine.resize).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test('reuses the renderer across show toggles and disposes each route instance once', () => {
+    const firstEngine = { ...mockEngine, dispose: jest.fn() };
+    const secondEngine = { ...mockEngine, dispose: jest.fn() };
+    createVisualizerEngine
+      .mockReturnValueOnce(firstEngine)
+      .mockReturnValueOnce(secondEngine);
+
+    const firstRoute = render(<Harness />);
+    const oldHost = firstRoute.container.firstChild;
+    firstRoute.rerender(<Harness state={{ ...viewState, show: false }} />);
+
+    expect(createVisualizerEngine).toHaveBeenCalledTimes(1);
+    expect(firstEngine.update).toHaveBeenCalledWith(expect.objectContaining({ show: false }));
+
+    firstRoute.unmount();
+    expect(firstEngine.dispose).toHaveBeenCalledTimes(1);
+    expect(oldHost.parentNode).toBeNull();
+
+    const secondRoute = render(<Harness />);
+    expect(createVisualizerEngine).toHaveBeenCalledTimes(2);
+    secondRoute.unmount();
+    expect(secondEngine.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  test('returns active engines to zero after 20 mount and unmount cycles', () => {
+    const engines = [];
+    createVisualizerEngine.mockImplementation(() => {
+      const engine = { ...mockEngine, dispose: jest.fn() };
+      engines.push(engine);
+      return engine;
+    });
+
+    for (let index = 0; index < 20; ++index) {
+      const route = render(<Harness />);
+      route.unmount();
+    }
+
+    expect(engines).toHaveLength(20);
+    expect(engines.filter(engine => engine.dispose.mock.calls.length === 0)).toHaveLength(0);
+    engines.forEach(engine => {
+      expect(engine.dispose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('pairs StrictMode engine setup and cleanup without leaving an active engine', () => {
+    const engines = [];
+    createVisualizerEngine.mockImplementation(() => {
+      const engine = { ...mockEngine, dispose: jest.fn() };
+      engines.push(engine);
+      return engine;
+    });
+
+    const route = render(
+      <React.StrictMode>
+        <Harness />
+      </React.StrictMode>,
+    );
+
+    expect(engines.length).toBeGreaterThanOrEqual(1);
+    expect(engines.filter(engine => engine.dispose.mock.calls.length === 0)).toHaveLength(1);
+    route.unmount();
+    expect(engines.filter(engine => engine.dispose.mock.calls.length === 0)).toHaveLength(0);
+    engines.forEach(engine => {
+      expect(engine.dispose).toHaveBeenCalledTimes(1);
+    });
+  });
+
   test('keeps action identities stable while reading the latest engine ref', () => {
     function StatefulHarness() {
       const [value, setValue] = useState(0);

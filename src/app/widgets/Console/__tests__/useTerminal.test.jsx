@@ -8,6 +8,7 @@ const mockScrollbars = [];
 
 jest.mock('xterm', () => ({
   Terminal: jest.fn(options => {
+    const loadedAddons = new Set();
     const line = {
       length: 80,
       loadCell: jest.fn(),
@@ -42,11 +43,25 @@ jest.mock('xterm', () => ({
       },
       keyDisposable: { dispose: jest.fn() },
       resizeDisposable: { dispose: jest.fn() },
-      loadAddon: jest.fn(),
+      loadAddon: jest.fn(addon => {
+        const dispose = addon.dispose;
+        let disposed = false;
+        addon.dispose = jest.fn(() => {
+          if (!disposed) {
+            disposed = true;
+            loadedAddons.delete(addon);
+            dispose();
+          }
+        });
+        loadedAddons.add(addon);
+      }),
       open: jest.fn(),
       focus: jest.fn(),
       dispose: jest.fn(),
     };
+    instance.dispose.mockImplementation(() => {
+      [...loadedAddons].forEach(addon => addon.dispose());
+    });
     instance.line = line;
     instance.open.mockImplementation(node => {
       const xtermElement = node.ownerDocument.createElement('div');
@@ -135,10 +150,17 @@ describe('useTerminal', () => {
     expect(mockXtermInstances).toHaveLength(1);
     const [term] = mockXtermInstances;
     const [addon] = mockFitAddons;
+    expect(term.textarea.onpaste).toEqual(expect.any(Function));
     view.unmount();
 
     expect(term.keyDisposable.dispose).toHaveBeenCalledTimes(1);
     expect(term.resizeDisposable.dispose).toHaveBeenCalledTimes(1);
+    expect(term.textarea.onpaste).toBeNull();
+    expect(mockScrollbars[0].destroy).toHaveBeenCalledTimes(1);
+    expect(addon.dispose).toHaveBeenCalledTimes(1);
+    expect(term.dispose).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(mockScrollbars[0].destroy).toHaveBeenCalledTimes(1);
     expect(addon.dispose).toHaveBeenCalledTimes(1);
     expect(term.dispose).toHaveBeenCalledTimes(1);
   });
@@ -357,8 +379,45 @@ describe('useTerminal', () => {
 
     const activeBeforeUnmount = mockXtermInstances.filter(term => term.dispose.mock.calls.length === 0);
     expect(activeBeforeUnmount).toHaveLength(1);
+    expect(mockFitAddons.filter(addon => addon.dispose.mock.calls.length === 0)).toHaveLength(1);
+    expect(mockScrollbars.filter(scrollbar => scrollbar.destroy.mock.calls.length === 0)).toHaveLength(1);
     view.unmount();
     const activeAfterUnmount = mockXtermInstances.filter(term => term.dispose.mock.calls.length === 0);
     expect(activeAfterUnmount).toHaveLength(0);
+    expect(mockFitAddons.filter(addon => addon.dispose.mock.calls.length === 0)).toHaveLength(0);
+    expect(mockScrollbars.filter(scrollbar => scrollbar.destroy.mock.calls.length === 0)).toHaveLength(0);
+  });
+
+  test('returns xterm, addons, and scrollbar resources to zero after 20 cycles', () => {
+    for (let index = 0; index < 20; ++index) {
+      const view = render(
+        <Harness
+          enabled={true}
+          cols={254}
+          rows={15}
+          cursorBlink={true}
+          scrollback={1000}
+          tabStopWidth={2}
+          onData={jest.fn()}
+        />,
+      );
+      view.unmount();
+    }
+
+    expect(mockXtermInstances).toHaveLength(20);
+    expect(mockFitAddons).toHaveLength(20);
+    expect(mockScrollbars).toHaveLength(20);
+    expect(mockXtermInstances.filter(term => term.dispose.mock.calls.length === 0)).toHaveLength(0);
+    expect(mockFitAddons.filter(addon => addon.dispose.mock.calls.length === 0)).toHaveLength(0);
+    expect(mockScrollbars.filter(scrollbar => scrollbar.destroy.mock.calls.length === 0)).toHaveLength(0);
+    mockXtermInstances.forEach(term => {
+      expect(term.dispose).toHaveBeenCalledTimes(1);
+    });
+    mockFitAddons.forEach(addon => {
+      expect(addon.dispose).toHaveBeenCalledTimes(1);
+    });
+    mockScrollbars.forEach(scrollbar => {
+      expect(scrollbar.destroy).toHaveBeenCalledTimes(1);
+    });
   });
 });

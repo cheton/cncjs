@@ -106,7 +106,9 @@ class VisualizerEngine {
     this.pendingAssetLoads = new Set();
     this.disposedResources = new WeakSet();
     this.agitationAnimationFrame = null;
+    this.agitationAnimationGeneration = 0;
     this.controlsAnimationFrame = null;
+    this.controlsAnimationGeneration = 0;
     this.shouldAnimateControls = false;
     this.appendedCanvas = null;
 
@@ -846,15 +848,16 @@ class VisualizerEngine {
     controls.minDistance = TRACKBALL_CONTROLS_MIN_DISTANCE;
     controls.maxDistance = TRACKBALL_CONTROLS_MAX_DISTANCE;
 
-    const animate = () => {
-      this.controlsAnimationFrame = null;
-      if (this.disposed || !this.shouldAnimateControls) {
+    const animate = generation => {
+      if (generation !== this.controlsAnimationGeneration ||
+          this.disposed || !this.shouldAnimateControls) {
         return;
       }
+      this.controlsAnimationFrame = null;
       controls.update();
       this.updateScene();
       if (this.shouldAnimateControls && typeof requestAnimationFrame === 'function') {
-        this.controlsAnimationFrame = requestAnimationFrame(animate);
+        this.controlsAnimationFrame = requestAnimationFrame(() => animate(generation));
       }
     };
 
@@ -863,7 +866,8 @@ class VisualizerEngine {
         return;
       }
       this.shouldAnimateControls = true;
-      animate();
+      const generation = ++this.controlsAnimationGeneration;
+      animate(generation);
     };
     this.controlsEndHandler = () => {
       this.shouldAnimateControls = false;
@@ -898,21 +902,23 @@ class VisualizerEngine {
     if (this.agitationAnimationFrame !== null || typeof requestAnimationFrame !== 'function') {
       return;
     }
-    this.agitationAnimationFrame = requestAnimationFrame(this.renderAnimationLoop);
+    const generation = ++this.agitationAnimationGeneration;
+    this.agitationAnimationFrame = requestAnimationFrame(() => this.renderAnimationLoop(generation));
   }
 
   cancelAgitation() {
+    this.agitationAnimationGeneration += 1;
     if (this.agitationAnimationFrame !== null && typeof cancelAnimationFrame === 'function') {
       cancelAnimationFrame(this.agitationAnimationFrame);
     }
     this.agitationAnimationFrame = null;
   }
 
-  renderAnimationLoop = () => {
-    this.agitationAnimationFrame = null;
-    if (this.disposed) {
+  renderAnimationLoop = generation => {
+    if (generation !== this.agitationAnimationGeneration || this.disposed) {
       return;
     }
+    this.agitationAnimationFrame = null;
 
     if (this.isAgitated) {
       this.rotateCuttingTool(600);
@@ -922,11 +928,12 @@ class VisualizerEngine {
     this.updateScene();
 
     if (this.isAgitated && typeof requestAnimationFrame === 'function') {
-      this.agitationAnimationFrame = requestAnimationFrame(this.renderAnimationLoop);
+      this.agitationAnimationFrame = requestAnimationFrame(() => this.renderAnimationLoop(generation));
     }
   };
 
   cancelControlsAnimation() {
+    this.controlsAnimationGeneration += 1;
     if (this.controlsAnimationFrame !== null && typeof cancelAnimationFrame === 'function') {
       cancelAnimationFrame(this.controlsAnimationFrame);
     }

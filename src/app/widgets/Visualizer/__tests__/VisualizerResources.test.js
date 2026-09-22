@@ -193,6 +193,12 @@ describe('Visualizer resource ownership', () => {
     }
   });
 
+  const runRafFrame = id => {
+    const callback = rafCallbacks.get(id);
+    rafCallbacks.delete(id);
+    callback();
+  };
+
   test('loadSTL rejects when the loader reports an error', async () => {
     const error = new Error('stl failed');
     mockSTLLoaderLoad.mockImplementation((url, onLoad, onProgress, onError) => {
@@ -233,6 +239,44 @@ describe('Visualizer resource ownership', () => {
     expect(onError).toHaveBeenCalledTimes(1);
     expect(onError).toHaveBeenCalledWith(error);
     engine.dispose();
+  });
+
+  test('attaches successful deferred assets and disposes each resource once', async () => {
+    const geometry = makeGeometry();
+    const texture = makeTexture();
+    const geometryDispose = jest.spyOn(geometry, 'dispose');
+    const textureDispose = jest.spyOn(texture, 'dispose');
+    const stl = deferred();
+    const textureLoad = deferred();
+    const onError = jest.fn();
+    loadSTLSpy.mockReturnValue(stl.promise);
+    loadTextureSpy.mockReturnValue(textureLoad.promise);
+
+    const engine = makeEngine({
+      onError,
+      viewState: {
+        ...viewState,
+        objects: {
+          ...viewState.objects,
+          cuttingTool: { visible: true },
+        },
+      },
+    });
+    stl.resolve(geometry);
+    textureLoad.resolve(texture);
+    await flushAsync();
+
+    const cuttingTool = engine.group.getObjectByName('CuttingTool');
+    expect(cuttingTool).toBeDefined();
+    expect(cuttingTool.children[0].geometry).toBe(geometry);
+    expect(cuttingTool.children[0].material.map).toBe(texture);
+    expect(onError).not.toHaveBeenCalled();
+
+    engine.dispose();
+    engine.dispose();
+
+    expect(geometryDispose).toHaveBeenCalledTimes(1);
+    expect(textureDispose).toHaveBeenCalledTimes(1);
   });
 
   test('disposes a successful texture when the STL load rejects', async () => {
@@ -342,6 +386,14 @@ describe('Visualizer resource ownership', () => {
       objects: { cuttingTool: { visible: true } },
       workPosition: { x: 70, y: 80, z: 10 },
     });
+    const latestProfile = {
+      limits: { xmin: 100, xmax: 300, ymin: 200, ymax: 400, zmin: -20, zmax: 20 },
+    };
+    engine.update({
+      machineProfile: latestProfile,
+      objects: { cuttingTool: { visible: true } },
+      workPosition: { x: 250, y: 350, z: 10 },
+    });
 
     stl.resolve(geometry);
     textureLoad.resolve(texture);
@@ -350,9 +402,35 @@ describe('Visualizer resource ownership', () => {
     const cuttingTool = engine.group.getObjectByName('CuttingTool');
     expect(cuttingTool).not.toBeNull();
     expect(cuttingTool.visible).toBe(true);
-    expect(cuttingTool.position).toMatchObject({ x: 20, y: 30, z: 10 });
+    expect(cuttingTool.position).toMatchObject({ x: 50, y: 50, z: 10 });
+    expect(engine.machineProfile).toEqual(latestProfile);
     expect(mockRendererInstances).toHaveLength(1);
     engine.dispose();
+  });
+
+  test('attaches successful assets after a G-code unload and disposes them once', async () => {
+    const geometry = makeGeometry();
+    const texture = makeTexture();
+    const geometryDispose = jest.spyOn(geometry, 'dispose');
+    const textureDispose = jest.spyOn(texture, 'dispose');
+    const stl = deferred();
+    const textureLoad = deferred();
+    const onError = jest.fn();
+    loadSTLSpy.mockReturnValue(stl.promise);
+    loadTextureSpy.mockReturnValue(textureLoad.promise);
+
+    const engine = makeEngine({ onError });
+    engine.unload();
+    stl.resolve(geometry);
+    textureLoad.resolve(texture);
+    await flushAsync();
+
+    expect(engine.group.getObjectByName('CuttingTool')).toBeDefined();
+    expect(onError).not.toHaveBeenCalled();
+
+    engine.dispose();
+    expect(geometryDispose).toHaveBeenCalledTimes(1);
+    expect(textureDispose).toHaveBeenCalledTimes(1);
   });
 
   test('unload disposes G-code geometry and material resources', () => {
@@ -451,6 +529,80 @@ describe('Visualizer resource ownership', () => {
     expect(engine.ownedResources).toBeUndefined();
     expect(engine.disposedResources).toBeInstanceOf(WeakSet);
     expect(engine.pendingAssetLoads.size).toBe(0);
+  });
+
+  test('advances each RAF loop one frame without creating duplicate loops', () => {
+    const stl = deferred();
+    const texture = deferred();
+    loadSTLSpy.mockReturnValue(stl.promise);
+    loadTextureSpy.mockReturnValue(texture.promise);
+
+    const engine = makeEngine();
+    const renderer = mockRendererInstances[0];
+    const controls = mockControlsInstances[0];
+    engine.update({ isAgitated: true });
+    controls.trigger('start');
+    controls.trigger('start');
+    engine.startAgitation();
+
+    expect(rafCallbacks).toHaveProperty('size', 2);
+    expect(global.requestAnimationFrame).toHaveBeenCalledTimes(2);
+    const renderCount = renderer.render.mock.calls.length;
+    const agitationFrame = engine.agitationAnimationFrame;
+    const controlsFrame = engine.controlsAnimationFrame;
+
+    runRafFrame(agitationFrame);
+    expect(renderer.render).toHaveBeenCalledTimes(renderCount + 1);
+    expect(engine.agitationAnimationFrame).not.toBe(agitationFrame);
+    expect(rafCallbacks).toHaveProperty('size', 2);
+
+    runRafFrame(controlsFrame);
+    expect(renderer.render).toHaveBeenCalledTimes(renderCount + 2);
+    expect(engine.controlsAnimationFrame).not.toBe(controlsFrame);
+    expect(rafCallbacks).toHaveProperty('size', 2);
+
+    engine.dispose();
+  });
+
+  test('ignores canceled RAF callbacks after either loop is restarted', () => {
+    const stl = deferred();
+    const texture = deferred();
+    loadSTLSpy.mockReturnValue(stl.promise);
+    loadTextureSpy.mockReturnValue(texture.promise);
+
+    const engine = makeEngine();
+    const renderer = mockRendererInstances[0];
+    const controls = mockControlsInstances[0];
+
+    engine.update({ isAgitated: true });
+    const staleAgitationFrame = engine.agitationAnimationFrame;
+    const staleAgitationCallback = rafCallbacks.get(staleAgitationFrame);
+    engine.update({ isAgitated: false });
+    engine.update({ isAgitated: true });
+    const currentAgitationFrame = engine.agitationAnimationFrame;
+    const renderCountAfterAgitationRestart = renderer.render.mock.calls.length;
+
+    staleAgitationCallback();
+
+    expect(engine.agitationAnimationFrame).toBe(currentAgitationFrame);
+    expect(renderer.render).toHaveBeenCalledTimes(renderCountAfterAgitationRestart);
+    expect(rafCallbacks).toHaveProperty('size', 1);
+
+    controls.trigger('start');
+    const staleControlsFrame = engine.controlsAnimationFrame;
+    const staleControlsCallback = rafCallbacks.get(staleControlsFrame);
+    controls.trigger('end');
+    controls.trigger('start');
+    const currentControlsFrame = engine.controlsAnimationFrame;
+    const renderCountAfterControlsRestart = renderer.render.mock.calls.length;
+
+    staleControlsCallback();
+
+    expect(engine.controlsAnimationFrame).toBe(currentControlsFrame);
+    expect(renderer.render).toHaveBeenCalledTimes(renderCountAfterControlsRestart);
+    expect(rafCallbacks).toHaveProperty('size', 2);
+
+    engine.dispose();
   });
 
   test('dispose is idempotent, cancels both RAF loops, removes named listeners, and keeps the host', () => {
