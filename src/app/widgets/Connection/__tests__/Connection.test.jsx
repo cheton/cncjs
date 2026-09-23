@@ -108,36 +108,6 @@ jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   default: () => mockConfig,
 }));
 
-jest.mock('react-select', () => {
-  const Select = ({
-    options,
-    value,
-    onChange,
-    isDisabled,
-    'aria-label': ariaLabel,
-  }) => (
-    <select
-      aria-label={ariaLabel}
-      disabled={isDisabled}
-      value={value?.value || ''}
-      onChange={event => onChange(options.find(item => String(item.value) === event.target.value))}
-    >
-      {options.map(option => (
-        <option key={option.value} value={option.value}>{option.label}</option>
-      ))}
-    </select>
-  );
-  Select.components = {
-    Option: ({ children }) => <div>{children}</div>,
-    SingleValue: ({ children }) => <div>{children}</div>,
-  };
-  return {
-    __esModule: true,
-    default: Select,
-    components: Select.components,
-  };
-});
-
 jest.mock('react-spring', () => ({
   animated: { div: 'div' },
   useTransition: () => renderTransition => renderTransition({}, true),
@@ -194,20 +164,61 @@ beforeEach(() => {
 });
 
 describe('Connection form', () => {
-  test('reads serial metadata from TanStack Query and preserves selection', () => {
+  test('reads serial metadata from TanStack Query and commits menu selection', async () => {
     renderAppUI(<Connection />);
 
-    const serialPort = screen.getByRole('combobox', { name: 'Serial port' });
-    const baudRate = screen.getByRole('combobox', { name: 'Baud rate' });
+    const serialPort = screen.getByRole('button', { name: 'Serial port' });
+    const baudRate = screen.getByRole('button', { name: 'Baud rate' });
 
-    expect(serialPort).toHaveValue('/dev/ttyUSB0');
-    expect(baudRate).toHaveValue('115200');
+    expect(serialPort).toHaveTextContent('/dev/ttyUSB0');
+    expect(baudRate).toHaveTextContent('115200');
 
-    fireEvent.change(serialPort, { target: { value: '/dev/ttyUSB1' } });
-    fireEvent.change(baudRate, { target: { value: '250000' } });
+    fireEvent.click(serialPort);
+    expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ })).toHaveTextContent('Manufacturer: {{manufacturer}}');
+    fireEvent.click(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ }));
+    fireEvent.click(baudRate);
+    fireEvent.click(screen.getByRole('menuitem', { name: '250000' }));
 
     expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.path', '/dev/ttyUSB1');
     expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.baudRate', 250000);
+    await waitFor(() => expect(baudRate).toHaveFocus());
+    expect(serialPort).toHaveTextContent('/dev/ttyUSB1');
+    expect(baudRate).toHaveTextContent('250000');
+  });
+
+  test('serial menus are disabled while connected and show an empty port message', () => {
+    mockPortsQuery.data = [];
+    const { rerender } = renderAppUI(<Connection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Serial port' }));
+    expect(screen.getByText('No ports available')).toBeInTheDocument();
+
+    mockConnection = createConnection({ state: 'connected', ident: 'serial:/dev/ttyUSB0' });
+    rerender(<Connection />);
+    expect(screen.getByRole('button', { name: 'Serial port' })).toBeDisabled();
+  });
+
+  test('serial menu supports keyboard selection, Escape, and focus return', async () => {
+    renderAppUI(<Connection />);
+    const serialPort = screen.getByRole('button', { name: 'Serial port' });
+
+    serialPort.focus();
+    fireEvent.keyDown(serialPort, { key: 'Enter' });
+    const menu = screen.getByRole('menu');
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB0/ })).toHaveFocus());
+    fireEvent.keyDown(menu, { key: 'ArrowDown' });
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ })).toHaveFocus());
+    fireEvent.keyDown(document.activeElement, { key: 'Enter' });
+
+    expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.path', '/dev/ttyUSB1');
+    await waitFor(() => expect(serialPort).toHaveFocus());
+
+    fireEvent.click(serialPort);
+    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    await waitFor(() => {
+      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+      expect(serialPort).toHaveFocus();
+    });
   });
 
   test('sends the complete serial connection payload through useConnection', () => {

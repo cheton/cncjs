@@ -7,6 +7,10 @@ import {
   Checkbox,
   Flex,
   Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -30,7 +34,6 @@ import React, {
   useState,
 } from 'react';
 import { Form, Field, FormSpy } from 'react-final-form';
-import Select, { components as SelectComponents } from 'react-select';
 import { useTransition, animated } from 'react-spring'; // TODO: remove
 import {
   GRBL,
@@ -591,31 +594,21 @@ function Connection() {
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <div data-test="connection-serial-port">
-                                      <Select
-                                        components={{
-                                          Option: SerialPortOption,
-                                          SingleValue: SerialPortSingleValue,
-                                        }}
-                                        inputId="connection-serial-port"
-                                        aria-label={i18n._('Serial port')}
-                                        classNamePrefix="connection-serial-port"
-                                        value={value}
-                                        onChange={(option) => {
-                                          const { value } = option;
-                                          input.onChange(value);
-
-                                          config.set('connection.serial.path', value);
-                                        }}
-                                        isClearable={false}
-                                        isDisabled={isDisabled}
-                                        isLoading={isFetchingSerialPorts}
-                                        isSearchable={false}
-                                        noOptionsMessage={() => i18n._('No ports available')}
+                                    <Box data-test="connection-serial-port">
+                                      <SerialConnectionMenu
+                                        id="connection-serial-port"
+                                        label={i18n._('Serial port')}
                                         options={options}
+                                        value={value}
+                                        disabled={isDisabled}
                                         placeholder={i18n._('Choose a port')}
+                                        emptyText={i18n._('No ports available')}
+                                        onSelect={(selected) => {
+                                          input.onChange(selected);
+                                          config.set('connection.serial.path', selected);
+                                        }}
                                       />
-                                    </div>
+                                    </Box>
                                   );
                                 }}
                               </Field>
@@ -657,26 +650,20 @@ function Connection() {
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <div data-test="connection-baud-rate">
-                                      <Select
-                                        inputId="connection-baud-rate"
-                                        aria-label={i18n._('Baud rate')}
-                                        classNamePrefix="connection-baud-rate"
-                                        value={value}
-                                        onChange={(option) => {
-                                          const { value } = option;
-                                          input.onChange(value);
-
-                                          config.set('connection.serial.baudRate', value);
-                                        }}
-                                        isClearable={false}
-                                        isDisabled={isDisabled}
-                                        isLoading={isFetchingSerialBaudRates}
-                                        isSearchable={false}
+                                    <Box data-test="connection-baud-rate">
+                                      <SerialConnectionMenu
+                                        id="connection-baud-rate"
+                                        label={i18n._('Baud rate')}
                                         options={options}
+                                        value={value}
+                                        disabled={isDisabled}
                                         placeholder={i18n._('Choose a baud rate')}
+                                        onSelect={(selected) => {
+                                          input.onChange(selected);
+                                          config.set('connection.serial.baudRate', selected);
+                                        }}
                                       />
-                                    </div>
+                                    </Box>
                                   );
                                 }}
                               </Field>
@@ -1119,52 +1106,47 @@ function Connection() {
 
 export default Connection;
 
-function SerialPortOption({
-  children,
-  ...props
-}) {
-  const data = _get(props, 'data');
-  const connected = !!data.connected;
-  const manufacturer = data.manufacturer;
-
+/**
+ * @param {{id: string, label: string, options: Array, value: object | null, disabled: boolean, placeholder: string, emptyText?: string, onSelect: Function}} props
+ */
+function SerialConnectionMenu({ id, label, options, value, disabled, placeholder, emptyText, onSelect }) {
   return (
-    <SelectComponents.Option {...props}>
-      <Flex align="center">
-        <Box flex="auto" style={{ wordBreak: 'break-all' }}>
-          {children}
-        </Box>
-        <Box flex="none">
-          <Space width={8} />
-          <FontAwesomeIcon icon="lock" fixedWidth style={{ opacity: (connected ? 1 : 0) }} />
-        </Box>
-      </Flex>
-      {manufacturer && (
-        <Box ml="6x">
-          <Text>
-            {i18n._('Manufacturer: {{manufacturer}}', { manufacturer })}
-          </Text>
-        </Box>
-      )}
-    </SelectComponents.Option>
-  );
-}
-
-function SerialPortSingleValue({
-  children,
-  ...props
-}) {
-  const data = _get(props, 'data');
-  const connected = !!data.connected;
-
-  return (
-    <SelectComponents.SingleValue {...props}>
-      {connected && (
-        <>
-          <FontAwesomeIcon icon="lock" fixedWidth />
-          <Space width={8} />
-        </>
-      )}
-      {children}
-    </SelectComponents.SingleValue>
+    <Menu matchWidth>
+      <MenuButton
+        id={id}
+        aria-label={label}
+        disabled={disabled}
+        width="100%"
+        variant="secondary"
+      >
+        {value?.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
+        {value?.connected && <Space width={8} />}
+        {value?.label || placeholder}
+      </MenuButton>
+      <MenuList maxHeight={200} overflowY="auto">
+        {options.length === 0 && <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>}
+        {options.map(option => (
+          <MenuItem
+            key={option.value}
+            aria-current={option.value === value?.value ? 'true' : undefined}
+            onClick={() => onSelect(option.value)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                onSelect(option.value);
+              }
+            }}
+            width="100%"
+          >
+            <Flex align="center">
+              <Box flex="auto" style={{ wordBreak: 'break-all' }}>{option.label}</Box>
+              {option.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
+            </Flex>
+            {option.manufacturer && (
+              <Text ml="6x">{i18n._('Manufacturer: {{manufacturer}}', { manufacturer: option.manufacturer })}</Text>
+            )}
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
   );
 }
