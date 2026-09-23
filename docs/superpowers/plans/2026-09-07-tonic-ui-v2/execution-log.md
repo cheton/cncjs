@@ -1493,3 +1493,9 @@ Implementation: `bf369a2b` migrates all ten Commands, Events, Machines, Macros, 
 Test-first evidence: a new representative Create Command regression was RED because the visible label did not name the field; it is GREEN with linked errors after invalid submit and no mutation call. Focused Administration: 1 suite / 2 tests passed. Root review corrected an invalid nested label composition before integration. The fresh full frontend run passed 62 suites / 381 tests; targeted ESLint and `git diff --check` passed. Exact Administration drawer `FormGroup` scan has zero matches. Browser, simulator, and build remain deferred to R6.
 
 Status transition: P2 remains `in_progress`. Direct production `FormGroup` consumers remain in Macro New/Edit modals, with other P2 families still open. Next exact slice is the Macro modal `FormGroup`/`InlineError` migration. The user scheduled any react-final-form v7 upgrade after P2, as a separate assessment if needed.
+
+## P2 Macro New/Edit modal forms — completed slice 2026-09-23
+
+Implementation: NewMacro and EditMacro replace legacy `FormGroup`/`InlineError` with Tonic `FormControl`, `FormLabel`, `FormInput`/`FormTextarea`, and `FormErrorMessage`. React Final Form continues to own values, validation, and submission; mutation and variable insertion flows remain in place.
+
+Test-first evidence: two regressions were RED because the fields lacked accessible names. They are GREEN with linked field errors and invalid mutation suppression. Focused Macro 1 suite / 7 tests and fresh full frontend 62 suites / 383 tests passed. Targeted ESLint exited 0 with existing unrelated warnings; `git diff --check` passed. Browser, simulator, and build remain deferred to R6. P2 remains `in_progress`; remaining form families and the family zero-import gate are next.
