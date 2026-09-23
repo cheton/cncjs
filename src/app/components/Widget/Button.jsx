@@ -1,8 +1,11 @@
 import { ButtonLink, LinkButton } from '@tonic-ui/react';
-import PropTypes from 'prop-types';
 import React from 'react';
 
-function Button({ disabled, href, inverted, onClick, sx, ...props }) {
+/**
+ * @param {{ disabled?: boolean, href?: string, inverted?: boolean, onClick?: Function, sx?: object }} props
+ * @returns {JSX.Element}
+ */
+function Button({ disabled, href, inverted = false, onClick, sx, ...props }) {
   const Component = href ? ButtonLink : LinkButton;
 
   return (
@@ -35,22 +38,5 @@ function Button({ disabled, href, inverted, onClick, sx, ...props }) {
     />
   );
 }
-
-Button.propTypes = {
-  disabled: PropTypes.bool,
-  href: PropTypes.string,
-  onClick: PropTypes.func,
-  role: PropTypes.string,
-  style: PropTypes.object,
-  tabIndex: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string
-  ]),
-  inverted: PropTypes.bool
-};
-
-Button.defaultProps = {
-  inverted: false
-};
 
 export default Button;

@@ -1,6 +1,6 @@
 import {
   Box,
-  Button as TonicButton,
+  Button,
   Flex,
   Menu,
   MenuButton,
@@ -41,19 +41,6 @@ const KeypadSubscriptText = styled(KeypadText)`
     font-size: 80%;
     line-height: 0;
 `;
-
-/**
- * @param {{ btnStyle?: string, compact?: boolean }} props
- */
-function Button({ btnStyle, compact, ...props }) {
-  return (
-    <TonicButton
-      {...props}
-      size={compact ? 'sm' : 'md'}
-      variant={btnStyle === 'primary' ? 'primary' : 'default'}
-    />
-  );
-}
 
 /**
  * @returns {JSX.Element}
@@ -156,8 +143,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative Y positive"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => {
                       const distance = onGetJogDistance();
@@ -174,8 +160,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Y positive"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightY }
@@ -196,8 +181,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive Y positive"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => {
                       const distance = onGetJogDistance();
@@ -214,8 +198,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Z positive"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightZ }
@@ -240,8 +223,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightX }
@@ -261,8 +243,7 @@ function Keypad() {
               <Box flex="1 1 0%">
                 <Box className={styles.colSpace}>
                   <Button
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => onMove({ X: 0, Y: 0 })}
                     disabled={!canClickXY}
@@ -279,8 +260,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightX }
@@ -300,8 +280,7 @@ function Keypad() {
               <Box flex="1 1 0%">
                 <Box className={styles.colSpace}>
                   <Button
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => onMove({ Z: 0 })}
                     disabled={!canClickZ}
@@ -320,8 +299,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X negative Y negative"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => {
                       const distance = onGetJogDistance();
@@ -338,8 +316,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Y negative"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightY }
@@ -360,8 +337,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move X positive Y negative"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={styles.btnKeypad}
                     onClick={() => {
                       const distance = onGetJogDistance();
@@ -378,8 +354,7 @@ function Keypad() {
                 <Box className={styles.colSpace}>
                   <Button
                     aria-label="Move Z negative"
-                    btnStyle="default"
-                    compact
+                    size="sm"
                     className={cx(
                       styles.btnKeypad,
                       { [styles.highlight]: highlightZ }
