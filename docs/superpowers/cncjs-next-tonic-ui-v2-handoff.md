@@ -18,12 +18,12 @@
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `d248069a`（文件更新本身尚未 commit） |
+| HEAD | `5322f77b`（文件更新本身尚未 commit） |
 | 工作樹 | source clean；本 handoff 更新本身尚未 commit |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | 無；**P1 overlays 已完成** |
-| 最近完成 | 所有 P1 legacy families 移除；最後 source checkpoints `22d06ba1`、`d248069a` |
-| 下一步推薦 | **P2 controlled forms** |
+| Active task | **P2 controlled forms** |
+| 最近完成 | P1 source checkpoints `22d06ba1`、`d248069a`；P2 Login slice `5322f77b` |
+| 下一步推薦 | Migrate the Administration drawer `FormGroup` consumers |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,15 +31,17 @@
 
 ## 下一個可執行項目
 
-P1 has passed its zero-import gate. P2 controlled forms is next eligible. Browser evidence remains deferred to R6.
+P1 has passed its zero-import gate. P2 controlled forms is in progress. Browser evidence remains deferred to R6.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Migrate the remaining shared form families and consumers | 否 |
+| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Next: Administration drawer `FormGroup` consumers; then remaining form families and zero-import gate | 否 |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
 P2 forms should pair `react-final-form` ownership with the installed Tonic UI v2 `FormControl` family. The current lock has `react-final-form` 6.5.9 and `final-form` 4.20.10. No version upgrade is required for the form component migration; if one becomes necessary, assess the [official v6→v7 guide](https://github.com/final-form/react-final-form/blob/main/MIGRATION_V7.md) as a separate dependency slice.
+
+The first P2 slice (`5322f77b`) migrates Login from legacy `FormGroup`/`InlineError` to Tonic `FormControl`, `FormLabel`, `FormInput`, and `FormErrorMessage` while retaining `react-final-form`. Its new regression was RED on the missing accessible labels, then passed with linked required errors and invalid-submit suppression. Full frontend passed 62 suites / 380 tests; targeted ESLint and diff checks passed. P2 remains in progress because other family consumers remain.
 
 ## 本輪交接重點（G1）
 
@@ -119,7 +121,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 已完成；下一個 eligible task 是 P2 controlled forms。先確認 STATUS 與 source 現況，再固定 P2 第一個可驗證 slice 的 consumer、行為與 family deletion gate。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1。
+P1 overlays 已完成；P2 controlled forms 進行中。Login slice 已完成，下一個精確 slice 是 Administration drawers 的 FormGroup consumers；先核對 STATUS、source imports 與現有表單測試，再固定每個 drawer 的 label/error/submit contract。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

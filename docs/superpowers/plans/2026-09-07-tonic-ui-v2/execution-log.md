@@ -1477,3 +1477,11 @@ Ruling: the user allowed Tonic replacements in consumers owned by later P2–P5 
 Verification: a fresh `yarn test:frontend --runInBand --silent` after both code checkpoints passed 62 suites / 379 tests. Changed-file ESLint and `git diff --check` passed. Exact P1 source-import, relative Anchor-import, family-file, and direct-dependency scans found zero matches. Browser, simulator, and build evidence remain deferred to R6.
 
 Status transition: P1 is `completed`; P2 controlled forms is next eligible. Tonic UI v3 migration starts after all major components migrate to Tonic UI. The future upgrade targets all Tonic UI packages at `3.0.0-alpha.1`; local source and the two migration guides are linked from the handoff. Main model is GPT-6-Sol, implementation/deterministic subagents use GPT-6-Luna extra-high/max, and GPT-5.6 fallback is prohibited.
+
+## P2 Login form control slice — completed 2026-09-23
+
+Implementation: `5322f77b` keeps `react-final-form` as the Login state/validation/submit owner and replaces the local `FormGroup`/`InlineError` consumers with Tonic `FormControl`, `FormLabel`, `FormInput`, and `FormErrorMessage`. Each field now has an accessible name, and touched required errors have `role="alert"`, `aria-invalid`, and an input-to-error description link. The authentication flow and duplicate-submit lock remain unchanged.
+
+Test-first evidence: the new Login test initially failed because the Username textbox had no accessible name. After migration it passed with the three existing Login cases; the focused command passed 1 suite / 4 tests. Fresh full frontend passed 62 suites / 380 tests. Targeted ESLint and `git diff --check` passed. Browser, simulator, and build checks remain deferred to R6.
+
+Ruling: P2 can proceed with locked `react-final-form` 6.5.9 and `final-form` 4.20.10. The current upstream v6→v7 migration guide mainly describes TypeScript-facing changes; a dependency upgrade is separate from the form component migration and requires its own submission/validation/field-state verification if needed. P2 remains `in_progress`; next exact slice is the Administration drawer `FormGroup` consumers.
