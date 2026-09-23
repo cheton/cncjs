@@ -13,17 +13,17 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-09-23）
+## 現況快照（2026-09-24）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `bf369a2b`（文件更新本身尚未 commit） |
-| 工作樹 | source clean；本 handoff 更新本身尚未 commit |
+| HEAD | `ea0deb12`（本次交接更新前） |
+| 工作樹 | 本次交接更新前為 clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
 | Active task | **P2 controlled forms** |
-| 最近完成 | P2 Login `5322f77b`；十個 Administration drawer form controls `bf369a2b` |
-| 下一步推薦 | Audit remaining P2 keyboard/invalid-submit evidence |
+| 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；文件 checkpoint `ea0deb12` |
+| 下一步推薦 | 盤點 P2 表單的鍵盤操作與無效提交測試；逐項補證據，核對 gate 後才關閉 P2 |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,11 +31,11 @@
 
 ## 下一個可執行項目
 
-P1 has passed its zero-import gate. P2 controlled forms is in progress. Browser evidence remains deferred to R6.
+P1 已通過零匯入 gate。P2 的 legacy family 零匯入 gate 已通過，但整體 P2 仍在進行中。Browser evidence 延後至 R6。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Legacy family zero-import gate and Connection Menu migration done; next: behavior evidence audit | 否 |
+| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | 先盤點現有測試與 source，再補鍵盤操作、無效提交的具體證據缺口；不能僅憑零匯入或全套測試通過就標記完成 | 否 |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -43,13 +43,13 @@ P2 forms should pair `react-final-form` ownership with the installed Tonic UI v2
 
 The first P2 slice (`5322f77b`) migrates Login from legacy `FormGroup`/`InlineError` to Tonic `FormControl`, `FormLabel`, `FormInput`, and `FormErrorMessage` while retaining `react-final-form`. Its new regression was RED on the missing accessible labels, then passed with linked required errors and invalid-submit suppression. Full frontend passed 62 suites / 380 tests; targeted ESLint and diff checks passed. P2 remains in progress because other family consumers remain.
 
-The second P2 slice (`bf369a2b`) migrates all ten Administration create/update drawers and shared FieldInput/FieldTextarea to Tonic form controls while retaining React Final Form ownership and submit-failed error timing. The representative Create Command regression was RED on the inaccessible label, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 381 tests; targeted ESLint and diff checks passed. The next direct production `FormGroup` consumers are Macro New/Edit modals; other P2 family consumers remain.
+The second P2 slice (`bf369a2b`) migrates all ten Administration create/update drawers and shared FieldInput/FieldTextarea to Tonic form controls while retaining React Final Form ownership and submit-failed error timing. The representative Create Command regression was RED on the inaccessible label, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 381 tests; targeted ESLint and diff checks passed.
 
-The third P2 slice migrates Macro New/Edit modal fields to Tonic form controls while retaining React Final Form. Two regressions were RED on missing accessible labels, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 383 tests; targeted ESLint and diff checks passed. Remaining P2 families and the zero-import gate remain open.
+The third P2 slice (`425271c0`) migrates Macro New/Edit modal fields to Tonic form controls while retaining React Final Form. Two regressions were RED on missing accessible labels, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 383 tests; targeted ESLint and diff checks passed.
 
-Fresh inventory found no production imports of the nine legacy P2 families, so the unused modules were removed and a source import regression was added. Fresh full frontend passed 63 suites / 384 tests. P2 remains open for the Connection `react-select` equivalence decision and keyboard/invalid-submit evidence audit.
+Fresh inventory found no production imports of the nine legacy P2 families, so the unused modules were removed in `b117c4c3` and a source import regression was added. Fresh full frontend passed 63 suites / 384 tests.
 
-The Connection serial port and baud rate selectors now use installed Tonic Menu, matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade. P2 remains open for the final keyboard/invalid-submit evidence audit.
+The Connection serial port and baud rate selectors now use installed Tonic Menu (`9f56e397`), matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Fresh post-removal `yarn test:frontend --runInBand` passed 63 suites / 386 tests; targeted ESLint exited 0 with existing warnings and `git diff --check` passed. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade. P2 remains open for the final keyboard/invalid-submit evidence audit.
 
 ## 本輪交接重點（G1）
 
