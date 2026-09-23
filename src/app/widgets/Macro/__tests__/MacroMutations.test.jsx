@@ -41,6 +41,28 @@ describe('Macro mutation modal contracts', () => {
     mockPortal.mockReset();
   });
 
+  test.each([
+    ['New', NewMacro, { onClose: jest.fn() }, mockUseCreateMacroMutation],
+    ['Edit', EditMacro, { id: 'm1', name: '', content: '', onClose: jest.fn() }, mockUseUpdateMacroMutation],
+  ])('%s Macro links required field errors and blocks invalid submission', async (title, Component, props, mutationHook) => {
+    const mutateAsync = jest.fn();
+    mutationHook.mockReturnValue({ isLoading: false, mutateAsync });
+    if (title === 'Edit') {
+      mockUseDeleteMacroMutation.mockReturnValue({ isLoading: false, mutateAsync: jest.fn() });
+    }
+
+    renderAppUI(<Component {...props} />);
+    const name = screen.getByRole('textbox', { name: /^Macro Name/ });
+    const content = screen.getByRole('textbox', { name: /^Macro Commands/ });
+    fireEvent.click(screen.getByRole('button', { name: title === 'New' ? 'OK' : 'Save Changes' }));
+
+    await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'));
+    expect(content).toHaveAttribute('aria-invalid', 'true');
+    expect(name.getAttribute('aria-describedby')).toBeTruthy();
+    expect(content.getAttribute('aria-describedby')).toBeTruthy();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   test('NewMacro waits for create success before closing', async () => {
     let resolveCreate;
     const mutateAsync = jest.fn(() => new Promise(resolve => {

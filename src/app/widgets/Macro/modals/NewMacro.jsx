@@ -3,7 +3,11 @@ import {
   Box,
   Button,
   Flex,
-  Input,
+  FormControl,
+  FormErrorMessage,
+  FormInput,
+  FormLabel,
+  FormTextarea,
   Menu,
   MenuButton,
   MenuList,
@@ -17,16 +21,12 @@ import {
   ModalFooter,
   Space,
   Text,
-  Textarea,
-  TextLabel,
 } from '@tonic-ui/react';
 import { ensureArray } from 'ensure-type';
 import _uniqueId from 'lodash/uniqueId';
 import React, { useRef } from 'react';
 import { FORM_ERROR } from 'final-form';
 import { Form, Field, FormSpy } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import InlineError from '@app/components/InlineError';
 import i18n from '@app/lib/i18n';
 import { useCreateMacroMutation } from '@app/queries/macros';
 import { composeValidators, required } from '@app/widgets/shared/validations';
@@ -113,17 +113,13 @@ function NewMacro({
                 >
                   {({ input, meta }) => {
                     return (
-                      <FormGroup>
-                        <TextLabel mb="2x">
+                      <FormControl error={Boolean(meta.error && meta.touched)} mb="4x">
+                        <FormLabel required>
                           {i18n._('Macro Name')}
-                        </TextLabel>
-                        <Box>
-                          <Input {...input} />
-                        </Box>
-                        {(meta.error && meta.touched) && (
-                          <InlineError>{meta.error}</InlineError>
-                        )}
-                      </FormGroup>
+                        </FormLabel>
+                        <FormInput {...input} />
+                        <FormErrorMessage errors={meta.error && meta.touched ? [meta.error] : []} />
+                      </FormControl>
                     );
                   }}
                 </Field>
@@ -133,12 +129,12 @@ function NewMacro({
                 >
                   {({ input, meta }) => {
                     return (
-                      <FormGroup>
+                      <FormControl error={Boolean(meta.error && meta.touched)} mb="4x">
                         <Flex align="center" justify="space-between">
                           <Box>
-                            <TextLabel mb="2x">
+                            <FormLabel required>
                               {i18n._('Macro Commands')}
-                            </TextLabel>
+                            </FormLabel>
                           </Box>
                           <Box>
                             <Menu>
@@ -173,15 +169,13 @@ function NewMacro({
                             </Menu>
                           </Box>
                         </Flex>
-                        <Textarea
+                        <FormTextarea
                           {...input}
                           ref={contentRef}
                           rows={10}
                         />
-                        {(meta.error && meta.touched) && (
-                          <InlineError>{meta.error}</InlineError>
-                        )}
-                      </FormGroup>
+                        <FormErrorMessage errors={meta.error && meta.touched ? [meta.error] : []} />
+                      </FormControl>
                     );
                   }}
                 </Field>
