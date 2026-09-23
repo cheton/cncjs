@@ -4,8 +4,11 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormErrorMessage,
+  FormInput,
+  FormLabel,
   Image,
-  Input,
   Link,
   Stack,
   Text,
@@ -17,8 +20,6 @@ import React, { useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { Navigate, useLocation } from 'react-router-dom';
 import axios from '@app/api/axios';
-import FormGroup from '@app/components/FormGroup';
-import InlineError from '@app/components/InlineError';
 import settings from '@app/config/settings';
 import * as analytics from '@app/lib/analytics';
 import controller from '@app/lib/controller';
@@ -175,47 +176,27 @@ const LoginPage = () => {
         </Stack>
         <Form
           onSubmit={handleFormSubmit}
-          render={({ handleSubmit, values }) => (
+          render={({ handleSubmit }) => (
             <>
-              <FormGroup>
-                <Field
-                  name="name"
-                  validate={required}
-                >
-                  {({ input, meta }) => (
-                    <>
-                      <Input
-                        {...input}
-                        type="text"
-                        placeholder={i18n._('Username')}
-                      />
-                      {(meta.error && meta.touched) && (
-                        <InlineError>{meta.error}</InlineError>
-                      )}
-                    </>
-                  )}
-                </Field>
-              </FormGroup>
-              <FormGroup>
-                <Field
-                  name="password"
-                  validate={required}
-                >
-                  {({ input, meta }) => (
-                    <>
-                      <Input
-                        {...input}
-                        type="password"
-                        placeholder={i18n._('Password')}
-                      />
-                      {(meta.error && meta.touched) && (
-                        <InlineError>{meta.error}</InlineError>
-                      )}
-                    </>
-                  )}
-                </Field>
-              </FormGroup>
-              <FormGroup>
+              <Field name="name" validate={required}>
+                {({ input, meta }) => (
+                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
+                    <FormLabel>{i18n._('Username')}</FormLabel>
+                    <FormInput {...input} type="text" placeholder={i18n._('Username')} />
+                    <FormErrorMessage errors={meta.error} />
+                  </FormControl>
+                )}
+              </Field>
+              <Field name="password" validate={required}>
+                {({ input, meta }) => (
+                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
+                    <FormLabel>{i18n._('Password')}</FormLabel>
+                    <FormInput {...input} type="password" placeholder={i18n._('Password')} />
+                    <FormErrorMessage errors={meta.error} />
+                  </FormControl>
+                )}
+              </Field>
+              <Box mb="4x">
                 <Flex
                   alignItems="center"
                   justifyContent="space-between"
@@ -243,7 +224,7 @@ const LoginPage = () => {
                     </Button>
                   </Box>
                 </Flex>
-              </FormGroup>
+              </Box>
             </>
           )}
         />

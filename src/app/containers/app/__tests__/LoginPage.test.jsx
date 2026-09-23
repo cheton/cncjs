@@ -134,4 +134,23 @@ describe('LoginPage session mutation boundary', () => {
 
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
   });
+
+  test('links required field errors to their controls and blocks invalid sign-in', async () => {
+    renderLogin();
+
+    const name = screen.getByRole('textbox', { name: 'Username' });
+    const password = screen.getByLabelText('Password');
+    fireEvent.blur(name);
+    fireEvent.blur(password);
+
+    const errors = await screen.findAllByRole('alert');
+    expect(errors).toHaveLength(2);
+    expect(name).toHaveAttribute('aria-invalid', 'true');
+    expect(password).toHaveAttribute('aria-invalid', 'true');
+    expect(name.getAttribute('aria-describedby')).toContain(errors[0].id);
+    expect(password.getAttribute('aria-describedby')).toContain(errors[1].id);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+    expect(mockMutateAsync).not.toHaveBeenCalled();
+  });
 });
