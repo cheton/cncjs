@@ -13,17 +13,17 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-09-22）
+## 現況快照（2026-09-23）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `3f2866c1`（文件更新本身尚未 commit） |
+| HEAD | `d248069a`（文件更新本身尚未 commit） |
 | 工作樹 | source clean；本 handoff 更新本身尚未 commit |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | **P1 overlays** |
-| 最近完成 | DisplayPanel/TopNav menu migration and Dropdown/RootCloseWrapper removal (`3f2866c1`) |
-| 下一步推薦 | Audit the next remaining P1 component family |
+| Active task | 無；**P1 overlays 已完成** |
+| 最近完成 | 所有 P1 legacy families 移除；最後 source checkpoints `22d06ba1`、`d248069a` |
+| 下一步推薦 | **P2 controlled forms** |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,13 +31,15 @@
 
 ## 下一個可執行項目
 
-P1 is active; no downstream task is eligible until its zero-import gate is resolved. Browser evidence remains deferred to R6.
+P1 has passed its zero-import gate. P2 controlled forms is next eligible. Browser evidence remains deferred to R6.
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P1** [overlays](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | W1 ✅, P0 ✅ | Finish the remaining component-family zero-import work | 否 |
+| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Migrate the remaining shared form families and consumers | 否 |
 
-P1 has migrated Workspace feeder/wait/disconnect and fork/remove dialogs, corrupted-settings and Visualizer dialog actions, workflow toast, app-chrome and Administration actions, Axes tooltip/infotip consumers, all ten Administration `InlineToasts` drawers, the shared Widget dropdown adapter, Axes Keypad menus, DisplayPanel CNC command menus, and the deprecated TopNav menus. `ModalTemplate`, `InlineToasts`, `Dropdown`, and `RootCloseWrapper` are deleted. The Widget adapter preserves widget `eventKey`/`onSelect` calls and its regression covers selection cardinality, disabled items, Escape/focus return, and outside-focus closure. The DisplayPanel regression proves the exact work-zero command reaches the CNC command owner. The pre-deletion and post-deletion full frontend runs each passed 62 suites / 379 tests. Targeted ESLint has 0 errors and 12 pre-existing warnings; `DisplayPanel` retains its pre-existing max-lines warning. Next, audit the remaining P1 Anchor/Buttons/Clickable/IconButton, Tooltip/Infotip, Modal, and Notifications consumers before choosing the next zero-import family slice.
+P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
+
+P2 forms should pair `react-final-form` ownership with the installed Tonic UI v2 `FormControl` family. The current lock has `react-final-form` 6.5.9 and `final-form` 4.20.10. No version upgrade is required for the form component migration; if one becomes necessary, assess the [official v6→v7 guide](https://github.com/final-form/react-final-form/blob/main/MIGRATION_V7.md) as a separate dependency slice.
 
 ## 本輪交接重點（G1）
 
@@ -102,25 +104,33 @@ This is a follow-up inventory, not an authorization to batch-edit widgets or cha
 
 Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/widgets/**/*.jsx`; re-run it before each slice because source may change. Browser evidence remains deferred to R6.
 
+## Deferred Tonic UI v3 reference
+
+This checkpoint uses the installed Tonic UI v2 API. After all major components have migrated to Tonic UI, upgrade all Tonic UI packages to `3.0.0-alpha.1`. That version provides native semantic color tokens, autocomplete, and dropdown support for light/dark mode. Do not use those v3 APIs before the package upgrade.
+
+- Local v3 source: `/home/cheton/Code/trendmicro-frontend/tonic-ui`
+- Color token guide: `/home/cheton/Code/trendmicro-frontend/tonic-ui/packages/react-docs/pages/migrations/migrating-color-tokens-from-v2-to-v3`
+- General migration guide: `/home/cheton/Code/trendmicro-frontend/tonic-ui/packages/react-docs/pages/migrations/migrating-from-v2-to-v3`
+
 ## 恢復 prompt
 
 ```text
 請從 docs/superpowers/cncjs-next-tonic-ui-v2-handoff.md 接手。
-請以 Terra high 當 main loop，Luna high/max 當 implementation subagent；這次授權執行目前階段。
+請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-優先恢復 in_progress 的 P1 overlays；下一個精確 slice 是審計剩餘 Anchor/Buttons/Clickable/IconButton、Tooltip/Infotip、Modal 與 Notifications consumers，選定一個零 import family slice。P2–P5 的 consumers 不可為了 P1 的 audit 而越界修改；若 P1 的 zero-import gate 與後續 family ownership 衝突，記錄到 STATUS 並請使用者決定。
+P1 overlays 已完成；下一個 eligible task 是 P2 controlled forms。先確認 STATUS 與 source 現況，再固定 P2 第一個可驗證 slice 的 consumer、行為與 family deletion gate。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
-Terra 先固定每個 task 的 contract，依 EXECUTION task matrix 設 model=gpt-5.6-luna、reasoning_effort=high 或 max、fork_turns=none 派一個 worker，記錄選擇理由。
+主控先固定每個 task 的 contract；若使用 subagent，依實際複雜度使用 GPT-6-Luna extra-high/max，記錄選擇理由。
 再按四個維度核對實際子任務，勿以整個 widget 固定 effort；調整 task 預設需記理由，父 task 的整合 gate 不變。
-架構/ownership/command 語義交 Terra high 決策；需要第二意見時暫停 worker，派唯讀 gpt-5.6-sol / medium advisor。
+架構、ownership、command 語義由 GPT-6-Sol 主控決策；需要第二意見時先暫停 implementation worker。
 複雜不等於 blocking；只有明確缺少解阻條件、輸入、環境或可行方案時記 blocker。
-Terra review 實際 diff 與驗證證據後才 completed；worker 不改 ledger，不派更多代理。
+主控 review 實際 diff 與驗證證據後才 completed；worker 不改 ledger，不派更多代理。
 一個 task 通過後繼續本階段下一個 eligible task，階段完成或遇停止條件就交接。
-不自行 commit/push；若本次另有授權則依授權執行。
+使用者已授權 local commit checkpoints；不得自行 push。
 ```
 
 ## 文件索引

@@ -46,17 +46,21 @@
 **Files:** manifest P1 家族；remaining consumers 位於 `src/app/containers/app/**`、`src/app/pages/Workspace/**` 與 inventory 指定 widgets。
 **Create/Modify Tests:** 各 consumer 既有 tests；若尚無，建立 `src/app/components/__tests__/overlays.test.jsx` 只測共用 modal/menu contract，並在 domain consumer 測 action。
 
-- [ ] Anchor/Buttons/Clickable/IconButton 改 Tonic `Button`、`ButtonBase`、`Link`；保留 `type="submit"`、disabled、keyboard activation、aria-label。toolbar spacing 用 `Flex/Stack`，不留 Bootstrap size/bsStyle props。
+- [x] Anchor/Buttons/Clickable/IconButton 改 Tonic `Button`、`ButtonBase`、`Link`；保留 `type="submit"`、disabled、keyboard activation、aria-label。Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Axes Keypad uses direct Tonic `Button size="sm"` without Bootstrap adapter props. Toolbar spacing uses Tonic layout primitives. `22d06ba1`, `d248069a`.
 - [x] Dropdown/RootCloseWrapper 改 Tonic Menu。每個 MenuItem 自己處理 onClick；測 disabled item、Esc、outside interaction、focus return 與一次 callback。Widget adapter regression covers disabled/Escape/outside/focus-return/single callback; DisplayPanel regression covers the exact work-zero CNC command; deprecated TopNav now uses Tonic Menu. `3f2866c1` deletes both complete families after a zero-import audit and 62-suite/379-test frontend run.
-- [ ] Modal/ModalTemplate 改 Tonic modal primitives。每個 dialog 明確設定 `autoFocus`、`ensureFocus`、`closeOnEsc`、`closeOnInteractOutside`；danger/cancel/submit 的 close 順序由 domain test 決定。最後 consumer 清空才移除 `ModalProvider/ModalRoot/useModal`。
-- [ ] Tooltip/Infotip 改 Tonic Tooltip；含互動內容的 Infotip 改 Popover。確認 hover、focus、aria-describedby 與 portal layering，再移除 `rc-trigger`。
-- [ ] Notifications/InlineToasts 以 Tonic Toast/Alert 呈現；只保留 notification timeout、OS notification 與 queue policy 為純 domain helper。錯誤訊息需 i18next 且不被 modal unmount 提前清掉。
+- [x] Modal/ModalTemplate consumers use Tonic modal primitives; the final legacy Modal family, including ModalRoot/useModal, had no remaining runtime consumers and was deleted. Existing dialog interaction tests and the full frontend suite pass.
+- [x] Tooltip/Infotip consumers use Tonic Tooltip; the final TopNav tooltip was replaced and the zero-consumer legacy families and `rc-trigger` direct dependency were removed. Browser interaction evidence remains deferred to R6.
+- [x] Notifications/InlineToasts consumers use shared Tonic toast behavior. The ten Administration drawers retain persistent i18next error notifications after unmount; their cross-consumer regression passes. Both legacy families were deleted.
 
-**Gate:** P1 family imports 為零；menu/modal keyboard regression 過；`react-bootstrap-buttons`、`rc-trigger` 只有在 package-wide 最後 consumer 消失時移除。
+**Gate (2026-09-23):** P1 family source imports and family files are zero. Menu/modal interaction regressions and the full frontend suite pass (62 suites / 379 tests); changed-file ESLint and diff checks pass. Direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. Browser evidence remains deferred to R6.
+
+**Ruling (2026-09-23):** The user identified the active `src/app/components/TablePagination/TablePagination.js` as the Tonic pagination example. The zero-consumer legacy `Paginations` family and deprecated Administration `TablePagination.jsx` were deleted in the P1 finishing slice. This is an early P4 cleanup; the active pagination component remains for P4 behavior work.
 
 ## Task P2：controlled forms
 
 **Files:** manifest P2 家族；Login、Administration drawers、Axes/Autolevel/Connection/Custom/Laser/Macro/Probe/Spindle/Webcam consumers。
+
+**Form contract (2026-09-23):** Use `react-final-form` to own form values, validation, and submit state. Render fields and feedback with the installed Tonic UI v2 `FormControl`, `FormLabel`, `FormInput`, `FormErrorMessage`, and related controls where applicable. Existing Tool and Webcam forms demonstrate this composition. The current locked `react-final-form` is 6.5.9 with `final-form` 4.20.10; P2 does not require an upgrade. If a later dependency upgrade is needed, first assess the official v6→v7 guide and verify form submission, validation, field state, and mocks as a separate slice.
 
 - [ ] Checkbox/Radio/ToggleSwitch 改 Tonic controlled `checked/value` + `onChange`。不能從 React child instance 讀 `.checked`；真 input ref只用於 focus。
 - [ ] FormControl/FormGroup/InputGroup/InlineError 改 Tonic form primitives。每欄保留 label/help/error 關聯、required、disabled、numeric zero、empty string 和 Enter submit。

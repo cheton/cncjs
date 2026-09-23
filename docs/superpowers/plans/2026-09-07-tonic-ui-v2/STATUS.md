@@ -1,14 +1,14 @@
 # Migration task status
 
-更新日期：2026-09-21。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
+更新日期：2026-09-23。執行模式：**implementation / active**。計畫文件完成不代表實作完成；目前依 task ledger 執行。
 
 本檔是任務狀態唯一來源；[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md) 是恢復起點，[執行規則](EXECUTION.md) 定義狀態轉移。不要由聊天歷史或已消失的 /tmp 文件猜進度。
 
 ## Current checkpoint
 
-- Active task: **P1 overlays**. Workspace feeder dialogs, fork/remove dialogs, corrupted-settings dialog, and Visualizer dialog actions are direct Tonic modal owners; ModalTemplate, Dropdown, RootCloseWrapper, and InlineToasts are deleted. Remaining P1 families are in progress.
-- Main: current root session（非 Terra；此限制已記錄）；Q2 used the plan-default `gpt-5.6-luna` / high scope because the consumer audit was fixed and the work was dependency removal plus bounded cache regression verification.
-- Next eligible task: none while **P1 overlays** is in progress. Browser evidence remains deferred to R6.
+- Active task: none. **P1 overlays is completed**; all P1 legacy component families are removed.
+- Main: GPT-6-Sol. For future deterministic or implementation subtasks, use GPT-6-Luna at extra-high or max effort; do not use GPT-5.6 models.
+- Next eligible task: **P2 controlled forms**. Browser evidence remains deferred to R6.
 - Current blockers: no non-browser blocker. G1-B01 is resolved. BR0 remains `waived` (not passed); existing browser evidence only covers connection/upload/Run/Pause/Resume, and remaining browser gaps are deferred to R6. System Chrome channel still does not support screenshots.
 - Browser instruction: 2026-09-20，使用者要求不要執行 browser tests。G7 與後續工作不得啟動 browser runner、Playwright、screenshot、accessible snapshot 或 simulator browser procedure；所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model。未完成 browser evidence 保持 deferred，不能標為 passed。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI` and widget-header-control names are not part of the active API.
@@ -83,8 +83,8 @@
 | R5 | [commands 驗收](09-regression-gates.md) | E4, A1b, A3b, T3, C1, C2, C3, C4 | completed | current root session / 2026-09-22 | Added `WorkflowControl.test.jsx` and `Autolevel/__tests__/VisualizerIntegration.test.jsx`. Fixed controller fixtures assert exact run/pause/stop/resume/unload args, M6 confirmation, disabled keyboard/click paths, and real-hook profile/camera/resize/refetch/StrictMode zero command/write. Autolevel fixtures assert visualization payloads in metric/imperial units, drag returns, ordered start/stop/hide, and nonzero work-offset compensation context. Focused 4 suites / 38 tests and full frontend 57 suites / 355 tests pass; ESLint has 0 target errors with 13 pre-existing warnings; browser evidence remains deferred to R6. |
 | W1 | [Workspace domain](08-workspace-and-cleanup.md) | G1, G2, G3, G4, G5, G6, G7, T3, C1, C2, C3, C4, A2, A3b, E4, B1 | completed | current root session / 2026-09-22 | Workspace lifecycle is hook-owned and load-G-code uses the shared mutation. Manager draft selection is controlled and direct Tonic controls replace its legacy modal/grid/toggle owner; Workspace shell uses direct Tonic layout controls. Focused Workspace: 7 suites / 68 tests; full frontend: 58 suites / 367 tests. Browser, simulator, and build remain deferred to R6. |
 | P0 | [unused families](details/08a-component-families.md) | U3 | completed | root session / 2026-09-18T22:15:00+08:00 | Deleted all 14 P0 families after graph/literal zero-consumer audit. `Notifications/ToastNotification` remains separate P1 code. Full frontend 22 suites/126 tests; build-dev, ESLint, and diff checks pass. |
-| P1 | [overlays](details/08a-component-families.md) | W1, P0 | in_progress | current root session / 2026-09-22 | `3f2866c1` migrated DisplayPanel's CNC command menus and the deprecated TopNav command/session menus to Tonic `Menu` primitives, then deleted the complete Dropdown and RootCloseWrapper families. The new Axes regression proves `Go To Work Zero (G0 X0 Y0 Z0)` emits the exact `gcode` command. Focused Axes: 1 suite / 21 tests; post-deletion full frontend: 62 suites / 379 tests; targeted ESLint: 0 errors / 12 pre-existing warnings; `git diff --check` passes. `@app/components/Dropdown` and `@app/components/RootCloseWrapper` imports are zero. Browser, simulator, and build remain deferred to R6. Next: audit the remaining P1 Anchor/Buttons/Clickable/IconButton, Tooltip/Infotip, Modal, and Notifications consumers before deleting their families. |
-| P2 | [forms](details/08a-component-families.md) | P1 | todo | — | — |
+| P1 | [overlays](details/08a-component-families.md) | W1, P0 | completed | current root session / 2026-09-23 | `22d06ba1` and `d248069a` replace the final Anchor/Buttons/Clickable/IconButton, Tooltip/Infotip, Modal, and Notifications consumers with Tonic components and remove those families. Earlier `ModalTemplate`, `InlineToasts`, `Dropdown`, and `RootCloseWrapper` removals complete the P1 manifest. Exact source import and family-file scans are empty; direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. Fresh full frontend: 62 suites / 379 tests; changed-file ESLint and `git diff --check` pass. Zero-consumer legacy Paginations and Administration TablePagination were also removed; the active Tonic TablePagination remains. Browser, simulator, and build evidence remain deferred to R6. |
+| P2 | [forms](details/08a-component-families.md) | P1 | todo | — | Next eligible task. |
 | P3 | [layout](details/08a-component-families.md) | P2 | todo | — | — |
 | P4 | [Administration tables](details/08a-component-families.md) | P3 | todo | — | — |
 | P5 | [domain families](details/08a-component-families.md) | P4 | todo | — | — |

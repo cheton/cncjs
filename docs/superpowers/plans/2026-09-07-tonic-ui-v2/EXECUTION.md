@@ -18,7 +18,7 @@
 
 ## Terra main loop / Luna worker
 
-使用者已指定主控為 **Terra (`gpt-5.6-terra`)**、實作 subagent 為 **Luna (`gpt-5.6-luna`)**。此角色分工授權用於後續 implementation；目前 plan_only 不啟動 worker。沿用本目錄狀態，不另建立 loop-engineering 的 .loop-states。
+目前使用者指定主控為 **GPT-6-Sol**，deterministic 或 implementation subagent 使用 **GPT-6-Luna extra-high/max**。不得 fallback 至 GPT-5.6 models。沿用本目錄狀態，不另建立 loop-engineering 的 .loop-states。
 
 | 角色 | 責任與寫入範圍 |
 | --- | --- |
@@ -28,15 +28,15 @@
 
 ### Hard rule — browser verification ownership
 
-所有 browser tests、browser regression、screenshot、accessible snapshot，以及 Playwright／browser runner 操作，**必須**由 `gpt-5.6-luna`、`reasoning_effort: "medium"` 執行。此規則覆蓋本文件其他 Luna effort 預設與 task matrix。
+所有 browser tests、browser regression、screenshot、accessible snapshot，以及 Playwright／browser runner 操作目前均延後至 R6；屆時依使用者另行指定的 model 執行。不得使用 GPT-5.6 models。此規則覆蓋本文件其他 Luna effort 預設與 task matrix。
 
 - 主控只可提供 bounded brief、審核實際 evidence、更新 `STATUS.md`／[交接入口](../../cncjs-next-tonic-ui-v2-handoff.md)／`execution-log.md`，不得自行執行 browser 操作或改派其他模型。
-- 若 Luna medium 不可用，browser gate 保持 `in_progress` 或記錄具名 blocker；不得以主控、Terra、Sol 或其他 model 代跑並宣稱已驗證。
+- 使用者指定 R6 model 之前，browser gate 保持 deferred；不得自行選 model 代跑並宣稱已驗證。
 - 每個 browser worker brief 與 execution log 必須記錄此 hard rule 與實際 `model`／`reasoning_effort`。
 
 ### Model / reasoning effort
 
-主控使用 **Terra high**。除 browser hard rule 外，Luna 依以下表格使用 **high 或 max**；Sol 固定 **medium**。這是本專案依風險制定的派工預設，不代表模型能力排名，也不能用更高 effort 取代 regression evidence。
+主控使用 **GPT-6-Sol**。除 browser hard rule 外，GPT-6-Luna 的 deterministic 或 implementation subtask 使用 **extra-high 或 max**。下表原有 `high` 分類按 `extra-high` 執行，`max` 分類仍按 `max` 執行；這不代表模型能力排名，也不能用更高 effort 取代 regression evidence。
 
 | 工作類型 | Luna effort | 選擇理由 / 升級條件 |
 | --- | --- | --- |
@@ -104,13 +104,13 @@ Unresolved decision / decision owner: none 或具體問題及 Terra/Sol 分工�
 
 同一未解問題不無限輪流換模型。沿既有兩次失敗修正門檻由 Terra 診斷；Sol 建議也不能通過 gate 時，記錄剩餘假設與具體 blocker，不用忽略測試或更新 golden 消除失敗。
 
-派工參數：browser hard rule 的 Luna 使用 `model: "gpt-5.6-luna"`、`reasoning_effort: "medium"`；其餘 Luna 使用 `"high"` 或 `"max"`。Sol 使用 `model: "gpt-5.6-sol"`、`reasoning_effort: "medium"`，兩者使用 `fork_turns: "none"` 和完整 bounded brief。main session 選 `gpt-5.6-terra` / high。若 host 不支援指定 model/effort，明確記錄限制，不聲稱已套用。
+派工參數：deterministic 或 implementation worker 使用 `model: "gpt-6-luna"`、`reasoning_effort: "xhigh"` 或 `"max"`，並使用 `fork_turns: "none"` 和完整 bounded brief。main conversation 使用 GPT-6-Sol。R6 browser model 待使用者指定；任何工作都不得 fallback 至 GPT-5.6。若 host 不支援指定 model/effort，明確記錄限制，不聲稱已套用。
 
 Sol 判斷期間讓 Luna 在 checkpoint 暫停，避免同一問題邊修改邊 review；預設同時最多一個活躍 subagent（Luna worker 或 Sol advisor）。Terra 保持唯一 ledger writer。worker brief 與 log 增加 `model / reasoning_effort / selection reason / advisor decision`；handoff 記錄未決問題及下次所需 effort。
 
 預設最多 **一個活躍 Luna worker**。Terra 可在 worker 執行期間讀 code、準備 review，但不編輯同一批 source。共用介面、Axes/Autolevel/Visualizer 先由 Terra 固定 contract、測試 oracle 與 ownership，再交 Luna 實作。需要更改 contract 時 worker 回報，由 Terra 決策並更新計畫後再派工。
 
-主控模型需由使用者在新 session 選 Terra；文件無法切換當前 main model。派工使用工具的 model 參數明確選 Luna，並用 `fork_turns: "none"` 提供完整 brief，避免繼承 main model。若環境沒有可選 Luna 的 subagent 能力，回報工具限制，不默默換成其他模型。
+主控模型需由使用者在新 session 選 GPT-6-Sol；文件無法切換當前 main model。派工使用工具的 model 參數明確選 GPT-6-Luna，並用 `fork_turns: "none"` 提供完整 brief，避免繼承 main model。若環境沒有可選 GPT-6-Luna 的 subagent 能力，回報工具限制，不默默換成其他模型。
 
 ### 每次迭代
 
