@@ -39,20 +39,8 @@ jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   }),
 }));
 
-jest.mock('@app/components/FormControl/Input', () => {
-  throw new Error('Spindle must use Tonic Input directly');
-});
-
-jest.mock('@app/components/FormGroup', () => {
-  throw new Error('Spindle must use Tonic layout primitives directly');
-});
-
 jest.mock('@app/components/GridSystem', () => {
   throw new Error('Spindle must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/InputGroup', () => {
-  throw new Error('Spindle must use Tonic InputGroup primitives directly');
 });
 
 jest.mock('@app/components/ImageIcon', () => ({

@@ -74,24 +74,8 @@ jest.mock('@app/components/GridSystem', () => {
   throw new Error('Probe widget must use Tonic Box directly');
 });
 
-jest.mock('@app/components/FormControl/Input', () => {
-  throw new Error('Probe widget must use Tonic Input directly');
-});
-
-jest.mock('@app/components/FormGroup', () => {
-  throw new Error('Probe widget must use Tonic layout primitives directly');
-});
-
 jest.mock('@app/components/Hoverable', () => {
   throw new Error('Probe widget must use Tonic style props directly');
-});
-
-jest.mock('@app/components/InlineError', () => {
-  throw new Error('Probe widget must use Tonic form feedback directly');
-});
-
-jest.mock('@app/components/InputGroup', () => {
-  throw new Error('Probe widget must use Tonic InputGroup directly');
 });
 
 jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({

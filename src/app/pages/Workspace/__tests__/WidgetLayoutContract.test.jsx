@@ -164,11 +164,6 @@ jest.mock('@tonic-ui/react', () => {
   };
 });
 
-jest.mock('@app/components/FormGroup', () => {
-  const React = require('react');
-  return ({ children, ...props }) => React.createElement('div', props, children);
-});
-
 jest.mock('@app/components/GridSystem', () => {
   const React = require('react');
   const Container = ({ children, ...props }) => React.createElement('div', props, children);

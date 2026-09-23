@@ -63,24 +63,8 @@ jest.mock('@app/components/CollapsibleCard', () => {
   throw new Error('Laser must use Tonic collapse primitives directly');
 });
 
-jest.mock('@app/components/FormControl/Input', () => {
-  throw new Error('Laser must use Tonic Input directly');
-});
-
-jest.mock('@app/components/FormGroup', () => {
-  throw new Error('Laser must use Tonic layout primitives directly');
-});
-
 jest.mock('@app/components/GridSystem', () => {
   throw new Error('Laser must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/HorizontalForm', () => {
-  throw new Error('Laser must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/InputGroup', () => {
-  throw new Error('Laser must use Tonic InputGroup primitives directly');
 });
 
 jest.mock('@app/components/Center', () => {

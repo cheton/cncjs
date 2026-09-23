@@ -26,18 +26,6 @@ jest.mock('@app/lib/i18n', () => ({
   },
 }));
 
-jest.mock('@app/components/FormControl/Input', () => {
-  throw new Error('SettingsModal must use Tonic Input directly');
-});
-
-jest.mock('@app/components/FormGroup', () => {
-  throw new Error('SettingsModal must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/InlineError', () => {
-  throw new Error('SettingsModal must use Tonic form feedback directly');
-});
-
 const SettingsModal = require('../modals/SettingsModal').default;
 
 function NestedSettingsHarness({ events, triggerRef }) {
