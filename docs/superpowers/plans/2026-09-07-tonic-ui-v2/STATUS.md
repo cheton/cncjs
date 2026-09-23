@@ -9,6 +9,7 @@
 - Active task: **P2 controlled forms**. Login field labels and validation feedback are migrated; next slice is the Administration drawer `FormGroup` consumers.
 - Main: GPT-6-Sol. For future deterministic or implementation subtasks, use GPT-6-Luna at extra-high or max effort; do not use GPT-5.6 models.
 - Next eligible task: P3 only after the P2 family zero-import gate. Browser evidence remains deferred to R6.
+- Dependency order: finish P2 forms with locked `react-final-form` 6.5.9; assess a v7 upgrade only afterward, as a separate slice if needed.
 - Current blockers: no non-browser blocker. G1-B01 is resolved. BR0 remains `waived` (not passed); existing browser evidence only covers connection/upload/Run/Pause/Resume, and remaining browser gaps are deferred to R6. System Chrome channel still does not support screenshots.
 - Browser instruction: 2026-09-20，使用者要求不要執行 browser tests。G7 與後續工作不得啟動 browser runner、Playwright、screenshot、accessible snapshot 或 simulator browser procedure；所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model。未完成 browser evidence 保持 deferred，不能標為 passed。
 - D3 naming decision: remaining scope is host dispatch, so the test is named `WidgetHost.test.jsx`. The runtime contract is `view` (`normal`／`collapsed`／`fullscreen`) plus `onViewChange(view)`; `WidgetUI` and widget-header-control names are not part of the active API.

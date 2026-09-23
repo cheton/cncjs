@@ -60,7 +60,7 @@
 
 **Files:** manifest P2 家族；Login、Administration drawers、Axes/Autolevel/Connection/Custom/Laser/Macro/Probe/Spindle/Webcam consumers。
 
-**Form contract (2026-09-23):** Use `react-final-form` to own form values, validation, and submit state. Render fields and feedback with the installed Tonic UI v2 `FormControl`, `FormLabel`, `FormInput`, `FormErrorMessage`, and related controls where applicable. Existing Tool and Webcam forms demonstrate this composition. The current locked `react-final-form` is 6.5.9 with `final-form` 4.20.10; P2 does not require an upgrade. If a later dependency upgrade is needed, first assess the official v6→v7 guide and verify form submission, validation, field state, and mocks as a separate slice.
+**Form contract (2026-09-23):** Use `react-final-form` to own form values, validation, and submit state. Render fields and feedback with the installed Tonic UI v2 `FormControl`, `FormLabel`, `FormInput`, `FormErrorMessage`, and related controls where applicable. Existing Tool and Webcam forms demonstrate this composition. The current locked `react-final-form` is 6.5.9 with `final-form` 4.20.10; P2 does not require an upgrade. The user scheduled any v7 upgrade after P2 form migration. If an upgrade is then needed, assess the official v6→v7 guide and verify form submission, validation, field state, and mocks as a separate slice.
 
 - [ ] Checkbox/Radio/ToggleSwitch 改 Tonic controlled `checked/value` + `onChange`。不能從 React child instance 讀 `.checked`；真 input ref只用於 focus。
 - [ ] FormControl/FormGroup/InputGroup/InlineError 改 Tonic form primitives。每欄保留 label/help/error 關聯、required、disabled、numeric zero、empty string 和 Enter submit。
