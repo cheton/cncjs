@@ -1499,3 +1499,9 @@ Status transition: P2 remains `in_progress`. Direct production `FormGroup` consu
 Implementation: NewMacro and EditMacro replace legacy `FormGroup`/`InlineError` with Tonic `FormControl`, `FormLabel`, `FormInput`/`FormTextarea`, and `FormErrorMessage`. React Final Form continues to own values, validation, and submission; mutation and variable insertion flows remain in place.
 
 Test-first evidence: two regressions were RED because the fields lacked accessible names. They are GREEN with linked field errors and invalid mutation suppression. Focused Macro 1 suite / 7 tests and fresh full frontend 62 suites / 383 tests passed. Targeted ESLint exited 0 with existing unrelated warnings; `git diff --check` passed. Browser, simulator, and build remain deferred to R6. P2 remains `in_progress`; remaining form families and the family zero-import gate are next.
+
+## P2 legacy form family removal — 2026-09-23
+
+Fresh source inventory found zero production imports of the nine legacy P2 families. The old inventory lists historical users and is not a current import map. Removed the unused Checkbox, FormControl, FormGroup, HorizontalForm, InputGroup, InlineError, Radio, ToggleSwitch, and Validation modules. Removed obsolete Jest mocks that referenced deleted paths, and added a source import regression so reintroducing a legacy family fails frontend tests.
+
+Focused affected tests passed 6 suites / 62 tests. Fresh full frontend passed 63 suites / 384 tests. The zero-import source gate is met. P2 remains `in_progress`: Connection still uses `react-select`, and keyboard/invalid-submit behavior needs a final evidence audit. Browser evidence remains deferred to R6.

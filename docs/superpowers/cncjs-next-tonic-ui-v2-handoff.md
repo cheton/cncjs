@@ -23,7 +23,7 @@
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
 | Active task | **P2 controlled forms** |
 | 最近完成 | P2 Login `5322f77b`；十個 Administration drawer form controls `bf369a2b` |
-| 下一步推薦 | Inventory remaining P2 form family consumers and migrate the next bounded group |
+| 下一步推薦 | Assess Connection `react-select` equivalence and audit P2 keyboard/invalid-submit evidence |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -35,7 +35,7 @@ P1 has passed its zero-import gate. P2 controlled forms is in progress. Browser 
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Next: remaining form families and zero-import gate | 否 |
+| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | Legacy family zero-import gate met; next: Connection `react-select` and behavior evidence | 否 |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -46,6 +46,8 @@ The first P2 slice (`5322f77b`) migrates Login from legacy `FormGroup`/`InlineEr
 The second P2 slice (`bf369a2b`) migrates all ten Administration create/update drawers and shared FieldInput/FieldTextarea to Tonic form controls while retaining React Final Form ownership and submit-failed error timing. The representative Create Command regression was RED on the inaccessible label, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 381 tests; targeted ESLint and diff checks passed. The next direct production `FormGroup` consumers are Macro New/Edit modals; other P2 family consumers remain.
 
 The third P2 slice migrates Macro New/Edit modal fields to Tonic form controls while retaining React Final Form. Two regressions were RED on missing accessible labels, then passed with linked errors and invalid-submit suppression. Fresh full frontend passed 62 suites / 383 tests; targeted ESLint and diff checks passed. Remaining P2 families and the zero-import gate remain open.
+
+Fresh inventory found no production imports of the nine legacy P2 families, so the unused modules were removed and a source import regression was added. Fresh full frontend passed 63 suites / 384 tests. P2 remains open for the Connection `react-select` equivalence decision and keyboard/invalid-submit evidence audit.
 
 ## 本輪交接重點（G1）
 
@@ -125,7 +127,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 已完成；P2 controlled forms 進行中。Login、十個 Administration drawers、Macro New/Edit modals 已遷移。下一步盤點剩餘 P2 家族 consumers，選擇下一個 bounded slice；react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1。
+P1 overlays 已完成；P2 controlled forms 進行中。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。下一步評估 Connection 的 `react-select` 等價行為並核對 keyboard/invalid-submit 證據；react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。
