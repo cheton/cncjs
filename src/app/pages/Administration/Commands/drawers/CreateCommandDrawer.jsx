@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -9,6 +8,7 @@ import {
   DrawerFooter,
   DrawerOverlay,
   Flex,
+  FormControl,
   Switch,
   Text,
   TextLabel,
@@ -18,7 +18,6 @@ import {
 } from '@tonic-ui/react-hooks';
 import React, { useCallback } from 'react';
 import { Field, Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
 import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
@@ -95,7 +94,7 @@ const CreateCommandDrawer = ({
               </Text>
             </DrawerHeader>
             <DrawerBody>
-              <FormGroup>
+              <FormControl mb="4x">
                 <Flex
                   alignItems="center"
                   columnGap="3x"
@@ -123,35 +122,21 @@ const CreateCommandDrawer = ({
                     }}
                   </Field>
                 </Flex>
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel required>
-                    {i18n._('Command name:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldInput
-                  aria-label="Title"
-                  name="name"
-                  placeholder={i18n._('e.g., Activate Air Purifier')}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel
-                    required
-                    infoTipLabel={i18n._('Input the shell commands to execute with this command.')}
-                  >
-                    {i18n._('Command action:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldTextarea
-                  aria-label="Commands"
-                  name="action"
-                  rows="10"
-                  placeholder="/home/cncjs/bin/activate-air-purifier"
-                />
-              </FormGroup>
+              </FormControl>
+              <FieldInput
+                name="name"
+                label={i18n._('Command name:')}
+                required
+                placeholder={i18n._('e.g., Activate Air Purifier')}
+              />
+              <FieldTextarea
+                name="action"
+                label={i18n._('Command action:')}
+                required
+                infoTipLabel={i18n._('Input the shell commands to execute with this command.')}
+                rows="10"
+                placeholder="/home/cncjs/bin/activate-air-purifier"
+              />
             </DrawerBody>
             <DrawerFooter>
               <Flex

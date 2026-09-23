@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -21,12 +20,10 @@ import {
 } from '@tonic-ui/react-hooks';
 import React, { useCallback, useRef } from 'react';
 import { Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
 import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
-import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
   useCreateMacroMutation,
@@ -99,28 +96,20 @@ const CreateMacroDrawer = ({
               </Text>
             </DrawerHeader>
             <DrawerBody>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel required>
-                    {i18n._('Macro name:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldInput name="name" />
-              </FormGroup>
-              <FormGroup>
-                <Flex
-                  mb="1x"
-                  justifyContent="space-between"
-                >
-                  <FieldTextLabel
-                    required
-                    infoTipLabel={i18n._('Input the G-code commands to execute with this macro.')}
-                  >
-                    {i18n._('G-code commands:')}
-                  </FieldTextLabel>
-                  <Menu
-                    placement="bottom-end"
-                  >
+              <FieldInput
+                name="name"
+                label={i18n._('Macro name:')}
+                required
+              />
+              <FieldTextarea
+                ref={gcodeInputRef}
+                name="action"
+                label={i18n._('G-code commands:')}
+                required
+                infoTipLabel={i18n._('Input the G-code commands to execute with this macro.')}
+                rows="10"
+                labelAction={(
+                  <Menu placement="bottom-end">
                     <MenuToggle>
                       <LinkButton>
                         {i18n._('Select variables')}
@@ -153,13 +142,8 @@ const CreateMacroDrawer = ({
                       ))}
                     </MenuList>
                   </Menu>
-                </Flex>
-                <FieldTextarea
-                  ref={gcodeInputRef}
-                  name="action"
-                  rows="10"
-                />
-              </FormGroup>
+                )}
+              />
             </DrawerBody>
             <DrawerFooter>
               <Flex

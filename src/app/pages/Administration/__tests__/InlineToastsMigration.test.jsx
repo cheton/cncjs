@@ -1,4 +1,5 @@
 import React from 'react';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderAppUI } from '@app/test/render';
 
 const mockMutationOptions = {};
@@ -168,4 +169,30 @@ test('Administration drawers route mutation failures to the global persistent to
     expect(options.duration).toBeUndefined();
     expect(options.content.props.children).toBe('An unexpected error has occurred.');
   });
+});
+
+test('CreateCommandDrawer associates required labels and errors without submitting invalid values', () => {
+  const CreateCommandDrawer = drawerCases[0][1];
+  const view = renderAppUI(<CreateCommandDrawer onClose={jest.fn()} />);
+
+  try {
+    const commandName = screen.getByRole('textbox', { name: /^Command name:/ });
+    const commandAction = screen.getByRole('textbox', { name: /^Command action:/ });
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    [commandName, commandAction].forEach((field) => {
+      const describedBy = field.getAttribute('aria-describedby');
+      const associatedError = describedBy
+        .split(/\s+/)
+        .map(id => document.getElementById(id))
+        .find(element => element && element.getAttribute('role') === 'alert');
+
+      expect(associatedError).toHaveTextContent(/\S/);
+    });
+    expect(mockCreateCommandMutation.mock.results[0].value.mutate).not.toHaveBeenCalled();
+  } finally {
+    view.dispose();
+  }
 });
