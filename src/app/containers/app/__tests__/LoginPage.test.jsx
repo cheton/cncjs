@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { renderAppUI } from '@app/test/render';
 
@@ -135,7 +136,8 @@ describe('LoginPage session mutation boundary', () => {
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
   });
 
-  test('links required field errors to their controls and blocks invalid sign-in', async () => {
+  test('links required errors and blocks invalid keyboard sign-in', async () => {
+    const user = userEvent.setup();
     renderLogin();
 
     const name = screen.getByRole('textbox', { name: 'Username' });
@@ -150,7 +152,9 @@ describe('LoginPage session mutation boundary', () => {
     expect(name.getAttribute('aria-describedby')).toContain(errors[0].id);
     expect(password.getAttribute('aria-describedby')).toContain(errors[1].id);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+    const submit = screen.getByRole('button', { name: 'Sign In' });
+    submit.focus();
+    await user.keyboard('{Enter}');
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 });

@@ -170,6 +170,7 @@ function Spindle({
           <Box width="66.66666667%">
             <InputGroup size="sm">
               <Input
+                aria-label={i18n._('Spindle Speed')}
                 type="number"
                 value={speedDraft}
                 min={0}

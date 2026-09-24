@@ -1,5 +1,6 @@
 import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 
 const mockCommand = jest.fn((name, _payload, callback) => {
@@ -287,6 +288,30 @@ describe('Autolevel workflow owner', () => {
     } finally {
       view.dispose();
       jest.useRealTimers();
+    }
+  });
+
+  test('blocks a full probe start when a setup field is invalid', async () => {
+    const user = userEvent.setup();
+    const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Start New Probe' }));
+
+      const stepX = view.container.querySelector('#autolevel-step-x');
+      expect(stepX).toHaveAttribute('aria-label', 'Step X');
+      stepX.focus();
+      await user.clear(stepX);
+      await user.keyboard('0');
+
+      const startProbing = screen.getByRole('button', { name: 'Start Probing' });
+      expect(startProbing).toBeDisabled();
+      startProbing.focus();
+      await user.keyboard('{Enter}');
+
+      expect(mockCommand).not.toHaveBeenCalledWith('autolevel:start', expect.anything());
+    } finally {
+      view.dispose();
     }
   });
 

@@ -69,6 +69,24 @@ describe('Webcam display controls', () => {
     ]));
   });
 
+  test('declares the image scale slider range for keyboard operation', () => {
+    renderAppUI(<Webcam disabled={false} isFullscreen={false} />);
+
+    const slider = screen.getByRole('slider', { name: 'Image scale' });
+    expect(slider).toHaveAttribute('aria-valuemin', '0.1');
+    expect(slider).toHaveAttribute('aria-valuemax', '10');
+    expect(slider).toHaveAttribute('aria-valuenow', '1');
+  });
+
+  test('commits image scale keyboard changes to the widget config', () => {
+    renderAppUI(<Webcam disabled={false} isFullscreen={false} />);
+
+    const slider = screen.getByRole('slider', { name: 'Image scale' });
+    fireEvent.keyDown(slider, { key: 'ArrowRight', keyCode: 39, which: 39 });
+
+    expect(mockSet).toHaveBeenCalledWith('geometry.scale', 1.1);
+  });
+
   test('refreshes the current stream element and clears its timer on unmount', () => {
     jest.useFakeTimers();
     mockValues.mediaSource = MEDIA_SOURCE_STREAM;

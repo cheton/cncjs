@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 
 const configValues = {
@@ -81,6 +82,25 @@ describe('Custom SettingsModal Tonic contract', () => {
 
     expect(mockConfigSet).toHaveBeenNthCalledWith(1, 'title', 'Updated title');
     expect(mockConfigSet).toHaveBeenNthCalledWith(2, 'url', '/widget/');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  test('submits the draft from the keyboard alone', async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+
+    renderAppUI(<SettingsModal onClose={onClose} />);
+
+    const title = screen.getByDisplayValue('Existing title');
+    title.focus();
+    await user.clear(title);
+    await user.keyboard('Keyboard title');
+
+    const save = screen.getByRole('button', { name: 'Save Changes' });
+    save.focus();
+    await user.keyboard('{Enter}');
+
+    expect(mockConfigSet).toHaveBeenNthCalledWith(1, 'title', 'Keyboard title');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

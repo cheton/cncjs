@@ -1,9 +1,12 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import General from '../Settings/General';
 import Settings from '../Settings';
 import ShuttleXpress from '../Settings/ShuttleXpress';
+import CreateRecord from '../Settings/MDI/CreateRecord';
+import UpdateRecord from '../Settings/MDI/UpdateRecord';
 import { useMdiQuery, useSaveMdiMutation } from '../queries';
 
 jest.mock('../queries', () => ({
@@ -17,26 +20,6 @@ jest.mock('@app/lib/i18n', () => ({
     _: value => value,
   },
 }));
-
-jest.mock('rc-slider', () => {
-  const Slider = props => (
-    <input
-      type="range"
-      {...props}
-      onChange={event => props.onChange(Number(event.target.value))}
-    />
-  );
-
-  Slider.Range = props => (
-    <input
-      type="range"
-      {...props}
-      onChange={event => props.onChange([Number(event.target.value), props.value[1]])}
-    />
-  );
-
-  return Slider;
-});
 
 describe('Axes controlled Settings tabs', () => {
   const createConfig = () => ({
@@ -145,7 +128,7 @@ describe('Axes controlled Settings tabs', () => {
     });
   });
 
-  test('ShuttleXpress reports controlled slider and select changes', () => {
+  test('ShuttleXpress preserves slider ranges, steps, and keyboard changes', () => {
     const onChange = jest.fn();
     const value = {
       feedrateMin: 100,
@@ -161,9 +144,95 @@ describe('Axes controlled Settings tabs', () => {
     });
     expect(onChange).toHaveBeenLastCalledWith({ ...value, hertz: 5 });
 
-    fireEvent.change(screen.getByRole('slider', { name: 'Distance Overshoot' }), {
-      target: { value: '1.25' },
+    const minimumFeed = screen.getByRole('slider', { name: 'Minimum feed rate' });
+    expect(minimumFeed).toHaveAttribute('aria-valuemin', '100');
+    expect(minimumFeed).toHaveAttribute('aria-valuemax', '2500');
+    minimumFeed.closest('.rc-slider').getBoundingClientRect = () => ({
+      bottom: 0,
+      height: 0,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
     });
-    expect(onChange).toHaveBeenLastCalledWith({ ...value, overshoot: 1.25 });
+    fireEvent.focus(minimumFeed);
+    fireEvent.keyDown(minimumFeed, { key: 'ArrowRight', keyCode: 39, which: 39 });
+    expect(onChange).toHaveBeenLastCalledWith({ ...value, feedrateMin: 150, feedrateMax: 2500 });
+
+    const overshoot = screen.getByRole('slider', { name: 'Distance Overshoot' });
+    expect(overshoot).toHaveAttribute('aria-valuemin', '1');
+    expect(overshoot).toHaveAttribute('aria-valuemax', '1.5');
+    fireEvent.keyDown(overshoot, { key: 'ArrowRight', keyCode: 39, which: 39 });
+    expect(onChange).toHaveBeenLastCalledWith({ ...value, overshoot: 1.01 });
+  });
+});
+
+describe('Axes MDI record form accessibility', () => {
+  test.each([
+    ['CreateRecord', CreateRecord, {}],
+    ['UpdateRecord', UpdateRecord, {
+      initialValues: { name: '', command: '', grid: { xs: 6 } },
+    }],
+  ])('%s blocks invalid keyboard submission', async (name, Component, props) => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const view = renderAppUI(
+      <Component
+        {...props}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    try {
+      const submit = screen.getByRole('button', { name: 'OK' });
+      submit.focus();
+      await user.keyboard('{Enter}');
+
+      expect(screen.getByText('This field is required.')).toBeInTheDocument();
+      expect(onSave).not.toHaveBeenCalled();
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test.each([
+    ['CreateRecord', CreateRecord, {}],
+    ['UpdateRecord', UpdateRecord, {
+      initialValues: { name: 'Home', command: 'G28', grid: { xs: 6 } },
+    }],
+  ])('%s preserves the slider range and keyboard commit', async (name, Component, props) => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const view = renderAppUI(
+      <Component
+        {...props}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    try {
+      if (name === 'CreateRecord') {
+        await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Home');
+        await user.type(screen.getByRole('textbox', { name: 'Command' }), 'G28');
+      }
+
+      const slider = screen.getByRole('slider', { name: 'Button width' });
+      expect(slider).toHaveAttribute('aria-valuemin', '1');
+      expect(slider).toHaveAttribute('aria-valuemax', '12');
+      fireEvent.keyDown(slider, { key: 'ArrowRight', keyCode: 39, which: 39 });
+
+      const submit = screen.getByRole('button', { name: 'OK' });
+      submit.focus();
+      await user.keyboard('{Enter}');
+      expect(onSave).toHaveBeenCalledWith({
+        name: 'Home',
+        command: 'G28',
+        grid: { xs: 7 },
+      });
+    } finally {
+      view.dispose();
+    }
   });
 });

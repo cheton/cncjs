@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import Tool, { getToolProbeCommands } from '../Tool';
 import ToolWidget, { createToolConfigDraft } from '../index';
@@ -144,6 +145,44 @@ describe('Tool controlled form', () => {
       expect(onChange).toHaveBeenLastCalledWith({
         ...value,
         toolProbeCustomCommands: 'G91\nG38.2',
+      });
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('reports a keyboard-only custom-command edit through the controlled callback', async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    const view = renderAppUI(
+      <Tool
+        canClick
+        connected
+        controller={{ type: 'Grbl' }}
+        machinePosition={{}}
+        units="mm"
+        value={value}
+        onChange={onChange}
+      />,
+    );
+
+    try {
+      const edit = screen.getByRole('button', { name: 'Edit custom tool probe commands' });
+      edit.focus();
+      await user.keyboard('{Enter}');
+
+      const textarea = screen.getByRole('textbox', { name: 'Custom Tool Probe Commands' });
+      textarea.focus();
+      await user.clear(textarea);
+      await user.keyboard('G91');
+
+      const save = screen.getByRole('button', { name: 'Save custom tool probe commands' });
+      save.focus();
+      await user.keyboard('{Enter}');
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        ...value,
+        toolProbeCustomCommands: 'G91',
       });
     } finally {
       view.dispose();

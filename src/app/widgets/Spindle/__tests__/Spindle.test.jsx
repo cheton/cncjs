@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 
 const mockCommand = jest.fn();
@@ -119,6 +120,24 @@ describe('Spindle Tonic primitive pilot', () => {
 
     fireEvent.change(input, { target: { value: '-10' } });
     expect(mockConfigSet).toHaveBeenLastCalledWith('speed', 0);
+  });
+
+  test('names the speed field and completes a spindle command from the keyboard', async () => {
+    const user = userEvent.setup();
+    renderSpindle();
+
+    const input = screen.getByRole('spinbutton', { name: 'Spindle Speed' });
+    input.focus();
+    await user.clear(input);
+    await user.keyboard('2400');
+
+    const action = getAction('M3');
+    action.focus();
+    await user.keyboard('{Enter}');
+
+    expect(mockConfigSet).toHaveBeenLastCalledWith('speed', 2400);
+    expect(mockCommand).toHaveBeenCalledTimes(1);
+    expect(mockCommand).toHaveBeenCalledWith('gcode', 'M3 S2400');
   });
 
   test('uses the current speed draft without sending a command on edit', () => {

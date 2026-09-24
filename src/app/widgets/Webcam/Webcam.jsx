@@ -271,6 +271,7 @@ function Webcam({
             mb="1x"
           >
             <Slider
+              ariaLabelForHandle={i18n._('Image scale')}
               defaultValue={scale}
               min={0.1}
               max={10}

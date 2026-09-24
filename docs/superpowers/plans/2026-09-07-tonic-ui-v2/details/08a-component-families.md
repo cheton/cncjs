@@ -62,13 +62,13 @@
 
 **Form contract (2026-09-23):** Use `react-final-form` to own form values, validation, and submit state. Render fields and feedback with the installed Tonic UI v2 `FormControl`, `FormLabel`, `FormInput`, `FormErrorMessage`, and related controls where applicable. Existing Tool and Webcam forms demonstrate this composition. The current locked `react-final-form` is 6.5.9 with `final-form` 4.20.10; P2 does not require an upgrade. The user scheduled any v7 upgrade after P2 form migration. If an upgrade is then needed, assess the official v6→v7 guide and verify form submission, validation, field state, and mocks as a separate slice.
 
-- [ ] Checkbox/Radio/ToggleSwitch 改 Tonic controlled `checked/value` + `onChange`。不能從 React child instance 讀 `.checked`；真 input ref只用於 focus。
-- [ ] FormControl/FormGroup/InputGroup/InlineError 改 Tonic form primitives。每欄保留 label/help/error 關聯、required、disabled、numeric zero、empty string 和 Enter submit。
-- [ ] HorizontalForm 的 responsive columns 改 Tonic Grid/Flex；刪 context HOC。
-- [ ] Validation 的 `createForm/createFormControl` class HOC 改既有 react-final-form props/hooks；不能同時保留兩份 draft state。MDI 的完整介面依 06a。
-- [ ] 依 00-design 的 API 相容性規則處理 react-select：先保存搜尋、自訂 options 與 keyboard 行為，再決定 native Select 或以 Tonic `MenuButton/MenuList/MenuItem` 組成的 domain selector；未等價的 caller 明列例外。若評估 Menu，先測 keyboard、focus return、選取值、disabled、ARIA/i18n 與 change/commit 時機。rc-slider 保留，Tonic 沒有公開 Slider，先測 min/max/step、keyboard 與 change/commit 時機。
+- [x] Checkbox/Radio/ToggleSwitch 改 Tonic controlled `checked/value` + `onChange`。不能從 React child instance 讀 `.checked`；真 input ref只用於 focus。The nine legacy families were deleted; the last native `<label><input type="radio">` and native `<select>` (Webcam settings) became Tonic `Radio`/`Select`, and the Autolevel/Axes/Administration checkboxes already used Tonic controlled values.
+- [x] FormControl/FormGroup/InputGroup/InlineError 改 Tonic form primitives。每欄保留 label/help/error 關聯、required、disabled、numeric zero、empty string 和 Enter submit。The audit added the missing accessible names for the Spindle speed input and the Connection socket Host/Port fields; every P2 form now has keyboard-only submit and invalid-submit suppression evidence.
+- [x] HorizontalForm 的 responsive columns 改 Tonic Grid/Flex；刪 context HOC。The legacy module and its `withContextConsumer` HOC were deleted with the other unused families; its consumers use Tonic `Flex`/`Box`.
+- [x] Validation 的 `createForm/createFormControl` class HOC 改既有 react-final-form props/hooks；不能同時保留兩份 draft state。MDI 的完整介面依 06a。The class HOC modules were deleted; Axes MDI uses `react-final-form`-free controlled `{ value, onChange }` drafts per 06a.
+- [x] 依 00-design 的 API 相容性規則處理 react-select：先保存搜尋、自訂 options 與 keyboard 行為，再決定 native Select 或以 Tonic `MenuButton/MenuList/MenuItem` 組成的 domain selector；未等價的 caller 明列例外。若評估 Menu，先測 keyboard、focus return、選取值、disabled、ARIA/i18n 與 change/commit 時機。rc-slider 保留，Tonic 沒有公開 Slider，先測 min/max/step、keyboard 與 change/commit 時機。Connection's two non-searchable selectors became Tonic Menu with keyboard/selection/empty/disabled/focus-return regressions; the dependency was removed and no equivalent-incompatible caller remains. rc-slider is retained in five files, each now covered for range and keyboard commit.
 
-**Gate:** P2 family imports 為零；react-select 未等價 caller 逐檔記錄，rc-slider 按設計保留；所有 form 可由 keyboard 完成；invalid submit 不送 HTTP/controller mutation。
+**Gate (2026-09-24):** P2 family imports and files are zero; `react-select` has no remaining caller and is removed from dependencies; rc-slider is retained by design in five audited consumers; every P2 form completes by keyboard alone; invalid submit never reaches HTTP or a controller mutation. Fresh full frontend 64 suites / 421 tests, ESLint 0 errors, and `git diff --check` pass. Browser evidence remains deferred to R6.
 
 ## Task P3：layout 與 display
 

@@ -872,6 +872,7 @@ function Connection() {
                                   <>
                                     <Input
                                       {...input}
+                                      aria-label={i18n._('Host')}
                                       type="text"
                                       disabled={isDisabled}
                                       onChange={(event) => {
@@ -909,6 +910,7 @@ function Connection() {
                                   <>
                                     <Input
                                       {...input}
+                                      aria-label={i18n._('Port')}
                                       type="number"
                                       min={0}
                                       max={65535}

@@ -79,7 +79,7 @@ function UpdateRecord({ initialValues, onSave, onCancel }) {
             <Box>
               <TextLabel mb="2x">{i18n._('Button Width')}</TextLabel>
               <Slider
-                aria-label={i18n._('Button width')}
+                ariaLabelForHandle={i18n._('Button width')}
                 value={grid}
                 min={1}
                 max={12}

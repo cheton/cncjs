@@ -95,8 +95,8 @@ const UpdateMachineDrawer = ({
         onSubmit={handleFormSubmit}
         validate={(values) => {
           const errors = {};
-          errors.name = validations.required(values.name);
-          errors.data = validations.required(values.data);
+          errors.title = validations.required(values.title);
+          errors.commands = validations.required(values.commands);
           return errors;
         }}
         render={({ form }) => (

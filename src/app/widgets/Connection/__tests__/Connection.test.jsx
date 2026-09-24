@@ -4,6 +4,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 
 const mockOpen = jest.fn();
@@ -263,13 +264,25 @@ describe('Connection form', () => {
     expect(screen.getAllByRole('button', { name: 'Refresh' })[1]).toBeDisabled();
   });
 
-  test('preserves network selection and sends the socket port in the open payload', () => {
+  test('preserves network selection and sends the socket port in the open payload', async () => {
+    const user = userEvent.setup();
     renderAppUI(<Connection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Wi-Fi' }));
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'cnc.local' } });
-    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '9010' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+
+    const host = screen.getByRole('textbox', { name: 'Host' });
+    host.focus();
+    await user.clear(host);
+    await user.keyboard('cnc.local');
+
+    const port = screen.getByRole('spinbutton', { name: 'Port' });
+    port.focus();
+    await user.clear(port);
+    await user.keyboard('9010');
+
+    const open = screen.getByRole('button', { name: 'Open' });
+    open.focus();
+    await user.keyboard('{Enter}');
 
     expect(mockOpen).toHaveBeenCalledWith({
       controller: { type: 'grbl' },

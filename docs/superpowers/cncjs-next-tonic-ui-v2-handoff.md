@@ -21,9 +21,9 @@
 | HEAD | `ea0deb12`（本次交接更新前） |
 | 工作樹 | 本次交接更新前為 clean |
 | 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
-| Active task | **P2 controlled forms** |
-| 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；文件 checkpoint `ea0deb12` |
-| 下一步推薦 | 盤點 P2 表單的鍵盤操作與無效提交測試；逐項補證據，核對 gate 後才關閉 P2 |
+| Active task | **P3 layout 與 display**（P2 controlled forms 已完成） |
+| 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；P2 keyboard/invalid-submit audit（本次，尚未 commit） |
+| 下一步推薦 | 領取 P3：GridSystem → Tonic Grid/Flex，逐一保存 Workspace／Widget／modal breakpoint 行為 |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -31,11 +31,11 @@
 
 ## 下一個可執行項目
 
-P1 已通過零匯入 gate。P2 的 legacy family 零匯入 gate 已通過，但整體 P2 仍在進行中。Browser evidence 延後至 R6。
+P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零匯入、`react-select` 移除、rc-slider 按設計保留，且每個表單都有鍵盤操作與無效提交的具體證據。Browser evidence 延後至 R6。
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P2** [controlled forms](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P1 ✅ | 先盤點現有測試與 source，再補鍵盤操作、無效提交的具體證據缺口；不能僅憑零匯入或全套測試通過就標記完成 | 否 |
+| **P3** [layout 與 display](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P2 ✅ | GridSystem → Tonic Grid/Flex，逐一保存 Workspace／Widget／modal 的寬窄 breakpoint 行為；最後 consumer 清空後刪 `GridSystemProvider` 與 context/Resolver | 是（light/dark、1440×900、768×900 deferred 至 R6） |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -49,7 +49,9 @@ The third P2 slice (`425271c0`) migrates Macro New/Edit modal fields to Tonic fo
 
 Fresh inventory found no production imports of the nine legacy P2 families, so the unused modules were removed in `b117c4c3` and a source import regression was added. Fresh full frontend passed 63 suites / 384 tests.
 
-The Connection serial port and baud rate selectors now use installed Tonic Menu (`9f56e397`), matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Fresh post-removal `yarn test:frontend --runInBand` passed 63 suites / 386 tests; targeted ESLint exited 0 with existing warnings and `git diff --check` passed. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade. P2 remains open for the final keyboard/invalid-submit evidence audit.
+The Connection serial port and baud rate selectors now use installed Tonic Menu (`9f56e397`), matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade.
+
+**P2 keyboard/invalid-submit audit (2026-09-24, not yet committed) closed the task.** The audit extended the Administration drawer table so all ten create/update drawers prove keyboard-only entry, primary-button activation, linked errors, and mutation suppression; it also fixed three drawers whose validators targeted `name`/`data` while their fields are `title`/`commands`. It found and closed two real production gaps test-first: the Webcam settings modal still rendered a native `<label><input type="radio">` pair and an unnamed native `<select>` (now Tonic `Radio`/`Select` with accessible names), and the Spindle speed input had no accessible name (now `aria-label`, deliberately not a hard-coded `id` because forkable widgets can mount duplicates). Connection socket Host/Port gained `aria-label` values; the Laser `rc-slider` test mock was deleted so the real slider is exercised; Webcam, Autolevel, Probe, Tool, Custom settings, and the previously untested GeneralSettings form gained keyboard-only and invalid-gate regressions. Production source now has no native `input`/`select`/`label`; rc-slider stays in exactly five audited consumers. Fresh full frontend 64 suites / 421 tests, ESLint 0 errors / 7 pre-existing warnings, `git diff --check` clean. Browser evidence remains deferred to R6.
 
 ## 本輪交接重點（G1）
 

@@ -1511,3 +1511,45 @@ Focused affected tests passed 6 suites / 62 tests. Fresh full frontend passed 63
 User decision: use installed Tonic Menu for Connection serial port and baud rate; consider Tonic Dropdown after the planned `3.0.0-alpha.1` upgrade. Both existing selectors had `isSearchable={false}`. The new Menu composition retains selected value, port manufacturer and lock details, empty-port message, disabled state, immediate React Final Form/config updates, and no-clear behavior. The unused `react-select` dependency is removed. Keyboard regression revealed that installed Tonic MenuItem closes on Enter/Space without invoking its `onClick`; explicit keyboard selection now preserves commit behavior. Focused Connection tests cover direction keys, Enter, Escape, focus return, selection, disabled state, empty state, and connection payload. Browser evidence remains deferred to R6; P2 still needs a final behavior evidence audit.
 
 Test-first evidence: the changed Connection cases were RED while `react-select` still rendered; focused Connection then passed 1 suite / 10 tests. After removing the unused dependency, fresh full frontend passed 63 suites / 386 tests. Targeted ESLint exited 0 with existing warnings; `git diff --check` passed.
+
+## P2 final form evidence audit — resumed 2026-09-24
+
+Task / session / timestamp: P2 / current root session / 2026-09-24T20:16:00+08:00.
+
+Branch / start HEAD / reviewed dirty files: `feat/tonic-ui-v2-migration` / `8508c3aea5333c7966790e8da34d8b1486e82d38` / clean worktree. No unknown differences were reset. Browser, simulator, production build, package upgrade, and push remain outside this substep.
+
+Plan contract and baseline fixture: `details/08a-component-families.md` P2, `00-design.md`, `.omp/RULES.md`, and the existing Login, Administration drawer, Macro modal, Connection, Axes, Laser, and Webcam regressions. The zero-import scan is empty; `react-select` is absent; the five intentional `rc-slider` consumers remain. Existing tests prove linked invalid errors for Login, both Macro modals, and Create Command, and prove Connection menu keyboard selection/Escape/focus return. The missing durable evidence is breadth across all ten Administration create/update drawers: keyboard-only field entry and submit-button activation, plus invalid-submit suppression and linked errors for every drawer rather than one representative.
+
+Model / reasoning_effort / selection reason: current main runtime `gpt-5.6-sol`; no implementation worker was dispatched because this harness cannot select the required GPT-6-Luna model. The model limitation was surfaced before work and the user explicitly instructed `go` again. This substep is a bounded test/evidence audit with no production contract change; the main session remains the sole source and ledger writer.
+
+Test contract: extend the existing real-drawer regression table. A realistic mutation—disconnecting any drawer's primary button from `form.submit()`, removing one required validator, or breaking its label/error association—must fail. Exercise Tonic buttons with keyboard input and assert the drawer mutation boundary, not framework internals. If current production already satisfies the contract, retain the characterization regression without changing source. Then run the focused P2 suites, full frontend suite, targeted ESLint, exact import/dependency scans, and `git diff --check` before changing status.
+
+Status transition: P2 remains `in_progress`; no blocker. Next exact step: add and run the all-drawer regression, then review the P2 checklist and fresh verification evidence.
+
+## P2 completed — keyboard/invalid-submit audit and remaining consumer gaps — 2026-09-24
+
+Task / session / timestamp: P2 / current root session / 2026-09-24T23:10:00+08:00.
+
+All-drawer regression: the `drawerCases` table in `src/app/pages/Administration/__tests__/InlineToastsMigration.test.jsx` now drives every one of the ten create/update drawers through two new cases — `links every required error and blocks invalid keyboard submission` and `accepts keyboard-only field entry and primary-button submission`. Both clear and retype fields with `userEvent`, activate the primary button with focus + `Enter`, assert the linked `aria-describedby` error element for each required field, and assert the mutation boundary is never reached on invalid submit. Two lint-driven rewrites replaced `await` inside `for...of` with a sequential `reduce` chain (`no-await-in-loop`).
+
+Corrected an invalid-validator mismatch found during the audit: `UpdateMachineDrawer`, `CreateUserDrawer`, and `UpdateUserDrawer` validated `errors.name`/`errors.data`, but their fields are named `title`/`commands`. The validators now target the real field names, so required errors attach to the rendered fields.
+
+Two real production gaps were closed test-first:
+
+- `src/app/widgets/Webcam/modals/SettingsModal.jsx` still rendered a native `<label><input type="radio">` pair and a native `<select>` with no accessible name. The RED run reported `Unable to find an accessible element with the role "combobox" and name "Choose a video device"`. Both controls now use Tonic `Radio` and `Select`; the new regressions assert the accessible names and a full keyboard-only draft (radio via `Space`, URL via keyboard, Save via `Enter`).
+- `src/app/widgets/Spindle/Spindle.jsx` labeled the speed field with a `TextLabel` that had no `htmlFor`, so `getByRole('spinbutton', { name: 'Spindle Speed' })` failed. The input now carries `aria-label={i18n._('Spindle Speed')}` rather than a hard-coded DOM `id`, because forkable widgets can mount duplicates of the same source.
+
+Additional evidence gaps closed without production change:
+
+- Connection socket Host/Port received `aria-label` values (their `TextLabel`s had no `htmlFor`), and the socket case now enters both by keyboard and opens with `Enter`.
+- `rc-slider` is retained by design in five consumers. The Laser test's local `rc-slider` mock was removed so the real slider is exercised; the laser case now asserts `aria-valuemin`/`aria-valuemax`/`aria-valuenow` and drives power with `ArrowRight`, producing `M3 S11`. Webcam gained range and keyboard-commit coverage for image scale. Axes Settings already covered range and keyboard commit.
+- Autolevel gained an invalid-setup gate case (step set to `0` disables Start Probing and sends no `autolevel:start`), and `StartProbeModal` gained a keyboard-only confirmation path.
+- Probe, Tool, Custom settings, and the previously untested `GeneralSettings` form gained keyboard-only completion regressions. `GeneralSettings` also gained an invalid/disabled-save case.
+- `Axes/Settings/*` sliders switched from the ineffective `aria-label` to rc-slider's real API (`ariaLabelForHandle`, `ariaLabelGroupForHandles`); the Axes Settings cases perform an explicit `fireEvent.focus` because the slider derives handle identity from a focus event, then commit with a keydown.
+- Two test-only cleanups: `userEvent` replaced manual `focus()` + `keyboard()` where the Tonic value update needed to settle, and `await`-in-loop lint errors were rewritten.
+
+Verification: focused P2 suites passed throughout each slice. Fresh full frontend `yarn test:frontend --runInBand --silent` passed 64 suites / 421 tests. `yarn eslint` exited 0 with 7 pre-existing warnings and 0 errors. `git diff --check` exited 0.
+
+Gate review: P2 family imports and directories are zero; no native `input`/`select`/`label` remains in production `src/app` source; `react-select` has no caller and is removed from `package.json`; rc-slider remains in exactly five audited consumers; every P2 form completes by keyboard alone; invalid submit never reaches an HTTP or controller mutation.
+
+Status transition: P2 is `completed`. Browser, simulator, and production-build evidence remain deferred to R6. Next eligible task is P3 (layout 與 display) after its P2 dependency is now satisfied.

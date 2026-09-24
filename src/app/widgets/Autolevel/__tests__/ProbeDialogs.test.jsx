@@ -1,5 +1,6 @@
 import React from 'react';
 import { act, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import StartProbeModal from '../StartProbeModal';
 import StopProbeModal from '../StopProbeModal';
@@ -72,6 +73,31 @@ describe('Autolevel probe dialogs', () => {
       fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
       fireEvent.click(confirm);
       fireEvent.click(confirm);
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('activates start probing from the keyboard alone', async () => {
+    const user = userEvent.setup();
+    const onConfirm = jest.fn();
+    const view = renderAppUI(
+      <StartProbeModal
+        canConfirm onCancel={jest.fn()} onConfirm={onConfirm}
+        value={value}
+      />,
+    );
+
+    try {
+      const confirm = screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' });
+      confirm.focus();
+      await user.keyboard(' ');
+
+      const start = screen.getByRole('button', { name: 'Start Probing' });
+      start.focus();
+      await user.keyboard('{Enter}');
 
       expect(onConfirm).toHaveBeenCalledTimes(1);
     } finally {

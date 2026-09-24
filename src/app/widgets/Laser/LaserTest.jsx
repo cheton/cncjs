@@ -92,7 +92,7 @@ function LaserTest({
               <Text>{powerDraft}%</Text>
               <Box sx={{ '& .rc-slider': { padding: 0 } }}>
                 <Slider
-                  aria-label="Laser power"
+                  ariaLabelForHandle="Laser power"
                   value={numericPower === null ? 0 : numericPower}
                   min={0}
                   max={100}

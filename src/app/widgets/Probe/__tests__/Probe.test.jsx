@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   CONNECTION_STATE_CONNECTED,
   CONNECTION_STATE_DISCONNECTED,
@@ -170,6 +171,24 @@ describe('Probe modal command contract', () => {
     expect(mockConfigSet).toHaveBeenCalledWith('probeAxis', 'X');
     expect(mockConfigSet).toHaveBeenCalledWith('probeCommand', 'G38.3');
     expect(mockConfigSet).toHaveBeenCalledWith('probeDepth', 12);
+  });
+
+  test('opens a probe preview from keyboard-only draft entry', async () => {
+    const user = userEvent.setup();
+    renderAppUI(<Probe />);
+
+    const depth = screen.getByRole('spinbutton', { name: 'Probe Depth' });
+    depth.focus();
+    await user.clear(depth);
+    await user.keyboard('12');
+
+    const openPreview = screen.getByRole('button', { name: 'Probe Axis Z' });
+    openPreview.focus();
+    await user.keyboard('{Enter}');
+
+    expect(mockPortal).toHaveBeenCalledTimes(1);
+    expect(mockConfigSet).toHaveBeenCalledWith('probeDepth', 12);
+    expect(mockCommand).not.toHaveBeenCalled();
   });
 
   test('does not open a probe preview while disconnected or while the workflow is active', () => {

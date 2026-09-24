@@ -47,7 +47,10 @@ function ShuttleXpress({ value, onChange }) {
           })}
         </TextLabel>
         <Slider.Range
-          aria-label={i18n._('Feed Rate Range')}
+          ariaLabelGroupForHandles={[
+            i18n._('Minimum feed rate'),
+            i18n._('Maximum feed rate'),
+          ]}
           allowCross={false}
           value={[value.feedrateMin, value.feedrateMax]}
           min={FEEDRATE_RANGE[0]}
@@ -77,7 +80,7 @@ function ShuttleXpress({ value, onChange }) {
           {i18n._('Distance Overshoot: {{overshoot}}x', { overshoot: value.overshoot })}
         </TextLabel>
         <Slider
-          aria-label={i18n._('Distance Overshoot')}
+          ariaLabelForHandle={i18n._('Distance Overshoot')}
           value={value.overshoot}
           min={OVERSHOOT_RANGE[0]}
           max={OVERSHOOT_RANGE[1]}

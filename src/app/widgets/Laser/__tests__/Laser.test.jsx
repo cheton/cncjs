@@ -75,14 +75,6 @@ jest.mock('@app/components/RepeatableButton', () => {
   throw new Error('Laser must own repeat behavior on Tonic Button');
 });
 
-jest.mock('rc-slider', () => props => (
-  <input
-    type="range"
-    {...props}
-    onChange={event => props.onChange(Number(event.target.value))}
-  />
-));
-
 const LaserTest = require('../LaserTest').default;
 const LaserIntensityOverride = require('../LaserIntensityOverride').default;
 const LaserWidget = require('../index').default;
@@ -109,9 +101,11 @@ describe('Laser widget command contracts', () => {
   test('sends one laser test start and stop command with the controlled drafts', () => {
     renderLaserTest();
 
-    fireEvent.change(screen.getByRole('slider', { name: 'Laser power' }), {
-      target: { value: '55' },
-    });
+    const power = screen.getByRole('slider', { name: 'Laser power' });
+    expect(power).toHaveAttribute('aria-valuemin', '0');
+    expect(power).toHaveAttribute('aria-valuemax', '100');
+    expect(power).toHaveAttribute('aria-valuenow', '10');
+    fireEvent.keyDown(power, { key: 'ArrowRight', keyCode: 39, which: 39 });
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Test duration in milliseconds' }), {
       target: { value: '400' },
     });
@@ -124,7 +118,7 @@ describe('Laser widget command contracts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Laser Off' }));
 
     expect(mockCommand).toHaveBeenCalledTimes(2);
-    expect(mockCommand).toHaveBeenNthCalledWith(1, 'laser_test', 55, 400, 1400);
+    expect(mockCommand).toHaveBeenNthCalledWith(1, 'laser_test', 11, 400, 1400);
     expect(mockCommand).toHaveBeenNthCalledWith(2, 'laser_test', 0);
   });
 

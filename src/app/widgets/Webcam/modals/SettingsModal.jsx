@@ -9,6 +9,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  Select,
   Text,
   TextLabel,
 } from '@tonic-ui/react';
@@ -75,19 +77,34 @@ function SettingsModal({ onClose }) {
               <ModalBody>
                 <FormControl mb="4x">
                   <TextLabel>{i18n._('Media Source')}</TextLabel>
-                  <Field name="mediaSource" type="radio" value={MEDIA_SOURCE_LOCAL}>{({ input }) => <label><input {...input} /> {i18n._('Use a built-in camera or a connected webcam')}</label>}</Field>
+                  <Field name="mediaSource" type="radio" value={MEDIA_SOURCE_LOCAL}>
+                    {({ input }) => (
+                      <Radio {...input} checked={input.checked}>
+                        {i18n._('Use a built-in camera or a connected webcam')}
+                      </Radio>
+                    )}
+                  </Field>
                   <Box mt="2x" ml="5x">
                     <Field name="deviceId">{({ input }) => (
-                      <select {...input} disabled={values.mediaSource !== MEDIA_SOURCE_LOCAL}>
+                      <Select
+                        {...input} aria-label={i18n._('Choose a video device')}
+                        disabled={values.mediaSource !== MEDIA_SOURCE_LOCAL}
+                      >
                         <option value="__default__">{i18n._('Automatic detection')}</option>
                         {devices.map(device => <option key={device.deviceId} value={device.deviceId}>{device.label || device.deviceId}</option>)}
-                      </select>
+                      </Select>
                     )}
                     </Field>
                   </Box>
                 </FormControl>
                 <FormControl>
-                  <Field name="mediaSource" type="radio" value={MEDIA_SOURCE_STREAM}>{({ input }) => <label><input {...input} /> {i18n._('Connect to an IP camera')}</label>}</Field>
+                  <Field name="mediaSource" type="radio" value={MEDIA_SOURCE_STREAM}>
+                    {({ input }) => (
+                      <Radio {...input} checked={input.checked}>
+                        {i18n._('Connect to an IP camera')}
+                      </Radio>
+                    )}
+                  </Field>
                   <Box mt="2x" ml="5x">
                     <Field name="url">{({ input }) => (
                       <Input

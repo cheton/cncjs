@@ -1,5 +1,9 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import {
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 
 const mockMutationOptions = {};
@@ -110,16 +114,16 @@ jest.mock('../Users/queries', () => ({
 }));
 
 const drawerCases = [
-  ['CreateCommandDrawer', require('../Commands/drawers/CreateCommandDrawer').default, 'createCommand', false],
-  ['UpdateCommandDrawer', require('../Commands/drawers/UpdateCommandDrawer').default, 'updateCommand', true],
-  ['CreateEventDrawer', require('../Events/drawers/CreateEventDrawer').default, 'createEvent', false],
-  ['UpdateEventDrawer', require('../Events/drawers/UpdateEventDrawer').default, 'updateEvent', true],
-  ['CreateMachineDrawer', require('../Machines/drawers/CreateMachineDrawer').default, 'createMachine', false],
-  ['UpdateMachineDrawer', require('../Machines/drawers/UpdateMachineDrawer').default, 'updateMachine', true],
-  ['CreateMacroDrawer', require('../Macros/drawers/CreateMacroDrawer').default, 'createMacro', false],
-  ['UpdateMacroDrawer', require('../Macros/drawers/UpdateMacroDrawer').default, 'updateMacro', true],
-  ['CreateUserDrawer', require('../Users/drawers/CreateUserDrawer').default, 'createUser', false],
-  ['UpdateUserDrawer', require('../Users/drawers/UpdateUserDrawer').default, 'updateUser', true],
+  ['CreateCommandDrawer', require('../Commands/drawers/CreateCommandDrawer').default, 'createCommand', false, 'Add', ['Command name:', 'Command action:']],
+  ['UpdateCommandDrawer', require('../Commands/drawers/UpdateCommandDrawer').default, 'updateCommand', true, 'Save', ['Command name:', 'Command action:']],
+  ['CreateEventDrawer', require('../Events/drawers/CreateEventDrawer').default, 'createEvent', false, 'Add', ['Event name:', 'Event trigger:', 'Event action:']],
+  ['UpdateEventDrawer', require('../Events/drawers/UpdateEventDrawer').default, 'updateEvent', true, 'Save', ['Event name:', 'Event trigger:', 'Event action:']],
+  ['CreateMachineDrawer', require('../Machines/drawers/CreateMachineDrawer').default, 'createMachine', false, 'Add', ['Machine name:', 'Shell commands:']],
+  ['UpdateMachineDrawer', require('../Machines/drawers/UpdateMachineDrawer').default, 'updateMachine', true, 'Save', ['Machine name:', 'Shell commands:']],
+  ['CreateMacroDrawer', require('../Macros/drawers/CreateMacroDrawer').default, 'createMacro', false, 'Add', ['Macro name:', 'G-code commands:']],
+  ['UpdateMacroDrawer', require('../Macros/drawers/UpdateMacroDrawer').default, 'updateMacro', true, 'Save', ['Macro name:', 'G-code commands:']],
+  ['CreateUserDrawer', require('../Users/drawers/CreateUserDrawer').default, 'createUser', false, 'Add', ['User name:', 'Shell commands:']],
+  ['UpdateUserDrawer', require('../Users/drawers/UpdateUserDrawer').default, 'updateUser', true, 'Save', ['User name:', 'Shell commands:']],
 ];
 
 const mutationMocks = [
@@ -134,6 +138,24 @@ const mutationMocks = [
   mockCreateUserMutation,
   mockUpdateUserMutation,
 ];
+
+const mutationMocksByKey = {
+  createCommand: mockCreateCommandMutation,
+  updateCommand: mockUpdateCommandMutation,
+  createEvent: mockCreateEventMutation,
+  updateEvent: mockUpdateEventMutation,
+  createMachine: mockCreateMachineMutation,
+  updateMachine: mockUpdateMachineMutation,
+  createMacro: mockCreateMacroMutation,
+  updateMacro: mockUpdateMacroMutation,
+  createUser: mockCreateUserMutation,
+  updateUser: mockUpdateUserMutation,
+};
+
+const getLatestMutation = (mutationKey) => {
+  const results = mutationMocksByKey[mutationKey].mock.results;
+  return results[results.length - 1].value.mutate;
+};
 
 beforeEach(() => {
   mockNotifyToast.mockClear();
@@ -171,28 +193,75 @@ test('Administration drawers route mutation failures to the global persistent to
   });
 });
 
-test('CreateCommandDrawer associates required labels and errors without submitting invalid values', () => {
-  const CreateCommandDrawer = drawerCases[0][1];
-  const view = renderAppUI(<CreateCommandDrawer onClose={jest.fn()} />);
+test.each(drawerCases)(
+  '%s links every required error and blocks invalid keyboard submission',
+  async (name, Drawer, mutationKey, isUpdate, submitLabel, fieldLabels) => {
+    const user = userEvent.setup();
+    const view = renderAppUI(
+      <Drawer
+        id={isUpdate ? 'fixture-id' : undefined}
+        onClose={jest.fn()}
+      />
+    );
 
-  try {
-    const commandName = screen.getByRole('textbox', { name: /^Command name:/ });
-    const commandAction = screen.getByRole('textbox', { name: /^Command action:/ });
+    try {
+      const fields = fieldLabels.map(label => screen.getByRole('textbox', {
+        name: new RegExp(`^${label}`),
+      }));
+      await fields.reduce(
+        (promise, field) => promise.then(() => user.clear(field)),
+        Promise.resolve()
+      );
 
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+      const submit = screen.getByRole('button', { name: submitLabel });
+      submit.focus();
+      await user.keyboard('{Enter}');
 
-    [commandName, commandAction].forEach((field) => {
-      const describedBy = field.getAttribute('aria-describedby');
-      const associatedError = describedBy
-        .split(/\s+/)
-        .map(id => document.getElementById(id))
-        .find(element => element && element.getAttribute('role') === 'alert');
+      await waitFor(() => fields.forEach((field) => {
+        const describedBy = field.getAttribute('aria-describedby');
+        const associatedError = describedBy
+          .split(/\s+/)
+          .map(id => document.getElementById(id))
+          .find(element => element && element.getAttribute('role') === 'alert');
 
-      expect(associatedError).toHaveTextContent(/\S/);
-    });
-    expect(mockCreateCommandMutation.mock.results[0].value.mutate).not.toHaveBeenCalled();
-  } finally {
-    view.dispose();
+        expect(associatedError).toHaveTextContent(/\S/);
+      }));
+      expect(getLatestMutation(mutationKey)).not.toHaveBeenCalled();
+    } finally {
+      view.dispose();
+    }
   }
-});
+);
+
+test.each(drawerCases)(
+  '%s accepts keyboard-only field entry and primary-button submission',
+  async (name, Drawer, mutationKey, isUpdate, submitLabel, fieldLabels) => {
+    const user = userEvent.setup();
+    const view = renderAppUI(
+      <Drawer
+        id={isUpdate ? 'fixture-id' : undefined}
+        onClose={jest.fn()}
+      />
+    );
+
+    try {
+      const fields = fieldLabels.map(label => screen.getByRole('textbox', {
+        name: new RegExp(`^${label}`),
+      }));
+      await fields.reduce(
+        (promise, field, index) => promise
+          .then(() => user.clear(field))
+          .then(() => user.type(field, `value-${index + 1}`)),
+        Promise.resolve()
+      );
+
+      const submit = screen.getByRole('button', { name: submitLabel });
+      submit.focus();
+      await user.keyboard('{Enter}');
+
+      await waitFor(() => expect(getLatestMutation(mutationKey)).toHaveBeenCalledTimes(1));
+    } finally {
+      view.dispose();
+    }
+  }
+);
