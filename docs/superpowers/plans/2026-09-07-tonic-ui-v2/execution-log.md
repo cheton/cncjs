@@ -1552,4 +1552,4 @@ Verification: focused P2 suites passed throughout each slice. Fresh full fronten
 
 Gate review: P2 family imports and directories are zero; no native `input`/`select`/`label` remains in production `src/app` source; `react-select` has no caller and is removed from `package.json`; rc-slider remains in exactly five audited consumers; every P2 form completes by keyboard alone; invalid submit never reaches an HTTP or controller mutation.
 
-Status transition: P2 is `completed`. Browser, simulator, and production-build evidence remain deferred to R6. Next eligible task is P3 (layout 與 display) after its P2 dependency is now satisfied.
+Status transition: P2 is `completed`. Committed as `924007e4` (`fix(app): close P2 keyboard and invalid-submit evidence`). Browser, simulator, and production-build evidence remain deferred to R6. Next eligible task is P3 (layout 與 display) after its P2 dependency is now satisfied.
