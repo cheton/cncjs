@@ -122,8 +122,8 @@ const drawerCases = [
   ['UpdateMachineDrawer', require('../Machines/drawers/UpdateMachineDrawer').default, 'updateMachine', true, 'Save', ['Machine name:', 'Shell commands:']],
   ['CreateMacroDrawer', require('../Macros/drawers/CreateMacroDrawer').default, 'createMacro', false, 'Add', ['Macro name:', 'G-code commands:']],
   ['UpdateMacroDrawer', require('../Macros/drawers/UpdateMacroDrawer').default, 'updateMacro', true, 'Save', ['Macro name:', 'G-code commands:']],
-  ['CreateUserDrawer', require('../Users/drawers/CreateUserDrawer').default, 'createUser', false, 'Add', ['User name:', 'Shell commands:']],
-  ['UpdateUserDrawer', require('../Users/drawers/UpdateUserDrawer').default, 'updateUser', true, 'Save', ['User name:', 'Shell commands:']],
+  ['CreateUserDrawer', require('../Users/drawers/CreateUserDrawer').default, 'createUser', false, 'Add', ['User name:', 'Password:']],
+  ['UpdateUserDrawer', require('../Users/drawers/UpdateUserDrawer').default, 'updateUser', true, 'Save', ['User name:']],
 ];
 
 const mutationMocks = [
@@ -205,9 +205,7 @@ test.each(drawerCases)(
     );
 
     try {
-      const fields = fieldLabels.map(label => screen.getByRole('textbox', {
-        name: new RegExp(`^${label}`),
-      }));
+      const fields = fieldLabels.map(label => screen.getByLabelText(new RegExp(`^${label}`)));
       await fields.reduce(
         (promise, field) => promise.then(() => user.clear(field)),
         Promise.resolve()
@@ -245,9 +243,7 @@ test.each(drawerCases)(
     );
 
     try {
-      const fields = fieldLabels.map(label => screen.getByRole('textbox', {
-        name: new RegExp(`^${label}`),
-      }));
+      const fields = fieldLabels.map(label => screen.getByLabelText(new RegExp(`^${label}`)));
       await fields.reduce(
         (promise, field, index) => promise
           .then(() => user.clear(field))

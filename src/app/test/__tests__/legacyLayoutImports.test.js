@@ -5,6 +5,7 @@ const appRoot = path.resolve(__dirname, '../..');
 const legacyFamilies = [
   'Badge', 'Card', 'Center', 'CollapsibleCard', 'GridSystem', 'Hoverable',
   'Image', 'ImageIcon', 'Navs', 'Panel', 'Progress', 'ProgressBar', 'shared',
+  'BaseTable', 'Table', 'TablePagination', 'Paginations',
 ];
 const familyPaths = legacyFamilies.map(family => path.join(appRoot, 'components', family));
 const isWithin = (filename, directory) => filename === directory || filename.startsWith(`${directory}${path.sep}`);
@@ -16,7 +17,7 @@ const sourceFiles = directory => fs.readdirSync(directory, { withFileTypes: true
   return /\.(js|jsx|styl)$/.test(entry.name) ? [filename] : [];
 });
 
-test('P3 families are deleted and have no alias or relative source references', () => {
+test('P3/P4 families are deleted and have no alias or relative source references', () => {
   expect(legacyFamilies.filter(family => fs.existsSync(path.join(appRoot, 'components', family)))).toEqual([]);
   const offenders = sourceFiles(appRoot).flatMap(filename => {
     const source = fs.readFileSync(filename, 'utf8');

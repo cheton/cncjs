@@ -1,0 +1,200 @@
+import React from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { PortalManager, ToastManager } from '@tonic-ui/react';
+import axios from '@app/api/axios';
+import { renderAppUI } from '@app/test/render';
+import Commands from '../Commands/Commands';
+import Events from '../Events/Events';
+import Machines from '../Machines/Machines';
+import Macros from '../Macros/Macros';
+import Users from '../Users/Users';
+
+jest.mock('@app/components/CodePreview', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+jest.mock('@app/api/axios', () => ({
+  __esModule: true,
+  default: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
+}));
+jest.mock('@app/lib/i18n', () => ({
+  __esModule: true,
+  default: { _: (text, values = {}) => text.replace(/{{(\w+)}}/g, (match, key) => values[key] ?? match) },
+}));
+jest.mock('react-virtualized-auto-sizer', () => ({
+  __esModule: true,
+  default: ({ children }) => children({ width: 800, height: 500 }),
+}));
+
+const resources = [
+  ['commands', Commands], ['events', Events], ['machines', Machines],
+  ['macros', Macros], ['users', Users],
+];
+const records = [
+  { id: 'r1', name: 'Zulu', title: 'Zulu', commands: 'G28', content: 'G28', mtime: 1700000000000, enabled: true },
+  { id: 'r2', name: 'Alpha', title: 'Alpha', commands: 'G0 X1', content: 'G0 X1', mtime: 1700000000000, enabled: false },
+];
+
+beforeEach(() => {
+  axios.get.mockReset();
+  axios.post.mockReset();
+  axios.put.mockReset();
+  axios.delete.mockReset();
+  axios.get.mockResolvedValue({ data: { records, pagination: { totalRecords: 120 } } });
+});
+
+test.each(resources)('%s retains server order, row/bulk selection and 1-based paging', async (resource, Component) => {
+  const user = userEvent.setup();
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('checkbox', { name: 'Select row r1' });
+    const names = screen.getAllByRole('button').filter(button => ['Zulu', 'Alpha'].includes(button.textContent));
+    expect(names.map(button => button.textContent)).toEqual(['Zulu', 'Alpha']);
+    await user.click(screen.getByRole('checkbox', { name: 'Select row r1' }));
+    expect(screen.getByRole('checkbox', { name: 'Select row r1' })).toBeChecked();
+    await user.click(screen.getByRole('checkbox', { name: 'Select all rows' }));
+    expect(screen.getByRole('checkbox', { name: 'Select row r2' })).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Go to first page' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Go to last page' }));
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Page' })).toHaveValue('6'));
+    expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Go to last page' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Go to first page' }));
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Page' })).toHaveValue('1'));
+    await user.click(screen.getByRole('button', { name: 'Go to next page' }));
+    await waitFor(() => expect(axios.get.mock.calls.some(([url]) => url === `api/${resource}?paging=true&page=2&pageLength=20`)).toBe(true));
+    expect(screen.getByRole('checkbox', { name: 'Select row r1' })).not.toBeChecked();
+    await user.click(screen.getByRole('button', { name: '20 per page' }));
+    await user.click(screen.getByRole('menuitem', { name: '50' }));
+    await waitFor(() => expect(axios.get.mock.calls.some(([url]) => url === `api/${resource}?paging=true&page=1&pageLength=50`)).toBe(true));
+    expect(screen.getByRole('textbox', { name: 'Page' })).toHaveValue('1');
+  } finally {
+    view.dispose();
+  }
+});
+
+test.each(resources)('%s distinguishes loading, empty and error and can retry', async (resource, Component) => {
+  const user = userEvent.setup();
+  let resolveRequest;
+  axios.get.mockImplementationOnce(() => new Promise(resolve => {
+    resolveRequest = resolve;
+  }));
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    expect(screen.getByRole('status')).toHaveTextContent('Loading...');
+    resolveRequest({ data: { records: [], pagination: { totalRecords: 0 } } });
+    await screen.findByText('No data to display');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDisabled();
+    axios.get.mockRejectedValueOnce(new Error('List unavailable'));
+    await user.click(screen.getByRole('button', { name: 'Refresh' }));
+    await screen.findByRole('alert');
+    axios.get.mockResolvedValueOnce({ data: { records, pagination: { totalRecords: 2 } } });
+    await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Retry' }));
+    await screen.findByRole('checkbox', { name: 'Select row r1' });
+  } finally {
+    view.dispose();
+  }
+});
+
+const createFields = {
+  commands: ['Command name:', 'Command action:'],
+  events: ['Event name:', 'Event trigger:', 'Event action:'],
+  machines: ['Machine name:', 'Shell commands:'],
+  macros: ['Macro name:', 'G-code commands:'],
+  users: ['User name:', 'Password:'],
+};
+
+test.each(resources)('%s updates the visible cache after create, update and bulk delete', async (resource, Component) => {
+  const user = userEvent.setup();
+  let serverRecords = records.map(record => ({ ...record }));
+  const prefix = `api/${resource}`;
+  axios.get.mockImplementation(url => {
+    if (url.startsWith(`${prefix}/`)) {
+      return Promise.resolve({ data: serverRecords.find(record => record.id === url.slice(prefix.length + 1)) });
+    }
+    return Promise.resolve({ data: { records: serverRecords, pagination: { totalRecords: serverRecords.length } } });
+  });
+  axios.post.mockImplementation((url, data) => {
+    if (url === `${prefix}/delete`) {
+      serverRecords = serverRecords.filter(record => !data.ids.includes(record.id));
+    } else {
+      serverRecords = serverRecords.concat({ ...data, id: 'created', mtime: 1700000000000 });
+    }
+    return Promise.resolve({ data: { id: 'created' } });
+  });
+  axios.put.mockImplementation((url, data) => {
+    serverRecords = serverRecords.map(record => (record.id === 'created' ? { ...record, ...data } : record));
+    return Promise.resolve({ data: { id: 'created' } });
+  });
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('checkbox', { name: 'Select row r1' });
+    await user.click(screen.getByRole('button', { name: 'Add' }));
+    const labels = createFields[resource];
+    await labels.reduce((promise, label, index) => promise.then(() => (
+      user.type(screen.getByLabelText(new RegExp(`^${label}`)), index === 0 ? 'Created' : 'fixture-value')
+    )), Promise.resolve());
+    const addButtons = screen.getAllByRole('button', { name: 'Add' });
+    await user.click(addButtons[addButtons.length - 1]);
+    await screen.findByRole('button', { name: 'Created' });
+    expect(axios.post).toHaveBeenCalledWith(prefix, expect.objectContaining({ name: 'Created' }));
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Select row created' })).toBeEnabled());
+    await user.click(screen.getByRole('button', { name: 'Created' }));
+    const name = await screen.findByLabelText(new RegExp(`^${labels[0]}`));
+    await waitFor(() => expect(name).toHaveValue('Created'));
+    await user.clear(name);
+    await user.type(name, 'Updated');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByRole('button', { name: 'Updated' });
+    expect(axios.put).toHaveBeenCalledWith(`${prefix}/created`, expect.objectContaining({ name: 'Updated' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Select row created' }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Updated' })).not.toBeInTheDocument());
+    expect(axios.post).toHaveBeenCalledWith(`${prefix}/delete`, { ids: ['created'] });
+  } finally {
+    view.dispose();
+  }
+});
+
+test.each(resources.filter(([resource]) => resource !== 'users'))('%s toggles row details without fetching or mutating', async (resource, Component) => {
+  const user = userEvent.setup();
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('checkbox', { name: 'Select row r1' });
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Select row r1' })).toBeEnabled());
+    const requestCount = axios.get.mock.calls.length;
+    const details = screen.getByRole('button', { name: 'Toggle details for r1' });
+    expect(details).toHaveAttribute('aria-expanded', 'false');
+    await user.click(details);
+    expect(screen.getByRole('button', { name: 'Toggle details for r1' })).toHaveAttribute('aria-expanded', 'true');
+    await user.click(screen.getByRole('button', { name: 'Toggle details for r1' }));
+    expect(screen.getByRole('button', { name: 'Toggle details for r1' })).toHaveAttribute('aria-expanded', 'false');
+    expect(axios.get).toHaveBeenCalledTimes(requestCount);
+    expect(axios.post).not.toHaveBeenCalled();
+    expect(axios.put).not.toHaveBeenCalled();
+  } finally {
+    view.dispose();
+  }
+});
+
+test('Users and Commands keep separate list caches', async () => {
+  axios.get.mockImplementation(url => Promise.resolve({
+    data: {
+      records: [{ ...records[0], name: url.startsWith('api/users') ? 'User fixture' : 'Command fixture' }],
+      pagination: { totalRecords: 1 },
+    },
+  }));
+  const view = renderAppUI(<ToastManager><PortalManager><Commands /><Users /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('button', { name: 'User fixture' });
+    await screen.findByRole('button', { name: 'Command fixture' });
+    expect(axios.get.mock.calls.map(([url]) => url)).toEqual(expect.arrayContaining([
+      'api/commands?paging=true&page=1&pageLength=20', 'api/users?paging=true&page=1&pageLength=20',
+    ]));
+  } finally {
+    view.dispose();
+  }
+});

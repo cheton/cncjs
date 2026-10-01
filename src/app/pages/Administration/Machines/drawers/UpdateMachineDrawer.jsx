@@ -31,6 +31,7 @@ import {
 
 const getMemoizedState = memoize(state => ({ ...state }));
 
+/** @param {{ id: string, onClose?: Function }} props */
 const UpdateMachineDrawer = ({
   id,
   onClose,
@@ -65,8 +66,8 @@ const UpdateMachineDrawer = ({
 
   const initialValues = getMemoizedState({
     enabled: readMachineQuery.data?.enabled,
-    title: readMachineQuery.data?.title,
-    commands: readMachineQuery.data?.commands,
+    name: readMachineQuery.data?.name,
+    data: readMachineQuery.data?.data,
   });
 
   const handleFormSubmit = useCallback((values) => {
@@ -95,8 +96,8 @@ const UpdateMachineDrawer = ({
         onSubmit={handleFormSubmit}
         validate={(values) => {
           const errors = {};
-          errors.title = validations.required(values.title);
-          errors.commands = validations.required(values.commands);
+          errors.name = validations.required(values.name);
+          errors.data = validations.required(values.data);
           return errors;
         }}
         render={({ form }) => (
@@ -141,13 +142,13 @@ const UpdateMachineDrawer = ({
                     </Flex>
                   </FormControl>
                   <FieldInput
-                    name="title"
+                    name="name"
                     label={i18n._('Machine name:')}
                     required
                     placeholder={i18n._('e.g., Activate Air Purifier')}
                   />
                   <FieldTextarea
-                    name="commands"
+                    name="data"
                     label={i18n._('Shell commands:')}
                     required
                     infoTipLabel={i18n._('Enter the shell commands to be executed when this command runs. Each line will be executed sequentially.')}

@@ -3,11 +3,19 @@ import {
   Button,
   ButtonGroup,
   Space,
+  Spinner,
+  Table,
+  TableHeader,
+  TableHeaderRow,
+  TableHeaderCell,
+  TableBody,
+  TableRow,
+  TableCell,
 } from '@tonic-ui/react';
 import get from 'lodash/get';
 import take from 'lodash/take';
 import React from 'react';
-import Table from '@app/components/Table';
+import { AddIcon, ChevronUpIcon, ChevronDownIcon, EditIcon, CloseIcon } from '@tonic-ui/react-icons';
 import i18n from '@app/lib/i18n';
 
 /**
@@ -68,129 +76,126 @@ function TableRecords({
   onUpdate,
   onRemove,
 }) {
-  return (
-    <Table
-      bordered={false}
-      justified={false}
-      hoverable={false}
-      maxHeight={300}
-      useFixedHeader
-      data={(error || loading) ? [] : records}
-      rowKey={record => record.id}
-      emptyText={() => {
-        if (error) {
-          return <Box color="danger">{i18n._('An unexpected error has occurred.')}</Box>;
-        }
+  const columns = [
+    {
+      title: i18n._('Order'),
+      className: 'text-nowrap',
+      key: 'order',
+      width: 80,
+      render: (value, row, rowIndex) => (
+        <ButtonGroup>
+          <Button
+            size="sm"
+            disabled={rowIndex === 0}
+            aria-label={i18n._('Move Up')}
+            title={i18n._('Move Up')}
+            onClick={() => onMove(rowIndex, rowIndex - 1)}
+          >
+            <ChevronUpIcon />
+          </Button>
+          <Button
+            size="sm"
+            disabled={rowIndex === records.length - 1}
+            aria-label={i18n._('Move Down')}
+            title={i18n._('Move Down')}
+            onClick={() => onMove(rowIndex, rowIndex + 1)}
+          >
+            <ChevronDownIcon />
+          </Button>
+        </ButtonGroup>
+      ),
+    },
+    {
+      title: i18n._('Name'),
+      className: 'text-nowrap',
+      key: 'name',
+      dataKey: 'name',
+    },
+    {
+      title: i18n._('Command'),
+      key: 'command',
+      render: (value, row) => {
+        const sx = { background: 'inherit', border: 'none', margin: 0, padding: 0 };
+        const lines = String(row.command).split('\n');
+        const limit = 4;
 
-        if (loading) {
+        if (lines.length > limit) {
           return (
-            <Box>
-              <i className="fa fa-fw fa-spin fa-circle-o-notch" />
-              <Space width="2x" />
-              {i18n._('Loading...')}
+            <Box as="pre" sx={sx}>
+              {take(lines, limit).join('\n')}
+              {'\n'}
+              {i18n._('and more...')}
             </Box>
           );
         }
 
-        return i18n._('No data to display');
-      }}
-      title={() => (
-        <Button onClick={onCreate}>
-          <i className="fa fa-plus" />
-          <Space width="2x" />
-          {i18n._('New')}
-        </Button>
-      )}
-      columns={[
-        {
-          title: i18n._('Order'),
-          className: 'text-nowrap',
-          key: 'order',
-          width: 80,
-          render: (value, row, rowIndex) => (
-            <ButtonGroup>
-              <Button
-                size="sm"
-                disabled={rowIndex === 0}
-                aria-label={i18n._('Move Up')}
-                title={i18n._('Move Up')}
-                onClick={() => onMove(rowIndex, rowIndex - 1)}
-              >
-                <i className="fa fa-fw fa-chevron-up" />
-              </Button>
-              <Button
-                size="sm"
-                disabled={rowIndex === records.length - 1}
-                aria-label={i18n._('Move Down')}
-                title={i18n._('Move Down')}
-                onClick={() => onMove(rowIndex, rowIndex + 1)}
-              >
-                <i className="fa fa-fw fa-chevron-down" />
-              </Button>
-            </ButtonGroup>
-          ),
-        },
-        {
-          title: i18n._('Name'),
-          className: 'text-nowrap',
-          key: 'name',
-          dataKey: 'name',
-        },
-        {
-          title: i18n._('Command'),
-          key: 'command',
-          render: (value, row) => {
-            const style = { background: 'inherit', border: 'none', margin: 0, padding: 0 };
-            const lines = String(row.command).split('\n');
-            const limit = 4;
-
-            if (lines.length > limit) {
-              return (
-                <pre style={style}>
-                  {take(lines, limit).join('\n')}
-                  {'\n'}
-                  {i18n._('and more...')}
-                </pre>
-              );
-            }
-
-            return <pre style={style}>{row.command}</pre>;
-          },
-        },
-        {
-          title: i18n._('Button Width'),
-          className: 'text-nowrap',
-          key: 'grid.xs',
-          render: (value, row) => GRID_LABELS[get(row, 'grid.xs')] || '–',
-        },
-        {
-          title: i18n._('Action'),
-          className: 'text-nowrap',
-          key: 'action',
-          width: 90,
-          render: (value, row) => (
-            <Box>
-              <Button
-                size="sm"
-                aria-label={i18n._('Update')}
-                title={i18n._('Update')}
-                onClick={() => onUpdate(row)}
-              >
-                <i className="fa fa-fw fa-edit" />
-              </Button>
-              <Button
-                size="sm"
-                aria-label={i18n._('Remove')}
-                title={i18n._('Remove')}
-                onClick={() => onRemove(row.id)}
-              >
-                <i className="fa fa-fw fa-close" />
-              </Button>
-            </Box>
-          ),
-        },
-      ]}
-    />
+        return <Box as="pre" sx={sx}>{row.command}</Box>;
+      },
+    },
+    {
+      title: i18n._('Button Width'),
+      className: 'text-nowrap',
+      key: 'grid.xs',
+      render: (value, row) => GRID_LABELS[get(row, 'grid.xs')] || '–',
+    },
+    {
+      title: i18n._('Action'),
+      className: 'text-nowrap',
+      key: 'action',
+      width: 90,
+      render: (value, row) => (
+        <Box>
+          <Button
+            size="sm"
+            aria-label={i18n._('Update')}
+            title={i18n._('Update')}
+            onClick={() => onUpdate(row)}
+          >
+            <EditIcon />
+          </Button>
+          <Button
+            size="sm"
+            aria-label={i18n._('Remove')}
+            title={i18n._('Remove')}
+            onClick={() => onRemove(row.id)}
+          >
+            <CloseIcon />
+          </Button>
+        </Box>
+      ),
+    },
+  ];
+  return (
+    <Box>
+      <Button onClick={onCreate} mb="2x"><AddIcon /><Space width="2x" />{i18n._('New')}</Button>
+      <Box maxHeight={300} overflow="auto">
+        <Table layout="table">
+          <TableHeader sx={{ position: 'sticky', top: 0, zIndex: 1 }}>
+            <TableHeaderRow>
+              {columns.map(column => (
+                <TableHeaderCell key={column.key} width={column.width} whiteSpace="nowrap">
+                  {column.title}
+                </TableHeaderCell>
+              ))}
+            </TableHeaderRow>
+          </TableHeader>
+          <TableBody>
+            {!error && !loading && records.map((record, rowIndex) => (
+              <TableRow key={record.id}>
+                {columns.map(column => (
+                  <TableCell key={column.key} whiteSpace={column.className === 'text-nowrap' ? 'nowrap' : undefined}>
+                    {column.render ? column.render(get(record, column.dataKey), record, rowIndex) : get(record, column.dataKey)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {error && <Box role="alert" color="danger">{i18n._('An unexpected error has occurred.')}</Box>}
+        {!error && loading && <Box role="status"><Spinner /><Space width="2x" />{i18n._('Loading...')}</Box>}
+        {!error && !loading && records.length === 0 && <Box>{i18n._('No data to display')}</Box>}
+      </Box>
+    </Box>
   );
 }
 

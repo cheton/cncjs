@@ -21,7 +21,6 @@ import { Field, Form } from 'react-final-form';
 import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
-import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
 import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
@@ -29,6 +28,7 @@ import {
   useCreateUserMutation,
 } from '../queries';
 
+/** @param {{ onClose?: Function, id?: string }} props */
 const CreateUserDrawer = ({
   onClose,
   ...rest
@@ -56,8 +56,8 @@ const CreateUserDrawer = ({
   });
   const initialValues = useConst(() => ({
     enabled: true,
-    title: '',
-    commands: '',
+    name: '',
+    password: '',
   }));
   const handleFormSubmit = useCallback((values) => {
     createUserMutation.mutate({
@@ -82,8 +82,8 @@ const CreateUserDrawer = ({
         onSubmit={handleFormSubmit}
         validate={(values) => {
           const errors = {};
-          errors.title = validations.required(values.title);
-          errors.commands = validations.required(values.commands);
+          errors.name = validations.required(values.name);
+          errors.password = validations.required(values.password);
           return errors;
         }}
         render={({ form }) => (
@@ -124,18 +124,17 @@ const CreateUserDrawer = ({
                 </Flex>
               </FormControl>
               <FieldInput
-                name="title"
+                name="name"
                 label={i18n._('User name:')}
                 required
-                placeholder={i18n._('e.g., Activate Air Purifier')}
+                autoComplete="username"
               />
-              <FieldTextarea
-                name="commands"
-                label={i18n._('Shell commands:')}
+              <FieldInput
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                label={i18n._('Password:')}
                 required
-                infoTipLabel={i18n._('Enter the shell commands to be executed when this command runs. Each line will be executed sequentially.')}
-                rows="10"
-                placeholder="/home/cncjs/bin/activate-air-purifier"
               />
             </DrawerBody>
             <DrawerFooter>

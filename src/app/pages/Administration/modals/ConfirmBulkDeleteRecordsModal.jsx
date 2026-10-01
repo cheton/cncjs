@@ -13,6 +13,7 @@ import ModalInfoIcon from '@app/icons/ModalInfoIcon';
 import React, { forwardRef } from 'react';
 import i18n from '@app/lib/i18n';
 
+/** @param {{ data: string[], onClose?: Function, onConfirm: Function }} props */
 const ConfirmBulkDeleteRecordsModal = forwardRef((
   {
     data,
@@ -27,7 +28,7 @@ const ConfirmBulkDeleteRecordsModal = forwardRef((
   return (
     <Modal
       closeOnEsc
-      closeOnOutsideClick
+      closeOnInteractOutside
       isClosable
       isOpen={true}
       onClose={onClose}

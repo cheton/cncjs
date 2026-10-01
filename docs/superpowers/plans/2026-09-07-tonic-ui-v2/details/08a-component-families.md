@@ -89,10 +89,14 @@
 **Files:** manifest P4；`src/app/pages/Administration/{Commands,Events,Machines,Macros,Users}/**`、`src/app/pages/Administration/components/TablePagination.jsx`、Axes MDI TableRecords。
 **Create/Modify Tests:** 每個 Administration resource 的 list interaction test；`src/app/widgets/Axes/__tests__/MDI.test.jsx`。
 
-- [ ] 保留既有 TanStack Table/data sorting/selection/page calculations為純 hooks或 helpers；render 改 Tonic Table/Pagination。
-- [ ] 每個 resource 測 loading、empty、error、sort asc/desc、row select、bulk select、page/page-size、create/update/delete 後 cache result。
-- [ ] TablePagination 的 page index base、total pages、disabled first/last 與 page-size reset 不變；不從 table child instance 讀狀態。
-- [ ] BaseTable overlay/loading 成為 consumer composition；Table/Pagination DOM、icons 和 Stylus重複層刪除。
+- [x] 保留既有 TanStack Table/data sorting/selection/page calculations為純 hooks或 helpers；render 改 Tonic Table/Pagination。
+- [x] 每個 resource 測 loading、empty、error、既有排序（本 checkout 無 sort controls/state/query，保留 server order）、row select、bulk select、page/page-size、create/update/delete 後 cache result。
+- [x] TablePagination 的 page index base、total pages、disabled first/last 與 page-size reset 不變；不從 table child instance 讀狀態。
+- [x] BaseTable overlay/loading 成為 consumer composition；Table/Pagination DOM、icons 和 Stylus重複層刪除。
+
+**Contract review (2026-10-01):** None of the five baseline lists exposes sorting or supplies TanStack sorting state / a server sort parameter. The generic sort asc/desc case is therefore not an existing consumer contract; regressions preserve the server's Zulu-before-Alpha order. No page-local sorting feature was introduced. Consumers now own direct Tonic Table/Pagination markup; `table/columnSizing.js` and `table/pagination.js` are pure calculations, and `table/useResourceTable.js` owns TanStack model/sizing with no UI import or rendering.
+
+**Gate passed (2026-10-01):** all P4 directories and alias/relative references are absent (`Paginations` was already removed in P1). Five real resource list tests cover loading/empty/error/retry, single/bulk selection, page 1/next/last bounds and page-size reset, CRUD-triggered visible cache refresh, four expandable lists, and separate Users/Commands caches. MDI tests preserve row order, movement bounds, create/update/remove arguments, command truncation and non-data states. Users requests now target the existing Users routes/cache; creation uses name/password and update retains existing password through the server's defaults. Machine update fields match its create form. Full frontend 68 suites / 455 tests; lint 0 errors / 5 existing warnings; development webpack compiles; diff check clean. Browser/server end-to-end evidence remains deferred to R6.
 
 **Gate:** P4 family imports 為零；五個 Administration resources 和 MDI 的資料/selection/paging regression 過；保留的 table helper不 import React UI。
 
