@@ -45,3 +45,51 @@ the `src/app/api/**` transport implementation are not React consumers.
 
 Remaining untested paths: this is an import/callsite baseline only; no
 transport was invoked and no browser or controller behavior is claimed.
+
+## B3 final reconciliation — 2026-10-01
+
+The original B0 rows above remain historical evidence. Every row now resolves to a query owner, a named non-React/browser exception, or a deleted source. The executable policy is [ui-migration-allowlist.json](../../../../scripts/ui-migration-allowlist.json); no wildcard directory grants transport permission.
+
+| Original B0 source / flow | Current owner / decision |
+| --- | --- |
+| lib/user.js authentication | Named pure transport/token-persistence exception; React signin uses queries/session.js. isAuthenticated is a local storage read, not HTTP. |
+| sagas/app/bootstrap.js session/state | Named non-React bootstrap exception; imports pure signin from queries/session.js, never a hook. No saga edits in B3. |
+| LoginPage signin and GET api/state | useSigninMutation plus new useAppStateQuery → fetchAppState → existing axios; the last direct state GET is removed. Failed state read releases pending state without retry/analytics/controller connect. |
+| Macro index / NewMacro / EditMacro | queries/macros.js query/mutation hooks; old shell/body ownership is function based. |
+| Axes index / Settings / legacy Settings/MDI/MDI.jsx | widgets/Axes/queries.js useMdiQuery/useSaveMdiMutation; legacy MDI path removed. |
+| Tool index read/save | widgets/Tool/queries.js hooks. |
+| Autolevel and Workspace load-G-code | queries/gcode.js useLoadGCodeMutation. |
+| Visualizer WatchDirectory | widgets/Visualizer/queries.js key/options/fetchWatchDirectory; React uses Query and client prefetch with pure options, with no direct queryFn call. |
+| Visualizer SecondaryToolbar machines | Named pages/Administration/Machines/queries.js shared Query hooks/cache. |
+| Visualizer Dashboard download | Exact download exception restricted to api.downloadGCode; Toolbars.test.jsx proves one action. Browser URL/token/metadata evidence remains R6. |
+| TopNav.old | Deleted in P3; no consumer. |
+| Administration/About queries | All exact module paths below; Macros queries re-export shared hooks. |
+| hooks/useFetch.js / useAsync.js | No consumers; both removed in B3. Their imports and obsolete fetch services are rejected by the gate. |
+
+### Exact HTTP boundary files
+
+| Full file path | Role / rationale |
+| --- | --- |
+| `src/app/queries/macros.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/queries/gcode.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/queries/session.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/queries/serialport.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/queries/appState.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/widgets/Axes/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/widgets/Tool/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/widgets/Visualizer/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/Commands/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/Events/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/Machines/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/Macros/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/Users/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/GeneralSettings/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/Administration/WorkspaceSettings/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/pages/About/queries.js` | query: Named resource query key/functions and TanStack Query hooks; React consumers use hook exports. |
+| `src/app/api/index.js` | transport: Existing API HTTP/download implementation. |
+| `src/app/api/axios.js` | transport: Existing shared axios configuration. |
+| `src/app/lib/user.js` | transport: Pure authentication transport and token persistence. |
+| `src/app/sagas/app/bootstrap.js` | transport: Existing non-React app/session bootstrap transport; only pure query exports allowed. |
+| `src/app/widgets/Visualizer/Dashboard.jsx` | download: Browser G-code download form submission, not cacheable HTTP server state; only api.downloadGCode permitted. |
+
+All React raw HTTP imports/mutations and old fetch-service identifiers are zero at the final gate. Socket/controller commands, PubSub and local configuration keep their existing owners. The gate also enforces P6's named domain classes/families without granting a React class exception. Production tests exclude fixture projects; fixture tests run separately through test:ui-migration.

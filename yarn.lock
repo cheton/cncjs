@@ -9381,13 +9381,11 @@ __metadata:
     react-facebook-loading: ~0.6.2
     react-final-form: ~6.5.2
     react-focus-lock: ~2.9.2
-    react-foreach: ~0.1.1
     react-ga4: ^2.1.0
     react-helmet: ~6.1.0
     react-hot-loader: ~4.13.0
     react-i18next: ~12.0.0
     react-icon-base: ~2.1.2
-    react-infinite-tree: ~0.7.1
     react-redux: ~8.0.2
     react-refresh: ^0.14.2
     react-router: ~6.3.0
@@ -19855,18 +19853,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-foreach@npm:~0.1.1":
-  version: 0.1.1
-  resolution: "react-foreach@npm:0.1.1"
-  dependencies:
-    ensure-array: ^1.0.0
-    prop-types: ^15.6.0
-  peerDependencies:
-    react: ^0.14.0 || >=15.0.0
-  checksum: a07255a47913fb89afd612c2dadb2867184c7626e1c4d0f8ce3d3bc17ce7e28a30cf63a1c2695e2bcc5e7e646f49e384eaaa132c08c5491033ef277f5faaef92
-  languageName: node
-  linkType: hard
-
 "react-ga4@npm:^2.1.0":
   version: 2.1.0
   resolution: "react-ga4@npm:2.1.0"
@@ -19936,17 +19922,6 @@ __metadata:
     prop-types: "*"
     react: "*"
   checksum: 460b58f82c092fd8f6814aee675f66375042bb88926baba3ab56678fdb5dedb433a51176311018127677d035d022f296a32e030f13ba7344e468dad7a108316c
-  languageName: node
-  linkType: hard
-
-"react-infinite-tree@npm:~0.7.1":
-  version: 0.7.1
-  resolution: "react-infinite-tree@npm:0.7.1"
-  peerDependencies:
-    infinite-tree: ">=1.11.0"
-    react: ^0.14.0 || >=15.0.0
-    react-dom: ^0.14.0 || >=15.0.0
-  checksum: bcdaae6b7cce52e357d1fae87b5e50780ff59a6f0877e110de6a7f1877583f7d412a54c66df89371e36989b6f4a9db95a02ce9b4e1f17cbb295fa5d0f72ea242
   languageName: node
   linkType: hard
 

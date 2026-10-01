@@ -18,12 +18,12 @@
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `3a4853cb`（P6 開始；後續 checkpoint commit 以 git 實測） |
+| HEAD | `2a8804d8`（B3 開始；本輪 checkpoint/remote 以 git 實測） |
 | 工作樹 | 本次交接更新前為 clean |
-| 未 push | P6 開始已有 local P3/P4/P5 checkpoints；以 git 實測；不自行 push |
-| Active task | **P6 completed；下一項 B3**。P3 只剩 deferred browser gate，仍為 in_progress。 |
+| 未 push | B3 開始已有四個 pending P3–P6 checkpoints；使用者本輪明確授權 commit/push，結果以 git 實測 |
+| Active task | **B3 completed；下一項 R6（deferred，等使用者指定 model）**。P3 只剩 deferred browser gate，仍為 in_progress。 |
 | 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；P2 keyboard/invalid-submit audit `924007e4` |
-| 下一步推薦 | B3 executable static migration gate；P3 browser evidence 仍留 R6，不宣稱 passed。 |
+| 下一步推薦 | R6 browser/performance validation；等待使用者指定 model，P3 browser evidence 不宣稱 passed。 |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -35,7 +35,7 @@ P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **B3** [static migration gate](plans/2026-09-07-tonic-ui-v2/details/03b-query-boundaries.md) | P6、B1 ✅ | 建立並測試可執行 AST/import migration gate | Browser evidence deferred 至 R6 |
+| **R6** [browser/performance validation](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | B3、R4、R5 ✅ | 補齊 deferred browser/performance evidence | **Deferred：等待使用者指定 model；不要自行啟動** |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -85,6 +85,14 @@ The Connection serial port and baud rate selectors now use installed Tonic Menu 
 - Remaining Axes styled labels/buttons/Keypad text use direct Tonic Box/Button. Unused visual adapters/mocks and styled-components manifest/lock entries are removed. Targeted Console.test.jsx ESLint passes after the user-requested formatting correction.
 - Frontend **71 suites / 478 tests**, lint **0 errors / 4 existing warnings**, development webpack, immutable install and diff checks pass. Node **19 suites / 571 tests** pass with SocketConnection excluded; diagnostic forceExit is needed for inherited simulator planner intervals, so clean shutdown remains final-validation carry-forward.
 - No server/controller/Redux/simulator edits, browser tooling, production build or push. P3 browser gate remains deferred to R6. Next eligible task **B3**, which creates the executable static CLI; P6's AST/manual audit does not claim B3 completed.
+
+## B3 complete — 2026-10-01
+
+- Executable `yarn check:ui-migration` scans **359 files / 18 domain classes / 0 violations**. [Usage](../../scripts/UI-MIGRATION.md) and [named policy](../../scripts/ui-migration-allowlist.json) cover exact HTTP owners, class/family permissions, alias/relative/barrel/CommonJS tracing, legacy/instance APIs and React inheritance. CI runs fixtures and gate before existing Node tests.
+- **64 fixture/CLI tests** pass, including illegal component mutation, class alias/factory/allowlist misuse, raw HTTP disguised as a hook, restricted download, legal Query options/controller commands and direct queryFn/eager-read rejection. Every B0 row is reconciled in the [final baseline](plans/2026-09-07-tonic-ui-v2/query-boundary-baseline.md).
+- Last Login state GET moves to a Query hook with failure/analytics/connection coverage. Unused useFetch/useAsync and react-foreach/react-infinite-tree are removed. Full frontend **71 suites / 480 tests**, lint **0 errors / 4 existing warnings**, development webpack, immutable install and diff checks pass.
+- User explicitly authorized “Then commit and push”; publish B3 and the four pending P3–P6 checkpoints on feat/tonic-ui-v2-migration. Verify HEAD/remote rather than inferring push state from this pre-commit snapshot. No browser/production build or protected server/controller/Redux changes.
+- Next **R6** remains deferred until user-selected model. P3's browser gate and W3 final delivery remain incomplete; B3 static success does not claim browser/performance validation.
 
 ## 本輪交接重點（G1）
 
@@ -164,7 +172,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 browser evidence 仍待 R6；P4 已在使用者指示 go next 後完成，下一項 B3。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
+P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 browser evidence 仍待 R6；P4 已在使用者指示 go next 後完成，下一項 R6（browser/model deferred）。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

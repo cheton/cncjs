@@ -97,11 +97,11 @@ describe('LoginPage session mutation boundary', () => {
       name: 'user',
       password: 'password',
     }));
-    expect(mockControllerConnect).toHaveBeenCalledWith(
+    await waitFor(() => expect(mockControllerConnect).toHaveBeenCalledWith(
       '',
       { query: 'token=session-token' },
       expect.any(Function)
-    );
+    ));
   });
 
   test('keeps the login page in an error state after authentication failure', async () => {
@@ -157,4 +157,41 @@ describe('LoginPage session mutation boundary', () => {
     await user.keyboard('{Enter}');
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
+});
+
+test('post-signin state read goes through Query and enables analytics only after success', async () => {
+  const axios = require('@app/api/axios').default;
+  const analytics = require('@app/lib/analytics');
+  axios.get.mockResolvedValueOnce({ data: { allowAnonymousUsageDataCollection: true } });
+  mockMutateAsync.mockResolvedValue({ authenticated: true, token: 'session-token' });
+  const view = renderLogin();
+  fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'user' } });
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+  await waitFor(() => expect(mockControllerConnect).toHaveBeenCalledTimes(1));
+  expect(axios.get).toHaveBeenCalledWith('api/state');
+  expect(analytics.initialize).toHaveBeenCalledTimes(1);
+  expect(view.queryClient.getQueryData(['api/state'])).toEqual({ allowAnonymousUsageDataCollection: true });
+});
+
+test('failed post-signin state read releases pending state and does not connect or retry', async () => {
+  const axios = require('@app/api/axios').default;
+  axios.get.mockRejectedValueOnce(new Error('state unavailable'));
+  mockMutateAsync.mockResolvedValue({ authenticated: true, token: 'session-token' });
+  renderLogin();
+  fireEvent.change(screen.getByLabelText('Username'), { target: { value: 'user' } });
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+  expect(await screen.findByText('An error occurred while fetching data.')).toBeInTheDocument();
+  expect(mockControllerConnect).not.toHaveBeenCalled();
+  expect(require('@app/lib/analytics').initialize).not.toHaveBeenCalled();
+  expect(axios.get).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('button', { name: 'Sign In' })).not.toBeDisabled();
+});
+
+beforeEach(() => {
+  mockMutateAsync.mockReset();
+  mockControllerConnect.mockClear();
+  const axios = require('@app/api/axios').default;
+  axios.get.mockReset().mockResolvedValue({ data: { allowAnonymousUsageDataCollection: false } });
 });

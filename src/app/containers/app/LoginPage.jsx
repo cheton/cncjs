@@ -19,7 +19,6 @@ import qs from 'qs';
 import React, { useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { Navigate, useLocation } from 'react-router-dom';
-import axios from '@app/api/axios';
 import settings from '@app/config/settings';
 import * as analytics from '@app/lib/analytics';
 import controller from '@app/lib/controller';
@@ -28,6 +27,7 @@ import x from '@app/lib/json-stringify';
 import log from '@app/lib/log';
 import * as user from '@app/lib/user';
 import config from '@app/store/config';
+import { useAppStateQuery } from '@app/queries/appState';
 import { useSigninMutation } from '@app/queries/session';
 
 const required = value => {
@@ -38,10 +38,12 @@ const required = value => {
 
 const forgotPasswordLink = 'https://github.com/cncjs/cncjs/wiki/FAQ#forgot-your-password';
 
+/** @returns {JSX.Element|null} */
 const LoginPage = () => {
   const location = useLocation();
   const { from } = location.state || { from: { pathname: '/' } };
   const signinMutation = useSigninMutation();
+  const appStateQuery = useAppStateQuery();
   const [state, setState] = useState({
     alertMessage: '',
     authenticating: false,
@@ -95,9 +97,17 @@ const LoginPage = () => {
     }
 
     // Anonymous usage data collection
-    const url = 'api/state';
-    const res = await axios.get(url);
-    const { allowAnonymousUsageDataCollection } = res.data;
+    let appState;
+    try {
+      ({ data: appState } = await appStateQuery.refetch({ throwOnError: true }));
+    } catch (error) {
+      setState(prevState => ({ ...prevState,
+        alertMessage: i18n._('An error occurred while fetching data.'),
+        authenticating: false,
+        redirectToReferrer: false }));
+      return;
+    }
+    const { allowAnonymousUsageDataCollection } = appState;
     if (allowAnonymousUsageDataCollection) {
       log.debug('Initializing anonymous usage data collection');
       analytics.initialize();

@@ -47,6 +47,8 @@ jobs:
         yarn up
         yarn install
         yarn lint
+        yarn test:ui-migration
+        yarn check:ui-migration
         yarn test
     - name: Run "build" script
       if: github.ref_type == 'tag'
@@ -154,6 +156,8 @@ jobs:
         yarn up
         yarn install
         yarn lint
+        yarn test:ui-migration
+        yarn check:ui-migration
         yarn test
     - name: Run "build" script
       if: github.ref_type == 'tag'
@@ -241,6 +245,8 @@ jobs:
         yarn up
         yarn install
         yarn lint
+        yarn test:ui-migration
+        yarn check:ui-migration
         yarn test
     - name: Run "build" script
       if: github.ref_type == 'tag'
@@ -325,6 +331,8 @@ jobs:
         yarn up
         yarn install
         yarn lint
+        yarn test:ui-migration
+        yarn check:ui-migration
         yarn test
     - name: Run "build" script
       if: github.ref_type == 'tag'

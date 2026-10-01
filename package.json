@@ -62,7 +62,9 @@
     "prepare": "husky install",
     "ci-dispatch": "gh workflow run ci.yml --repo cncjs/cncjs --ref",
     "ci-version": "changeset version && node scripts/package-sync.js && yarn install --mode=update-lockfile",
-    "ci-publish": "yarn build && changeset publish"
+    "ci-publish": "yarn build && changeset publish",
+    "check:ui-migration": "node scripts/check-ui-migration.js",
+    "test:ui-migration": "jest --runInBand --runTestsByPath __tests__/ui-migration.test.js --coverage=false"
   },
   "build": {
     "appId": "org.cncjs",
@@ -224,12 +226,10 @@
     "react-facebook-loading": "~0.6.2",
     "react-final-form": "~6.5.2",
     "react-focus-lock": "~2.9.2",
-    "react-foreach": "~0.1.1",
     "react-ga4": "^2.1.0",
     "react-helmet": "~6.1.0",
     "react-i18next": "~12.0.0",
     "react-icon-base": "~2.1.2",
-    "react-infinite-tree": "~0.7.1",
     "react-redux": "~8.0.2",
     "react-router": "~6.3.0",
     "react-router-dom": "~6.3.0",

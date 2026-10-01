@@ -76,16 +76,20 @@ rg -n "from ['\"](@app/)?api|from ['\"]axios|require\(['\"]axios|useFetch|useAsy
 
 **Modify:** W3 的 `scripts/check-ui-migration.js` 與 fixtures。
 
-- [ ] AST rule 禁止 `src/app/widgets/**`、`src/app/pages/**`、`src/app/containers/**`（query module 除外）直接 import HTTP transport。
-- [ ] allowlist 使用完整檔案路徑與理由；只允許上表的 `lib/user.js`、bootstrap/saga、browser download helpers、query modules。禁止 wildcard directory allowlist。
-- [ ] fixture 至少包含 alias import、relative import、barrel re-export、合法 query module、合法 controller command、非法 component mutation。
-- [ ] 最終 baseline 每一筆要變成 query module或表列例外；`createFetchMachine`、`fetchMacrosService`、React component 內直接 server-state transport 為零。
+- [x] AST rule 禁止 `src/app/widgets/**`、`src/app/pages/**`、`src/app/containers/**`（query module 除外）直接 import HTTP transport。
+- [x] allowlist 使用完整檔案路徑與理由；只允許上表的 `lib/user.js`、bootstrap/saga、browser download helpers、query modules。禁止 wildcard directory allowlist。
+- [x] fixture 至少包含 alias import、relative import、barrel re-export、合法 query module、合法 controller command、非法 component mutation。
+- [x] 最終 baseline 每一筆要變成 query module或表列例外；`createFetchMachine`、`fetchMacrosService`、React component 內直接 server-state transport 為零。
 
 ```bash
+yarn test:ui-migration
 yarn check:ui-migration
 yarn test:frontend --runInBand
 yarn lint
-yarn build
+yarn exec cross-env NODE_ENV=development webpack-cli --config webpack.config.development.js
 ```
 
 **Gate:** React UI 所有 HTTP read/mutation 都能從 component → hook → pure transport 追蹤；非 React caller 沒有違反 Hooks 規則；例外清單沒有未具名檔案。
+
+
+B3 completed 2026-10-01. [Gate usage/coverage](../../../../../scripts/UI-MIGRATION.md), [named policy](../../../../../scripts/ui-migration-allowlist.json) and [final B0 reconciliation](../query-boundary-baseline.md) are committed. 64 fixture/CLI cases cover aliases, relative and cyclic barrels, CommonJS, React inheritance/factories, raw component mutations, valid Query options/controller commands and restricted browser downloads. The checker permits pure options passed to Query and rejects direct queryFn execution; an options builder cannot perform an eager HTTP call. Production scan: 359 files, 18 named domain classes, zero violations. Local production builds remain prohibited by the user; development webpack replaces the old yarn build line. R6/W3 and P3's deferred browser gate remain uncompleted.

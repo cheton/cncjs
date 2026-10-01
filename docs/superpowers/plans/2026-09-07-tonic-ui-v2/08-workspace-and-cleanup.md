@@ -59,7 +59,7 @@ rg -n 'styled-components|react-infinite-tree|react-repeatable|rc-trigger|react-f
 ```
 
 - [ ] 目標模式無輸出；`rc-slider`、`@fortawesome/*` 及經逐檔說明的 react-select 例外依 00-design 核對。react-datepicker 無 consumers 才刪。合法 DOM ref/第三方 resource refs 不算違規；不能保留 collapse/expand/settings instance API。
-- [ ] 建立防回歸檢查 `scripts/check-ui-migration.js`：用 AST/import graph 掃 React class inheritance、legacy UI imports、禁止的 component instance patterns，`yarn check:ui-migration` 納入現有 CI 合適 gate。測試 fixture 包含 aliased Component 與 relative barrel 以免只比字串。
+- [x] 建立防回歸檢查 `scripts/check-ui-migration.js`：用 AST/import graph 掃 React class inheritance、legacy UI imports、禁止的 component instance patterns，`yarn check:ui-migration` 納入現有 CI 合適 gate。測試 fixture 包含 aliased Component 與 relative barrel 以免只比字串。
 - [ ] 執行完整驗證：
 
 ```bash
