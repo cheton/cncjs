@@ -13,8 +13,8 @@ import { connect } from 'react-redux';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import { none } from '@app/lib/utils';
+import RepeatableButton from '@app/components/RepeatableButton';
 import OverrideReadout from './components/OverrideReadout';
-import RepeatableButton from './components/RepeatableButton';
 
 /**
  * @param {{ value?: number }} props

@@ -3,8 +3,8 @@ import { Box, Button, ButtonGroup, Space, Text } from '@tonic-ui/react';
 import React from 'react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
+import RepeatableButton from '@app/components/RepeatableButton';
 import DigitalReadout from './DigitalReadout';
-import RepeatableButton from './RepeatableButton';
 
 const overrideSteps = [
   { icon: 'arrow-down', value: -10 },

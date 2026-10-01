@@ -18,12 +18,12 @@
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `51893ce5`（P4 開始；後續 checkpoint commit 以 git 實測） |
+| HEAD | `625099df`（P5 開始；後續 checkpoint commit 以 git 實測） |
 | 工作樹 | 本次交接更新前為 clean |
-| 未 push | P4 開始已有 local P3 checkpoint；以 git 實測；不自行 push |
-| Active task | **P4 completed；下一項 P5**。P3 只剩 deferred browser gate，仍為 in_progress。 |
+| 未 push | P5 開始已有 local P3/P4 checkpoints；以 git 實測；不自行 push |
+| Active task | **P5 completed；下一項 P6**。P3 只剩 deferred browser gate，仍為 in_progress。 |
 | 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；P2 keyboard/invalid-submit audit `924007e4` |
-| 下一步推薦 | P5 domain compositions/resource owners；P3 browser evidence 仍留 R6，不宣稱 passed。 |
+| 下一步推薦 | P6 non-widget classes / reconciliation；P3 browser evidence 仍留 R6，不宣稱 passed。 |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -35,7 +35,7 @@ P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **P5** [domain compositions/resource owners](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P4 ✅ | 保留具測試的 domain 邏輯，UI 直接用 Tonic，清理 class-only HOCs 與 react-repeatable | Browser evidence deferred 至 R6 |
+| **P6** [non-widget classes / reconciliation](plans/2026-09-07-tonic-ui-v2/details/08a-component-families.md) | P5 ✅ | 對帳剩餘 React classes 與 family exceptions | Browser evidence deferred 至 R6 |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -70,6 +70,14 @@ The Connection serial port and baud rate selectors now use installed Tonic Menu 
 - Tests uncovered Users' copied Commands endpoints/cache and bogus shell-command form fields. Frontend requests now use the existing Users routes; create sends name/password, update sends enabled/name while preserving the password through existing server defaults. Machine update fields now match its create form's name/data shape. No server changes.
 - Full frontend **68 suites / 455 tests**, lint **0 errors / 5 existing warnings**, development webpack compiled, diff check clean. P4's tests use isolated HTTP fixtures, not a live backend/browser; end-to-end evidence remains R6. No browser tooling, simulator, production build or push.
 - Next eligible implementation task: **P5** (CodePreview/I18n/Iframe/RenderBlock/RepeatableButton/Webcam/Widget/withRouter). Re-inventory its actual consumers before editing; retain only tested domain logic. P3's theme/viewport browser evidence stays pending for the user-authorized R6 model.
+
+## P5 complete — 2026-10-01
+
+- User said “Go P5”. Retained tested domain families render Tonic directly: CodePreview, Iframe, RepeatableButton, Webcam and Widget. Iframe native listeners, camera streams and hold timers belong to function owner hooks.
+- Real G-code escaping/line/empty and JSON previews pass. Iframe URL/error/current callbacks/StrictMode cleanup and camera stale-request/device-change/error/unmount cleanup pass. CNC holds keep 500ms delay, 66ms interval and final normal release; keyboard/cancel/blur/disabled/unmount and synthesized-click suppression are tested. Existing controller command oracles pass.
+- I18n/withMemo had zero consumers and are deleted; Macro RenderBlock is inline. WorkspaceRoot uses useLocation directly; withRouter is deleted. Four duplicate hold adapters and react-repeatable are removed, with an immutable lockfile install passing.
+- Final frontend **71 suites / 477 tests**, lint **0 errors / 4 existing warnings**, development webpack and diff checks pass. No server/controller/Redux edits, browser tooling, simulator, production build or push.
+- Next eligible task **P6**. P3 stays in_progress only for deferred theme/viewport browser evidence at R6; P5 completion does not pass that gate.
 
 ## 本輪交接重點（G1）
 
@@ -149,7 +157,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 browser evidence 仍待 R6；P4 已在使用者指示 go next 後完成，下一項 P5。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
+P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 browser evidence 仍待 R6；P4 已在使用者指示 go next 後完成，下一項 P6。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

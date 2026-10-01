@@ -9,8 +9,8 @@ import {
 import React from 'react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
+import RepeatableButton from '@app/components/RepeatableButton';
 import DigitalReadout from './DigitalReadout';
-import RepeatableButton from './RepeatableButton';
 
 /**
  * @param {{ ovF?: number, ovS?: number }} props

@@ -24,8 +24,6 @@ import React, {
   useState,
 } from 'react';
 import { connect } from 'react-redux';
-import compose from 'recompose/compose';
-import withRouter from '@app/components/withRouter'; // withRouter is deprecated
 import {
   CONNECTION_STATE_CONNECTED,
 } from '@app/constants/connection';
@@ -704,14 +702,11 @@ const WorkspaceWithLayout = props => {
 
 export { Workspace, WorkspaceWithLayout };
 
-export default compose(
-  withRouter,
-  connect(store => {
-    const connectionState = _get(store, 'connection.state');
-    const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
+export default connect(store => {
+  const connectionState = _get(store, 'connection.state');
+  const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
 
-    return {
-      isConnected,
-    };
-  }),
-)(WorkspaceWithLayout);
+  return {
+    isConnected,
+  };
+})(WorkspaceWithLayout);

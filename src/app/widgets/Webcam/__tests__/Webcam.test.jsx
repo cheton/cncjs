@@ -50,3 +50,54 @@ describe('Webcam media owner', () => {
     expect(secondStop).not.toHaveBeenCalled();
   });
 });
+
+test('detaches srcObject immediately on device change and ignores an older pending request', async () => {
+  let resolveFirst;
+  const oldStop = jest.fn();
+  const currentStop = jest.fn();
+  const current = { getTracks: () => [{ stop: currentStop }] };
+  navigator.mediaDevices = { getUserMedia: jest.fn()
+    .mockReturnValueOnce(new Promise(resolve => {
+      resolveFirst = resolve;
+    }))
+    .mockResolvedValueOnce(current) };
+  const view = render(<Webcam audio={false} video="first" />);
+  const element = view.container.querySelector('video');
+  view.rerender(<Webcam audio={false} video="second" />);
+  expect(element.srcObject).toBeNull();
+  await act(() => Promise.resolve());
+  expect(element.srcObject).toBe(current);
+  await act(() => {
+    resolveFirst({ getTracks: () => [{ stop: oldStop }] });
+    return Promise.resolve();
+  });
+  expect(oldStop).toHaveBeenCalledTimes(1);
+  expect(element.srcObject).toBe(current);
+  view.unmount();
+  expect(element.srcObject).toBeNull();
+  expect(currentStop).toHaveBeenCalledTimes(1);
+});
+
+test('rejected requests and unavailable media APIs unmount safely', async () => {
+  navigator.mediaDevices = { getUserMedia: jest.fn().mockRejectedValue(new Error('denied')) };
+  const view = render(<Webcam />);
+  await act(() => Promise.resolve());
+  expect(view.container.querySelector('video').srcObject).toBeFalsy();
+  view.unmount();
+  navigator.mediaDevices = undefined;
+  const missing = render(<Webcam />);
+  missing.unmount();
+});
+
+test('StrictMode stops the stale request and the current stream exactly once', async () => {
+  const stops = [jest.fn(), jest.fn()];
+  navigator.mediaDevices = { getUserMedia: jest.fn()
+    .mockResolvedValueOnce({ getTracks: () => [{ stop: stops[0] }] })
+    .mockResolvedValueOnce({ getTracks: () => [{ stop: stops[1] }] }) };
+  const view = render(<React.StrictMode><Webcam audio={false} /></React.StrictMode>);
+  await act(() => Promise.resolve());
+  expect(stops[0]).toHaveBeenCalledTimes(1);
+  expect(stops[1]).not.toHaveBeenCalled();
+  view.unmount();
+  expect(stops[1]).toHaveBeenCalledTimes(1);
+});

@@ -1,8 +1,8 @@
 import { Button, Space, Text } from '@tonic-ui/react';
 import React from 'react';
 import controller from '@app/lib/controller';
+import RepeatableButton from '@app/components/RepeatableButton';
 import DigitalReadout from './DigitalReadout';
-import RepeatableButton from './RepeatableButton';
 
 const adjustmentSx = { flex: 1, px: '1x' };
 

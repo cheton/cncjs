@@ -8912,7 +8912,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chained-function@npm:^0.5.0, chained-function@npm:~0.5.0":
+"chained-function@npm:~0.5.0":
   version: 0.5.0
   resolution: "chained-function@npm:0.5.0"
   checksum: f35fe5986498c64e0e7a28d3fed0ba2f5cb6671e04044d5a007a66846e60450f2ff27788673382341769523d14aa1f7cdc6d7d2968543177d16328c8d15d9b24
@@ -9426,7 +9426,6 @@ __metadata:
     react-infinite-tree: ~0.7.1
     react-redux: ~8.0.2
     react-refresh: ^0.14.2
-    react-repeatable: ~2.0.1
     react-router: ~6.3.0
     react-router-dom: ~6.3.0
     react-router-redux: ~4.0.8
@@ -20114,18 +20113,6 @@ __metadata:
   version: 0.14.2
   resolution: "react-refresh@npm:0.14.2"
   checksum: d80db4bd40a36dab79010dc8aa317a5b931f960c0d83c4f3b81f0552cbcf7f29e115b84bb7908ec6a1eb67720fff7023084eff73ece8a7ddc694882478464382
-  languageName: node
-  linkType: hard
-
-"react-repeatable@npm:~2.0.1":
-  version: 2.0.1
-  resolution: "react-repeatable@npm:2.0.1"
-  dependencies:
-    chained-function: ^0.5.0
-    prop-types: ^15.6.0
-  peerDependencies:
-    react: ^0.14.0 || >=15.0.0
-  checksum: 706fb7b357776e54ef55e77870688b17ceea3366571741cf821cba2a23e2f385b49ed9c31c07b47948757b32bb230c654b48a66e6746778d8499e485669287b3
   languageName: node
   linkType: hard
 

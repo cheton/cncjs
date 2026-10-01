@@ -231,7 +231,6 @@
     "react-icon-base": "~2.1.2",
     "react-infinite-tree": "~0.7.1",
     "react-redux": "~8.0.2",
-    "react-repeatable": "~2.0.1",
     "react-router": "~6.3.0",
     "react-router-dom": "~6.3.0",
     "react-router-redux": "~4.0.8",

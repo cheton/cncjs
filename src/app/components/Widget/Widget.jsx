@@ -1,10 +1,10 @@
 import { Box } from '@tonic-ui/react';
 import cx from 'classnames';
-import PropTypes from 'prop-types';
 import React from 'react';
 import styles from './index.styl';
 
-function Widget({ borderless, fullscreen, className, ...props }) {
+/** @param {{ borderless?: boolean, fullscreen?: boolean, className?: string, children?: React.ReactNode, [key: string]: unknown }} props */
+function Widget({ borderless = false, fullscreen = false, className, ...props }) {
   return (
     <Box
       role="region"
@@ -18,15 +18,5 @@ function Widget({ borderless, fullscreen, className, ...props }) {
     />
   );
 }
-
-Widget.propTypes = {
-  borderless: PropTypes.bool,
-  fullscreen: PropTypes.bool
-};
-
-Widget.defaultProps = {
-  borderless: false,
-  fullscreen: false
-};
 
 export default Widget;

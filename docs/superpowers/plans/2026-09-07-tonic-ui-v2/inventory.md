@@ -379,3 +379,9 @@ rg -n 'extends .*Component|findDOMNode|useImperativeHandle|this\.visualizer|widg
 rg -n 'createFetchMachine|fetchMacrosService|@trendmicro/react-|react-bootstrap-buttons' src package.json
 rg -n 'api\.|axios\.|useFetch|useAsync' src/app/widgets src/app/pages/Workspace
 ```
+
+## P5 current reconciliation — 2026-10-01
+
+The inventory above is the historical source baseline. P5 rechecked actual consumers and keeps only these domain families: CodePreview (G-code and Administration JSON syntax/line presentation), Iframe (Custom widget event owner), RepeatableButton (Axes step-size and four controller overrides), Webcam (local camera resource owner), and Widget (controlled frame composition). Each renders Tonic directly and consists of functions; DOM/media/timer resources belong to owner hooks.
+
+I18n and withMemo had no consumers and were deleted. Macro's RenderBlock was inlined. WorkspaceRoot now reads useLocation directly and passes location to the connected function page; withRouter is deleted. Four widget-specific react-repeatable adapters and the direct dependency/lock entry are gone. Executable alias/relative-import and dependency gates live in legacyLayoutImports.test.js.
