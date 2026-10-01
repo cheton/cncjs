@@ -1,6 +1,7 @@
 import { ensureArray } from 'ensure-type';
 import {
   Box,
+  Button,
   Image,
   Menu,
   MenuDivider,
@@ -30,13 +31,9 @@ import {
 } from '@app/constants/controller';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
-import AxisLabel from './components/AxisLabel';
-import AxisSubscript from './components/AxisSubscript';
-import Panel from './components/Panel';
 import PositionLabel from './components/PositionLabel';
 import PositionInput from './components/PositionInput';
 import Taskbar from './components/Taskbar';
-import TaskbarButton from './components/TaskbarButton';
 import { useAxes } from './context';
 import iconMinus from './images/minus.svg';
 import iconPlus from './images/plus.svg';
@@ -44,6 +41,28 @@ import iconHome from './images/home.svg';
 import iconPin from './images/pin.svg';
 import iconPencil from './images/pencil.svg';
 import styles from './index.styl';
+
+const taskbarButtonSx = {
+  display: 'inline-block',
+  m: '4px',
+  p: '2px 5px',
+  border: 0,
+  minWidth: 0,
+  height: 'auto',
+  fontWeight: 'normal',
+  lineHeight: 0,
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  touchAction: 'manipulation',
+  cursor: 'pointer',
+  userSelect: 'none',
+  backgroundImage: 'none',
+  backgroundColor: 'inherit',
+  opacity: 0.6,
+  '&:hover': { opacity: 0.8, backgroundColor: '#e6e6e6', textDecoration: 'none' },
+  '&:disabled': { opacity: 0.3, cursor: 'not-allowed' },
+  '&:disabled:hover': { backgroundColor: 'inherit' },
+};
 
 // Declares which gcode commands each controller supports in the axis dropdown.
 // Grouped by dropdown section (Work Coordinate System → Temporary Offsets → Machine Coordinate System).
@@ -1316,10 +1335,10 @@ function DisplayPanel() {
     return (
       <tr>
         <td className={styles.coordinate}>
-          <AxisLabel highlight={highlightAxis}>
+          <Box fontSize="24px" fontWeight={highlightAxis ? 'bold' : 'normal'}>
             {axisLabel}
-          </AxisLabel>
-          <AxisSubscript>{displayUnits}</AxisSubscript>
+          </Box>
+          <Box textAlign="center" fontSize="12px" lineHeight="20px">{displayUnits}</Box>
         </td>
         <td className={styles.machinePosition}>
           <PositionLabel value={mpos} />
@@ -1332,7 +1351,8 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Go to zero: ${axisLabel}`}
                   disabled={!canZeroOutMachine}
                   onClick={() => {
@@ -1340,7 +1360,7 @@ function DisplayPanel() {
                   }}
                 >
                   <Image src={iconPin} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
               <Tooltip
                 label={i18n._('Home Machine')}
@@ -1349,7 +1369,8 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Home: ${axisLabel}`}
                   disabled={!canClick}
                   onClick={() => {
@@ -1357,7 +1378,7 @@ function DisplayPanel() {
                   }}
                 >
                   <Image src={iconHome} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
             </Box>
           </Taskbar>
@@ -1386,7 +1407,8 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Move ${axisLabel} backward`}
                   disabled={!canMoveBackward}
                   onClick={() => {
@@ -1395,7 +1417,7 @@ function DisplayPanel() {
                   }}
                 >
                   <Image src={iconMinus} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
               <Tooltip
                 label={i18n._('Move Forward')}
@@ -1404,7 +1426,8 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Move ${axisLabel} forward`}
                   disabled={!canMoveForward}
                   onClick={() => {
@@ -1413,7 +1436,7 @@ function DisplayPanel() {
                   }}
                 >
                   <Image src={iconPlus} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
               <Tooltip
                 label={i18n._('Zero Out Work Offsets')}
@@ -1422,7 +1445,8 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Zero out ${axisLabel} work offsets`}
                   disabled={!canZeroOutWorkOffsets}
                   onClick={() => {
@@ -1430,7 +1454,7 @@ function DisplayPanel() {
                   }}
                 >
                   <Image src={iconPin} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
               <Tooltip
                 label={i18n._('Set Work Offsets')}
@@ -1439,14 +1463,15 @@ function DisplayPanel() {
                 enterDelay={0}
                 placement="bottom"
               >
-                <TaskbarButton
+                <Button
+                  variant="ghost" sx={taskbarButtonSx}
                   aria-label={`Set ${axisLabel} work offsets`}
                   active={isPositionInputVisible}
                   disabled={!canModifyWorkPosition}
                   onClick={showPositionInput(axis, wpos)}
                 >
                   <Image src={iconPencil} width={14} height={14} />
-                </TaskbarButton>
+                </Button>
               </Tooltip>
             </Box>
           </Taskbar>
@@ -1469,7 +1494,7 @@ function DisplayPanel() {
   const hasAxisC = includes(axes, AXIS_C);
 
   return (
-    <Panel className={styles.displayPanel}>
+    <Box className={styles.displayPanel} sx={{ mb: '10px', '&:last-child': { mb: 0 } }}>
       <table className="table-bordered">
         <thead>
           <tr>
@@ -1491,7 +1516,7 @@ function DisplayPanel() {
           {hasAxisC && renderAxis(AXIS_C)}
         </tbody>
       </table>
-    </Panel>
+    </Box>
   );
 }
 

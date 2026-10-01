@@ -263,7 +263,6 @@
     "socketio-jwt": "~4.6.2",
     "sortablejs": "~1.10.2",
     "spawn-default-shell": "~2.0.0",
-    "styled-components": "~5.3.5",
     "superagent": "~6.1.0",
     "superagent-use": "~0.1.0",
     "three": "~0.124.0",

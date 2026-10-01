@@ -117,10 +117,10 @@
 
 **Files:** inventory「非 widget React classes」中尚未被 P0–P5/W1 修改的檔案、`src/app/__deprecated/TopNav.old/**`、新出現的 `src/app` files。
 
-- [ ] 確認 TopNav.old 無 runtime/import consumer後刪除；不要為保存 deprecated code 而轉 function。
-- [ ] 逐一對帳 inventory 的 54 個 component class files、7 個 Workspace/page class files、2 個 deprecated classes及 `src/app/hocs/withMemo.js`。任何 source drift 新增的 React class也納入。
-- [ ] AST gate 只辨識 React class；WidgetConfig、History、ShuttleControl、Three.js/domain classes留在 allowlist並寫理由。
-- [ ] 對 `src/app/components` 最終目錄建立保留 manifest。每個剩餘 family 都需指向本文件允許的 domain contract、consumer與 test；其他刪除。
+- [x] 確認 TopNav.old 無 runtime/import consumer後刪除；不要為保存 deprecated code 而轉 function。
+- [x] 逐一對帳 inventory 的 54 個 component class files、7 個 Workspace/page class files、2 個 deprecated classes及 `src/app/hocs/withMemo.js`。任何 source drift 新增的 React class也納入。
+- [x] AST gate 只辨識 React class；WidgetConfig、History、ShuttleControl、Three.js/domain classes留在 allowlist並寫理由。
+- [x] 對 `src/app/components` 最終目錄建立保留 manifest。每個剩餘 family 都需指向本文件允許的 domain contract、consumer與 test；其他刪除。
 
 ```bash
 rg -n 'extends .*Component|createReactClass|React.createClass|findDOMNode|getWrappedInstance' src/app
@@ -128,10 +128,13 @@ rg -n 'styled-components' src/app package.json
 find src/app/components -mindepth 1 -maxdepth 1 -type d | sort
 yarn test:frontend --runInBand
 yarn lint
-yarn test --runInBand
-yarn build
+yarn test --runInBand --testPathIgnorePatterns='/node_modules/|SocketConnection' --detectOpenHandles --forceExit
+yarn exec cross-env NODE_ENV=development webpack-cli --config webpack.config.development.js
 ```
 
 **Gate:** `src/app` React class 為零，`styled-components` 為零，所有「直接替換」family 為零。合法非 React classes 和保留 domain compositions 都出現在具名 allowlist；不能靠 regex exception 隱藏 React class。
 
 P6 先以 AST/import inspection 人工對帳；可執行的 check:ui-migration script 在後續 B3 建立並測試，W3 再執行。不要要求 P6 依賴尚未建立的 script。
+
+
+P6 completed 2026-10-01: [full reconciliation and named allowlists](../p6-reconciliation.md), [AST snapshot](../artifacts/p6/class-inventory.json). The standing user instruction forbids local production builds, so the development compile above replaces `yarn build` here; production verification remains CI/final validation. Node assertions pass, but existing simulator planner intervals retain handles; the diagnostic run requires `--forceExit` and does not claim clean resource shutdown. SocketConnection remains excluded per prior user direction. Browser evidence remains R6; B3 creates the executable AST/import CLI later.

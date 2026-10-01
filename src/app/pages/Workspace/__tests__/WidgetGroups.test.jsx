@@ -261,12 +261,6 @@ jest.mock('react-dropzone', () => {
   return { __esModule: true, default: Dropzone };
 });
 
-jest.mock('styled-components', () => {
-  const React = require('react');
-  const styled = Component => () => props => React.createElement(Component, props);
-  return { __esModule: true, default: styled };
-});
-
 jest.mock('../widget-manager', () => ({
   getInactiveWidgets: jest.fn(() => []),
   show: jest.fn(),

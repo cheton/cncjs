@@ -1,5 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { renderAppUI } from '@app/test/render';
 
 const mockTerminalClear = jest.fn();
 const mockTerminalResize = jest.fn();
@@ -34,6 +35,7 @@ const mockEmitter = {
     mockEmitterListeners[event] = listener;
   }),
   off: jest.fn(),
+  emit: jest.fn(event => mockEmitterListeners[event]?.()),
 };
 
 jest.mock('react-redux', () => ({
@@ -67,6 +69,16 @@ jest.mock('pubsub-js', () => ({
 jest.mock('@app/widgets/shared/useWidgetEvent', () => ({
   __esModule: true,
   default: () => mockEmitter,
+}));
+
+jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
+  __esModule: true,
+  default: ({ children }) => children,
+}));
+
+jest.mock('@app/widgets/shared/WidgetEventProvider', () => ({
+  __esModule: true,
+  default: ({ children }) => children(mockEmitter),
 }));
 
 jest.mock('../useTerminal', () => ({
@@ -203,4 +215,20 @@ describe('Console connection lifecycle', () => {
       view.unmount();
     }
   });
+});
+
+test('Console shell Clear button reaches the terminal owner without a controller command', () => {
+  const ConsoleWidget = require('../index').default;
+  const view = renderAppUI(<ConsoleWidget
+    widgetId="console" view="normal"
+    onViewChange={jest.fn()} onFork={jest.fn()} onRemove={jest.fn()}
+    sortable={{}}
+  />);
+  mockTerminalClear.mockClear();
+  mockControllerWrite.mockClear();
+  fireEvent.click(screen.getByRole('button', { name: 'Clear console' }));
+  expect(mockTerminalClear).toHaveBeenCalledTimes(1);
+  expect(mockControllerWrite).not.toHaveBeenCalled();
+  view.unmount();
+  expect(mockEmitter.off).toHaveBeenCalledWith('terminal:clear', expect.any(Function));
 });

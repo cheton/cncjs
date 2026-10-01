@@ -3,8 +3,7 @@ import {
   Space,
 } from '@tonic-ui/react';
 import cx from 'classnames';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
@@ -12,161 +11,154 @@ import WidgetEventProvider from '@app/widgets/shared/WidgetEventProvider';
 import Console from './Console';
 import styles from './index.styl';
 
-class ConsoleWidget extends Component {
-  static propTypes = {
-    widgetId: PropTypes.string.isRequired,
-    onFork: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired,
-    view: PropTypes.oneOf(['normal', 'collapsed', 'fullscreen']).isRequired,
-    onViewChange: PropTypes.func.isRequired,
-    sortable: PropTypes.object
-  };
+/**
+ * @param {{ widgetId: string, onFork: () => void, onRemove: () => void,
+ * view: 'normal'|'collapsed'|'fullscreen', onViewChange: (view: string) => void,
+ * sortable?: {handleClassName?: string, filterClassName?: string} }} props
+ */
+function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortable = {} }) {
+  const isCollapsed = view === 'collapsed';
+  const isFullscreen = view === 'fullscreen';
+  const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
-  render() {
-    const { widgetId, view, onViewChange } = this.props;
-    const isCollapsed = view === 'collapsed';
-    const isFullscreen = view === 'fullscreen';
-    const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
-
-    return (
-      <WidgetConfigProvider widgetId={widgetId}>
-        <WidgetEventProvider>
-          {(emitter) => (
-            <Widget aria-label="Console widget" fullscreen={isFullscreen}>
-              <Widget.Header>
-                <Widget.Title>
-                  <Widget.Sortable className={this.props.sortable.handleClassName}>
-                    <FontAwesomeIcon icon="bars" fixedWidth />
-                    <Space width={4} />
-                  </Widget.Sortable>
-                  {isForkedWidget &&
-                    <FontAwesomeIcon icon="code-branch" fixedWidth />}
-                  {i18n._('Console')}
-                </Widget.Title>
-                <Widget.Controls className={this.props.sortable.filterClassName}>
-                  <Widget.Button
-                    aria-label="Clear console"
-                    title={i18n._('Clear all')}
-                    onClick={this.clearAll}
-                  >
-                    <FontAwesomeIcon icon="trash-alt" fixedWidth />
-                  </Widget.Button>
-                  <Widget.Button
-                    aria-label={isCollapsed ? 'Expand' : 'Collapse'}
-                    aria-expanded={!isCollapsed}
-                    disabled={isFullscreen}
-                    title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
-                    onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
-                  >
-                    {isCollapsed &&
-                      <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-                    {!isCollapsed &&
-                      <FontAwesomeIcon icon="chevron-up" fixedWidth />}
-                  </Widget.Button>
-                  <Widget.Button
-                    aria-label={!isFullscreen ? 'Enter full screen' : 'Exit full screen'}
-                    title={!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
-                    onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
-                  >
-                    {isFullscreen &&
-                      <FontAwesomeIcon icon="compress" fixedWidth />}
-                    {!isFullscreen &&
-                      <FontAwesomeIcon icon="expand" fixedWidth />}
-                  </Widget.Button>
-                  <Widget.DropdownButton
-                    aria-label="More options"
-                    title={i18n._('More')}
-                    toggle={(
-                      <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
-                    )}
-                    onSelect={(eventKey) => {
-                      if (eventKey === 'refresh') {
-                        emitter.emit('terminal:refresh');
-                      } else if (eventKey === 'selectAll') {
-                        emitter.emit('terminal:selectAll');
-                      } else if (eventKey === 'copySelection') {
-                        if (typeof document.execCommand === 'function') {
-                          document.execCommand('copy');
-                        }
-                      } else if (eventKey === 'clearSelection') {
-                        emitter.emit('terminal:clearSelection');
-                      } else if (eventKey === 'fullscreen') {
-                        onViewChange(isFullscreen ? 'normal' : 'fullscreen');
-                      } if (eventKey === 'fork') {
-                        this.props.onFork();
-                      } else if (eventKey === 'remove') {
-                        this.props.onRemove();
+  return (
+    <WidgetConfigProvider widgetId={widgetId}>
+      <WidgetEventProvider>
+        {(emitter) => (
+          <Widget aria-label="Console widget" fullscreen={isFullscreen}>
+            <Widget.Header>
+              <Widget.Title>
+                <Widget.Sortable className={sortable.handleClassName}>
+                  <FontAwesomeIcon icon="bars" fixedWidth />
+                  <Space width={4} />
+                </Widget.Sortable>
+                {isForkedWidget &&
+                <FontAwesomeIcon icon="code-branch" fixedWidth />}
+                {i18n._('Console')}
+              </Widget.Title>
+              <Widget.Controls className={sortable.filterClassName}>
+                <Widget.Button
+                  aria-label="Clear console"
+                  title={i18n._('Clear all')}
+                  onClick={() => emitter.emit('terminal:clear')}
+                >
+                  <FontAwesomeIcon icon="trash-alt" fixedWidth />
+                </Widget.Button>
+                <Widget.Button
+                  aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                  aria-expanded={!isCollapsed}
+                  disabled={isFullscreen}
+                  title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                  onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
+                >
+                  {isCollapsed &&
+                  <FontAwesomeIcon icon="chevron-down" fixedWidth />}
+                  {!isCollapsed &&
+                  <FontAwesomeIcon icon="chevron-up" fixedWidth />}
+                </Widget.Button>
+                <Widget.Button
+                  aria-label={!isFullscreen ? 'Enter full screen' : 'Exit full screen'}
+                  title={!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
+                  onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
+                >
+                  {isFullscreen &&
+                  <FontAwesomeIcon icon="compress" fixedWidth />}
+                  {!isFullscreen &&
+                  <FontAwesomeIcon icon="expand" fixedWidth />}
+                </Widget.Button>
+                <Widget.DropdownButton
+                  aria-label="More options"
+                  title={i18n._('More')}
+                  toggle={(
+                    <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  )}
+                  onSelect={(eventKey) => {
+                    if (eventKey === 'refresh') {
+                      emitter.emit('terminal:refresh');
+                    } else if (eventKey === 'selectAll') {
+                      emitter.emit('terminal:selectAll');
+                    } else if (eventKey === 'copySelection') {
+                      if (typeof document.execCommand === 'function') {
+                        document.execCommand('copy');
                       }
-                    }}
-                  >
-                    <Widget.DropdownMenuItem eventKey="refresh">
-                      <FontAwesomeIcon icon="undo-alt" fixedWidth />
-                      <Space width={8} />
-                      {i18n._('Refresh')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="selectAll">
-                      <i
-                        className={cx(
-                          styles.icon,
-                          styles.selectAll
-                        )}
-                      />
-                      <Space width={8} />
-                      {i18n._('Select All')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="copySelection">
-
-                      <FontAwesomeIcon icon="copy" fixedWidth />
-                      <Space width={8} />
-                      {i18n._('Copy Selection')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="clearSelection">
-
-                      <FontAwesomeIcon icon="eraser" fixedWidth />
-                      <Space width={8} />
-                      {i18n._('Clear Selection')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="fullscreen">
-                      {!isFullscreen && (
-                        <FontAwesomeIcon icon="expand" fixedWidth />
+                    } else if (eventKey === 'clearSelection') {
+                      emitter.emit('terminal:clearSelection');
+                    } else if (eventKey === 'fullscreen') {
+                      onViewChange(isFullscreen ? 'normal' : 'fullscreen');
+                    } if (eventKey === 'fork') {
+                      onFork();
+                    } else if (eventKey === 'remove') {
+                      onRemove();
+                    }
+                  }}
+                >
+                  <Widget.DropdownMenuItem eventKey="refresh">
+                    <FontAwesomeIcon icon="undo-alt" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Refresh')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="selectAll">
+                    <i
+                      className={cx(
+                        styles.icon,
+                        styles.selectAll
                       )}
-                      {isFullscreen && (
-                        <FontAwesomeIcon icon="compress" fixedWidth />
-                      )}
-                      <Space width={8} />
-                      {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="fork">
-                      <FontAwesomeIcon icon="code-branch" fixedWidth />
-                      <Space width={8} />
-                      {i18n._('Fork Widget')}
-                    </Widget.DropdownMenuItem>
-                    <Widget.DropdownMenuItem eventKey="remove">
-                      <FontAwesomeIcon icon="times" fixedWidth />
-                      <Space width={8} />
-                      {i18n._('Remove Widget')}
-                    </Widget.DropdownMenuItem>
-                  </Widget.DropdownButton>
-                </Widget.Controls>
-              </Widget.Header>
-              <Widget.Content
-                aria-hidden={isCollapsed}
-                className={cx(
-                  styles.widgetContent,
-                  { [styles.hidden]: isCollapsed },
-                  { [styles.fullscreen]: isFullscreen }
-                )}
-              >
-                <Console
-                  isFullscreen={isFullscreen}
-                />
-              </Widget.Content>
-            </Widget>
-          )}
-        </WidgetEventProvider>
-      </WidgetConfigProvider>
-    );
-  }
+                    />
+                    <Space width={8} />
+                    {i18n._('Select All')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="copySelection">
+
+                    <FontAwesomeIcon icon="copy" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Copy Selection')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="clearSelection">
+
+                    <FontAwesomeIcon icon="eraser" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Clear Selection')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="fullscreen">
+                    {!isFullscreen && (
+                      <FontAwesomeIcon icon="expand" fixedWidth />
+                    )}
+                    {isFullscreen && (
+                      <FontAwesomeIcon icon="compress" fixedWidth />
+                    )}
+                    <Space width={8} />
+                    {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="fork">
+                    <FontAwesomeIcon icon="code-branch" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Fork Widget')}
+                  </Widget.DropdownMenuItem>
+                  <Widget.DropdownMenuItem eventKey="remove">
+                    <FontAwesomeIcon icon="times" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Remove Widget')}
+                  </Widget.DropdownMenuItem>
+                </Widget.DropdownButton>
+              </Widget.Controls>
+            </Widget.Header>
+            <Widget.Content
+              aria-hidden={isCollapsed}
+              className={cx(
+                styles.widgetContent,
+                { [styles.hidden]: isCollapsed },
+                { [styles.fullscreen]: isFullscreen }
+              )}
+            >
+              <Console
+                isFullscreen={isFullscreen}
+              />
+            </Widget.Content>
+          </Widget>
+        )}
+      </WidgetEventProvider>
+    </WidgetConfigProvider>
+  );
 }
 
 export default ConsoleWidget;

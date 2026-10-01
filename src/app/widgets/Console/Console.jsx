@@ -114,6 +114,8 @@ function Console({
   });
 
   useEffect(() => {
+    const onClear = () => actions.clear();
+
     const onClearSelection = () => {
       actions.clearSelection();
     };
@@ -126,11 +128,13 @@ function Console({
       actions.selectAll();
     };
 
+    emitter.on('terminal:clear', onClear);
     emitter.on('terminal:clearSelection', onClearSelection);
     emitter.on('terminal:refresh', onRefresh);
     emitter.on('terminal:selectAll', onSelectAll);
 
     return () => {
+      emitter.off('terminal:clear', onClear);
       emitter.off('terminal:clearSelection', onClearSelection);
       emitter.off('terminal:refresh', onRefresh);
       emitter.off('terminal:selectAll', onSelectAll);

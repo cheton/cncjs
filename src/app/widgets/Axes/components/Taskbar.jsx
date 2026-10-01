@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box } from '@tonic-ui/react';
-import TaskbarButton from './TaskbarButton';
 
 /**
  * @param {{ children?: React.ReactNode, style?: object }} props
@@ -19,7 +18,5 @@ function Taskbar({ children, style, ...props }) {
     </Box>
   );
 }
-
-Taskbar.Button = TaskbarButton;
 
 export default Taskbar;

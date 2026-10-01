@@ -13,7 +13,6 @@ import { ensureArray } from 'ensure-type';
 import _includes from 'lodash/includes';
 import _uniqueId from 'lodash/uniqueId';
 import React from 'react';
-import styled from 'styled-components';
 import RepeatableButton from '@app/components/RepeatableButton';
 import {
   IMPERIAL_UNITS,
@@ -26,21 +25,9 @@ import i18n from '@app/lib/i18n';
 import { useAxes } from './context';
 import styles from './index.styl';
 
-const KeypadText = styled(Box)`
-    position: relative;
-    display: inline-block;
-    vertical-align: baseline;
-`;
-
-const KeypadDirectionText = styled(KeypadText)`
-    min-width: 10px;
-`;
-
-const KeypadSubscriptText = styled(KeypadText)`
-    min-width: 10px;
-    font-size: 80%;
-    line-height: 0;
-`;
+const keypadTextSx = { position: 'relative', display: 'inline-block', verticalAlign: 'baseline' };
+const keypadDirectionSx = { ...keypadTextSx, minWidth: '10px' };
+const keypadSubscriptSx = { ...keypadDirectionSx, fontSize: '80%', lineHeight: 0 };
 
 /**
  * @returns {JSX.Element}
@@ -172,8 +159,8 @@ function Keypad() {
                     disabled={!canClickY}
                     title={i18n._('Move Y+')}
                   >
-                    <KeypadText>Y</KeypadText>
-                    <KeypadDirectionText>+</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>Y</Box>
+                    <Box sx={keypadDirectionSx}>+</Box>
                   </Button>
                 </Box>
               </Box>
@@ -210,8 +197,8 @@ function Keypad() {
                     disabled={!canClickZ}
                     title={i18n._('Move Z+')}
                   >
-                    <KeypadText>Z</KeypadText>
-                    <KeypadDirectionText>+</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>Z</Box>
+                    <Box sx={keypadDirectionSx}>+</Box>
                   </Button>
                 </Box>
               </Box>
@@ -235,8 +222,8 @@ function Keypad() {
                     disabled={!canClickX}
                     title={i18n._('Move X-')}
                   >
-                    <KeypadText>X</KeypadText>
-                    <KeypadDirectionText>-</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>X</Box>
+                    <Box sx={keypadDirectionSx}>-</Box>
                   </Button>
                 </Box>
               </Box>
@@ -249,10 +236,10 @@ function Keypad() {
                     disabled={!canClickXY}
                     title={i18n._('Move To XY Zero (G0 X0 Y0)')}
                   >
-                    <KeypadText>X</KeypadText>
-                    <KeypadSubscriptText>0</KeypadSubscriptText>
-                    <KeypadText>Y</KeypadText>
-                    <KeypadSubscriptText>0</KeypadSubscriptText>
+                    <Box sx={keypadTextSx}>X</Box>
+                    <Box sx={keypadSubscriptSx}>0</Box>
+                    <Box sx={keypadTextSx}>Y</Box>
+                    <Box sx={keypadSubscriptSx}>0</Box>
                   </Button>
                 </Box>
               </Box>
@@ -272,8 +259,8 @@ function Keypad() {
                     disabled={!canClickX}
                     title={i18n._('Move X+')}
                   >
-                    <KeypadText>X</KeypadText>
-                    <KeypadDirectionText>+</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>X</Box>
+                    <Box sx={keypadDirectionSx}>+</Box>
                   </Button>
                 </Box>
               </Box>
@@ -286,8 +273,8 @@ function Keypad() {
                     disabled={!canClickZ}
                     title={i18n._('Move To Z Zero (G0 Z0)')}
                   >
-                    <KeypadText>Z</KeypadText>
-                    <KeypadSubscriptText>0</KeypadSubscriptText>
+                    <Box sx={keypadTextSx}>Z</Box>
+                    <Box sx={keypadSubscriptSx}>0</Box>
                   </Button>
                 </Box>
               </Box>
@@ -328,8 +315,8 @@ function Keypad() {
                     disabled={!canClickY}
                     title={i18n._('Move Y-')}
                   >
-                    <KeypadText>Y</KeypadText>
-                    <KeypadDirectionText>-</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>Y</Box>
+                    <Box sx={keypadDirectionSx}>-</Box>
                   </Button>
                 </Box>
               </Box>
@@ -366,8 +353,8 @@ function Keypad() {
                     disabled={!canClickZ}
                     title={i18n._('Move Z-')}
                   >
-                    <KeypadText>Z</KeypadText>
-                    <KeypadDirectionText>-</KeypadDirectionText>
+                    <Box sx={keypadTextSx}>Z</Box>
+                    <Box sx={keypadDirectionSx}>-</Box>
                   </Button>
                 </Box>
               </Box>
