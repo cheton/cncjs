@@ -74,13 +74,15 @@
 
 **Files:** manifest P3 家族、`src/app/context.jsx`、各 consumer Stylus。
 
-- [ ] GridSystem 改 Tonic Grid/Flex，逐一保存 Workspace、Widget、modal 的寬窄 breakpoint 行為；最後 consumer 清空後刪 `GridSystemProvider` 與 context/Resolver。
-- [ ] Navs 改 Tonic Tabs；selected index/value 是 controlled state。測切 tab 是否原本 preserve 或 unmount panel，避免 mount effect 重送 controller command。
-- [ ] Card/CollapsibleCard/Panel 以 Box/Accordion 組合。只有 CNC spacing、collapse policy 等具 test 的 domain contract可留下；Context/Resolver 若只為視覺 variants 就刪除。
-- [ ] Badge/Center/Hoverable/Image/ImageIcon/Progress/ProgressBar 改 Tonic primitive。SVG/圖片資產只有無 consumer 才刪。
-- [ ] `components/shared` utilities 只保留仍被 domain composition 使用的純函式，移到該 domain 旁；不能留一個孤立 shared UI compatibility layer。
+- [x] GridSystem 改 Tonic Grid/Flex，逐一保存 Workspace、Widget、modal 的寬窄 breakpoint 行為；最後 consumer 清空後刪 `GridSystemProvider` 與 context/Resolver。
+- [x] Navs 改 Tonic Tabs；selected index/value 是 controlled state。測切 tab 是否原本 preserve 或 unmount panel，避免 mount effect 重送 controller command。
+- [x] Card/CollapsibleCard/Panel 以 Box/Accordion 組合。只有 CNC spacing、collapse policy 等具 test 的 domain contract可留下；Context/Resolver 若只為視覺 variants 就刪除。
+- [x] Badge/Center/Hoverable/Image/ImageIcon/Progress/ProgressBar 改 Tonic primitive。SVG/圖片資產只有無 consumer 才刪。
+- [x] `components/shared` utilities 只保留仍被 domain composition 使用的純函式，移到該 domain 旁；不能留一個孤立 shared UI compatibility layer。
 
-**Gate:** P3 family imports 為零，除非 execution log 有具名 domain composition + test；`context.jsx` 不再掛 GridSystemProvider；light/dark、1440×900、768×900 browser checks 過。
+**Implementation checkpoint (2026-10-01):** all 13 families, their contexts/resolvers/barrels/styles, and zero-consumer TopNav.old are deleted. TopNav.old removal is the planned P6 cleanup performed early to release the last deprecated GridSystem/Badge/Hoverable/Image consumers. Active Workspace/widget/modal layouts already use Tonic; their layout props/styles were preserved. Axes Tabs retain conditional inactive-child unmount and owner drafts; Spindle retains fan SVGs, 16px size and coolant-driven 2s rotation. No P3 domain helper remains; Axes `widgets/Axes/components/Panel` is a separate domain component. Full frontend 65 suites / 423 tests, lint, development webpack, and diff checks pass.
+
+**Gate (still pending):** P3 family imports 為零，除非 execution log 有具名 domain composition + test；`context.jsx` 不再掛 GridSystemProvider；light/dark、1440×900、768×900 browser checks 過。
 
 ## Task P4：Administration/table vertical slice
 

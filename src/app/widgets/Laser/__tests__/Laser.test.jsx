@@ -59,18 +59,6 @@ jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
   default: ({ children }) => children,
 }));
 
-jest.mock('@app/components/CollapsibleCard', () => {
-  throw new Error('Laser must use Tonic collapse primitives directly');
-});
-
-jest.mock('@app/components/GridSystem', () => {
-  throw new Error('Laser must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/Center', () => {
-  throw new Error('Laser must use Tonic Flex primitives directly');
-});
-
 jest.mock('@app/components/RepeatableButton', () => {
   throw new Error('Laser must own repeat behavior on Tonic Button');
 });

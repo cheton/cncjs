@@ -203,12 +203,6 @@ jest.mock('../widgetRegistry', () => {
   return { WIDGET_REGISTRY: mockWidgetRegistry };
 });
 
-jest.mock('@app/components/GridSystem', () => {
-  const React = require('react');
-  const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
-  return { Row: Primitive, Col: Primitive };
-});
-
 jest.mock('@tonic-ui/react', () => {
   const React = require('react');
   const Primitive = ({ as: Tag = 'div', children, ...props }) => React.createElement(Tag, props, children);

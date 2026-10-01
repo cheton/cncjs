@@ -1,9 +1,11 @@
+import { keyframes } from '@emotion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
   Button,
   ButtonGroup,
   Flex,
+  Image,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -15,7 +17,6 @@ import _get from 'lodash/get';
 import _includes from 'lodash/includes';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import ImageIcon from '@app/components/ImageIcon';
 import {
   CONNECTION_STATE_CONNECTED,
 } from '@app/constants/connection';
@@ -32,6 +33,15 @@ import i18n from '@app/lib/i18n';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
 import iconFan from './images/fan.svg';
 
+const coolantSpin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(359deg); }
+`;
+
+/**
+ * @param {{ isActionable: boolean, mistCoolant: boolean, floodCoolant: boolean, spindle: string }} props
+ * @returns {JSX.Element}
+ */
 function Spindle({
   isActionable,
   mistCoolant,
@@ -77,12 +87,14 @@ function Spindle({
                 title={i18n._('Mist Coolant On (M7)', { ns: 'gcode' })}
                 disabled={isDisabled}
               >
-                <ImageIcon
+                <Image
                   src={iconFan}
-                  spin={mistCoolant}
-                  style={{
+                  sx={{
                     width: '16px',
                     height: '16px',
+                    display: 'inline-block',
+                    verticalAlign: '-0.125em',
+                    animation: mistCoolant ? `${coolantSpin} 2s infinite linear` : undefined,
                   }}
                 />
                 <Space width={8} />
@@ -95,12 +107,14 @@ function Spindle({
                 title={i18n._('Flood Coolant On (M8)', { ns: 'gcode' })}
                 disabled={isDisabled}
               >
-                <ImageIcon
+                <Image
                   src={iconFan}
-                  spin={floodCoolant}
-                  style={{
+                  sx={{
                     width: '16px',
                     height: '16px',
+                    display: 'inline-block',
+                    verticalAlign: '-0.125em',
+                    animation: floodCoolant ? `${coolantSpin} 2s infinite linear` : undefined,
                   }}
                 />
                 <Space width={8} />

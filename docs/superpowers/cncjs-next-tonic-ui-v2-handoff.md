@@ -13,17 +13,17 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-09-24）
+## 現況快照（2026-10-01）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `ea0deb12`（本次交接更新前） |
+| HEAD | `2b1581c8`（本輪開始；後續 checkpoint commit 以 git 實測） |
 | 工作樹 | 本次交接更新前為 clean |
-| 未 push | branch 領先 origin；以 `git log origin/feat/tonic-ui-v2-migration..HEAD` 實測 |
+| 未 push | 本輪開始無 ahead commits；後續 local checkpoint 以 git 實測；不自行 push |
 | Active task | **P3 layout 與 display**（P2 controlled forms 已完成） |
 | 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；P2 keyboard/invalid-submit audit `924007e4` |
-| 下一步推薦 | 領取 P3：GridSystem → Tonic Grid/Flex，逐一保存 Workspace／Widget／modal breakpoint 行為 |
+| 下一步推薦 | P3 implementation/import gates 已過；保留 in_progress，light/dark 與兩個 viewport browser gate 待 R6 授權模型補齊。P4 尚未領取。 |
 | Open blockers | 無 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -52,6 +52,15 @@ Fresh inventory found no production imports of the nine legacy P2 families, so t
 The Connection serial port and baud rate selectors now use installed Tonic Menu (`9f56e397`), matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade.
 
 **P2 keyboard/invalid-submit audit (2026-09-24, `924007e4`) closed the task.** The audit extended the Administration drawer table so all ten create/update drawers prove keyboard-only entry, primary-button activation, linked errors, and mutation suppression; it also fixed three drawers whose validators targeted `name`/`data` while their fields are `title`/`commands`. It found and closed two real production gaps test-first: the Webcam settings modal still rendered a native `<label><input type="radio">` pair and an unnamed native `<select>` (now Tonic `Radio`/`Select` with accessible names), and the Spindle speed input had no accessible name (now `aria-label`, deliberately not a hard-coded `id` because forkable widgets can mount duplicates). Connection socket Host/Port gained `aria-label` values; the Laser `rc-slider` test mock was deleted so the real slider is exercised; Webcam, Autolevel, Probe, Tool, Custom settings, and the previously untested GeneralSettings form gained keyboard-only and invalid-gate regressions. Production source now has no native `input`/`select`/`label`; rc-slider stays in exactly five audited consumers. Fresh full frontend 64 suites / 421 tests, ESLint 0 errors / 7 pre-existing warnings, `git diff --check` clean. Browser evidence remains deferred to R6.
+
+## P3 implementation checkpoint — 2026-10-01
+
+- Removed all 13 P3 families and their dedicated styles/barrels/contexts after alias/relative source inspection. `context.jsx` no longer mounts GridSystem/Card providers. Existing active Workspace/widget layout props and styles are preserved; no active consumer required breakpoint translation in this checkout.
+- Axes Settings now uses controlled Tonic Tabs/TabList/Tab/TabPanels/TabPanel. Inactive children still unmount; the Settings owner retains edited drafts; tab changes trigger neither mutation nor config writes. The new keyboard regression was RED on missing legacy tab roles, then passed after migration.
+- Axes DisplayPanel and Spindle use direct Tonic Image. Existing SVGs remain; Axes dimensions use numeric pixel props; Spindle retains 16px coolant fans and conditionally driven 2s rotation through Emotion keyframes and `sx`.
+- Zero-consumer TopNav.old was deleted as an early P6 cleanup, releasing its remaining P3 consumers. Obsolete family mocks were removed from six consumer test files. `legacyLayoutImports.test.js` checks absent family directories and alias/relative source references.
+- Validation: full frontend 65 suites / 423 tests; lint 0 errors / 7 existing warnings; development webpack compiled with an existing warning; `git diff --check` clean. No server/controller/Redux store, dependency manifest/lock, or Prettier-config changes. No browser tooling, simulator, production build, or push.
+- **P3 remains in_progress**: light/dark and 1440×900 / 768×900 browser checks are deferred to R6. P4 has not been claimed. Next exact gate: when the user authorizes the R6 model, collect the deferred theme/viewport evidence before closing P3; retain the pending gate until then.
 
 ## 本輪交接重點（G1）
 
@@ -131,7 +140,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 已完成；P2 controlled forms 進行中。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；下一步核對剩餘 keyboard/invalid-submit 證據。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
+P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 下一步是依 R6 授權補齊 light/dark 與兩個 viewport evidence，P4 尚未領取。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

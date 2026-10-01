@@ -7,9 +7,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from '@tonic-ui/react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Nav, NavItem } from '@app/components/Navs';
 import i18n from '@app/lib/i18n';
 import { useMdiQuery, useSaveMdiMutation } from '../queries';
 import { createSettingsDraft, normalizeGeneral } from './draft';
@@ -29,7 +33,7 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
   const mdiQuery = useMdiQuery();
   const saveMdi = useSaveMdiMutation();
   const saving = saveMdi.isPending ?? saveMdi.isLoading ?? false;
-  const [activeKey, setActiveKey] = useState('general');
+  const [activeIndex, setActiveIndex] = useState(0);
   const [draft, setDraft] = useState(() => ({
     ...createSettingsDraft(config),
     mdiRecords: null,
@@ -109,57 +113,52 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
       <ModalContent>
         <ModalHeader>{i18n._('Axes Settings')}</ModalHeader>
         <ModalBody padding={false}>
-          <Nav
-            navStyle="tabs"
-            activeKey={activeKey}
-            onSelect={setActiveKey}
-            style={{ marginTop: 15, paddingLeft: 15 }}
-          >
-            <NavItem eventKey="general">{i18n._('General')}</NavItem>
-            <NavItem eventKey="mdi">{i18n._('Custom Commands')}</NavItem>
-            <NavItem eventKey="shuttleXpress">{i18n._('ShuttleXpress')}</NavItem>
-          </Nav>
-          <Box padding="2x 3x" minHeight="240px">
-            {activeKey === 'general' && (
-              <General value={draft.general} onChange={updateGeneral} />
-            )}
-            {activeKey === 'mdi' && (
-              <>
-                {mdiQuery.isError && (
-                  <Box role="alert" color="danger" mb="2x">
-                    {i18n._('An unexpected error has occurred.')}
-                    <Button size="sm" onClick={() => mdiQuery.refetch()}>
-                      {i18n._('Retry')}
-                    </Button>
-                  </Box>
+          <Tabs index={activeIndex} onChange={setActiveIndex}>
+            <TabList aria-label={i18n._('Axes Settings')} sx={{ mt: '15px', pl: '15px' }}>
+              <Tab index={0}>{i18n._('General')}</Tab>
+              <Tab index={1}>{i18n._('Custom Commands')}</Tab>
+              <Tab index={2}>{i18n._('ShuttleXpress')}</Tab>
+            </TabList>
+            <TabPanels padding="2x 3x" minHeight="240px">
+              <TabPanel index={0} padding={0}>
+                {activeIndex === 0 && <General value={draft.general} onChange={updateGeneral} />}
+              </TabPanel>
+              <TabPanel index={1} padding={0}>
+                {activeIndex === 1 && (
+                  <>
+                    {mdiQuery.isError && (
+                      <Box role="alert" color="danger" mb="2x">
+                        {i18n._('An unexpected error has occurred.')}
+                        <Button size="sm" onClick={() => mdiQuery.refetch()}>
+                          {i18n._('Retry')}
+                        </Button>
+                      </Box>
+                    )}
+                    <MDI
+                      records={draft.mdiRecords || []}
+                      loading={mdiQuery.isLoading}
+                      error={mdiQuery.isError}
+                      onRecordsChange={updateMdiRecords}
+                    />
+                  </>
                 )}
-                <MDI
-                  records={draft.mdiRecords || []}
-                  loading={mdiQuery.isLoading}
-                  error={mdiQuery.isError}
-                  onRecordsChange={updateMdiRecords}
-                />
-              </>
-            )}
-            {activeKey === 'shuttleXpress' && (
-              <ShuttleXpress value={draft.shuttleXpress} onChange={updateShuttleXpress} />
-            )}
-            {error && (
-              <Box role="alert" color="danger" mt="2x">
-                {errorMessage}
-              </Box>
-            )}
-          </Box>
+              </TabPanel>
+              <TabPanel index={2} padding={0}>
+                {activeIndex === 2 && <ShuttleXpress value={draft.shuttleXpress} onChange={updateShuttleXpress} />}
+              </TabPanel>
+              {error && (
+                <Box role="alert" color="danger" mt="2x">
+                  {errorMessage}
+                </Box>
+              )}
+            </TabPanels>
+          </Tabs>
         </ModalBody>
         <ModalFooter>
           <Button disabled={saving} onClick={close}>
             {i18n._('Cancel')}
           </Button>
-          <Button
-            variant="primary"
-            disabled={saving || !mdiReady}
-            onClick={save}
-          >
+          <Button variant="primary" disabled={saving || !mdiReady} onClick={save}>
             {i18n._('Save Changes')}
           </Button>
         </ModalFooter>

@@ -40,15 +40,6 @@ jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   }),
 }));
 
-jest.mock('@app/components/GridSystem', () => {
-  throw new Error('Spindle must use Tonic layout primitives directly');
-});
-
-jest.mock('@app/components/ImageIcon', () => ({
-  __esModule: true,
-  default: props => <img alt="" {...props} />,
-}));
-
 const Spindle = require('../Spindle').default;
 const SpindleWidget = require('../index').default;
 

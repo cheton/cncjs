@@ -1553,3 +1553,31 @@ Verification: focused P2 suites passed throughout each slice. Fresh full fronten
 Gate review: P2 family imports and directories are zero; no native `input`/`select`/`label` remains in production `src/app` source; `react-select` has no caller and is removed from `package.json`; rc-slider remains in exactly five audited consumers; every P2 form completes by keyboard alone; invalid submit never reaches an HTTP or controller mutation.
 
 Status transition: P2 is `completed`. Committed as `924007e4` (`fix(app): close P2 keyboard and invalid-submit evidence`). Browser, simulator, and production-build evidence remain deferred to R6. Next eligible task is P3 (layout 與 display) after its P2 dependency is now satisfied.
+
+## P3 resume — 2026-10-01
+
+- Branch/start HEAD: `feat/tonic-ui-v2-migration`, `2b1581c8efcbdf5580d42f528f7c495d3cbaac5a`; clean worktree, no commits ahead of origin.
+- Scope: resume P3 only; preserve current layout breakpoints, controlled Axes draft and panel unmount policy, image assets and coolant animation; remove families only after zero-consumer proof. Protected server/controller/protocol/Redux boundaries unchanged. No browser tooling, production build, or push.
+- Current inventory: Workspace and active widget GridSystem consumers are already gone. Root still mounts GridSystem/Card providers. Axes Settings uses Navs; Axes DisplayPanel uses Image; Spindle uses ImageIcon. Deprecated TopNav is the only remaining Badge/Hoverable/GridSystem consumer.
+- Execution: main performs inventory and contract decisions; no worker dispatched yet. Main model cannot be switched by a repository document; no claim is made that a model selection was applied.
+- Baseline environment: dependencies absent; `yarn` executable absent. Use `node .yarn/releases/yarn-3.3.1.cjs` with task caches under `/tmp`. Sandbox install failed on network socket access; escalated immutable install requested.
+- Status: P3 `todo → in_progress`; browser light/dark/viewport evidence remains deferred to R6.
+
+### P3 implementation review / checkpoint — 2026-10-01
+
+| Family | Decision / last consumers | Replacement / retained domain logic | Deletions / verification |
+| --- | --- | --- | --- |
+| GridSystem | Remove; root provider and zero-consumer TopNav.old were last references | Active layouts already use Tonic Box/Flex; preserve their source breakpoints/layout props | Entire family including Provider/context/Resolver/Stylus; Workspace interaction suite passes |
+| Navs | Replace; Axes Settings | Controlled Tonic Tabs; parent draft retained and inactive fields unmount; no mutation on tab change | Entire family/barrel/Stylus; Settings RED on missing tab role, GREEN 9 tests |
+| Card / CollapsibleCard / shared | Remove; root CardProvider and internal-only compositions/helpers | No externally consumed domain policy/helper remains | Entire three families including contexts/resolvers/styles; frontend and build pass |
+| Image / ImageIcon | Replace; Axes DisplayPanel, Spindle, deprecated TopNav.old | Direct Tonic Image; same SVG assets/pixel dimensions; coolant-driven 2s rotation via Emotion keyframes/sx | Both families; Settings/Spindle focused 17 tests, full frontend pass |
+| Badge / Hoverable | Remove; zero-consumer TopNav.old | No runtime replacement necessary | Entire families and TopNav.old; external alias/relative literal scan found none |
+| Center / Panel / Progress / ProgressBar | Remove; no external production consumers | No domain logic retained in these families; widget-local Axes Panel is distinct | Entire four families and dedicated styles; full frontend/build pass |
+
+- Import review: scanned JS/JSX/Stylus string references under `src` with alias and relative resolution before deletion; only obsolete test mocks remained. Deleted those mocks; added executable P3 import/directory gate. No family assets existed to delete; widget SVG assets retained.
+- Main reviewed actual source/test diff. An initial mock-removal regex removed too much surrounding test setup; review caught it and restored the original six test files before removing only the exact obsolete mock blocks. Final full-suite evidence is after that correction.
+- Fresh commands (working tree with all P3 production/deletion changes): `yarn test:frontend --runInBand` exit 0, **65 suites / 423 tests**; `yarn lint` exit 0, 7 pre-existing ESLint warnings; `yarn exec cross-env NODE_ENV=development webpack-cli --config webpack.config.development.js` exit 0, webpack 5.75.0 compiled with an existing warning; `git diff --check` exit 0. The import gate had a lint-only nested-ternary issue; replaced with equivalent if/else and reran its test (1/1) and ESLint (0 errors). Final lint repeated after correction.
+- Local command logs under `/tmp/cncjs-p3-*` are convenience files; durable evidence is the committed regression tests and reproducible commands above. No browser/simulator/production-build evidence claimed.
+- Protected boundaries: `git diff --name-only -- src/server src/app/lib/controller src/app/store package.json yarn.lock .prettierrc.json` empty. Installed source confirmed Tonic 2.x controlled `index/onChange`, panel visibility and direct Image contract before editing.
+- Status: implementation checklist checked; P3 stays `in_progress`, not completed, because browser theme/viewport gate is deferred. P4 not claimed. No background dev server/simulator started.
+- Next exact step: under user-authorized R6 model, collect light/dark + 1440×900 / 768×900 evidence and reconcile the P3 gate. Until then keep the browser result pending; do not silently mark completed or claim downstream dependency satisfied.

@@ -71,14 +71,6 @@ jest.mock('@app/components/CodePreview', () => ({
   default: ({ data }) => <pre>{data}</pre>,
 }));
 
-jest.mock('@app/components/GridSystem', () => {
-  throw new Error('Probe widget must use Tonic Box directly');
-});
-
-jest.mock('@app/components/Hoverable', () => {
-  throw new Error('Probe widget must use Tonic style props directly');
-});
-
 jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({
   __esModule: true,
   default: ({ children }) => children,

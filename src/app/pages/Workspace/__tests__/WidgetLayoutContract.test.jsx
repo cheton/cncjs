@@ -164,16 +164,6 @@ jest.mock('@tonic-ui/react', () => {
   };
 });
 
-jest.mock('@app/components/GridSystem', () => {
-  const React = require('react');
-  const Container = ({ children, ...props }) => React.createElement('div', props, children);
-  return {
-    Container,
-    Row: Container,
-    Col: Container,
-  };
-});
-
 jest.mock('@app/widgets/shared/WidgetConfigProvider', () => ({ children }) => children);
 jest.mock('@app/widgets/shared/WidgetConfigConsumer', () => ({ children }) => (
   children({ get: (_path, defaultValue) => defaultValue })

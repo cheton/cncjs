@@ -48,6 +48,38 @@ describe('Axes controlled Settings tabs', () => {
     });
   });
 
+  test('keyboard tab changes unmount inactive fields and retain the owner draft without saving', async () => {
+    const user = userEvent.setup();
+    const config = createConfig();
+    const mutateAsync = jest.fn().mockResolvedValue({});
+    useSaveMdiMutation.mockReturnValue({ isPending: false, mutateAsync });
+    const view = renderAppUI(<Settings config={config} />);
+
+    try {
+      fireEvent.change(screen.getByRole('spinbutton', { name: 'Custom Jog Distance (mm) 1' }), {
+        target: { value: '2.5' },
+      });
+      const general = screen.getByRole('tab', { name: 'General' });
+      expect(general).toHaveAttribute('aria-selected', 'true');
+      general.focus();
+      await user.keyboard('{Tab}{Enter}');
+      expect(screen.getByRole('tab', { name: 'Custom Commands' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.queryByRole('spinbutton', { name: 'Custom Jog Distance (mm) 1' })).not.toBeInTheDocument();
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(config.set).not.toHaveBeenCalled();
+
+      await user.click(general);
+      expect(screen.getByRole('spinbutton', { name: 'Custom Jog Distance (mm) 1' })).toHaveValue(2.5);
+      await user.click(screen.getByRole('tab', { name: 'ShuttleXpress' }));
+      expect(screen.getByRole('combobox', { name: 'Repeat Rate' })).toBeInTheDocument();
+      await user.click(screen.getByRole('button', { name: 'Save Changes' }));
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(config.set).toHaveBeenCalledWith('jog.metric.distances', [2.5]);
+    } finally {
+      view.dispose();
+    }
+  });
+
   test('saves the MDI snapshot before writing normalized local settings', async () => {
     const config = createConfig();
     const onSave = jest.fn();

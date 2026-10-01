@@ -1,6 +1,7 @@
 import { ensureArray } from 'ensure-type';
 import {
   Box,
+  Image,
   Menu,
   MenuDivider,
   MenuItem as TonicMenuItem,
@@ -11,7 +12,6 @@ import {
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
 import React, { Children, cloneElement, isValidElement } from 'react';
-import Image from '@app/components/Image';
 import {
   AXIS_E,
   AXIS_X,
@@ -1339,7 +1339,7 @@ function DisplayPanel() {
                     controller.command('gcode', `G28.3 ${axisLabel}0`);
                   }}
                 >
-                  <Image src={iconPin} width="14" height="14" />
+                  <Image src={iconPin} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
               <Tooltip
@@ -1356,7 +1356,7 @@ function DisplayPanel() {
                     controller.command('gcode', axisHomingCommand);
                   }}
                 >
-                  <Image src={iconHome} width="14" height="14" />
+                  <Image src={iconHome} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
             </Box>
@@ -1394,7 +1394,7 @@ function DisplayPanel() {
                     onJog({ [axis]: -distance });
                   }}
                 >
-                  <Image src={iconMinus} width="14" height="14" />
+                  <Image src={iconMinus} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
               <Tooltip
@@ -1412,7 +1412,7 @@ function DisplayPanel() {
                     onJog({ [axis]: distance });
                   }}
                 >
-                  <Image src={iconPlus} width="14" height="14" />
+                  <Image src={iconPlus} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
               <Tooltip
@@ -1429,7 +1429,7 @@ function DisplayPanel() {
                     onSetWorkOffsets(axis, 0);
                   }}
                 >
-                  <Image src={iconPin} width="14" height="14" />
+                  <Image src={iconPin} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
               <Tooltip
@@ -1445,7 +1445,7 @@ function DisplayPanel() {
                   disabled={!canModifyWorkPosition}
                   onClick={showPositionInput(axis, wpos)}
                 >
-                  <Image src={iconPencil} width="14" height="14" />
+                  <Image src={iconPencil} width={14} height={14} />
                 </TaskbarButton>
               </Tooltip>
             </Box>
