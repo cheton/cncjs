@@ -39,9 +39,9 @@ jobs:
         run: yarn lint
       - name: Node and simulator tests
         # Preserve the user-directed SocketConnection exclusion. Existing
-        # simulator planner intervals require forceExit; this is not a clean
-        # shutdown assertion. R6 separately verifies owned browser resources.
-        run: yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles --forceExit
+        # simulator fixture intervals are cleaned up after each test. R6
+        # separately verifies owned browser resources.
+        run: yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles
       - name: Production build
         run: yarn build
       - name: Verify packaged entry points

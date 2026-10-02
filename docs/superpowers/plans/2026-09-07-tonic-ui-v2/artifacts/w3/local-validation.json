@@ -38,13 +38,13 @@
       "log": "lint-final.log"
     },
     {
-      "command": "yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles --forceExit",
+      "command": "yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles",
       "exitCode": 0,
       "suites": 22,
       "tests": 641,
-      "openHandles": 112,
-      "log": "node-final.log",
-      "cleanShutdownProven": false
+      "openHandles": 0,
+      "log": "node-clean-shutdown.log",
+      "cleanShutdownProven": true
     },
     {
       "command": "production-entry/bootstrap focused regressions",
@@ -65,7 +65,21 @@
   "browserEvidence": "Completed R6 artifacts; no new W3 screenshots claimed",
   "productionBuild": {
     "location": "CI only",
-    "status": "pending"
+    "status": "success",
+    "revision": "d745478258dbfe9376c31b5ffe4e36e55aaab3ab",
+    "run": "https://github.com/cheton/cncjs/actions/runs/37016788462"
   },
-  "protectedSourceChanges": 0
+  "protectedSourceChanges": 0,
+  "historicalNodeGate": {
+    "command": "yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles --forceExit",
+    "exitCode": 0,
+    "suites": 22,
+    "tests": 641,
+    "openHandles": 112,
+    "log": "node-final.log",
+    "cleanShutdownProven": false
+  },
+  "testFixtureChanges": [
+    "grbl-simulator/__tests__/grbl-simulator.test.js"
+  ]
 }
