@@ -833,5 +833,49 @@
         }
       }
     }
+  },
+  {
+    "name": "W3 rejects retired direct dependency react-animate-height",
+    "files": {
+      "src/app/pages/View.jsx": "export default function View() { return null; }",
+      "package.json": "{\"dependencies\": {\"react-animate-height\": \"1.0.0\"}}"
+    },
+    "policy": {},
+    "rules": [
+      "legacy-ui"
+    ]
+  },
+  {
+    "name": "W3 rejects retired direct dependency react-datepicker",
+    "files": {
+      "src/app/pages/View.jsx": "export default function View() { return null; }",
+      "package.json": "{\"dependencies\": {\"react-datepicker\": \"1.0.0\"}}"
+    },
+    "policy": {},
+    "rules": [
+      "legacy-ui"
+    ]
+  },
+  {
+    "name": "W3 rejects retired direct dependency react-facebook-loading",
+    "files": {
+      "src/app/pages/View.jsx": "export default function View() { return null; }",
+      "package.json": "{\"dependencies\": {\"react-facebook-loading\": \"1.0.0\"}}"
+    },
+    "policy": {},
+    "rules": [
+      "legacy-ui"
+    ]
+  },
+  {
+    "name": "W3 rejects retired direct dependency uncontrollable",
+    "files": {
+      "src/app/pages/View.jsx": "export default function View() { return null; }",
+      "package.json": "{\"dependencies\": {\"uncontrollable\": \"1.0.0\"}}"
+    },
+    "policy": {},
+    "rules": [
+      "legacy-ui"
+    ]
   }
 ]

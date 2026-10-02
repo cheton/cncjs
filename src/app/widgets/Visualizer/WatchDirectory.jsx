@@ -482,7 +482,7 @@ function WatchDirectory({ state = {}, actions = {} }) {
               marginLeft="auto"
               onClick={() => rootQuery.refetch()}
             >
-              <i aria-hidden="true" className={rootQuery.isFetching ? 'fa fa-refresh fa-spin' : 'fa fa-refresh'} />
+              {rootQuery.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <i aria-hidden="true" className="fa fa-refresh" />}
             </Button>
           </Flex>
           <Box
@@ -569,7 +569,7 @@ function WatchDirectory({ state = {}, actions = {} }) {
             {uploading && (
               <Box className={watchDirectoryStyles.dropzoneHint}>
                 <Box className={watchDirectoryStyles.progressLabel}>
-                  <i aria-hidden="true" className="fa fa-circle-o-notch fa-spin" />
+                  <Spinner size="xs" aria-hidden="true" />
                   <Space width={8} />
                   {i18n._('Upload G-code')} {uploadProgress}%
                 </Box>

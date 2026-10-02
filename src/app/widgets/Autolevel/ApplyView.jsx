@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, LinearProgress, Text } from '@tonic-ui/react';
+import { Box, Button, Spinner, Text } from '@tonic-ui/react';
 import pubsub from 'pubsub-js';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import i18n from '@app/lib/i18n';
@@ -205,9 +205,8 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
         )}
         {pipeline.pipelineState === PIPELINE_PROCESSING && (
           <Box alignItems="center" display="flex" gap="2x">
-            <CircularProgress aria-label={phaseText} size={20} />
+            <Spinner aria-label={phaseText} size="xs" />
             <Text>{phaseText}</Text>
-            <LinearProgress flex="1" />
           </Box>
         )}
         {pipeline.pipelineState === PIPELINE_DONE && (

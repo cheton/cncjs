@@ -1,5 +1,6 @@
 import {
   Space,
+  Spinner,
 } from '@tonic-ui/react';
 import path from 'path';
 import cx from 'classnames';
@@ -92,27 +93,10 @@ TreeNodeToggler.propTypes = {
   expanded: PropTypes.bool
 };
 
-function TreeNodeLoader({ show }) {
-  if (!show) {
-    return null;
-  }
-
-  return (
-    <i
-      style={{ marginLeft: 5 }}
-      className={cx(
-        { 'hidden': !show },
-        'fa',
-        'fa-circle-o-notch',
-        'fa-fw',
-        { 'fa-spin': show }
-      )}
-    />
-  );
+/** @param {{ show?: boolean }} props */
+function TreeNodeLoader({ show = false }) {
+  return show ? <Spinner size="xs" ml={5} aria-label={i18n._('Loading...')} /> : null;
 }
-TreeNodeLoader.propTypes = {
-  show: PropTypes.bool
-};
 
 const renderer = (node, treeOptions) => {
   const { id, loadOnDemand = false } = node;

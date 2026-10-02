@@ -7,7 +7,8 @@ const { parseSync, traverse } = require('@babel/core');
 const posix = filename => filename.split(path.sep).join('/');
 const propertyName = node => node?.name || node?.value;
 const bannedPackages = ['styled-components', 'react-repeatable', 'react-foreach', 'react-infinite-tree',
-  'rc-trigger', 'react-bootstrap-buttons', 'react-select', 'create-react-class'];
+  'rc-trigger', 'react-bootstrap-buttons', 'react-select', 'create-react-class',
+  'react-animate-height', 'react-datepicker', 'react-facebook-loading', 'uncontrollable'];
 const httpPackages = ['axios', 'superagent', 'superagent-use'];
 const dangerousMembers = ['findDOMNode', 'getWrappedInstance', 'useImperativeHandle', 'widgetMap', 'primaryWidgets', 'secondaryWidgets'];
 const readSources = directory => (fs.existsSync(directory) ? fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {

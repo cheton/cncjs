@@ -45,10 +45,10 @@
 
 **Modify:** `package.json`, `yarn.lock`, `src/app/styles/vendor.styl`、失去 consumers 的各 component styles。僅在 packaging 顯示需要時更動 `src/package.json`；不能盲目把前端套件塞進 server runtime manifest。
 
-- [ ] 確認全部 Buttons consumers 清空後 `yarn remove react-bootstrap-buttons`，刪其 CSS import 和 override.styl。Bootstrap UI package 不可保留相容性例外；以 manifest、import graph 與既有 Button 功能驗收確認沒有直接 Bootstrap runtime package、CSS import 或本地 re-export。若整合驗收證明 CNCjs 色票／語意必須保留，可保留 `src/app/components/Button`，但它必須直接使用 Tonic Button，且不可轉接 Bootstrap API。名稱含 `bootstrap` 的 CNCjs saga 不屬於 UI library。若 Q2 尚未移除無 consumers 的 XState，在本 task 移除。
-- [ ] 用 `yarn why <package>` 與全 src imports 判斷 `rc-trigger`、`uncontrollable`、`react-facebook-loading`、`react-animate-height`、`react-datepicker`、`react-select`、`react-infinite-tree` 等是否因本輪失去最後使用者；只刪這些確定被替代的 direct dependencies。第三方仍需的 transitive package 不強行 resolutions 到零。
-- [ ] 保留 @trendmicro/babel-config / eslint-config-trendmicro；目標是 UI packages，不是 npm scope 名稱清洗。
-- [ ] 以下命令作首輪負向掃描，另外以 AST／import resolution 檢查 alias inheritance、relative re-exports；rg 不能證明全部。
+- [x] 確認全部 Buttons consumers 清空後 `yarn remove react-bootstrap-buttons`，刪其 CSS import 和 override.styl。Bootstrap UI package 不可保留相容性例外；以 manifest、import graph 與既有 Button 功能驗收確認沒有直接 Bootstrap runtime package、CSS import 或本地 re-export。若整合驗收證明 CNCjs 色票／語意必須保留，可保留 `src/app/components/Button`，但它必須直接使用 Tonic Button，且不可轉接 Bootstrap API。名稱含 `bootstrap` 的 CNCjs saga 不屬於 UI library。若 Q2 尚未移除無 consumers 的 XState，在本 task 移除。
+- [x] 用 `yarn why <package>` 與全 src imports 判斷 `rc-trigger`、`uncontrollable`、`react-facebook-loading`、`react-animate-height`、`react-datepicker`、`react-select`、`react-infinite-tree` 等是否因本輪失去最後使用者；只刪這些確定被替代的 direct dependencies。第三方仍需的 transitive package 不強行 resolutions 到零。
+- [x] 保留 @trendmicro/babel-config / eslint-config-trendmicro；目標是 UI packages，不是 npm scope 名稱清洗。
+- [x] 以下命令作首輪負向掃描，另外以 AST／import resolution 檢查 alias inheritance、relative re-exports；rg 不能證明全部。
 
 ```bash
 rg -n '@trendmicro/react-|react-bootstrap-buttons|createFetchMachine|fetchMacrosService' src package.json
@@ -58,7 +58,7 @@ rg -n "(app/components/|components/)(Buttons|Dropdown|Modal|GridSystem|Navs|Chec
 rg -n 'styled-components|react-infinite-tree|react-repeatable|rc-trigger|react-foreach' src/app package.json
 ```
 
-- [ ] 目標模式無輸出；`rc-slider`、`@fortawesome/*` 及經逐檔說明的 react-select 例外依 00-design 核對。react-datepicker 無 consumers 才刪。合法 DOM ref/第三方 resource refs 不算違規；不能保留 collapse/expand/settings instance API。
+- [x] 目標模式無輸出；`rc-slider`、`@fortawesome/*` 及經逐檔說明的 react-select 例外依 00-design 核對。react-datepicker 無 consumers 才刪。合法 DOM ref/第三方 resource refs 不算違規；不能保留 collapse/expand/settings instance API。
 - [x] 建立防回歸檢查 `scripts/check-ui-migration.js`：用 AST/import graph 掃 React class inheritance、legacy UI imports、禁止的 component instance patterns，`yarn check:ui-migration` 納入現有 CI 合適 gate。測試 fixture 包含 aliased Component 與 relative barrel 以免只比字串。
 - [ ] 執行完整驗證：
 
@@ -71,6 +71,8 @@ yarn test --runInBand
 yarn build
 ```
 
-- [ ] Browser：依 [09a — browser procedure](details/09a-browser-procedure.md) 跑所有 17 widgets、Workspace 排序/管理、Administration CRUD、登入/登出切換、light/dark/auto、窄/寬視窗、modal focus/keyboard、browser fullscreen、WebGL、console 長時輸出。
-- [ ] 以 mock transport/simulator 驗證 CNC 指令未重送；frontend tests、backend tests、browser、simulator 分別列實際結果和未覆蓋項。
-- [ ] inventory 每個 family/task 勾清，execution log 記錄最終保留 domain components 與 API 證據；不以 compile 成功代替完成。
+- [x] Browser：依 [09a — browser procedure](details/09a-browser-procedure.md) 跑所有 17 widgets、Workspace 排序/管理、Administration CRUD、登入/登出切換、light/dark/auto、窄/寬視窗、modal focus/keyboard、browser fullscreen、WebGL、console 長時輸出。
+- [x] 以 mock transport/simulator 驗證 CNC 指令未重送；frontend tests、backend tests、browser、simulator 分別列實際結果和未覆蓋項。
+- [x] inventory 每個 family/task 勾清，execution log 記錄最終保留 domain components 與 API 證據；不以 compile 成功代替完成。
+
+W3 current evidence (2026-10-02): [final reconciliation](w3-final-reconciliation.md), [dependency audit](artifacts/w3/dependency-audit.json), [local gates](artifacts/w3/local-validation.json). R6 completed browser/command/resource evidence is retained. User requested Spinner loading; Tonic bootstrap SSR/production vendor discovery are additionally tested. Node preserves prior SocketConnection exclusion and forceExit/112inheritedinterval limitation. Production build is CI-only under the standing handoff rule; full-verification checkbox remains open until CI passes.

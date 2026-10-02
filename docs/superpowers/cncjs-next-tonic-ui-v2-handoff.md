@@ -21,9 +21,9 @@
 | HEAD | `ae070b9f`（B3 已 commit/push；R6 尚未 commit） |
 | 工作樹 | R6 source fixes、tests、browser artifacts 與 ledger 納入本次交付 commit |
 | 未 push | 使用者已授權 R6 commit/push；接手時以 git status/log 核對實際狀態 |
-| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。下一階段 W3 todo。 |
+| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。W3 in_progress。 |
 | 最近完成 | R6 browser/performance gates completed；B3 HEAD `ae070b9f`，R6 尚未 commit |
-| 下一步推薦 | W3 dependency/final production/CI gate；R6 已完成，W3 尚未開始。 |
+| 下一步推薦 | W3 local gates 已通過；production build 由 CI 驗證。 |
 | Open gaps | advanced Visualizer 14 gates、13 個通用 widget view contracts 及雙 viewport 主題已通過；controller replay、matched performance、console classification 與 cleanup 未完成 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -38,6 +38,10 @@
 - Console patterns classified against baseline; Macro nested-button/keyboard and Webcam provider/live-settings regressions fixed test-first and browser-verified. All synthetic users/machines/commands/events/macros removed, owned R6 processes stopped, ports8000/8080/8082 closed. All17locales retain only9required Machines keys beyond HEAD.
 - Auto-review originally rejected broad /tmp deletion. The user subsequently authorized cleanup: all reviewed R6 temporary config/auth/log/fixture files, baseline checkout and temporary Playwright caches are now deleted; repository evidence remains.
 
+## W3 current execution — 2026-10-02
+
+Four retired direct dependencies/CSS removed; loading uses Tonic Spinner including bootstrap SSR. Production vendor excludes test harness imports after a red/green regression. Immutable install, guard68tests/0violations, frontend78/501, lint0errors/4warnings and Node22/641 (SocketConnection excluded,112inheritedintervals/forceExit) pass. R6 browser evidence retained. W3 production build runs only in read-only CI validation; pending result prevents W3 completion. See [W3 reconciliation](plans/2026-09-07-tonic-ui-v2/w3-final-reconciliation.md).
+
 ## 下一個可執行項目
 
 P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零匯入、`react-select` 移除、rc-slider 按設計保留，且每個表單都有鍵盤操作與無效提交的具體證據。Browser evidence 延後至 R6。
@@ -45,7 +49,7 @@ P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
 | **R6** [browser/performance validation](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | B3、R4、R5 ✅ | 補齊 deferred browser/performance evidence | **Completed：2026-10-02；下一階段 W3 todo** |
-| **W3** [dependency cleanup and final gate](plans/2026-09-07-tonic-ui-v2/08-workspace-and-cleanup.md) | R6 ✅ | 最終依賴／production／CI gate | **Todo；尚未開始** |
+| **W3** [dependency cleanup and final gate](plans/2026-09-07-tonic-ui-v2/08-workspace-and-cleanup.md) | R6 ✅ | 最終依賴／production／CI gate | **In progress；local gates pass，CI production pending** |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 

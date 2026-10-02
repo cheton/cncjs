@@ -1,4 +1,4 @@
-import { Space } from '@tonic-ui/react';
+import { Space, Spinner } from '@tonic-ui/react';
 import classNames from 'classnames';
 import { ensureNumber, ensureString } from 'ensure-type';
 import produce from 'immer';
@@ -233,7 +233,7 @@ function ToolWidget({
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             <Widget.Button aria-label={i18n._('Refresh tool configuration')} title={i18n._('Refresh')} onClick={refresh}>
-              <i aria-hidden="true" className={classNames('fa', 'fa-refresh', { 'fa-spin': query.isFetching })} />
+              {query.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <i aria-hidden="true" className="fa fa-refresh" />}
             </Widget.Button>
             <Widget.Button
               aria-label={i18n._(isCollapsed ? 'Expand' : 'Collapse')} aria-expanded={!isCollapsed} disabled={isFullscreen}

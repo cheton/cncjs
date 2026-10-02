@@ -5,6 +5,7 @@ import {
   Button,
   Flex,
   Space,
+  Spinner,
   Text,
   useColorMode,
   useColorStyle,
@@ -154,7 +155,11 @@ function Macro({
       {(() => {
         if (fetchMacrosQuery.isLoading && !hasData) {
           return (
-            <Box px="3x" py="2x">
+            <Box
+              px="3x" py="2x" display="flex"
+              alignItems="center" role="status"
+            >
+              <Spinner size="xs" mr="2x" aria-hidden="true" />
               <Text color={secondaryColor}>
                 {i18n._('Loading...')}
               </Text>
