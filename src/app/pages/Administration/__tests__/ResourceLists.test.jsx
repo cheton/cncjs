@@ -10,6 +10,11 @@ import Machines from '../Machines/Machines';
 import Macros from '../Macros/Macros';
 import Users from '../Users/Users';
 
+// These integration cases exercise several real Tonic menus/drawers and CRUD
+// transitions. Intel macOS CI can exceed the default 10s case budget; retain
+// every interaction/assertion and the normal per-query waitFor deadlines.
+jest.setTimeout(30000);
+
 jest.mock('@app/components/CodePreview', () => ({
   __esModule: true,
   default: () => null,
