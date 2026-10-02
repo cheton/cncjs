@@ -56,6 +56,13 @@
     {
       "command": "git diff --check",
       "exitCode": 0
+    },
+    {
+      "command": "yarn test:frontend --runInBand src/app/pages/Administration/__tests__/ResourceLists.test.jsx",
+      "exitCode": 0,
+      "suites": 1,
+      "tests": 20,
+      "log": "resource-lists-budget.log"
     }
   ],
   "testFirst": {
@@ -66,8 +73,9 @@
   "productionBuild": {
     "location": "CI only",
     "status": "success",
-    "revision": "d745478258dbfe9376c31b5ffe4e36e55aaab3ab",
-    "run": "https://github.com/cheton/cncjs/actions/runs/37016788462"
+    "revision": "b0612c796e3ddf6aa445933a66047a8aa83db6f5",
+    "run": "https://github.com/cheton/cncjs/actions/runs/37020168380",
+    "evidence": "ci-production-budget-fix.json"
   },
   "protectedSourceChanges": 0,
   "historicalNodeGate": {

@@ -60,7 +60,7 @@ rg -n 'styled-components|react-infinite-tree|react-repeatable|rc-trigger|react-f
 
 - [x] 目標模式無輸出；`rc-slider`、`@fortawesome/*` 及經逐檔說明的 react-select 例外依 00-design 核對。react-datepicker 無 consumers 才刪。合法 DOM ref/第三方 resource refs 不算違規；不能保留 collapse/expand/settings instance API。
 - [x] 建立防回歸檢查 `scripts/check-ui-migration.js`：用 AST/import graph 掃 React class inheritance、legacy UI imports、禁止的 component instance patterns，`yarn check:ui-migration` 納入現有 CI 合適 gate。測試 fixture 包含 aliased Component 與 relative barrel 以免只比字串。
-- [ ] 執行完整驗證：
+- [x] 執行完整驗證：
 
 ```bash
 yarn install --immutable
@@ -75,4 +75,4 @@ yarn build
 - [x] 以 mock transport/simulator 驗證 CNC 指令未重送；frontend tests、backend tests、browser、simulator 分別列實際結果和未覆蓋項。
 - [x] inventory 每個 family/task 勾清，execution log 記錄最終保留 domain components 與 API 證據；不以 compile 成功代替完成。
 
-W3 current evidence (2026-10-02): [final reconciliation](w3-final-reconciliation.md), [dependency audit](artifacts/w3/dependency-audit.json), [local gates](artifacts/w3/local-validation.json). R6 completed browser/command/resource evidence is retained. User requested Spinner loading; Tonic bootstrap SSR/production vendor discovery are additionally tested. Node preserves prior SocketConnection exclusion and forceExit/112inheritedinterval limitation. Production build is CI-only under the standing handoff rule; full-verification checkbox remains open until CI passes.
+W3 completed evidence (2026-10-02): [final reconciliation](w3-final-reconciliation.md), [dependency audit](artifacts/w3/dependency-audit.json), [local gates](artifacts/w3/local-validation.json). R6 browser/command/resource evidence retained. Waits use Spinner; determinate values use Tonic LinearProgress. Node22/641 exits naturally after fixture timer cleanup with the prior local SocketConnection exclusion; shared platform CI retains full Node coverage. Production build is CI-only and passes on b0612c79 (run37020168380), including package checks/artifact upload. All four platform full checks pass on that revision (run37020178338); scoped ResourceLists30s total-case budget preserves all assertions/query deadlines. Windows binaries succeed; other platform binary packaging is still running at snapshot and is not claimed complete.
