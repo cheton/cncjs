@@ -7,9 +7,10 @@ const useFetchUsersQuery = (options) => {
   const query = options?.meta?.query;
   return useQuery({
     queryKey: [...API_USERS_QUERY_KEY, query].filter(Boolean),
-    queryFn: async ({ queryKey, meta }) => {
-      const url = meta.query
-        ? 'api/users?' + meta.query
+    queryFn: async ({ meta }) => {
+      const query = meta?.query;
+      const url = query
+        ? 'api/users?' + query
         : 'api/users';
       const response = await axios.get(url);
       return response.data;

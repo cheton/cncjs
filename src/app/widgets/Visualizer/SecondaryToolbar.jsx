@@ -124,7 +124,7 @@ function useRepeatable(onAction, disabled) {
  */
 function CameraIconButton({ children, label, onClick, selected = false }) {
   return (
-    <Tooltip label={label} shouldWrapChildren placement="top">
+    <Tooltip label={label} placement="top">
       <Button
         aria-label={label}
         onClick={onClick}
@@ -163,7 +163,7 @@ function RepeatableCameraButton({ children, label, onClick }) {
   };
 
   return (
-    <Tooltip label={label} shouldWrapChildren placement="top">
+    <Tooltip label={label} placement="top">
       <Button
         {...repeatableProps}
         aria-label={label}
@@ -259,8 +259,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconTopView}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </CameraIconButton>
               <CameraIconButton
@@ -271,8 +271,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconFrontView}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </CameraIconButton>
               <CameraIconButton
@@ -283,8 +283,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconRightSideView}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </CameraIconButton>
               <CameraIconButton
@@ -295,8 +295,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconLeftSideView}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </CameraIconButton>
               <CameraIconButton
@@ -307,8 +307,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={icon3DView}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </CameraIconButton>
               <RepeatableCameraButton
@@ -318,8 +318,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconZoomFit}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </RepeatableCameraButton>
               <RepeatableCameraButton
@@ -329,8 +329,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconZoomIn}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </RepeatableCameraButton>
               <RepeatableCameraButton
@@ -340,8 +340,8 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={iconZoomOut}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </RepeatableCameraButton>
             </ButtonGroup>
@@ -354,18 +354,18 @@ function SecondaryToolbar({
                 <Image
                   aria-hidden="true"
                   src={cameraMode === CAMERA_MODE_PAN ? iconMoveCamera : iconRotateCamera}
-                  width="20"
-                  height="20"
+                  width={20}
+                  height={20}
                 />
               </MenuButton>
               <MenuList>
                 <MenuItem onClick={camera.toPanMode}>
-                  <Image src={iconMoveCamera} width="20" height="20" />
+                  <Image src={iconMoveCamera} width={20} height={20} />
                   <Space width={4} />
                   {i18n._('Move the camera')}
                 </MenuItem>
                 <MenuItem onClick={camera.toRotateMode}>
-                  <Image src={iconRotateCamera} width="20" height="20" />
+                  <Image src={iconRotateCamera} width={20} height={20} />
                   <Space width={4} />
                   {i18n._('Rotate the camera')}
                 </MenuItem>

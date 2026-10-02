@@ -251,6 +251,26 @@ describe('Visualizer secondary toolbar machine profiles', () => {
 
     expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['api/machines'] });
   });
+
+  test('keeps camera controls as direct tooltip targets inside the button group', () => {
+    const camera = {
+      toTopView: jest.fn(),
+      toFrontView: jest.fn(),
+      toRightSideView: jest.fn(),
+      toLeftSideView: jest.fn(),
+      to3DView: jest.fn(),
+      zoomFit: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+    };
+
+    renderAppUI(<SecondaryToolbar is3DView camera={camera} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Front View' }));
+
+    expect(camera.toFrontView).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Front View' })).toBeInTheDocument();
+  });
 });
 
 describe('Visualizer dashboard download handoff', () => {

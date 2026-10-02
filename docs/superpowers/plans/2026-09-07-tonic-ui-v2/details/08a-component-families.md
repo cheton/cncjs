@@ -82,7 +82,7 @@
 
 **Implementation checkpoint (2026-10-01):** all 13 families, their contexts/resolvers/barrels/styles, and zero-consumer TopNav.old are deleted. TopNav.old removal is the planned P6 cleanup performed early to release the last deprecated GridSystem/Badge/Hoverable/Image consumers. Active Workspace/widget/modal layouts already use Tonic; their layout props/styles were preserved. Axes Tabs retain conditional inactive-child unmount and owner drafts; Spindle retains fan SVGs, 16px size and coolant-driven 2s rotation. No P3 domain helper remains; Axes `widgets/Axes/components/Panel` is a separate domain component. Full frontend 65 suites / 423 tests, lint, development webpack, and diff checks pass.
 
-**Gate (still pending):** P3 family imports 為零，除非 execution log 有具名 domain composition + test；`context.jsx` 不再掛 GridSystemProvider；light/dark、1440×900、768×900 browser checks 過。
+**Gate (passed during R6, 2026-10-01):** P3 family imports remain zero and GridSystemProvider is absent. `artifacts/browser/r6-20261001-luna/workspace-gates.json` and theme screenshots prove light/dark/device at1440×900/768×900, DPR1, bounded page/canvas, readable text and actual mouse/keyboard reachability. Initial narrow overflow, pale dark panels and intrinsic500px camera images were fixed before the final pass. Broader R6 performance/resource/workflow gates remain pending.
 
 ## Task P4：Administration/table vertical slice
 

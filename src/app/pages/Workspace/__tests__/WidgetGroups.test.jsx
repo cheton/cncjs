@@ -234,6 +234,11 @@ jest.mock('@tonic-ui/react', () => {
     children
   );
   return {
+    useColorStyle: () => [{
+      background: { secondary: '#f6f7f8' },
+      color: { primary: '#222' },
+      divider: '#ccc',
+    }],
     Box: Primitive,
     Button,
     ButtonGroup: Primitive,

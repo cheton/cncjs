@@ -61,11 +61,12 @@ jest.mock('@tonic-ui/react', () => {
     }),
     children
   );
-  const Checkbox = ({ checked, children, disabled, onChange, ...props }) => React.createElement(
+  const Checkbox = ({ checked, children, disabled, inputProps = {}, onChange, ...props }) => React.createElement(
     'label',
     null,
     React.createElement('input', {
       ...props,
+      ...inputProps,
       checked,
       disabled,
       onChange,

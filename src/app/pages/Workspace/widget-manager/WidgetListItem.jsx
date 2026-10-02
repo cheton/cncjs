@@ -70,9 +70,9 @@ function WidgetListItem({
             {caption}
           </Box>
           <Checkbox
-            aria-label={caption}
             checked={checked}
             disabled={disabled}
+            inputProps={{ 'aria-label': caption }}
             title={checked ? i18n._('On') : i18n._('Off')}
             onChange={handleChange}
           />

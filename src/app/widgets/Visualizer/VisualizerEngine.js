@@ -23,6 +23,17 @@ import TextSprite from './TextSprite';
 import GCodeVisualizer from './GCodeVisualizer';
 import ProbeVisualization from './ProbeVisualization';
 import {
+  beginVisualizerLoad,
+  cancelVisualizerLoad,
+  cancelOwnedAnimationFrame,
+  recordOwnedListenerDelta,
+  recordVisualizerRender,
+  registerVisualizerEngine,
+  requestOwnedAnimationFrame,
+  unregisterVisualizerEngine,
+  updateVisualizerEngineMetrics,
+} from './metrics';
+import {
   CAMERA_MODE_PAN,
   CAMERA_MODE_ROTATE
 } from './constants';
@@ -137,26 +148,81 @@ class VisualizerEngine {
       });
     });
 
-    this.createScene();
-    this.resize();
+    const initialPivot = this.pivotPoint.get();
+    registerVisualizerEngine(this, {
+      width: this.getVisibleWidth(),
+      height: this.getVisibleHeight(),
+      canvasAttached: false,
+      pivotX: initialPivot.x,
+      pivotY: initialPivot.y,
+      pivotZ: initialPivot.z,
+      cameraPosition: this.viewState.cameraPosition,
+      cameraMode: this.viewState.cameraMode,
+      projection: this.viewState.projection,
+      units: this.viewState.units,
+      hasGCode: false,
+      limitsVisible: this.viewState.objects.limits.visible,
+      coordinateSystemVisible: this.viewState.objects.coordinateSystem.visible,
+      gridLineNumbersVisible: this.viewState.objects.gridLineNumbers.visible,
+      cuttingToolVisible: this.viewState.objects.cuttingTool.visible,
+    });
 
-    // The initial machine profile must pass through the same profile pipeline
-    // as later profile changes. Starting with a null profile makes that first
-    // update observable even when the store already contains a profile.
-    const initialState = normalizeViewState(viewState);
-    this.viewState = emptyViewState();
-    this.update(initialState);
+    try {
+      this.createScene();
+      this.resize();
+
+      // The initial machine profile must pass through the same profile pipeline
+      // as later profile changes. Starting with a null profile makes that first
+      // update observable even when the store already contains a profile.
+      const initialState = normalizeViewState(viewState);
+      this.viewState = emptyViewState();
+      this.update(initialState);
+    } catch (error) {
+      this.dispose();
+      throw error;
+    }
   }
 
   getVisibleWidth() {
     return Math.max(
       ensurePositiveNumber(this.container && this.container.clientWidth),
-      360
+      1
     );
   }
 
   getVisibleHeight() {
     return ensurePositiveNumber(this.container && this.container.clientHeight);
+  }
+
+  updatePivotMetrics() {
+    const pivot = this.pivotPoint.get();
+    updateVisualizerEngineMetrics(this, {
+      pivotX: pivot.x,
+      pivotY: pivot.y,
+      pivotZ: pivot.z,
+    });
+  }
+
+  updateGCodeWorldCenterMetrics() {
+    if (process.env.NODE_ENV !== 'development') {
+      return;
+    }
+    const object = this.group && this.group.getObjectByName('Visualizer');
+    if (!object) {
+      updateVisualizerEngineMetrics(this, {
+        gcodeWorldCenterX: null,
+        gcodeWorldCenterY: null,
+        gcodeWorldCenterZ: null,
+      });
+      return;
+    }
+    const worldBounds = new THREE.Box3().setFromObject(object);
+    const worldCenter = worldBounds.getCenter(new THREE.Vector3());
+    updateVisualizerEngineMetrics(this, {
+      gcodeWorldCenterX: worldCenter.x,
+      gcodeWorldCenterY: worldCenter.y,
+      gcodeWorldCenterZ: worldCenter.z,
+    });
   }
 
   update(nextViewState = {}) {
@@ -174,6 +240,18 @@ class VisualizerEngine {
       },
     });
     this.viewState = state;
+    if (process.env.NODE_ENV === 'development') {
+      updateVisualizerEngineMetrics(this, {
+        cameraPosition: state.cameraPosition || null,
+        cameraMode: state.cameraMode,
+        projection: state.projection,
+        units: state.units,
+        limitsVisible: state.objects.limits.visible,
+        coordinateSystemVisible: state.objects.coordinateSystem.visible,
+        gridLineNumbersVisible: state.objects.gridLineNumbers.visible,
+        cuttingToolVisible: state.objects.cuttingTool.visible,
+      });
+    }
 
     let forceUpdate = false;
     let needUpdateScene = false;
@@ -336,6 +414,11 @@ class VisualizerEngine {
 
     this.appendedCanvas = this.renderer.domElement;
     this.container.appendChild(this.appendedCanvas);
+    updateVisualizerEngineMetrics(this, {
+      canvasAttached: this.appendedCanvas.parentNode === this.container,
+      width,
+      height,
+    });
 
     this.scene = new THREE.Scene();
     this.camera = this.createCombinedCamera(width, height);
@@ -396,7 +479,8 @@ class VisualizerEngine {
       this.camera,
       this.renderer.domElement,
       this.controls,
-      () => this.updateScene({ forceUpdate: true })
+      () => this.updateScene({ forceUpdate: true }),
+      this
     );
     this.probeVisualization.group.name = 'ProbeVisualization';
     this.probeVisualization.group.visible = false;
@@ -742,12 +826,14 @@ class VisualizerEngine {
     if (!this.machineProfile) {
       if (!this.gcodeVisualizer) {
         this.pivotPoint.set(0, 0, 0);
+        this.updatePivotMetrics();
       }
       this.updateCuttingToolPosition();
       this.updateCuttingPointerPosition();
       this.updateLimitsPosition();
       this.updateProbeVisualizationPosition();
       this.rebuildCoordinateSystems();
+      this.updateGCodeWorldCenterMetrics();
       this.updateScene();
       return;
     }
@@ -767,6 +853,7 @@ class VisualizerEngine {
 
     if (!this.gcodeVisualizer) {
       this.pivotPoint.set((xmin + xmax) / 2, (ymin + ymax) / 2, 0);
+      this.updatePivotMetrics();
     }
 
     this.updateCuttingToolPosition();
@@ -774,6 +861,7 @@ class VisualizerEngine {
     this.updateLimitsPosition();
     this.updateProbeVisualizationPosition();
     this.rebuildCoordinateSystems();
+    this.updateGCodeWorldCenterMetrics();
     this.updateScene();
   }
 
@@ -799,6 +887,7 @@ class VisualizerEngine {
 
     this.renderer.setPixelRatio(getRenderPixelRatio());
     this.renderer.setSize(width, height);
+    updateVisualizerEngineMetrics(this, { width, height });
     this.updateScene();
   }
 
@@ -811,8 +900,53 @@ class VisualizerEngine {
     const needUpdateScene = this.viewState.show || forceUpdate;
 
     if (this.renderer && needUpdateScene) {
+      const renderStartedAt = process.env.NODE_ENV === 'development' ? performance.now() : 0;
       this.renderer.render(this.scene, this.camera);
+      const renderDurationMs = process.env.NODE_ENV === 'development'
+        ? performance.now() - renderStartedAt
+        : 0;
+      const renderCompletedAtMs = process.env.NODE_ENV === 'development' ? performance.now() : undefined;
+      const sceneMetrics = process.env.NODE_ENV === 'development' ? this.getDevelopmentSceneMetrics() : undefined;
+      recordVisualizerRender(
+        this,
+        this.renderer.info && this.renderer.info.memory,
+        renderDurationMs,
+        sceneMetrics,
+        renderCompletedAtMs,
+      );
     }
+  }
+
+  getDevelopmentSceneMetrics() {
+    const cameraPosition = this.camera && this.camera.position;
+    const cameraRotation = this.camera && this.camera.rotation;
+    const target = this.controls && this.controls.target;
+    const getVisible = name => {
+      const object = this.group && this.group.getObjectByName(name);
+      return !!(object && object.visible);
+    };
+    const coordinateSystemVisible = getVisible('MetricCoordinateSystem') || getVisible('ImperialCoordinateSystem');
+    const gridLineNumbersVisible = getVisible('MetricGridLineNumbers') || getVisible('ImperialGridLineNumbers');
+
+    return {
+      cameraX: cameraPosition ? cameraPosition.x : null,
+      cameraY: cameraPosition ? cameraPosition.y : null,
+      cameraZ: cameraPosition ? cameraPosition.z : null,
+      cameraRotationX: cameraRotation ? cameraRotation.x : null,
+      cameraRotationY: cameraRotation ? cameraRotation.y : null,
+      cameraRotationZ: cameraRotation ? cameraRotation.z : null,
+      cameraTargetX: target ? target.x : null,
+      cameraTargetY: target ? target.y : null,
+      cameraTargetZ: target ? target.z : null,
+      cameraDistance: cameraPosition && target ? cameraPosition.distanceTo(target) : null,
+      cameraZoom: this.camera ? this.camera.zoom : null,
+      cameraFov: this.camera ? this.camera.fov : null,
+      projectionModeOrthographic: !!(this.camera && this.camera.inOrthographicMode),
+      sceneLimitsVisible: !!(this.limits && this.limits.visible),
+      sceneCoordinateSystemVisible: coordinateSystemVisible,
+      sceneGridLineNumbersVisible: gridLineNumbersVisible,
+      sceneCuttingToolVisible: !!(this.cuttingTool && this.cuttingTool.visible),
+    };
   }
 
   createCombinedCamera(width, height) {
@@ -857,7 +991,7 @@ class VisualizerEngine {
       controls.update();
       this.updateScene();
       if (this.shouldAnimateControls && typeof requestAnimationFrame === 'function') {
-        this.controlsAnimationFrame = requestAnimationFrame(() => animate(generation));
+        this.controlsAnimationFrame = requestOwnedAnimationFrame(this, () => animate(generation));
       }
     };
 
@@ -881,6 +1015,7 @@ class VisualizerEngine {
     controls.addEventListener('start', this.controlsStartHandler);
     controls.addEventListener('end', this.controlsEndHandler);
     controls.addEventListener('change', this.controlsChangeHandler);
+    recordOwnedListenerDelta(this, 3);
 
     return controls;
   }
@@ -903,13 +1038,13 @@ class VisualizerEngine {
       return;
     }
     const generation = ++this.agitationAnimationGeneration;
-    this.agitationAnimationFrame = requestAnimationFrame(() => this.renderAnimationLoop(generation));
+    this.agitationAnimationFrame = requestOwnedAnimationFrame(this, () => this.renderAnimationLoop(generation));
   }
 
   cancelAgitation() {
     this.agitationAnimationGeneration += 1;
     if (this.agitationAnimationFrame !== null && typeof cancelAnimationFrame === 'function') {
-      cancelAnimationFrame(this.agitationAnimationFrame);
+      cancelOwnedAnimationFrame(this, this.agitationAnimationFrame);
     }
     this.agitationAnimationFrame = null;
   }
@@ -928,14 +1063,14 @@ class VisualizerEngine {
     this.updateScene();
 
     if (this.isAgitated && typeof requestAnimationFrame === 'function') {
-      this.agitationAnimationFrame = requestAnimationFrame(() => this.renderAnimationLoop(generation));
+      this.agitationAnimationFrame = requestOwnedAnimationFrame(this, () => this.renderAnimationLoop(generation));
     }
   };
 
   cancelControlsAnimation() {
     this.controlsAnimationGeneration += 1;
     if (this.controlsAnimationFrame !== null && typeof cancelAnimationFrame === 'function') {
-      cancelAnimationFrame(this.controlsAnimationFrame);
+      cancelOwnedAnimationFrame(this, this.controlsAnimationFrame);
     }
     this.controlsAnimationFrame = null;
   }
@@ -1023,15 +1158,24 @@ class VisualizerEngine {
     this.updateScene();
   }
 
-  load({ content } = {}) {
+  load({ name, content } = {}) {
     // `name` is intentionally accepted for owner metadata. Parsing is based
     // only on the supplied content and remains synchronous.
     this.unload();
 
+    beginVisualizerLoad(this, name);
     this.gcodeVisualizer = new GCodeVisualizer();
-    const object = this.gcodeVisualizer.render(content);
+    let object;
+    try {
+      object = this.gcodeVisualizer.render(content);
+    } catch (error) {
+      // A failed parse must not leave a load sample pending for another file.
+      cancelVisualizerLoad(this);
+      throw error;
+    }
     object.name = 'Visualizer';
     this.group.add(object);
+    updateVisualizerEngineMetrics(this, { hasGCode: true });
 
     const bbox = getBoundingBox(object);
     const dX = bbox.max.x - bbox.min.x;
@@ -1044,7 +1188,9 @@ class VisualizerEngine {
     );
 
     this.pivotPoint.set(center.x, center.y, center.z);
+    this.updatePivotMetrics();
     object.position.set(-center.x, -center.y, -center.z);
+    this.updateGCodeWorldCenterMetrics();
 
     this.updateCuttingToolPosition();
     this.updateCuttingPointerPosition();
@@ -1063,6 +1209,7 @@ class VisualizerEngine {
   }
 
   unload() {
+    cancelVisualizerLoad(this);
     const visualizerObject = this.group.getObjectByName('Visualizer');
     if (visualizerObject) {
       this.group.remove(visualizerObject);
@@ -1075,13 +1222,21 @@ class VisualizerEngine {
     }
 
     this.gcodeVisualizer = null;
+    if (process.env.NODE_ENV === 'development') {
+      this.updateGCodeWorldCenterMetrics();
+      updateVisualizerEngineMetrics(this, { hasGCode: false });
+    } else {
+      updateVisualizerEngineMetrics(this, { hasGCode: false });
+    }
 
     if (this.machineProfile) {
       const limits = _get(this.machineProfile, 'limits');
       const { xmin = 0, xmax = 0, ymin = 0, ymax = 0 } = { ...limits };
       this.pivotPoint.set((xmin + xmax) / 2, (ymin + ymax) / 2, 0);
+      this.updatePivotMetrics();
     } else {
       this.pivotPoint.set(0, 0, 0);
+      this.updatePivotMetrics();
     }
 
     this.updateCuttingToolPosition();
@@ -1395,6 +1550,7 @@ class VisualizerEngine {
         this.controls.removeEventListener('start', this.controlsStartHandler);
         this.controls.removeEventListener('end', this.controlsEndHandler);
         this.controls.removeEventListener('change', this.controlsChangeHandler);
+        recordOwnedListenerDelta(this, -3);
       }
       if (typeof this.controls.dispose === 'function') {
         this.controls.dispose();
@@ -1407,6 +1563,8 @@ class VisualizerEngine {
     if (this.appendedCanvas && this.appendedCanvas.parentNode === this.container) {
       this.container.removeChild(this.appendedCanvas);
     }
+    updateVisualizerEngineMetrics(this, { canvasAttached: false });
+    unregisterVisualizerEngine(this);
   }
 }
 

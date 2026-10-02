@@ -224,6 +224,11 @@ jest.mock('@tonic-ui/react', () => {
     children
   );
   return {
+    useColorStyle: () => [{
+      background: { secondary: '#f6f7f8' },
+      color: { primary: '#222' },
+      divider: '#ccc',
+    }],
     Box: Primitive,
     Button,
     ButtonGroup: Primitive,
@@ -358,6 +363,44 @@ test('bulk view action changes config once and is idempotent', () => {
   expect(mockConfig.read().widgets.axes.minimized).toBe(false);
   expect(firstExpandChangeCount).toBe(2);
   expect(mockConfigChangeCount).toBe(firstExpandChangeCount);
+});
+
+test('route changes publish resize and restore horizontal overflow state', () => {
+  jest.useFakeTimers();
+  mockState.workspace.container.secondary.show = false;
+  document.body.style.overflowX = '';
+  const renderAt = pathname => (
+    <WorkspaceLayoutProvider config={mockConfig}>
+      <WorkspaceWithLayout
+        isConnected={true}
+        location={{ pathname }}
+      />
+    </WorkspaceLayoutProvider>
+  );
+  let view;
+  try {
+    view = render(renderAt('/administration/machine-profiles'));
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    mockPubSub.publish.mockClear();
+
+    view.rerender(renderAt('/workspace'));
+
+    expect(mockPubSub.publish).toHaveBeenCalledWith('resize');
+    expect(document.body.style.overflowX).toBe('hidden');
+    mockPubSub.publish.mockClear();
+
+    view.rerender(renderAt('/administration/machine-profiles'));
+
+    expect(mockPubSub.publish).toHaveBeenCalledWith('resize');
+    expect(document.body.style.overflowX).toBe('');
+  } finally {
+    view?.unmount();
+    document.body.style.overflowX = '';
+    jest.useRealTimers();
+  }
 });
 
 test('restore after async hydration shows saved state and corrupt data keeps it', async () => {

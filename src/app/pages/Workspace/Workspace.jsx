@@ -6,6 +6,7 @@ import {
   Flex,
   Space,
   Text,
+  useColorStyle,
 } from '@tonic-ui/react';
 import _difference from 'lodash/difference';
 import _get from 'lodash/get';
@@ -82,6 +83,7 @@ const Workspace = ({
   location,
   ...props
 }) => {
+  const [colorStyle] = useColorStyle();
   const [modal, setModal] = useState({
     name: MODAL_NONE,
     params: {}
@@ -104,6 +106,7 @@ const Workspace = ({
     showSecondaryContainer,
   });
   const locationRef = useRef(location);
+  const previousPathnameRef = useRef(location?.pathname);
   layoutRef.current = {
     showPrimaryContainer,
     showSecondaryContainer,
@@ -248,6 +251,15 @@ const Workspace = ({
     // canvas against the new width.
     pubsub.publish('resize'); // Also see "widgets/Visualizer"
   }, []);
+
+  useEffect(() => {
+    const previousPathname = previousPathnameRef.current;
+    previousPathnameRef.current = location?.pathname;
+
+    if (previousPathname !== location?.pathname) {
+      publishResizeEvent();
+    }
+  }, [location?.pathname, publishResizeEvent]);
 
   const didMountLayoutRef = useRef(false);
   useEffect(() => {
@@ -501,17 +513,19 @@ const Workspace = ({
             <Box height="calc(100vh - 48px)">
               <Flex height="calc(100vh - 48px)" minHeight="0">
                 <Box
-                  flex="none"
+                  flex="0 1 360px"
                   width="360px"
+                  minWidth="160px"
                   minHeight="0"
                   display={hidePrimaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
                   position="relative"
-                  backgroundColor="#f6f7f8"
-                  borderRight="1px solid #ccc"
+                  backgroundColor={colorStyle.background.secondary}
+                  color={colorStyle.color.primary}
+                  borderRight={`1px solid ${colorStyle.divider}`}
                 >
                   <Box px="3x" py="3x" flex="none">
-                    <Flex align="center" gap="2x">
+                    <Flex align="center" flexWrap="wrap" gap="2x">
                       <Button
                         aria-label={i18n._('Hide left panel')}
                         onClick={togglePrimaryContainer}
@@ -520,14 +534,16 @@ const Workspace = ({
                         <FontAwesomeIcon aria-hidden="true" icon="chevron-left" fixedWidth />
                       </Button>
                       <Button
+                        aria-label={i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         flex="auto"
                         onClick={updateWidgetsForPrimaryContainer}
                         size="sm"
-                        width="100%"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                         <Space width={8} />
-                        {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        <Box className={styles.panelActionLabel}>
+                          {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        </Box>
                       </Button>
                       <ButtonGroup size="sm">
                         <Button
@@ -550,6 +566,7 @@ const Workspace = ({
                   <Box
                     flex="auto"
                     height="100%"
+                    overflowX="auto"
                     overflowY="auto"
                     px="3x"
                   >
@@ -567,8 +584,9 @@ const Workspace = ({
                     width="50px"
                     paddingTop="10px"
                     textAlign="center"
-                    backgroundColor="#f6f7f8"
-                    borderRight="1px solid #ccc"
+                    backgroundColor={colorStyle.background.secondary}
+                    color={colorStyle.color.primary}
+                    borderRight={`1px solid ${colorStyle.divider}`}
                   >
                     <Button
                       aria-label={i18n._('Show left panel')}
@@ -594,8 +612,9 @@ const Workspace = ({
                     width="50px"
                     paddingTop="10px"
                     textAlign="center"
-                    backgroundColor="#f6f7f8"
-                    borderLeft="1px solid #ccc"
+                    backgroundColor={colorStyle.background.secondary}
+                    color={colorStyle.color.primary}
+                    borderLeft={`1px solid ${colorStyle.divider}`}
                   >
                     <Button
                       aria-label={i18n._('Show right panel')}
@@ -607,17 +626,19 @@ const Workspace = ({
                   </Box>
                 )}
                 <Box
-                  flex="none"
+                  flex="0 1 360px"
                   width="360px"
+                  minWidth="160px"
                   minHeight="0"
                   display={hideSecondaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
                   position="relative"
-                  backgroundColor="#f6f7f8"
-                  borderLeft="1px solid #ccc"
+                  backgroundColor={colorStyle.background.secondary}
+                  color={colorStyle.color.primary}
+                  borderLeft={`1px solid ${colorStyle.divider}`}
                 >
                   <Box px="3x" py="3x" flex="none">
-                    <Flex align="center" gap="2x">
+                    <Flex align="center" flexWrap="wrap" gap="2x">
                       <ButtonGroup size="sm">
                         <Button
                           aria-label={i18n._('Collapse all right panel widgets')}
@@ -635,14 +656,16 @@ const Workspace = ({
                         </Button>
                       </ButtonGroup>
                       <Button
+                        aria-label={i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         flex="auto"
                         onClick={updateWidgetsForSecondaryContainer}
                         size="sm"
-                        width="100%"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                         <Space width={8} />
-                        {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        <Box className={styles.panelActionLabel}>
+                          {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
+                        </Box>
                       </Button>
                       <Button
                         aria-label={i18n._('Hide right panel')}
@@ -656,6 +679,7 @@ const Workspace = ({
                   <Box
                     flex="auto"
                     height="100%"
+                    overflowX="auto"
                     overflowY="auto"
                     px="3x"
                   >

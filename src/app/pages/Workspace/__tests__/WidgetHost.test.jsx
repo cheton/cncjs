@@ -15,6 +15,11 @@ jest.mock('@tonic-ui/react', () => {
   const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
 
   return {
+    useColorStyle: () => [{
+      background: { secondary: '#f6f7f8' },
+      color: { primary: '#222' },
+      divider: '#ccc',
+    }],
     Box: Primitive,
     Button: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     Menu: Primitive,

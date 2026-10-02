@@ -777,5 +777,14 @@
   "Stream URL": "Stream URL",
   "Marlin controller data": "Marlin controller data",
   "Smoothie controller data": "Smoothie controller data",
-  "TinyG controller data": "TinyG controller data"
+  "TinyG controller data": "TinyG controller data",
+  "e.g., CNC Router": "e.g., CNC Router",
+  "Enter a valid finite number.": "Enter a valid finite number.",
+  "Maximum must be greater than or equal to minimum.": "Maximum must be greater than or equal to minimum.",
+  "X min": "X min",
+  "X max": "X max",
+  "Y min": "Y min",
+  "Y max": "Y max",
+  "Z min": "Z min",
+  "Z max": "Z max"
 }

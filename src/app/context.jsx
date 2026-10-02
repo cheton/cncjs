@@ -54,12 +54,11 @@ export function GlobalProvider({ children }) {
       // | 'dark'     | false              |
       const appearance = config.get('settings.appearance') ?? 'auto';
       const useSystemColorMode = (appearance === 'auto');
-      if (colorModeState.useSystemColorMode !== useSystemColorMode) {
-        setColorModeState(prevState => ({
-          ...prevState,
-          useSystemColorMode,
-        }));
-      }
+      setColorModeState(prevState => (
+        prevState.useSystemColorMode === useSystemColorMode
+          ? prevState
+          : { ...prevState, useSystemColorMode }
+      ));
     };
     config.on('change', onChange);
     return () => {

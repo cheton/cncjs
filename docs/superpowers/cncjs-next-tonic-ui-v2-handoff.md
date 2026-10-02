@@ -13,21 +13,30 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-10-01）
+## 現況快照（2026-10-02）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `2a8804d8`（B3 開始；本輪 checkpoint/remote 以 git 實測） |
-| 工作樹 | 本次交接更新前為 clean |
-| 未 push | B3 開始已有四個 pending P3–P6 checkpoints；使用者本輪明確授權 commit/push，結果以 git 實測 |
-| Active task | **B3 completed；下一項 R6（deferred，等使用者指定 model）**。P3 只剩 deferred browser gate，仍為 in_progress。 |
-| 最近完成 | Macro forms `425271c0`；legacy P2 families removal `b117c4c3`；Connection Menu `9f56e397`；P2 keyboard/invalid-submit audit `924007e4` |
-| 下一步推薦 | R6 browser/performance validation；等待使用者指定 model，P3 browser evidence 不宣稱 passed。 |
-| Open blockers | 無 |
+| HEAD | `ae070b9f`（B3 已 commit/push；R6 尚未 commit） |
+| 工作樹 | R6 source fixes、tests、browser artifacts 與 ledger 納入本次交付 commit |
+| 未 push | 使用者已授權 R6 commit/push；接手時以 git status/log 核對實際狀態 |
+| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。下一階段 W3 todo。 |
+| 最近完成 | R6 browser/performance gates completed；B3 HEAD `ae070b9f`，R6 尚未 commit |
+| 下一步推薦 | W3 dependency/final production/CI gate；R6 已完成，W3 尚未開始。 |
+| Open gaps | advanced Visualizer 14 gates、13 個通用 widget view contracts 及雙 viewport 主題已通過；controller replay、matched performance、console classification 與 cleanup 未完成 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
 本表是撰寫當下的事實，**不是當前狀態**——本檔與後續 doc commit 都會推進 HEAD。接手時一律自行實測；若與 [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 不一致，以 STATUS 為準。
+
+## R6 completed — 2026-10-02
+
+- GPT-6-Luna extra-high completed browser execution; root reviewed evidence and final source checks. R6 is completed, P3 deferred browser gate completed, W3 remains todo. R6 changes are included in the user-authorized delivery commit; no production build.
+- Durable evidence: [R6 artifacts README](plans/2026-09-07-tonic-ui-v2/artifacts/browser/r6-20261001-luna/README.md). Both viewports/themes, all16widget views, native reorder/fork/remove/settings, Console/Webcam, simulator workflow/jog, controller replay, Administration CRUD/auth, large WatchDirectory, geometry/camera/pivot/visibility/probe and real WebGL fallback pass. Historical failed runs remain preserved; focused trusted-click visibility rerun passes without source changes, exact earlier race cause unproven.
+- Matched performance uses Chromium153/SwiftShader, identical100k fixture and648×284 canvas: load-to-first-render median+10.45%, renderer-call median unchanged, native input-to-render+2.53%. No new long-stall class observed; five-load p95+25.7% and nonisolated upload diagnostics are recorded limitations. Post-fix20cycles plateau251geometries/188textures/6listeners/0RAF/1canvas;20actual route teardown cycles clean owned resources.
+- Latest validation: frontend78suites/501tests, lint0errors/4existingwarnings, guard361files/18domainclasses/0violations, development compilation and final diff/protected-boundary checks pass. Node20suites/635tests pass with SocketConnection exclusion/forceExit;112inherited simulator intervals mean clean Node shutdown is not proven.
+- Console patterns classified against baseline; Macro nested-button/keyboard and Webcam provider/live-settings regressions fixed test-first and browser-verified. All synthetic users/machines/commands/events/macros removed, owned R6 processes stopped, ports8000/8080/8082 closed. All17locales retain only9required Machines keys beyond HEAD.
+- Auto-review originally rejected broad /tmp deletion. The user subsequently authorized cleanup: all reviewed R6 temporary config/auth/log/fixture files, baseline checkout and temporary Playwright caches are now deleted; repository evidence remains.
 
 ## 下一個可執行項目
 
@@ -35,7 +44,8 @@ P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零
 
 | 可執行 task | Depends on | 性質 | 需要 browser？ |
 | --- | --- | --- | --- |
-| **R6** [browser/performance validation](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | B3、R4、R5 ✅ | 補齊 deferred browser/performance evidence | **Deferred：等待使用者指定 model；不要自行啟動** |
+| **R6** [browser/performance validation](plans/2026-09-07-tonic-ui-v2/09-regression-gates.md) | B3、R4、R5 ✅ | 補齊 deferred browser/performance evidence | **Completed：2026-10-02；下一階段 W3 todo** |
+| **W3** [dependency cleanup and final gate](plans/2026-09-07-tonic-ui-v2/08-workspace-and-cleanup.md) | R6 ✅ | 最終依賴／production／CI gate | **Todo；尚未開始** |
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
@@ -111,7 +121,7 @@ The Connection serial port and baud rate selectors now use installed Tonic Menu 
 
 完整執行規則見 [EXECUTION](plans/2026-09-07-tonic-ui-v2/EXECUTION.md)；以下是接手時最容易違反的摘要。
 
-1. **Browser evidence deferred：** 使用者已要求目前不要執行任何 browser test／regression／screenshot／accessible snapshot／browser runner 操作。所有 browser evidence 延後至 R6，屆時使用者會指定不同且較低成本的 model；在該指示前不得自行選模型、執行 browser tooling，或宣稱 browser gate 已驗證。
+1. **R6 browser authorized：** 2026-10-01 使用者指示 “Go R6” 並指定 GPT-6-Luna extra-high；先前 browser deferral 對 R6 已解除。未執行的 gate 仍不得宣稱 passed。
 2. **Project rules：** 修改 React interface、Tonic UI 或 runtime boundary 時，先讀取 [`.omp/RULES.md`](../../.omp/RULES.md)。
 3. **Browser 環境：** 用 Playwright bundled Chromium，不用 system Chrome screenshot channel。以 `SUPPRESS_WEBGL_WARNING=1` 啟動 dev build；production 永遠強制 `0`。
 4. **測試 config：** 唯一受版本控制的 reference 是 [`docs/testing/configs/browser-test.cncrc`](../testing/configs/browser-test.cncrc)。先複製到唯一 `/tmp` 路徑，再以 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` 啟動。不可用 repo 內檔案或使用者的 `~/.cncrc` 作 active config，不可提交 token／password／machine-specific config。

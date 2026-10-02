@@ -22,7 +22,7 @@ import i18n from '@app/lib/i18n';
 import config from '@app/store/config';
 import WidgetList from './WidgetList';
 
-const WIDGET_DEFINITIONS = [
+const getWidgetDefinitions = () => [
   {
     id: 'visualizer',
     caption: i18n._('Visualizer Widget'),
@@ -160,7 +160,7 @@ const getConfiguredActiveWidgets = () => {
  */
 function WidgetManager({ onClose = () => {}, onSave = () => {} }) {
   const widgetList = useMemo(
-    () => WIDGET_DEFINITIONS.filter(widget => isWidgetAvailable(widget.id)),
+    () => getWidgetDefinitions().filter(widget => isWidgetAvailable(widget.id)),
     []
   );
   const [activeWidgetIds, setActiveWidgetIds] = useState(() => {
@@ -208,8 +208,10 @@ function WidgetManager({ onClose = () => {}, onSave = () => {} }) {
 
   return (
     <Modal
+      autoFocus
       closeOnEsc
       closeOnInteractOutside
+      ensureFocus
       isClosable
       isOpen
       onClose={handleClose}

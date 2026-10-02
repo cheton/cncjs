@@ -104,6 +104,11 @@ jest.mock('@app/lib/controller', () => ({
 }));
 const mockPortal = jest.fn();
 
+// Keep the toolbar's real Query owner while isolating its profile-list transport.
+jest.mock('@app/api/axios', () => ({
+  __esModule: true,
+  default: { get: jest.fn(() => Promise.resolve({ data: [] })) },
+}));
 jest.mock('@app/lib/portal', () => mockPortal);
 jest.mock('@app/lib/i18n', () => ({
   __esModule: true,

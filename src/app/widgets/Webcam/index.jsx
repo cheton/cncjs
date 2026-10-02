@@ -1,9 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Space } from '@tonic-ui/react';
-import React from 'react';
+import React, { useState } from 'react';
 import Widget from '@app/components/Widget';
 import i18n from '@app/lib/i18n';
-import portal from '@app/lib/portal';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import WidgetConfigConsumer from '@app/widgets/shared/WidgetConfigConsumer';
 import WidgetEventProvider from '@app/widgets/shared/WidgetEventProvider';
@@ -14,6 +13,7 @@ import Webcam from './Webcam';
  * @param {{ widgetId: string, onFork: () => void, onRemove: () => void, view: 'normal'|'collapsed'|'fullscreen', onViewChange: (view: string) => void, sortable: object, config: object, emitter: object }} props
  */
 function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sortable, config, emitter }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const isCollapsed = view === 'collapsed';
   const isFullscreen = view === 'fullscreen';
   const disabled = Boolean(config.get('disabled', true));
@@ -21,7 +21,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
 
   const onSelect = (eventKey) => {
     if (eventKey === 'settings') {
-      portal(({ onClose }) => <SettingsModal onClose={onClose} />);
+      setSettingsOpen(true);
     } else if (eventKey === 'fullscreen') {
       onViewChange(isFullscreen ? 'normal' : 'fullscreen');
     } else if (eventKey === 'fork') {
@@ -81,6 +81,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
       <Widget.Content aria-hidden={isCollapsed} sx={{ display: isCollapsed ? 'none' : 'block' }}>
         <Webcam disabled={disabled} isFullscreen={isFullscreen} />
       </Widget.Content>
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </Widget>
   );
 }

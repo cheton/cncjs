@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import TrackballControls from '@app/lib/three/TrackballControls';
 import { createVisualizerEngine } from '../VisualizerEngine';
 import Visualizer from '../Visualizer';
 import { rectangularFixture } from './fixtures';
@@ -6,6 +7,7 @@ import { rectangularFixture } from './fixtures';
 const mockRenderer = {
   clear: jest.fn(),
   domElement: document.createElement('canvas'),
+  dispose: jest.fn(),
   render: jest.fn(),
   setClearColor: jest.fn(),
   setPixelRatio: jest.fn(),
@@ -123,6 +125,56 @@ describe('VisualizerEngine', () => {
     );
   });
 
+  test('reports the actual centered G-code mesh through profile changes and clears it on unload', () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    let createDevelopmentEngine;
+    delete window.__CNCJS_VISUALIZER_METRICS__;
+
+    try {
+      process.env.NODE_ENV = 'development';
+      jest.isolateModules(() => {
+        ({ createVisualizerEngine: createDevelopmentEngine } = require('../VisualizerEngine'));
+      });
+
+      const container = document.createElement('div');
+      Object.defineProperty(container, 'clientWidth', { value: 640 });
+      Object.defineProperty(container, 'clientHeight', { value: 480 });
+      const engine = createDevelopmentEngine({ container, viewState });
+      engine.load({ name: 'rectangle.gcode', content: rectangularFixture });
+
+      expect(window.__CNCJS_VISUALIZER_METRICS__.engines[0]).toMatchObject({
+        hasGCode: true,
+        gcodeWorldCenterX: 0,
+        gcodeWorldCenterY: 0,
+        gcodeWorldCenterZ: 0,
+      });
+
+      engine.update({
+        machineProfile: {
+          name: 'profile-change-test',
+          limits: { xmin: -100, xmax: 100, ymin: -100, ymax: 100, zmin: -50, zmax: 50 },
+        },
+      });
+      expect(window.__CNCJS_VISUALIZER_METRICS__.engines[0]).toMatchObject({
+        hasGCode: true,
+        gcodeWorldCenterX: 0,
+        gcodeWorldCenterY: 0,
+        gcodeWorldCenterZ: 0,
+      });
+
+      engine.unload();
+      expect(window.__CNCJS_VISUALIZER_METRICS__.engines[0]).toMatchObject({
+        hasGCode: false,
+        gcodeWorldCenterX: null,
+        gcodeWorldCenterY: null,
+        gcodeWorldCenterZ: null,
+      });
+      engine.dispose();
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
+
   test('applies the top-level sent view-state field to the rendered toolpath', () => {
     const container = document.createElement('div');
     Object.defineProperty(container, 'clientWidth', { value: 640 });
@@ -154,6 +206,76 @@ describe('VisualizerEngine', () => {
 
     const pointer = mockRenderer.render.mock.calls.at(-1)[0].getObjectByName('CuttingPointer');
     expect(pointer.position).toMatchObject({ x: 12, y: 24, z: -3 });
+  });
+
+  test('sizes the renderer and camera to a narrow visible host', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 220 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+
+    const engine = createVisualizerEngine({ container, viewState });
+
+    expect(mockRenderer.setSize).toHaveBeenCalledWith(220, 480);
+    expect(engine.camera.aspect).toBeCloseTo(220 / 480);
+
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 180 });
+    engine.resize();
+
+    expect(mockRenderer.setSize).toHaveBeenLastCalledWith(180, 480);
+    expect(engine.camera.aspect).toBeCloseTo(180 / 480);
+    engine.dispose();
+  });
+
+  test('unload cancels a hidden G-code load before a later visible render', () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    let createDevelopmentEngine;
+    delete window.__CNCJS_VISUALIZER_METRICS__;
+
+    try {
+      process.env.NODE_ENV = 'development';
+      jest.isolateModules(() => {
+        ({ createVisualizerEngine: createDevelopmentEngine } = require('../VisualizerEngine'));
+      });
+    } finally {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { value: 640 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+    const engine = createDevelopmentEngine({
+      container,
+      viewState: { ...viewState, show: false },
+    });
+    const initialLoadCount = window.__CNCJS_VISUALIZER_METRICS__.loadCount;
+
+    engine.load({ name: 'hidden.gcode', content: rectangularFixture });
+    expect(window.__CNCJS_VISUALIZER_METRICS__.engines[0].pendingLoadId).not.toBeNull();
+
+    engine.unload();
+    engine.update({ show: true });
+
+    expect(window.__CNCJS_VISUALIZER_METRICS__).toMatchObject({
+      loadCount: initialLoadCount,
+      engines: [{ pendingLoadId: null, hasGCode: false, renderFrameCount: expect.any(Number) }],
+    });
+    expect(window.__CNCJS_VISUALIZER_METRICS__.loadSamples).toEqual([]);
+
+    engine.dispose();
+  });
+
+  test('disposes renderer and canvas when trackball setup fails during construction', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { value: 640 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+    const error = new Error('Trackball setup failed');
+    TrackballControls.mockImplementationOnce(() => {
+      throw error;
+    });
+
+    expect(() => createVisualizerEngine({ container, viewState })).toThrow(error);
+    expect(container.contains(mockRenderer.domElement)).toBe(false);
+    expect(mockRenderer.dispose).toHaveBeenCalledTimes(1);
   });
 
   test('keeps the canvas host sized while hidden', () => {

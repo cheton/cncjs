@@ -1668,3 +1668,189 @@ Status transition: P2 is `completed`. Committed as `924007e4` (`fix(app): close 
 - Final evidence: `yarn test:ui-migration` exit 0, **64 fixture/CLI tests**; `yarn check:ui-migration` exit 0, **359 production files / 18 domain classes / 0 violations**; `yarn test:frontend --runInBand` exit 0, **71 suites / 480 tests**; `yarn lint` exit 0, **0 errors / 4 existing warnings**; development webpack exit 0, compiled successfully; immutable Yarn install exit 0, existing peer warnings; git diff --check clean. Final checker-only refinements were followed by fixture/gate checks and targeted/full ESLint.
 - Main reviewed production diff, named policy, fixtures, CI wiring, lock delta and final baseline. Protected server/controller/Redux/store/simulator diff is empty. No browser, screenshots, simulator browser procedure or production build. Node full-suite inherited simulator interval limitation remains as documented at P6; this slice runs its isolated Node gate tests, with no forceExit needed.
 - B3 completed. Next R6 remains deferred until the user selects its model; P3 browser evidence is not passed/waived. User explicitly requested commit and push; publish the current migration branch with this B3 checkpoint and its four pending P3–P6 commits, using a normal fast-forward push and the existing pre-push lint hook.
+
+
+## R6 start — 2026-10-01
+
+- User authorized “Go R6”, installed socat, then selected GPT-6-Luna with extra-high reasoning. Browser deferral lifted for this task; root owns ledger/review, selected Luna worker owns execution and evidence.
+- Start checkpoint ae070b9f; socat /opt/homebrew/bin/socat version 1.8.1.3 verified. Historical ChatGPT Playwright path absent; locate supported runner and bundled Chromium before executing the isolated temporary-config yarn dev lifecycle. No production build or push authorized.
+- P3 remains in_progress until actual theme/viewport evidence passes. R6 requires all documented functional/performance/resource gates; no completion claim at setup.
+
+### R6 findings / ongoing review — 2026-10-01
+
+- Luna installed temporary Playwright 1.62.1 with bundled Chromium151/v1234; user separately installed global Playwright1.63.0/Chromium1243 and optional CLI. R6 keeps its pinned pair for comparisons. Isolated yarn dev and browser need elevated execution after sandbox listenEPERM/Mach-port denial.
+- Live WebGL context exists via ANGLE SwiftShader, DPR1. Four no-options list hooks threw on meta.query; real QueryClient regressions reproduced and guarded optional metadata in Commands/Events/Machines/Users. Browser startup error disappears.
+- WidgetManager omitted Tonic autoFocus/ensureFocus; real modal focus/return now passes after supported props. Checkbox label belonged on inputProps; module-scope translations also yielded empty captions before i18next init. Delayed literal-translation factory preserves scanner extraction. Autolevel region gained a localized accessible name.
+- Root rejected initial P3 pass interpretation: 768 artifact reports overflowX=true and full-page capture1152px; dark widget text is pale on fixed pale panel backgrounds. Theme switching alone does not pass visual/layout gate. P3 and R6 remain in_progress while fixes, simulator frontend callback issue, baseline/performance/resource and broader functional checks continue.
+
+### P3 deferred browser gate closed during R6 — 2026-10-01
+
+- Final workspace-gates.json has9/9passing assertion cases; screenshot review plus contrast/overflow/canvas and actual wheel+keyboard reachability prove light/dark/device at1440×900/768×900 DPR1. Fixes remove invalid Tonic image dimension strings, hardcoded pale default headers/cards, rigid sidepanel geometry and canvas minimum-width clipping; narrow panels deliberately scroll internally with named accessible controls.
+- Root reviewed durable results and dark768capture; initial falsepositive interpretations were rejected and assertions strengthened. P3 becomes completed; R6 stays in_progress for simulator, broader UI/admin/WebGL and baseline/performance/resource checks.
+
+### R6 partial results / usage-reset resume — 2026-10-02
+
+- Reviewed artifacts confirm Workspace9/9, simulator12/12, jog9/9, Machines5/5, Commands/Events/Macros CRUD, 100k load/unload20cycles,150native interactions and20actual teardown/remount cycles. Connected Window/Document/canvas/element listener counts plateau; detached WeakRef census is not proof of a leak-free heap.
+- Historical archived frontend runs in isolated `/tmp` source/dependency/output directories. Five loads and150interactions complete; current load median+10.4% and interactionp95+16.8%. Canvas heights differ755vs284px; comparison review remains open. Faceless-geometry console count difference still needs classification.
+- Live table gate exposed repeated unchanged column-sizing writes and row-control remounts. Worker fixed the hook with a focused regression; live CRUD passes afterward. Successful auth reported separately; durable failed auth attempt is retained and successful evidence still needs reconciliation.
+- WatchDirectory nested5000node gate passes;5000siblings require fixtures before watcher startup. Advanced Visualizer run retains hidden1×0canvas and failed pivot/camera/toggle/probe checks; controller-driven G20/G21 units passed. No broader completion claim.
+- Luna hit usage limit; user confirmed reset and root resumed the same selected Luna extra-high worker. Authorized owned isolated lifecycle restart can address the sibling fixture setup. Final browser gates, integrated validation and cleanup remain pending; no R6 commit/push.
+
+### R6 interim integrated validation — 2026-10-02
+
+- Full frontend initially failed ten assertions across four Workspace suites because their existing Tonic mocks omitted the newly used theme hook. Root added only the hook fixture to those mocks. The next run passed all assertions but exited1: two Visualizer characterization suites started real profile-list Axios requests after the optional-meta fix, producing late network-error logs.
+- Root kept the real Query owner and isolated only profile-list transport in loadGCode/WorkflowControl test setup. Focused2suites/20tests exit0; full `yarn test:frontend --runInBand` exit0,75suites/491tests. No broad console suppression or production workaround.
+- `yarn lint` and post-test-edit ESLint exit0,0errors/4existingwarnings; `yarn check:ui-migration` exit0,361production files/18domain classes/0violations; `git diff --check` clean. Protected server/controller/Redux/store source diff is empty. These are interim checks; later source fixes require appropriate revalidation. No production build.
+
+### R6 WatchDirectory gate — 2026-10-02
+
+- Worker verified exact ownership and stopped the primary isolated lifecycle plus its duplicate auxiliary simulator/frontend before restarting one redirected temporary-config `yarn dev`. Pre-created sibling fixture is included in the startup watch cache; root101entries, nested100directories/4900files, sibling5000files.
+- Root reviewed authoritative watch-directory-r6.json:3/3gates pass, selected nested directory has49sortedfiles and sibling directory5000sortedfiles, first sibling selected and LoadG-code enabled;0pageErrors/requestFailures. Prior nested-only result and explicitly blocked sibling setup retained in watch-directory-before-restart-r6.json.
+- This functional run uses bundledChromium153.0.8010.12; earlier performance pair remainsChromium151.0.7922.34. Browser versions must stay matched within a performance comparison. Watch pass does not close pending advancedVisualizer/widget/performance-review gates.
+
+### R6 Administration→Workspace resize regression — 2026-10-02
+
+- Root distinguished the runner's self-induced text-view toggle failure from a separate route sizing hypothesis. Historical Workspace.componentDidUpdate published resize after every update; the migrated effects depend on panel visibility/window resize and omit route changes.
+- Worker reproduced fresh Administration→actual Workspace navigation at fixed1440×900/DPR1, with no viewport resize/toggle: engine remains1×0 and attached canvas rectangle1×0 while3DView button says Disable3DView. This is a product regression requiring a route-visible resize notification and regression test; a harness viewport resize is not an acceptable gate substitute.
+
+### R6 route resize fix / browser verification — 2026-10-02
+
+- Workspace now republishes its existing resize event when pathname changes, restoring both the Visualizer host measurement on entry and body horizontal-overflow cleanup on exit. Focused route regression passes; ESLint exits 0 with four existing warnings.
+- Root reviewed visualizer-admin-workspace-size-passed-r6.json against the preserved failing artifact: actual MiniNav navigation expands the canvas from 1×0 to 648×755 and renders at the fixed 1440×900/DPR1 viewport, with 3D enabled and no viewport resize. Unmasked renderer identifies ANGLE Vulkan SwiftShader. The advanced runner's off/on recovery was removed; broader functional checks remain pending.
+
+### R6 Node regression gate — 2026-10-02
+
+- `yarn test --runInBand --testPathIgnorePatterns SocketConnection --coverage=false --detectOpenHandles --forceExit` exits 0: 20 suites / 635 tests, including the migration checker fixtures. SocketConnection stays excluded per the prior user instruction. Existing loopback fixtures required elevated execution; they use ephemeral ports and do not stop the owned dev lifecycle.
+- Diagnostic still reports 112 inherited simulator planner interval handles at grbl-simulator.js:346. forceExit is recorded, not claimed as clean resource shutdown. No server/simulator changes or production build.
+
+### R6 zero-extent limits geometry — 2026-10-02
+
+- Root reproduced the DirectGeometry error using the installed Three implementation: all three `Number.MIN_VALUE` box dimensions collapse to one vertex and no faces, then EdgesGeometry attempts a faceless conversion. Ordinary dimensions retain eight vertices and twelve faces. The sanitized reproduction is saved in `faceless-geometry-reproduction-r6.json`.
+- Luna confirmed the browser's two errors originate from initial/profile limit construction and changed Cuboid to use an empty BufferGeometry for a faceless box, disposing the intermediate box geometry. Empty dashed geometry skips line-distance calculation; ordinary outlines retain their edges.
+- Worker reports focused Cuboid, VisualizerEngine, and metrics checks passing: 3 suites / 13 tests. The test observes console errors and asserts zero calls, with the observer restored afterward. Browser console verification, resource plateau after this change, and final integrated checks remain pending.
+
+### R6 source checks after geometry / route fixes — 2026-10-02
+
+- Root reran the complete frontend suite after the route resize, render-completion timestamp, and Cuboid changes: `yarn test:frontend --runInBand` exits 0, 76 suites / 496 tests. `yarn lint` exits 0 with no errors and four existing warnings; the migration guard passes 361 production files / 18 domain classes / zero violations. `git diff --check` and protected-source diff are clean.
+- The historical Visualizer instrumentation is now saved as `artifacts/browser/r6-20261001-luna/baseline-instrumentation.patch`, generated against exact archived commit `0a90e31f90515d711379bad8729f96a068d90718`. This preserves matching load-start/first-render intervals for reproduction; the final performance comparison and commands README remain pending.
+- Source checks are recorded as a later checkpoint in `integrated-validation-20261002.json`; browser completion still requires the remaining widget, fallback, comparable performance, console classification, and cleanup gates.
+
+### R6 advanced Visualizer functional results — 2026-10-02
+
+- Root reviewed `visualizer-functional-r6-verified10.json`: all 14 recorded gates pass on Chromium 153 / ANGLE Vulkan SwiftShader at 1440×900, DPR 1. Six pivot cases retain the expected G-code bounds and zero world center through profile changes; unload clears mesh-center metrics. Five camera positions match actual camera XYZ, with actual zoom, fit, and orthographic/perspective changes.
+- Limits, coordinate system, grid labels, and cutting tool toggle off/on in both desired state and actual scene objects. The coordinate-system case also passes with no selected profile. Native probe-area canvas dragging changes all four bounds fields by the expected translation.
+- Sanitized polling/WebSocket telemetry records only the two explicit fixture loads, two unloads, and expected G20/G21 unit setup commands. Camera, visibility, and probe interactions each have zero program-state/setup/motion/other deltas after explicit fixture preparation. There are no page errors or failed requests. The DirectGeometry error count is zero after the Cuboid fix; dependency warnings still require baseline classification.
+- The runner's earlier failures are preserved. Loaded-profile pivot expectations were corrected to retain the G-code center, and menu-item locators were scoped to the visible Visualizer. WebGL-unavailable fallback, remaining widget interactions, matched performance, final resource/check reconciliation, and cleanup remain pending.
+
+### R6 artifact reproduction / curation — 2026-10-02
+
+- Root added an execution-checkpoint README with deterministic fixture generation, sibling pre-creation, redirected single lifecycle, browser version/cache setup, accepted result pointers, isolated historical archive/dependencies/static assets, preserved instrumentation, and explicit pending reproduction/cleanup gaps.
+- The 12.6 MB pan result contained repeated large fixture content in legacy command payloads. Root replaced only that content with byte counts/SHA256, retaining all 150 latency samples, 17 native pans, five loads, snapshots, counters, and event order; artifact is now 188,988 bytes. Original artifact hash and transformation are recorded, with raw backup under `/tmp`. The historical monitor captured payload rather than command name, so exact classification relies on later corrected telemetry. No large generated G-code is committed.
+
+### R6 WatchDirectory last-file reach/load gate — 2026-10-02
+
+- Root reviewed `watch-directory-r6-complete8.json`: three functional gates plus unload cleanup pass, with no page errors or failed requests. Five native wheel events move the actual 240 px overflow:auto tree from scrollTop 5,160 to 185,160; the last row's rectangle lies inside the visible scroller.
+- The UI selects `r6-sibling-batch/sibling-4999.nc`, enables Load G-code, and displays the loaded relative path. The fixture is unloaded afterward. Earlier failures from a nonexistent Locator method, content-box wheel coordinates, and basename-only text assertion are retained and corrected in the runner; the accepted earlier directory result remains preserved.
+
+### R6 WebGL-unavailable initial fallback — 2026-10-02
+
+- Root reviewed `webgl-fallback-r6.json`: Chromium 153 launched with `--disable-webgl`, `--disable-webgl2`, and `--disable-3d-apis`; actual context creation returns null. Workspace remains available with zero WebGL canvases, Enable 3D View title, WebGL status Disabled, and projection control disabled. No page errors or failed requests.
+- This proves the initial unavailable-capability UI. Extending the browser gate to synthetic upload/metadata completion and unload remains pending, alongside other widget/performance/console gates; it does not claim the complete R6 task passed.
+
+### R6 WebGL-unavailable load/unload extension — 2026-10-02
+
+- Root reviewed `webgl-fallback-r6-complete.json`: all three gates pass on Chromium 153 with actual context creation null and no canvas. The 38-byte synthetic file finishes loading without an engine: Run and Close become enabled, with no Loading or Rendering indicator. Unload disables both controls and clears program state.
+- Sanitized telemetry records exactly sender_load then sender_unload, with no extra commands, page errors, or failed requests. Combined with the accepted advanced functional and native-pan evidence, this closes R6's functional WebGL checkbox. Widget, performance, console, final reconciliation, and cleanup gates remain open.
+
+### R6 remaining classification item — profile / visibility sequence
+
+- Later runner variants intermittently failed a visibility click after switching a profile while G-code remained loaded. The worker proposed a profile-transition race; root source review did not establish a desired-state overwrite path: handlers use functional state updates, configuration events update only machineProfile, and new limit geometry takes visibility from current viewState.
+- Preserve the accepted verified10 result and the failing variants. A minimal native-click/desired-state/actual-scene timeline is required to distinguish a runner interaction/transition issue from a product regression. Settling setup through unload and an unladen profile pivot isolates the visibility test but does not classify this sequence. Investigation remains open for final R6 reconciliation.
+
+### R6 automatic appearance defect / fix — 2026-10-02
+
+- Root found that GlobalProvider's one-time configuration subscription compares system appearance against captured initial state. Luna reproduced the browser failure: after explicit Light/Dark and return to Auto, device media is dark but the header remains light after five seconds. The callback logic is unchanged in the historical comparator; this is a confirmed pre-existing defect.
+- Root added two regressions using the real Tonic color-mode provider and controlled matchMedia changes. Both fail before the fix: initially automatic mode cannot resume following the system, and initially explicit mode cannot stop following it after a return transition. The callback now compares current state inside the functional setter and retains the same object when unchanged. Both regressions pass afterward; runtime singleton, Redux/store, and controller source remain untouched.
+- Full frontend exits 0, 77 suites / 498 tests. Full lint exits 0 with zero errors / four existing warnings; guard passes 361 files / 18 domain classes / zero violations, and diff/protected-source checks are clean. Development webpack compiles successfully with its existing warning. Durable summary: `global-provider-system-theme-regression.json` and updated integrated validation.
+- Subsequent browser Auto transitions pass. An apparent 3.61:1 contrast failure sampled the button during its 200 ms color/background transition; the intermediate channels match interpolation between light/dark endpoints. Settled sampling waits for actual mode, two RAFs, and CSS animation completion. The 1440 theme/camera gate passes; 768 verification remains in progress. No palette change or animation suppression was used.
+
+### R6 widget view partial results — 2026-10-02
+
+- Root reviewed `workspace-widget-views-r6-connection-smoke.json` and `workspace-widget-views-r6-autolevel-axes-console.json`: Custom activation and all 16 named frame regions plus the no-frame Visualizer are confirmed; Connection, Autolevel, Axes, and Console collapse/expand and fullscreen enter/exit pass with zero unexpected mutations, page errors, or failed requests.
+- Earlier runner failures are preserved. Corrected body targeting excludes header SVG aria-hidden attributes; CSS-module class names are inspected rather than assumed literal selectors. Remaining widget views/settings/fork/order/sizes and controller replay remain pending.
+
+### R6 settled themes and generic widget view aggregate — 2026-10-02
+
+- Root reviewed both `workspace-widget-theme-settled-1440.json` and `workspace-widget-theme-settled-768.json`: all four light/dark/automatic states and native camera actions pass on Chromium 153 / SwiftShader. CSS and drawing buffers agree at 648×755 and 360×755; settled enabled-button contrast is 15.91:1 light and 6.48:1 dark. No page errors or failed requests. This supersedes the earlier pending 768 checkpoint.
+- Root reviewed `workspace-widget-views-r6-aggregate.json`: all 13 generic framed widgets prove collapse, hidden content, restoration, and fullscreen enter/exit. Each recorded fullscreen rectangle spans x=60..1440 and y=48..900. Unexpected CNC mutation counts, page errors, and failed requests are zero. Custom activation confirms all 16 named frame regions; Visualizer remains frameless.
+- Laser/Macro successes are preserved within a batch whose later Probe step failed on its existing menu caption (`Full Screen`). Probe passes separately after correcting the runner matcher; this is not a product fix. Marlin/Smoothie/TinyG replay and widget settings/order/Console/Webcam behavior remain pending; the broad widget checkbox is not closed.
+
+### R6 widget lifecycle / Webcam checkpoint — 2026-10-02
+
+- Root reviewed the individual passed gates in `workspace-widget-lifecycle-r6-settings-fork-pass-reorder-fail.json`: Custom Settings Save/Cancel, persisted title, restoration, fork cancellation, removal cancellation, confirmed removal and temporary-fork cleanup pass. The later reorder failure used offscreen handles; the retained artifact is not an all-pass run.
+- `workspace-widget-lifecycle-r6.json` separately proves native Console-before-Connection reordering and restoration to canonical order, with zero unexpected mutation commands, page errors or failed requests.
+- Webcam's settings portal originally threw `Please use <Provider>` because its separate React root lacked the widget config provider. Luna added the same-widget-ID provider in Webcam. Latest `workspace-console-webcam-r6.json` proves local synthetic camera Settings Save/Cancel/restoration, 640×480 video with an active stream and no page errors or failed requests. Webcam transform/size and Console output gates still time out; these are unclassified failures, not passes. Focused source regression and final full checks after this edit remain pending; 77 suites / 498 tests is the earlier checkpoint.
+- Luna stopped on a reported usage limit. Remaining execution is incomplete; R6 is not closed or committed.
+
+### R6 Webcam live configuration boundary correction — 2026-10-02
+
+- Execution resumed on user request. Root review found that duplicating the widget tracked provider in a separate settings root leaves the already mounted camera's reducer state unchanged when settings are saved. The new real-Tonic/provider regression fails against that intermediate fix: the fork remains local despite a persisted stream URL.
+- Webcam now opens its Tonic SettingsModal within the existing widget tree, preserving provider context through Tonic's modal portal. The regression passes: saving a stream updates the live fork immediately, the original camera retains its settings, writes target the fork ID, and the dialog closes. All four Webcam suites / 15 tests pass. Stronger live browser source-switch/restoration verification remains pending.
+- Full frontend: 78 suites / 499 tests, exit 0. Full lint: zero errors / four existing warnings, exit 0. Migration guard: 361 files / 18 domain classes / zero violations, exit 0. Protected server/controller/Redux/store/simulator diff remains empty. Integrated validation preserves earlier source checkpoints.
+- `console-classification-partial-r6.json` records eight warning patterns already observed in the historical comparator: ToastManager transition/focus API deprecations, Emotion first-child advisory, configuration listener threshold, Three addAttribute, SwiftShader ReadPixels, and findDOMNode. Their baseline presence is proven; the remaining console gate and latest-run review stay open.
+
+### R6 Console / Webcam runner failure classification checkpoint
+
+- Root identified the Webcam slider timeout as an argument-shape error: Playwright waitForFunction accepts one function argument and then options; the old runner supplied element and old value separately, leaving the second predicate parameter undefined. The runner is being corrected; this is not a demonstrated slider defect.
+- Console uses xterm's canvas renderer. Empty innerText and absent xterm-rows are not evidence of absent status replies; the runner is being changed to use existing Select All / Copy Selection actions and native scroll geometry. Its earlier empty-text failure remains a harness mismatch, while actual output/clear/size verification is pending.
+- Luna confirmed the original Webcam missing-provider raw browser JSON was overwritten by later reruns. The initial crash remains an agent-reported observation with retained failure screenshots and root source review; no reconstructed raw stack is claimed. Root's independent-provider live-update regression has retained RED/GREEN logs and a durable summary.
+
+### R6 authoritative Console / Webcam browser completion — 2026-10-02
+
+- Root reviewed `workspace-console-webcam-r6.json`: all three cases pass, with zero page errors or failed requests. Settings Save switches the mounted camera to a synthetic data-URI image; Cancel preserves the draft source; restoration returns to active 640×480 fake local capture. No external camera is used.
+- Native scale changes 1→1.3, rotation visibly changes the transform, fullscreen spans 1380×852, and cleanup restores scale 1, rotation 0, normal view and disabled state. The earlier post-cleanup hidden-slider read was a runner ordering mistake.
+- Console emits exactly 45 read-only writeln `$G` queries, with zero other outgoing commands. Existing Select All/Copy Selection actions yield 3,017 bytes and 45 parser replies; native scrolling changes scrollTop 2178→1278 on 2,448 px scrollback. Clear returns scrollback to the 270 px viewport baseline. Fullscreen grows from 335×309 to 1380×852 and exits successfully. Canvas-renderer text is verified through clipboard rather than nonexistent DOM rows.
+- The broad widget gate stays open for Marlin/Smoothie/TinyG frontend replay; matched performance, console reconciliation, final resources/checks and cleanup also remain incomplete.
+
+### R6 Macro variable menu defect / correction — 2026-10-02
+
+- Root found the complete nested-button stack in the source-suite log: Macro Create/Update FieldTextarea label actions nest a LinkButton button inside default MenuToggle's button. Historical comparator source contains this same composition; installed Tonic source confirms the DOM behavior. Two new real-DOM regressions fail before correction. Equivalent historical browser-route reproduction is not claimed.
+- Both callers now use MenuToggle's supported render prop to put getMenuToggleProps directly on one LinkButton. Regression then exposed another pre-existing API interaction: Tonic MenuItem Enter/Space prevents native activation and closes without invoking the caller's onClick insertion. A narrow non-repeat key handler invokes the native click with default prevention, retaining the existing insertion callback and normal menu close.
+- Both Create and Update now verify valid button DOM and keyboard insertion of `%wait` with Enter and `[posx]` with Space, without a resource mutation. Full frontend passes 78 suites / 501 tests; lint passes with zero errors / four existing warnings; migration guard passes 361 files / 18 domain classes / zero violations. Browser verification is still pending; `macro-variable-menu-regression-r6.json` retains RED, intermediate keyboard failure, and GREEN evidence.
+
+### R6 — controller replay and Macro live browser completion (2026-10-02)
+
+- `other-controller-replay-r6.json`: Marlin/Smoothie/TinyG bodies plus state/settings modal IDs pass, with zero outgoing commands/page errors/request failures. The relay appends six fixture packets after the forwarded real connection:open in the same polling response; real Grbl state/settings remain forwarded. Earlier failures were delayed harness delivery, not controller state overwrite.
+- `macro-live-browser-r6.json`: Create and Update native Enter insertion at the textarea caret pass, standalone toggle has zero nested buttons, and the synthetic macro is deleted. Space has source regression coverage.
+- Broad widget browser checkbox closes; matched performance, resource recheck, console reconciliation and final cleanup remain open. R6 remains in_progress.
+
+### R6 — matched performance and post-Cuboid resource gate (2026-10-02)
+
+- Shared `matched-performance-r6.mjs` completes baseline/current on Chromium153/SwiftShader, 1440×900 DPR1/light, matching648×284 CSS/buffer, identical100k fixture, five prewarm/five measured loads and150native actions/17pans. Raw runs and `matched-performance-comparison-r6.json` preserve conditions and samples.
+- Load-to-first-render medians77.5→85.6ms (+10.45%); renderer-call0.5→0.5ms; native input-to-render3.95→4.05ms (+2.53%). Longtasks375→355, total32089→31183ms, max153→163ms; same pan/readback stall class, no new class observed. Five-load p95 rises25.7%, disclosed as a rough tail.
+- Current ring retains937/1000samples, oldest852.8ms before first measured5851.5ms; all794measured-window samples survive resource extension. No rerun needed. The historical uploadToRunEnabledMs field includes diagnostic/locator overhead and does not isolate user readiness; reported separately.
+- Post-Cuboid checkpoints5/10/20 plateau251geometries/188textures/6listeners/0RAF/1canvas. Camera views expose additional label textures; bounded uploaded-label cache is an inference supported by TextSprite and installed Three frustum-culling/first-upload counting.
+- Performance checkbox closes with limitations; console/profile classification and cleanup remain open.
+
+### R6 — focused loaded-profile visibility sequence (2026-10-02)
+
+`profile-loaded-visibility-sequence-r6.json` passes five checks: Profile B while G-code is loaded keeps pivot(30,40,-1) and world center(0,0,0); trusted native Hide/Show Limits changes both state and scene after two frames and500ms; zero visual-action command delta; unload clears center and both synthetic profiles are removed. Earlier verified11/12 broad-run failures remain preserved and were not reproduced. Harness timing/actionability is suspected; exact historical cause is not proven because those runs did not capture equivalent target timelines. No source fix was needed.
+
+### R6 — durable auth and synthetic account cleanup (2026-10-02)
+
+`auth-signin-signout-cleanup-r6.json` passes five native UI gates: sign-in, sign-out, sign-in again, second sign-out and isolated admin account deletion. Both explicit sign-ins mount Workspace; account is absent after deletion. Credentials/tokens/names are omitted, zero page/request errors. An ancillary login401 is recorded separately from explicit successful sign-ins; earlier failed broad auth results remain preserved. Tooltip baseline-equivalent action, remaining CRUD evidence and final process/locale cleanup remain pending.
+
+### R6 — completed final review (2026-10-02)
+
+- Final console classification closes the console checkbox; equivalent baseline Macro Create reproduces TooltipTrigger ref warning. User Create/Update gate in historical admin batch plus new auth5gate artifact prove CRUD/auth; failed-run Command/Event leftovers removed.
+- `r6-final-cleanup.json`: API200 counts0 for all five resources, verified owned PIDs exited, ports8000/8080/8082closed, no simulatorlink. /tmp config/log/evidence preserved after auto-review rejected broad deletion scope; no retry.
+- Independent locale review: all17JSON files parse, exactly9requiredaddedkeys each, allHEADkeys/values unchanged. Final diff/protectedboundary and credential/JSON audit pass. Source checks remain78/501frontend, lint0errors/4existingwarnings, guard0violations; no further component edits after this checkpoint.
+- R6 marked completed with recorded benchmark/console/Node/historical-evidence limitations. W3 remains todo; no local production build, R6commit or push.
+
+### R6 — authorized temporary-file deletion (2026-10-02)
+
+User explicitly authorized deletion of the retained /tmp files. Reviewed the R6-only allowlist and confirmed no listeners on8000/8080/8082; removed isolated config/auth/logs/fixtures/raw backups, baseline checkout, temporary Playwright install/browser cache, reviewed root-level cncjs-r6 logs and two HTTP probe HTML files. Verified all selected paths absent; repository artifacts preserved. `r6-final-cleanup.json` now records completed deletion; original auto-review rejection remains historical. No source changes, commit or push.
+
+### R6 — user-authorized commit and push (2026-10-02)
+
+User requested commit and push after authorized temporary-file cleanup. Delivery includes R6 source fixes, regression tests, required locale keys and durable browser evidence/ledger. Pre-commit diff check and repository artifact JSON/JWT audit pass. Latest source validation is78frontend suites/501tests, lint0errors/4existingwarnings and migration guard0violations; no component edits since that checkpoint. Target branch: feat/tonic-ui-v2-migration on origin. No production build or W3 work.

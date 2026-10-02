@@ -111,9 +111,11 @@ const CreateMacroDrawer = ({
                 labelAction={(
                   <Menu placement="bottom-end">
                     <MenuToggle>
-                      <LinkButton>
-                        {i18n._('Select variables')}
-                      </LinkButton>
+                      {({ getMenuToggleProps }) => (
+                        <LinkButton {...getMenuToggleProps()}>
+                          {i18n._('Select variables')}
+                        </LinkButton>
+                      )}
                     </MenuToggle>
                     <MenuList
                       maxHeight="50vh"
@@ -128,6 +130,12 @@ const CreateMacroDrawer = ({
                             <MenuItem
                               key={item}
                               value={item}
+                              onKeyDown={(event) => {
+                                if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                                  event.preventDefault();
+                                  event.currentTarget.click();
+                                }
+                              }}
                               onClick={(event) => {
                                 const el = gcodeInputRef.current;
                                 const value = event.currentTarget.value;

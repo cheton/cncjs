@@ -101,12 +101,11 @@ test.each(resources)('%s distinguishes loading, empty and error and can retry', 
 const createFields = {
   commands: ['Command name:', 'Command action:'],
   events: ['Event name:', 'Event trigger:', 'Event action:'],
-  machines: ['Machine name:', 'Shell commands:'],
   macros: ['Macro name:', 'G-code commands:'],
   users: ['User name:', 'Password:'],
 };
 
-test.each(resources)('%s updates the visible cache after create, update and bulk delete', async (resource, Component) => {
+test.each(resources.filter(([resource]) => resource !== 'machines'))('%s updates the visible cache after create, update and bulk delete', async (resource, Component) => {
   const user = userEvent.setup();
   let serverRecords = records.map(record => ({ ...record }));
   const prefix = `api/${resource}`;
@@ -154,6 +153,92 @@ test.each(resources)('%s updates the visible cache after create, update and bulk
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Updated' })).not.toBeInTheDocument());
     expect(axios.post).toHaveBeenCalledWith(`${prefix}/delete`, { ids: ['created'] });
+  } finally {
+    view.dispose();
+  }
+});
+
+test('Machines create, update and bulk delete preserve the server name and numeric limits contract', async () => {
+  const user = userEvent.setup();
+  let serverRecords = [{
+    id: 'r1',
+    name: 'Existing profile',
+    limits: { xmin: -10, xmax: 10, ymin: -20, ymax: 20, zmin: -5, zmax: 5 },
+    mtime: 1700000000000,
+  }];
+  axios.get.mockImplementation(url => {
+    if (url.startsWith('api/machines/')) {
+      return Promise.resolve({ data: serverRecords.find(record => record.id === url.slice('api/machines/'.length)) });
+    }
+    return Promise.resolve({ data: { records: serverRecords, pagination: { totalRecords: serverRecords.length } } });
+  });
+  axios.post.mockImplementation((url, data) => {
+    if (url === 'api/machines/delete') {
+      serverRecords = serverRecords.filter(record => !data.ids.includes(record.id));
+    } else {
+      serverRecords = serverRecords.concat({ ...data, id: 'created', mtime: 1700000000000 });
+    }
+    return Promise.resolve({ data: { id: 'created' } });
+  });
+  axios.put.mockImplementation((url, data) => {
+    serverRecords = serverRecords.map(record => (record.id === 'created' ? { ...record, ...data } : record));
+    return Promise.resolve({ data: { id: 'created' } });
+  });
+
+  const view = renderAppUI(<ToastManager><PortalManager><Machines /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('button', { name: 'Existing profile' });
+    await user.click(screen.getByRole('button', { name: 'Add' }));
+    await screen.findByText('New Machine');
+    await user.type(screen.getByLabelText(/^Machine name:/), 'Created profile');
+    const addButtons = screen.getAllByRole('button', { name: 'Add' });
+    const submitAdd = addButtons[addButtons.length - 1];
+    const xmin = screen.getByLabelText(/^X min/);
+    await user.clear(xmin);
+    await user.click(submitAdd);
+    expect(await screen.findByText('Enter a valid finite number.')).toBeInTheDocument();
+    expect(axios.post).not.toHaveBeenCalled();
+
+    const createLimits = { xmin: '-100', xmax: '-101', ymin: '-50', ymax: '50', zmin: '-25', zmax: '25' };
+    await Object.entries(createLimits).reduce((promise, [key, value]) => promise.then(async () => {
+      const label = new RegExp(`^${key[0].toUpperCase()} ${key.endsWith('min') ? 'min' : 'max'}`);
+      const field = screen.getByLabelText(label);
+      await user.clear(field);
+      await user.type(field, value);
+    }), Promise.resolve());
+    await user.click(submitAdd);
+    expect(await screen.findByText('Maximum must be greater than or equal to minimum.')).toBeInTheDocument();
+    expect(axios.post).not.toHaveBeenCalled();
+    await user.clear(screen.getByLabelText(/^X max/));
+    await user.type(screen.getByLabelText(/^X max/), '100');
+    await user.click(submitAdd);
+    await screen.findByRole('button', { name: 'Created profile' });
+    expect(axios.post).toHaveBeenCalledWith('api/machines', {
+      name: 'Created profile',
+      limits: { xmin: -100, xmax: 100, ymin: -50, ymax: 50, zmin: -25, zmax: 25 },
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Created profile' }));
+    await screen.findByText('Machine Details');
+    await waitFor(() => expect(screen.getByLabelText(/^X max/)).toHaveValue(100));
+    const name = screen.getByLabelText(/^Machine name:/);
+    await user.clear(name);
+    await user.type(name, 'Updated profile');
+    const xmax = screen.getByLabelText(/^X max/);
+    await user.clear(xmax);
+    await user.type(xmax, '125');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByRole('button', { name: 'Updated profile' });
+    expect(axios.put).toHaveBeenCalledWith('api/machines/created', {
+      name: 'Updated profile',
+      limits: { xmin: -100, xmax: 125, ymin: -50, ymax: 50, zmin: -25, zmax: 25 },
+    });
+
+    await user.click(screen.getByRole('checkbox', { name: 'Select row created' }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Updated profile' })).not.toBeInTheDocument());
+    expect(axios.post).toHaveBeenCalledWith('api/machines/delete', { ids: ['created'] });
   } finally {
     view.dispose();
   }

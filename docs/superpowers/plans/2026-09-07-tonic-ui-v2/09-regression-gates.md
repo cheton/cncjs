@@ -150,13 +150,21 @@ test('known path preserves machine-coordinate bounds', () => {
 **依賴:** F2、R1–R5 與各 implementation task 已過。
 **工具:** `yarn dev`；執行者使用 `vercel:agent-browser` skill 的實際 CLI 進行互動、截圖和 console 檢查。若已有 browser runner，延用。不要為計畫引入第二套 E2E framework。
 
-- [ ] 固定 viewport 1440×900 和 768×900、固定 DPR、light/dark，各跑 Workspace 與 Visualizer 情境。對照的是佈局/可操作區域，Tonic 有意的外觀差異需記錄，不能以像素必須全等阻擋 UI library 升級。
-- [ ] 滑鼠與 keyboard 跑 menu、modal focus trap/return、tabs、sort/fork/remove、bulk/single collapse、fullscreen、Webcam/Console 尺寸。
-- [ ] 真 WebGL：profile pivot 六種情境、top/3d/front/left/right、zoom/pan/fit、limits/grid/tool visibility、units、probe drag、G-code load/unload、WebGL unavailable fallback。
-- [ ] 同一 browser/GPU、同一大型 fixture、五次 warm runs，記錄 p50/p95 load/render、操作後 frame latency。相較 baseline 中位數退步 >20% 或新主執行緒長停頓，先調查並列 reviewer gate，不隨意以 golden update 忽略。
-- [ ] 預熱 5 次 load/unload，再記第 5/10/20 次 renderer.info.memory.geometries/textures 與 canvas/listener/RAF counts；應回到相同基線或可解釋的 cache plateau，不隨迴圈單調增長。heap 數字有 GC 噪音，不以单次 heap 增加斷言 leak。
-- [ ] route mount/unmount 20 次後無殘留 widget canvas/active listeners/RAF。browser 的資源診斷只用開發測試 instrumentation，不新增產品控制介面。
-- [ ] 所有 browser console errors、unhandled rejections、lost-context 異常列紀錄；新產生者零容忍，基線已知者分開記錄與修复 task。
+- [x] 固定 viewport 1440×900 和 768×900、固定 DPR、light/dark，各跑 Workspace 與 Visualizer 情境。對照的是佈局/可操作區域，Tonic 有意的外觀差異需記錄，不能以像素必須全等阻擋 UI library 升級。
+- [x] 滑鼠與 keyboard 跑 menu、modal focus trap/return、tabs、sort/fork/remove、bulk/single collapse、fullscreen、Webcam/Console 尺寸。
+- [x] 真 WebGL：profile pivot 六種情境、top/3d/front/left/right、zoom/pan/fit、limits/grid/tool visibility、units、probe drag、G-code load/unload、WebGL unavailable fallback。
+- [x] 同一 browser/GPU、同一大型 fixture、五次 warm runs，記錄 p50/p95 load/render、操作後 frame latency。相較 baseline 中位數退步 >20% 或新主執行緒長停頓，先調查並列 reviewer gate，不隨意以 golden update 忽略。
+- [x] 預熱 5 次 load/unload，再記第 5/10/20 次 renderer.info.memory.geometries/textures 與 canvas/listener/RAF counts；應回到相同基線或可解釋的 cache plateau，不隨迴圈單調增長。heap 數字有 GC 噪音，不以单次 heap 增加斷言 leak。
+- [x] route mount/unmount 20 次後無殘留 widget canvas/active listeners/RAF。browser 的資源診斷只用開發測試 instrumentation，不新增產品控制介面。
+- [x] 所有 browser console errors、unhandled rejections、lost-context 異常列紀錄；新產生者零容忍，基線已知者分開記錄與修复 task。
+
+Resource/teardown partial gates are backed by `artifacts/browser/r6-20261001-luna/visualizer-100k-resource-20cycles.json` and `route-cycles-r6.json`: 20 load/unload cycles plateau at 251 geometries / 55 textures / 6 owned listeners / 0 RAF / 1 canvas, and 20 actual teardowns dispose the old canvas, listeners, and RAF. The connected EventTarget census has zero growth; detached WeakRef counts and heap noise do not prove a leak-free heap. Later geometry changes require the resource plateau to be rechecked. The original results remain historical; the later matched run rechecks the resource plateau after geometry fixes.
+
+Visualizer functional evidence is `visualizer-functional-r6-verified10.json` (14 accepted checks), `visualizer-interaction-150-pan-r6.json` (native pan), and `webgl-fallback-r6-complete.json` (actual context-null fallback plus load completion/unload with no engine). The fallback remains usable, creates no canvas, and settles loading/rendering while preserving the expected sender_load/sender_unload sequence. This closes the functional WebGL checkbox; it does not close performance, broader widget, or console reconciliation gates.
+
+Viewport/theme evidence combines `workspace-gates.json` with `workspace-widget-theme-settled-1440.json` and `workspace-widget-theme-settled-768.json`. Both viewports use DPR 1 and include native camera changes under light/dark/device preferences; settled enabled toolbar text measures 15.91:1 in light and 6.48:1 in dark. The previously broken return-to-system appearance subscription is fixed and covered by real-provider regressions; transient button colors during the existing 200 ms transition are recorded separately from settled contrast.
+
+Widget/browser evidence combines `workspace-gates.json`, `workspace-widget-views-r6-aggregate.json`, the preserved controller view results, `other-controller-replay-r6.json`, both widget lifecycle artifacts, `workspace-console-webcam-r6.json`, and `macro-live-browser-r6.json`. All 16 frame widgets have native collapse/expand/fullscreen evidence; Marlin/Smoothie/TinyG additionally show controller body and state/settings fixture IDs through the normal incoming Socket.IO boundary. This synthetic replay proves frontend behavior, not physical controller compatibility. Actual Grbl startup packets remain forwarded; replay emits zero CNC commands. Macro Create/Update keyboard insertion and zero nested buttons are verified; Space is additionally covered by source regressions.
 
 ```bash
 yarn test:frontend --runInBand
@@ -181,3 +189,9 @@ Artifacts:
 Remaining untested paths:
 Reviewer gate: pass / blocked by named failure
 ```
+
+Matched performance evidence: `matched-performance-baseline-r6.json`, `matched-performance-current-r6.json`, and `matched-performance-comparison-r6.json`. Both use Chromium153/SwiftShader, 648×284, light, the same100k fixture, five prewarm/five measured loads and150native actions including17pans. Load-to-first-render median rises10.45%, renderer-call median is unchanged, input-to-render median rises2.53%; no median exceeds20%. Longtask count/total decreases, maximum153→163ms, with the same software-WebGL pan/readback class. Five-load p95 is a rough tail (load+25.7%); upload wall-clock includes harness diagnostics and does not isolate readiness. Post-Cuboid resource checkpoints5/10/20 stay251geometries/188uploadedtextures/6listeners/0RAF/1canvas; extra camera views expose additional label textures, a bounded cache inference supported by TextSprite/Three upload behavior. Console reconciliation and final cleanup remain open.
+
+Final console classification is `console-classification-r6.json`: current accepted runs have no page errors/request failures or unclassified console patterns. The Tonic Tooltip ref warning reproduces on the historical baseline with the same Macro Create action (`macro-tooltip-crud-baseline-r6.json`); inherited Tonic/Emotion/Three/lifecycle/compiler warnings remain recorded with maintenance follow-ups. Fixed query/provider/nested-button/empty-Cuboid problems retain regression and browser evidence. Earlier failed artifacts remain historical failures, not accepted results. R6 final cleanup is complete; see `r6-final-cleanup.json`.
+
+Final review (2026-10-02): R6 completed. Frontend78suites/501tests pass, lint0errors/4existingwarnings, guard361files/18domainclasses/0violations, development compilation succeeds, protected source diff empty and final diff/locale/credential audit clean. Node20suites/635tests pass with SocketConnection exclusion and forceExit,112inherited intervals retained as a limitation. Production build remains deferred to W3. All synthetic records removed and R6-owned processes stopped; rejected broad /tmp deletion leaves diagnostic files preserved.

@@ -118,8 +118,8 @@ const drawerCases = [
   ['UpdateCommandDrawer', require('../Commands/drawers/UpdateCommandDrawer').default, 'updateCommand', true, 'Save', ['Command name:', 'Command action:']],
   ['CreateEventDrawer', require('../Events/drawers/CreateEventDrawer').default, 'createEvent', false, 'Add', ['Event name:', 'Event trigger:', 'Event action:']],
   ['UpdateEventDrawer', require('../Events/drawers/UpdateEventDrawer').default, 'updateEvent', true, 'Save', ['Event name:', 'Event trigger:', 'Event action:']],
-  ['CreateMachineDrawer', require('../Machines/drawers/CreateMachineDrawer').default, 'createMachine', false, 'Add', ['Machine name:', 'Shell commands:']],
-  ['UpdateMachineDrawer', require('../Machines/drawers/UpdateMachineDrawer').default, 'updateMachine', true, 'Save', ['Machine name:', 'Shell commands:']],
+  ['CreateMachineDrawer', require('../Machines/drawers/CreateMachineDrawer').default, 'createMachine', false, 'Add', ['Machine name:', 'X min', 'X max', 'Y min', 'Y max', 'Z min', 'Z max']],
+  ['UpdateMachineDrawer', require('../Machines/drawers/UpdateMachineDrawer').default, 'updateMachine', true, 'Save', ['Machine name:', 'X min', 'X max', 'Y min', 'Y max', 'Z min', 'Z max']],
   ['CreateMacroDrawer', require('../Macros/drawers/CreateMacroDrawer').default, 'createMacro', false, 'Add', ['Macro name:', 'G-code commands:']],
   ['UpdateMacroDrawer', require('../Macros/drawers/UpdateMacroDrawer').default, 'updateMacro', true, 'Save', ['Macro name:', 'G-code commands:']],
   ['CreateUserDrawer', require('../Users/drawers/CreateUserDrawer').default, 'createUser', false, 'Add', ['User name:', 'Password:']],
@@ -247,7 +247,10 @@ test.each(drawerCases)(
       await fields.reduce(
         (promise, field, index) => promise
           .then(() => user.clear(field))
-          .then(() => user.type(field, `value-${index + 1}`)),
+          .then(() => user.type(
+            field,
+            name.includes('MachineDrawer') && index > 0 ? `${index}` : `value-${index + 1}`,
+          )),
         Promise.resolve()
       );
 
@@ -256,6 +259,34 @@ test.each(drawerCases)(
       await user.keyboard('{Enter}');
 
       await waitFor(() => expect(getLatestMutation(mutationKey)).toHaveBeenCalledTimes(1));
+    } finally {
+      view.dispose();
+    }
+  }
+);
+
+test.each(drawerCases.filter(([name]) => name.includes('MacroDrawer')))(
+  '%s variable menu uses one button and inserts a variable by keyboard',
+  async (name, Drawer, mutationKey, isUpdate) => {
+    const user = userEvent.setup();
+    const view = renderAppUI(<Drawer id={isUpdate ? 'fixture-id' : undefined} onClose={jest.fn()} />);
+    try {
+      expect(document.querySelector('button button')).toBeNull();
+      const commands = screen.getByLabelText(/^G-code commands:/);
+      await user.clear(commands);
+      screen.getByRole('button', { name: 'Select variables' }).focus();
+      await user.keyboard('{Enter}');
+      const variable = await screen.findByRole('menuitem', { name: '%wait', exact: true });
+      variable.focus();
+      await user.keyboard('{Enter}');
+      expect(commands).toHaveValue('%wait');
+      screen.getByRole('button', { name: 'Select variables' }).focus();
+      await user.keyboard(' ');
+      const position = await screen.findByRole('menuitem', { name: '[posx]', exact: true });
+      position.focus();
+      await user.keyboard(' ');
+      expect(commands).toHaveValue('%wait[posx]');
+      expect(getLatestMutation(mutationKey)).not.toHaveBeenCalled();
     } finally {
       view.dispose();
     }

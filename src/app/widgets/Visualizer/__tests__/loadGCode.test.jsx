@@ -51,6 +51,11 @@ jest.mock('../useVisualizer', () => ({
   default: (...args) => mockUseVisualizer(...args),
 }));
 
+// Keep the toolbar's real Query owner while isolating its profile-list transport.
+jest.mock('@app/api/axios', () => ({
+  __esModule: true,
+  default: { get: jest.fn(() => Promise.resolve({ data: [] })) },
+}));
 jest.mock('@app/lib/portal', () => jest.fn());
 jest.mock('@app/lib/three/WebGL', () => ({
   isWebGLAvailable: jest.fn(() => true),

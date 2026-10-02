@@ -19,6 +19,13 @@ const getTextWidth = (text, font) => {
   return metrics.width || 0;
 };
 
+const hasSameColumnSizing = (current, next) => {
+  const currentKeys = Object.keys(current || {});
+  const nextKeys = Object.keys(next || {});
+
+  return currentKeys.length === nextKeys.length && nextKeys.every(key => current[key] === next[key]);
+};
+
 /** Own the Administration table model and measured sizing; presentation stays in each resource. */
 export default function useResourceTable({ columns, data, rowSelection, onRowSelectionChange, font }) {
   const headerRef = useRef(null);
@@ -40,7 +47,12 @@ export default function useResourceTable({ columns, data, rowSelection, onRowSel
       return;
     }
     const definitions = table.getAllColumns().map(column => ({ ...column.columnDef, id: column.id }));
-    table.setColumnSizing(getColumnSizing(definitions, tableWidth, text => getTextWidth(text, font)));
+    const columnSizing = getColumnSizing(definitions, tableWidth, text => getTextWidth(text, font));
+    const currentColumnSizing = table.getState().columnSizing;
+
+    if (!hasSameColumnSizing(currentColumnSizing, columnSizing)) {
+      table.setColumnSizing(columnSizing);
+    }
   }, [columns, font, table, tableWidth]);
   return { table, headerRef, setTableWidth };
 }

@@ -6,6 +6,7 @@ import {
   MenuItem,
   MenuList,
   Space,
+  useColorStyle,
 } from '@tonic-ui/react';
 import {
   ChevronDownIcon,
@@ -305,6 +306,7 @@ function AutolevelWidget({
   onViewChange = noop,
   sortable = {},
 }) {
+  const [colorStyle] = useColorStyle();
   const widgetConfig = useMemo(() => new WidgetConfig(widgetId), [widgetId]);
   const [state, dispatch] = useReducer(
     autolevelReducer,
@@ -745,6 +747,7 @@ function AutolevelWidget({
   return (
     <Box
       data-fullscreen={String(isFullscreen)}
+      aria-label={i18n._('Autolevel Widget')}
       role="region"
       sx={{
         position: isFullscreen ? 'fixed' : 'relative',
@@ -764,8 +767,9 @@ function AutolevelWidget({
         justifyContent="space-between"
         p="2x"
         sx={{
-          backgroundColor: '#f6f7f8',
-          border: '1px solid #ccc',
+          backgroundColor: colorStyle.background.secondary,
+          border: `1px solid ${colorStyle.divider}`,
+          color: colorStyle.color.primary,
           position: 'relative',
         }}
       >

@@ -200,7 +200,7 @@ const Users = () => {
       header: ({ table }) => (
         <Flex alignItems="center" justifyContent="center">
           <Checkbox
-            aria-label={i18n._('Select all rows')}
+            inputProps={{ 'aria-label': i18n._('Select all rows') }}
             disabled={isRowSelectionDisabled}
             checked={table.getIsAllRowsSelected()}
             indeterminate={table.getIsSomeRowsSelected()}
@@ -211,7 +211,7 @@ const Users = () => {
       cell: ({ row }) => (
         <Flex alignItems="center" justifyContent="center">
           <Checkbox
-            aria-label={i18n._('Select row {{id}}', { id: row.id })}
+            inputProps={{ 'aria-label': i18n._('Select row {{id}}', { id: row.id }) }}
             disabled={isRowSelectionDisabled}
             checked={row.getIsSelected()}
             indeterminate={row.getIsSomeSelected()}
