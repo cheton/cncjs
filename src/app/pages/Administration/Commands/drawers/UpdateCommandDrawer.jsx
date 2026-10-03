@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -9,6 +8,7 @@ import {
   DrawerFooter,
   DrawerOverlay,
   Flex,
+  FormControl,
   Spinner,
   Switch,
   Text,
@@ -17,12 +17,7 @@ import {
 import memoize from 'micro-memoize';
 import React, { useCallback } from 'react';
 import { Field, Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
@@ -41,7 +36,7 @@ const UpdateCommandDrawer = ({
   onClose,
   ...rest
 }) => {
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const queryClient = useQueryClient();
   const readCommandQuery = useReadCommandQuery({
     meta: {
@@ -104,9 +99,6 @@ const UpdateCommandDrawer = ({
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('Command Details')}
@@ -118,7 +110,7 @@ const UpdateCommandDrawer = ({
               )}
               {!(readCommandQuery.isFetching) && (
                 <>
-                  <FormGroup>
+                  <FormControl mb="4x">
                     <Flex
                       alignItems="center"
                       columnGap="3x"
@@ -146,35 +138,21 @@ const UpdateCommandDrawer = ({
                         }}
                       </Field>
                     </Flex>
-                  </FormGroup>
-                  <FormGroup>
-                    <Box mb="1x">
-                      <FieldTextLabel required>
-                        {i18n._('Command name:')}
-                      </FieldTextLabel>
-                    </Box>
-                    <FieldInput
-                      aria-label="Title"
-                      name="name"
-                      placeholder={i18n._('e.g., Activate Air Purifier')}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Box mb="1x">
-                      <FieldTextLabel
-                        required
-                        infoTipLabel={i18n._('Input the shell commands to execute with this command.')}
-                      >
-                        {i18n._('Command action:')}
-                      </FieldTextLabel>
-                    </Box>
-                    <FieldTextarea
-                      aria-label="Commands"
-                      name="action"
-                      rows="10"
-                      placeholder="/home/cncjs/bin/activate-air-purifier"
-                    />
-                  </FormGroup>
+                  </FormControl>
+                  <FieldInput
+                    name="name"
+                    label={i18n._('Command name:')}
+                    required
+                    placeholder={i18n._('e.g., Activate Air Purifier')}
+                  />
+                  <FieldTextarea
+                    name="action"
+                    label={i18n._('Command action:')}
+                    required
+                    infoTipLabel={i18n._('Input the shell commands to execute with this command.')}
+                    rows="10"
+                    placeholder="/home/cncjs/bin/activate-air-purifier"
+                  />
                 </>
               )}
             </DrawerBody>

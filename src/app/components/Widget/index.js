@@ -1,4 +1,3 @@
-import { MenuItem as DropdownMenuItem } from '../Dropdown';
 import Widget from './Widget';
 import Header from './Header';
 import Content from './Content';
@@ -7,6 +6,7 @@ import Sortable from './Sortable';
 import Title from './Title';
 import Button from './Button';
 import DropdownButton from './DropdownButton';
+import DropdownMenuItem from './DropdownMenuItem';
 import Controls from './Controls';
 
 Widget.Header = Header;

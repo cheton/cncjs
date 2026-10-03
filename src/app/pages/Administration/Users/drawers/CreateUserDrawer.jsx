@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -9,6 +8,7 @@ import {
   DrawerFooter,
   DrawerOverlay,
   Flex,
+  FormControl,
   Switch,
   Text,
   TextLabel,
@@ -18,15 +18,9 @@ import {
 } from '@tonic-ui/react-hooks';
 import React, { useCallback } from 'react';
 import { Field, Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
-import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
 import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
@@ -34,11 +28,12 @@ import {
   useCreateUserMutation,
 } from '../queries';
 
+/** @param {{ onClose?: Function, id?: string }} props */
 const CreateUserDrawer = ({
   onClose,
   ...rest
 }) => {
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const queryClient = useQueryClient();
   const createUserMutation = useCreateUserMutation({
     onSuccess: () => {
@@ -61,8 +56,8 @@ const CreateUserDrawer = ({
   });
   const initialValues = useConst(() => ({
     enabled: true,
-    title: '',
-    commands: '',
+    name: '',
+    password: '',
   }));
   const handleFormSubmit = useCallback((values) => {
     createUserMutation.mutate({
@@ -88,21 +83,18 @@ const CreateUserDrawer = ({
         validate={(values) => {
           const errors = {};
           errors.name = validations.required(values.name);
-          errors.data = validations.required(values.data);
+          errors.password = validations.required(values.password);
           return errors;
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New User')}
               </Text>
             </DrawerHeader>
             <DrawerBody>
-              <FormGroup>
+              <FormControl mb="4x">
                 <Flex
                   alignItems="center"
                   columnGap="3x"
@@ -130,36 +122,20 @@ const CreateUserDrawer = ({
                     }}
                   </Field>
                 </Flex>
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel
-                    required
-                  >
-                    {i18n._('User name:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldInput
-                  aria-label="Username"
-                  name="title"
-                  placeholder={i18n._('e.g., Activate Air Purifier')}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel
-                    required
-                    infoTipLabel={i18n._('Enter the shell commands to be executed when this command runs. Each line will be executed sequentially.')}
-                  >
-                    {i18n._('Shell commands:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldTextarea
-                  name="commands"
-                  rows="10"
-                  placeholder="/home/cncjs/bin/activate-air-purifier"
-                />
-              </FormGroup>
+              </FormControl>
+              <FieldInput
+                name="name"
+                label={i18n._('User name:')}
+                required
+                autoComplete="username"
+              />
+              <FieldInput
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                label={i18n._('Password:')}
+                required
+              />
             </DrawerBody>
             <DrawerFooter>
               <Flex

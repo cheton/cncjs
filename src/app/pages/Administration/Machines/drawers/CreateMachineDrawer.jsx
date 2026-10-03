@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -9,36 +8,38 @@ import {
   DrawerFooter,
   DrawerOverlay,
   Flex,
-  Switch,
   Text,
-  TextLabel,
 } from '@tonic-ui/react';
 import {
   useConst,
 } from '@tonic-ui/react-hooks';
 import React, { useCallback } from 'react';
-import { Field, Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import { Form } from 'react-final-form';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
-import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
-import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
+import {
+  DEFAULT_MACHINE_PROFILE_LIMITS,
+  MACHINE_PROFILE_LIMIT_FIELDS,
+  getMachineProfileLimitLabel,
+  normalizeMachineProfileLimits,
+  validateMachineProfileLimits,
+} from '../limits';
 import {
   API_MACHINES_QUERY_KEY,
   useCreateMachineMutation,
 } from '../queries';
 
+/**
+ * @param {{ onClose?: Function }} props
+ * @returns {JSX.Element}
+ */
 const CreateMachineDrawer = ({
   onClose,
   ...rest
 }) => {
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const queryClient = useQueryClient();
   const createMachineMutation = useCreateMachineMutation({
     onSuccess: () => {
@@ -60,13 +61,15 @@ const CreateMachineDrawer = ({
     },
   });
   const initialValues = useConst(() => ({
-    title: '',
-    commands: '',
-    enabled: true,
+    name: '',
+    limits: { ...DEFAULT_MACHINE_PROFILE_LIMITS },
   }));
   const handleFormSubmit = useCallback((values) => {
     createMachineMutation.mutate({
-      data: values,
+      data: {
+        name: values.name,
+        limits: normalizeMachineProfileLimits(values.limits),
+      },
     });
   }, [createMachineMutation]);
   const isFormDisabled = createMachineMutation.isLoading;
@@ -86,74 +89,35 @@ const CreateMachineDrawer = ({
         initialValues={initialValues}
         onSubmit={handleFormSubmit}
         validate={(values) => {
-          const errors = {};
-          errors.name = validations.required(values.name);
-          errors.data = validations.required(values.data);
-          return errors;
+          return {
+            name: validations.required(values.name),
+            ...validateMachineProfileLimits(values),
+          };
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New Machine')}
               </Text>
             </DrawerHeader>
             <DrawerBody>
-              <FormGroup>
-                <Flex
-                  alignItems="center"
-                  columnGap="3x"
-                >
-                  <FieldTextLabel>
-                    {i18n._('Status:')}
-                  </FieldTextLabel>
-                  <Field name="enabled">
-                    {({ input, meta }) => {
-                      return (
-                        <Flex
-                          alignItems="center"
-                          columnGap="2x"
-                        >
-                          <Switch
-                            {...input}
-                            checked={input.value}
-                          />
-                          <TextLabel>
-                            {input.value === true ? i18n._('ON') : i18n._('OFF')}
-                          </TextLabel>
-                        </Flex>
-                      );
-                    }}
-                  </Field>
-                </Flex>
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel
-                    required
-                  >
-                    {i18n._('Machine name:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldInput aria-label="Name" name="name" />
-              </FormGroup>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel
-                    required
-                    infoTipLabel={i18n._('Enter the shell commands to be executed when this command runs. Each line will be executed sequentially.')}
-                  >
-                    {i18n._('Shell commands:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldTextarea
-                  name="data"
-                  rows="10"
+              <FieldInput
+                name="name"
+                label={i18n._('Machine name:')}
+                required
+              />
+              <Text fontWeight="bold" mb="2x">{i18n._('Limits')}</Text>
+              {MACHINE_PROFILE_LIMIT_FIELDS.map(({ key, axis, bound }) => (
+                <FieldInput
+                  key={key}
+                  name={`limits.${key}`}
+                  label={getMachineProfileLimitLabel(axis, bound)}
+                  required
+                  type="number"
+                  step="any"
                 />
-              </FormGroup>
+              ))}
             </DrawerBody>
             <DrawerFooter>
               <Flex

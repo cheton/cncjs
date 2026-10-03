@@ -1,7 +1,5 @@
 import {
   Text,
-  useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import {
   isNullOrUndefined,
@@ -16,9 +14,6 @@ const FieldErrorText = forwardRef((
   },
   ref,
 ) => {
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle({ colorMode });
-
   return (
     <Field
       name={name}
@@ -38,7 +33,7 @@ const FieldErrorText = forwardRef((
         return (
           <Text
             ref={ref}
-            color={colorStyle.color.error}
+            color="error.text"
             mt="1x"
             {...rest}
           >

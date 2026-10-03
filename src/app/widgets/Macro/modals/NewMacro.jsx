@@ -3,7 +3,11 @@ import {
   Box,
   Button,
   Flex,
-  Input,
+  FormControl,
+  FormErrorMessage,
+  FormInput,
+  FormLabel,
+  FormTextarea,
   Menu,
   MenuButton,
   MenuList,
@@ -16,32 +20,17 @@ import {
   ModalBody,
   ModalFooter,
   Space,
-  Textarea,
-  TextLabel,
+  Text,
 } from '@tonic-ui/react';
 import { ensureArray } from 'ensure-type';
 import _uniqueId from 'lodash/uniqueId';
 import React, { useRef } from 'react';
-import { Form, Field } from 'react-final-form';
-import axios from '@app/api/axios';
-import FormGroup from '@app/components/FormGroup';
-import InlineError from '@app/components/InlineError';
+import { FORM_ERROR } from 'final-form';
+import { Form, Field, FormSpy } from 'react-final-form';
 import i18n from '@app/lib/i18n';
+import { useCreateMacroMutation } from '@app/queries/macros';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 import variables from '../shared/variables';
-
-const addMacro = async ({ name, content }) => {
-  try {
-    const url = '/api/macros';
-    const data = {
-      name,
-      content,
-    };
-    await axios.post(url, data);
-  } catch (err) {
-    // Ignore error
-  }
-};
 
 const mapMacroVariablesToMenuGroupItems = (variables) => ensureArray(variables).map(x => {
   if (x.role === 'group') {
@@ -67,24 +56,46 @@ function NewMacro({
   onClose,
 }) {
   const contentRef = useRef();
+  const submitLockRef = useRef(false);
+  const createMacroMutation = useCreateMacroMutation();
   const initialValues = {
     name: '',
     content: '',
+  };
+  const handleClose = () => {
+    if (submitLockRef.current || createMacroMutation.isLoading) {
+      return;
+    }
+    onClose();
   };
 
   return (
     <Modal
       isClosable
       isOpen
-      onClose={onClose}
+      onClose={handleClose}
       size="md"
     >
       <Form
         initialValues={initialValues}
         onSubmit={async (values) => {
+          if (submitLockRef.current) {
+            return undefined;
+          }
+          submitLockRef.current = true;
           const { name, content } = values;
-          await addMacro({ name, content });
-          onClose();
+          try {
+            await createMacroMutation.mutateAsync({
+              data: { name, content },
+            });
+            onClose();
+          } catch (error) {
+            submitLockRef.current = false;
+            return {
+              [FORM_ERROR]: error.message || i18n._('An unexpected error has occurred.'),
+            };
+          }
+          return undefined;
         }}
         subscription={{}}
       >
@@ -102,17 +113,13 @@ function NewMacro({
                 >
                   {({ input, meta }) => {
                     return (
-                      <FormGroup>
-                        <TextLabel mb="2x">
+                      <FormControl error={Boolean(meta.error && meta.touched)} mb="4x">
+                        <FormLabel required>
                           {i18n._('Macro Name')}
-                        </TextLabel>
-                        <Box>
-                          <Input {...input} />
-                        </Box>
-                        {(meta.error && meta.touched) && (
-                          <InlineError>{meta.error}</InlineError>
-                        )}
-                      </FormGroup>
+                        </FormLabel>
+                        <FormInput {...input} />
+                        <FormErrorMessage errors={meta.error && meta.touched ? [meta.error] : []} />
+                      </FormControl>
                     );
                   }}
                 </Field>
@@ -122,12 +129,12 @@ function NewMacro({
                 >
                   {({ input, meta }) => {
                     return (
-                      <FormGroup>
+                      <FormControl error={Boolean(meta.error && meta.touched)} mb="4x">
                         <Flex align="center" justify="space-between">
                           <Box>
-                            <TextLabel mb="2x">
+                            <FormLabel required>
                               {i18n._('Macro Commands')}
-                            </TextLabel>
+                            </FormLabel>
                           </Box>
                           <Box>
                             <Menu>
@@ -162,29 +169,36 @@ function NewMacro({
                             </Menu>
                           </Box>
                         </Flex>
-                        <Textarea
+                        <FormTextarea
                           {...input}
                           ref={contentRef}
                           rows={10}
                         />
-                        {(meta.error && meta.touched) && (
-                          <InlineError>{meta.error}</InlineError>
-                        )}
-                      </FormGroup>
+                        <FormErrorMessage errors={meta.error && meta.touched ? [meta.error] : []} />
+                      </FormControl>
                     );
                   }}
                 </Field>
               </ModalBody>
               <ModalFooter>
+                <FormSpy subscription={{ submitError: true }}>
+                  {({ submitError }) => submitError && (
+                    <Text color="error.text" mr="auto">
+                      {submitError}
+                    </Text>
+                  )}
+                </FormSpy>
                 <Button
                   variant="default"
-                  onClick={onClose}
+                  disabled={createMacroMutation.isLoading}
+                  onClick={handleClose}
                   minWidth="20x"
                 >
                   {i18n._('Cancel')}
                 </Button>
                 <Button
                   variant="primary"
+                  disabled={createMacroMutation.isLoading}
                   onClick={() => form.submit()}
                   minWidth="20x"
                 >

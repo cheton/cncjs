@@ -1,7 +1,5 @@
 import {
   Box,
-  useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import {
   useConst,
@@ -25,8 +23,6 @@ import MiniNav from './MiniNav';
 import SideNav from './SideNav';
 
 const MainPage = forwardRef((props, ref) => {
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle({ colorMode });
   const notLessThan640 = useMediaQuery('(min-width: 640px)'); // md
   const notLessThan1024 = useMediaQuery('(min-width: 1024px)'); // lg
   const [isMiniNavExpanded, toggleMiniNavExpanded] = useToggle(false);
@@ -127,7 +123,7 @@ const MainPage = forwardRef((props, ref) => {
       )}
       <Box
         as="main"
-        backgroundColor={colorStyle.background.primary}
+        backgroundColor="background.highest"
         ml={{
           xs: 0,
           md: layout.mininav.defaultWidth,

@@ -1,6 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -22,24 +20,17 @@ import {
 } from '@tonic-ui/react-hooks';
 import React, { useCallback, useRef } from 'react';
 import { Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
 import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
-import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
+import {
+  useCreateMacroMutation,
+} from '@app/queries/macros';
 import {
   MACRO_VARIABLE_EXAMPLES,
 } from '../constants';
-import {
-  API_MACROS_QUERY_KEY,
-  useCreateMacroMutation,
-} from '../queries';
 import {
   insertAtCaret,
 } from '../utils';
@@ -49,16 +40,12 @@ const CreateMacroDrawer = ({
   ...rest
 }) => {
   const gcodeInputRef = useRef();
-  const { toasts, notify: notifyToast } = useInlineToasts();
-  const queryClient = useQueryClient();
+  const notifyToast = useToast();
   const createMacroMutation = useCreateMacroMutation({
     onSuccess: () => {
       if (typeof onClose === 'function') {
         onClose();
       }
-
-      // Invalidate `useFetchMacrosQuery`
-      queryClient.invalidateQueries({ queryKey: API_MACROS_QUERY_KEY });
     },
     onError: () => {
       notifyToast({
@@ -103,41 +90,32 @@ const CreateMacroDrawer = ({
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('New Macro')}
               </Text>
             </DrawerHeader>
             <DrawerBody>
-              <FormGroup>
-                <Box mb="1x">
-                  <FieldTextLabel required>
-                    {i18n._('Macro name:')}
-                  </FieldTextLabel>
-                </Box>
-                <FieldInput name="name" />
-              </FormGroup>
-              <FormGroup>
-                <Flex
-                  mb="1x"
-                  justifyContent="space-between"
-                >
-                  <FieldTextLabel
-                    required
-                    infoTipLabel={i18n._('Input the G-code commands to execute with this macro.')}
-                  >
-                    {i18n._('G-code commands:')}
-                  </FieldTextLabel>
-                  <Menu
-                    placement="bottom-end"
-                  >
+              <FieldInput
+                name="name"
+                label={i18n._('Macro name:')}
+                required
+              />
+              <FieldTextarea
+                ref={gcodeInputRef}
+                name="action"
+                label={i18n._('G-code commands:')}
+                required
+                infoTipLabel={i18n._('Input the G-code commands to execute with this macro.')}
+                rows="10"
+                labelAction={(
+                  <Menu placement="bottom-end">
                     <MenuToggle>
-                      <LinkButton>
-                        {i18n._('Select variables')}
-                      </LinkButton>
+                      {({ getMenuToggleProps }) => (
+                        <LinkButton {...getMenuToggleProps()}>
+                          {i18n._('Select variables')}
+                        </LinkButton>
+                      )}
                     </MenuToggle>
                     <MenuList
                       maxHeight="50vh"
@@ -152,6 +130,12 @@ const CreateMacroDrawer = ({
                             <MenuItem
                               key={item}
                               value={item}
+                              onKeyDown={(event) => {
+                                if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                                  event.preventDefault();
+                                  event.currentTarget.click();
+                                }
+                              }}
                               onClick={(event) => {
                                 const el = gcodeInputRef.current;
                                 const value = event.currentTarget.value;
@@ -166,13 +150,8 @@ const CreateMacroDrawer = ({
                       ))}
                     </MenuList>
                   </Menu>
-                </Flex>
-                <FieldTextarea
-                  ref={gcodeInputRef}
-                  name="action"
-                  rows="10"
-                />
-              </FormGroup>
+                )}
+              />
             </DrawerBody>
             <DrawerFooter>
               <Flex

@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  Box,
   Button,
   Drawer,
   DrawerContent,
@@ -9,6 +8,7 @@ import {
   DrawerFooter,
   DrawerOverlay,
   Flex,
+  FormControl,
   Spinner,
   Switch,
   Text,
@@ -17,15 +17,9 @@ import {
 import memoize from 'micro-memoize';
 import React, { useCallback } from 'react';
 import { Field, Form } from 'react-final-form';
-import FormGroup from '@app/components/FormGroup';
-import {
-  InlineToastContainer,
-  InlineToasts,
-  useInlineToasts,
-} from '@app/components/InlineToasts';
+import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
-import FieldTextarea from '@app/pages/Administration/components/FieldTextarea';
 import FieldTextLabel from '@app/pages/Administration/components/FieldTextLabel';
 import * as validations from '@app/pages/Administration/validations';
 import {
@@ -36,12 +30,13 @@ import {
 
 const getMemoizedState = memoize(state => ({ ...state }));
 
+/** @param {{ onClose?: Function, id?: string }} props */
 const UpdateUserDrawer = ({
   id,
   onClose,
   ...rest
 }) => {
-  const { toasts, notify: notifyToast } = useInlineToasts();
+  const notifyToast = useToast();
   const queryClient = useQueryClient();
   const readUserQuery = useReadUserQuery({
     meta: {
@@ -69,8 +64,7 @@ const UpdateUserDrawer = ({
   });
   const initialValues = getMemoizedState({
     enabled: readUserQuery.data?.enabled,
-    title: readUserQuery.data?.title,
-    commands: readUserQuery.data?.commands,
+    name: readUserQuery.data?.name,
   });
   const handleFormSubmit = useCallback((values) => {
     updateUserMutation.mutate({
@@ -99,14 +93,11 @@ const UpdateUserDrawer = ({
         validate={(values) => {
           const errors = {};
           errors.name = validations.required(values.name);
-          errors.data = validations.required(values.data);
+
           return errors;
         }}
         render={({ form }) => (
           <DrawerContent>
-            <InlineToastContainer>
-              <InlineToasts toasts={toasts} />
-            </InlineToastContainer>
             <DrawerHeader>
               <Text>
                 {i18n._('User Details')}
@@ -118,7 +109,7 @@ const UpdateUserDrawer = ({
               )}
               {!(readUserQuery.isFetching) && (
                 <>
-                  <FormGroup>
+                  <FormControl mb="4x">
                     <Flex
                       alignItems="center"
                       columnGap="3x"
@@ -146,36 +137,14 @@ const UpdateUserDrawer = ({
                         }}
                       </Field>
                     </Flex>
-                  </FormGroup>
-                  <FormGroup>
-                    <Box mb="1x">
-                      <FieldTextLabel
-                        required
-                      >
-                        {i18n._('User name:')}
-                      </FieldTextLabel>
-                    </Box>
-                    <FieldInput
-                      aria-label="Username"
-                      name="title"
-                      placeholder={i18n._('e.g., Activate Air Purifier')}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Box mb="1x">
-                      <FieldTextLabel
-                        required
-                        infoTipLabel={i18n._('Enter the shell commands to be executed when this command runs. Each line will be executed sequentially.')}
-                      >
-                        {i18n._('Shell commands:')}
-                      </FieldTextLabel>
-                    </Box>
-                    <FieldTextarea
-                      name="commands"
-                      rows="10"
-                      placeholder="/home/cncjs/bin/activate-air-purifier"
-                    />
-                  </FormGroup>
+                  </FormControl>
+                  <FieldInput
+                    name="name"
+                    label={i18n._('User name:')}
+                    required
+                    autoComplete="username"
+                  />
+
                 </>
               )}
             </DrawerBody>

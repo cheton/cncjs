@@ -1,404 +1,244 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  Space,
-} from '@tonic-ui/react';
-import cx from 'classnames';
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Box, Space } from '@tonic-ui/react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Widget from '@app/components/Widget';
+import { SMOOTHIE } from '@app/constants/controller';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import WidgetConfig from '@app/widgets/shared/WidgetConfig';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
-import {
-  SMOOTHIE,
-} from '@app/constants/controller';
-import Smoothie from './Smoothie';
 import Controller from './Controller';
-import {
-  MODAL_NONE,
-  MODAL_CONTROLLER
-} from './constants';
-import styles from './index.styl';
+import Smoothie from './Smoothie';
 
-class SmoothieWidget extends Component {
-  static propTypes = {
-    widgetId: PropTypes.string.isRequired,
-    onFork: PropTypes.func.isRequired,
-    onRemove: PropTypes.func.isRequired,
-    sortable: PropTypes.object
-  };
+/**
+ * @param {{
+ *   onFork: () => void,
+ *   onRemove: () => void,
+ *   onViewChange: (view: 'normal' | 'collapsed' | 'fullscreen') => void,
+ *   sortable: { filterClassName: string, handleClassName: string },
+ *   view: 'normal' | 'collapsed' | 'fullscreen',
+ *   widgetId: string,
+ * }} props
+ */
+function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widgetId }) {
+  const config = useMemo(() => new WidgetConfig(widgetId), [widgetId]);
+  const [state, setState] = useState(() => getInitialState(config));
+  const [isControllerModalOpen, setIsControllerModalOpen] = useState(false);
 
-  // Public methods
-  collapse = () => {
-    this.setState({ minimized: true });
-  };
-
-  expand = () => {
-    this.setState({ minimized: false });
-  };
-
-  config = new WidgetConfig(this.props.widgetId);
-
-  state = this.getInitialState();
-
-  toggleFullscreen = () => {
-    this.setState(state => ({
-      minimized: state.isFullscreen ? state.minimized : false,
-      isFullscreen: !state.isFullscreen,
-    }));
-  };
-
-  toggleMinimized = () => {
-    this.setState(state => ({
-      minimized: !state.minimized,
-    }));
-  };
-
-  actions = {
-    openModal: (name = MODAL_NONE, params = {}) => {
-      this.setState({
-        modal: {
-          name: name,
-          params: params
-        }
-      });
-    },
-    closeModal: () => {
-      this.setState({
-        modal: {
-          name: MODAL_NONE,
-          params: {}
-        }
-      });
-    },
-    updateModalParams: (params = {}) => {
-      this.setState({
-        modal: {
-          ...this.state.modal,
-          params: {
-            ...this.state.modal.params,
-            ...params
-          }
-        }
-      });
-    },
-    toggleQueueReports: () => {
-      const expanded = this.state.panel.queueReports.expanded;
-
-      this.setState({
-        panel: {
-          ...this.state.panel,
-          queueReports: {
-            ...this.state.panel.queueReports,
-            expanded: !expanded
-          }
-        }
-      });
-    },
-    toggleStatusReports: () => {
-      const expanded = this.state.panel.statusReports.expanded;
-
-      this.setState({
-        panel: {
-          ...this.state.panel,
-          statusReports: {
-            ...this.state.panel.statusReports,
-            expanded: !expanded
-          }
-        }
-      });
-    },
-    toggleModalGroups: () => {
-      const expanded = this.state.panel.modalGroups.expanded;
-
-      this.setState({
-        panel: {
-          ...this.state.panel,
-          modalGroups: {
-            ...this.state.panel.modalGroups,
-            expanded: !expanded
-          }
-        }
-      });
-    }
-  };
-
-  controllerEvents = {
-    'connection:open': () => {
-      this.setState({ connected: true });
-    },
-    'connection:change': (connectionState, connected) => {
+  useEffect(() => {
+    const onConnectionOpen = () => setState(current => ({ ...current, connected: true }));
+    const onConnectionChange = (connectionState, connected) => {
       if (!connected) {
-        const initialState = this.getInitialState();
-        this.setState({ ...initialState });
+        setState({ ...getInitialState(config), connected: false });
+        setIsControllerModalOpen(false);
         return;
       }
-      this.setState({ connected: true });
-    },
-    'controller:settings': (type, controllerSettings) => {
-      if (type === SMOOTHIE) {
-        this.setState(state => ({
-          controller: {
-            ...state.controller,
-            type: type,
-            settings: controllerSettings
-          }
-        }));
+      setState(current => ({ ...current, connected: true }));
+    };
+    const onControllerSettings = (type, controllerSettings) => {
+      if (type !== SMOOTHIE) {
+        return;
       }
-    },
-    'controller:state': (type, controllerState) => {
-      if (type === SMOOTHIE) {
-        this.setState(state => ({
-          controller: {
-            ...state.controller,
-            type: type,
-            state: controllerState
-          }
-        }));
+      setState(current => ({
+        ...current,
+        controller: {
+          ...current.controller,
+          settings: { ...current.controller.settings, ...controllerSettings },
+          type,
+        },
+      }));
+    };
+    const onControllerState = (type, controllerState) => {
+      if (type !== SMOOTHIE) {
+        return;
       }
-    }
-  };
+      setState(current => ({
+        ...current,
+        controller: {
+          ...current.controller,
+          state: mergeControllerState(current.controller.state, controllerState),
+          type,
+        },
+      }));
+    };
+    const listeners = {
+      'connection:change': onConnectionChange,
+      'connection:open': onConnectionOpen,
+      'controller:settings': onControllerSettings,
+      'controller:state': onControllerState,
+    };
 
-  componentDidMount() {
-    this.addControllerEvents();
-  }
+    Object.entries(listeners).forEach(([eventName, listener]) => {
+      controller.addListener(eventName, listener);
+    });
+    return () => {
+      Object.entries(listeners).forEach(([eventName, listener]) => {
+        controller.removeListener(eventName, listener);
+      });
+    };
+  }, [config]);
 
-  componentWillUnmount() {
-    this.removeControllerEvents();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      minimized,
-      panel
-    } = this.state;
-
-    this.config.set('minimized', minimized);
-    this.config.set('panel.queueReports.expanded', panel.queueReports.expanded);
-    this.config.set('panel.statusReports.expanded', panel.statusReports.expanded);
-    this.config.set('panel.modalGroups.expanded', panel.modalGroups.expanded);
-  }
-
-  getInitialState() {
-    return {
-      minimized: this.config.get('minimized', false),
-      isFullscreen: false,
-      canClick: true, // Defaults to true
-      connected: !!controller.connection.ident,
-      controller: {
-        type: controller.type,
-        settings: controller.settings,
-        state: controller.state
-      },
-      modal: {
-        name: MODAL_NONE,
-        params: {}
-      },
+  const setPanelExpanded = useCallback((panelName, isExpanded) => {
+    setState(current => ({
+      ...current,
       panel: {
-        queueReports: {
-          expanded: this.config.get('panel.queueReports.expanded')
-        },
-        statusReports: {
-          expanded: this.config.get('panel.statusReports.expanded')
-        },
-        modalGroups: {
-          expanded: this.config.get('panel.modalGroups.expanded')
-        }
-      }
-    };
-  }
+        ...current.panel,
+        [panelName]: { ...current.panel[panelName], expanded: isExpanded },
+      },
+    }));
+    config.set(`panel.${panelName}.expanded`, isExpanded);
+  }, [config]);
 
-  addControllerEvents() {
-    Object.keys(this.controllerEvents).forEach(eventName => {
-      const callback = this.controllerEvents[eventName];
-      controller.addListener(eventName, callback);
-    });
-  }
+  const isCollapsed = view === 'collapsed';
+  const isFullscreen = view === 'fullscreen';
+  const isReady = state.connected && state.controller.type === SMOOTHIE;
+  const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
 
-  removeControllerEvents() {
-    Object.keys(this.controllerEvents).forEach(eventName => {
-      const callback = this.controllerEvents[eventName];
-      controller.removeListener(eventName, callback);
-    });
-  }
-
-  canClick() {
-    const { connected } = this.state;
-    const { type } = this.state.controller;
-
-    if (!connected) {
-      return false;
-    }
-    if (type !== SMOOTHIE) {
-      return false;
-    }
-
-    return true;
-  }
-
-  render() {
-    const { widgetId } = this.props;
-    const { minimized, isFullscreen } = this.state;
-    const isReady = this.state.connected && (this.state.controller.type === SMOOTHIE);
-    const isForkedWidget = widgetId.match(/\w+:[\w\-]+/);
-    const state = {
-      ...this.state,
-      canClick: this.canClick()
-    };
-    const actions = {
-      ...this.actions
-    };
-
-    return (
-      <WidgetConfigProvider widgetId={widgetId}>
-        <Widget aria-label="Smoothie widget" fullscreen={isFullscreen}>
-          <Widget.Header>
-            <Widget.Title>
-              <Widget.Sortable className={this.props.sortable.handleClassName}>
-                <FontAwesomeIcon icon="bars" fixedWidth />
-                <Space width={4} />
-              </Widget.Sortable>
-              {isForkedWidget &&
-                <FontAwesomeIcon icon="code-branch" fixedWidth />}
-              Smoothie
-            </Widget.Title>
-            <Widget.Controls className={this.props.sortable.filterClassName}>
-              {isReady && (
-                <Widget.Button
-                  aria-label="Smoothie controller info"
-                  onClick={(event) => {
-                    actions.openModal(MODAL_CONTROLLER);
-                  }}
-                >
-                  <i aria-hidden="true" className="fa fa-info" />
-                </Widget.Button>
-              )}
-              {isReady && (
-                <Widget.DropdownButton
-                  aria-label="Smoothie commands"
-                  toggle={<i aria-hidden="true" className="fa fa-th-large" />}
-                >
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.write('?')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('Status Report (?)')}
-                  </Widget.DropdownMenuItem>
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.command('homing')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('Homing ($H)')}
-                  </Widget.DropdownMenuItem>
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.command('unlock')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('Kill Alarm Lock ($X)')}
-                  </Widget.DropdownMenuItem>
-                  <Widget.DropdownMenuItem divider />
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.writeln('help')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('Help')}
-                  </Widget.DropdownMenuItem>
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.writeln('$#')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('View G-code Parameters ($#)')}
-                  </Widget.DropdownMenuItem>
-                  <Widget.DropdownMenuItem
-                    onSelect={() => controller.writeln('$G')}
-                    disabled={!state.canClick}
-                  >
-                    {i18n._('View G-code Parser State ($G)')}
-                  </Widget.DropdownMenuItem>
-                </Widget.DropdownButton>
-              )}
-              {isReady && (
-                <Widget.Button
-                  aria-label={minimized ? 'Expand' : 'Collapse'}
-                  aria-expanded={!minimized}
-                  disabled={isFullscreen}
-                  title={minimized ? i18n._('Expand') : i18n._('Collapse')}
-                  onClick={this.toggleMinimized}
-                >
-                  {minimized &&
-                    <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-                  {!minimized &&
-                    <FontAwesomeIcon icon="chevron-up" fixedWidth />}
-                </Widget.Button>
-              )}
-              {isFullscreen && (
-                <Widget.Button
-                  title={i18n._('Exit Full Screen')}
-                  onClick={this.toggleFullscreen}
-                >
-                  <FontAwesomeIcon icon="compress" fixedWidth />
-                </Widget.Button>
-              )}
-              <Widget.DropdownButton
-                aria-label="More options"
-                title={i18n._('More')}
-                toggle={(
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
-                )}
-                onSelect={(eventKey) => {
-                  if (eventKey === 'fullscreen') {
-                    this.toggleFullscreen();
-                  } else if (eventKey === 'fork') {
-                    this.props.onFork();
-                  } else if (eventKey === 'remove') {
-                    this.props.onRemove();
-                  }
-                }}
-              >
-                <Widget.DropdownMenuItem eventKey="fullscreen" disabled={!isReady}>
-                  {!isFullscreen && (
-                    <FontAwesomeIcon icon="expand" fixedWidth />
-                  )}
-                  {isFullscreen && (
-                    <FontAwesomeIcon icon="compress" fixedWidth />
-                  )}
-                  <Space width={8} />
-                  {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
+  return (
+    <WidgetConfigProvider widgetId={widgetId}>
+      <Widget aria-label="Smoothie widget" fullscreen={isFullscreen}>
+        <Widget.Header>
+          <Widget.Title>
+            <Widget.Sortable className={sortable.handleClassName}>
+              <FontAwesomeIcon icon="bars" fixedWidth />
+              <Space width="1x" />
+            </Widget.Sortable>
+            {isForkedWidget && <FontAwesomeIcon icon="code-branch" fixedWidth />}
+            Smoothie
+          </Widget.Title>
+          <Widget.Controls className={sortable.filterClassName}>
+            {isReady && (
+              <Widget.Button aria-label="Smoothie controller info" onClick={() => setIsControllerModalOpen(true)}>
+                <i aria-hidden="true" className="fa fa-info" />
+              </Widget.Button>
+            )}
+            {isReady && (
+              <Widget.DropdownButton aria-label="Smoothie commands" toggle={<i aria-hidden="true" className="fa fa-th-large" />}>
+                <Widget.DropdownMenuItem onSelect={() => controller.write('?')}>
+                  {i18n._('Status Report (?)')}
                 </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem eventKey="fork">
-                  <FontAwesomeIcon icon="code-branch" fixedWidth />
-                  <Space width={8} />
-                  {i18n._('Fork Widget')}
+                <Widget.DropdownMenuItem onSelect={() => controller.command('homing')}>
+                  {i18n._('Homing ($H)')}
                 </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem eventKey="remove">
-                  <FontAwesomeIcon icon="times" fixedWidth />
-                  <Space width={8} />
-                  {i18n._('Remove Widget')}
+                <Widget.DropdownMenuItem onSelect={() => controller.command('unlock')}>
+                  {i18n._('Kill Alarm Lock ($X)')}
+                </Widget.DropdownMenuItem>
+                <Widget.DropdownMenuItem divider />
+                <Widget.DropdownMenuItem onSelect={() => controller.writeln('help')}>
+                  {i18n._('Help')}
+                </Widget.DropdownMenuItem>
+                <Widget.DropdownMenuItem onSelect={() => controller.writeln('$#')}>
+                  {i18n._('View G-code Parameters ($#)')}
+                </Widget.DropdownMenuItem>
+                <Widget.DropdownMenuItem onSelect={() => controller.writeln('$G')}>
+                  {i18n._('View G-code Parser State ($G)')}
                 </Widget.DropdownMenuItem>
               </Widget.DropdownButton>
-            </Widget.Controls>
-          </Widget.Header>
-          {isReady && (
-            <Widget.Content
-              aria-hidden={minimized}
-              className={cx(
-                styles['widget-content'],
-                { [styles.hidden]: minimized }
-              )}
+            )}
+            {isReady && (
+              <Widget.Button
+                aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+                aria-expanded={!isCollapsed}
+                disabled={isFullscreen}
+                title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
+                onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
+              >
+                <FontAwesomeIcon icon={isCollapsed ? 'chevron-down' : 'chevron-up'} fixedWidth />
+              </Widget.Button>
+            )}
+            {isFullscreen && (
+              <Widget.Button title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}>
+                <FontAwesomeIcon icon="compress" fixedWidth />
+              </Widget.Button>
+            )}
+            <Widget.DropdownButton
+              aria-label="More options"
+              title={i18n._('More')}
+              toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
+              onSelect={(eventKey) => {
+                if (eventKey === 'fullscreen') {
+                  onViewChange(isFullscreen ? 'normal' : 'fullscreen');
+                } else if (eventKey === 'fork') {
+                  onFork();
+                } else if (eventKey === 'remove') {
+                  onRemove();
+                }
+              }}
             >
-              {state.modal.name === MODAL_CONTROLLER &&
-                <Controller state={state} actions={actions} />}
+              <Widget.DropdownMenuItem eventKey="fullscreen" disabled={!isReady}>
+                <FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth />
+                <Space width="2x" />
+                {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
+              </Widget.DropdownMenuItem>
+              <Widget.DropdownMenuItem eventKey="fork">
+                <FontAwesomeIcon icon="code-branch" fixedWidth />
+                <Space width="2x" />
+                {i18n._('Fork Widget')}
+              </Widget.DropdownMenuItem>
+              <Widget.DropdownMenuItem eventKey="remove">
+                <FontAwesomeIcon icon="times" fixedWidth />
+                <Space width="2x" />
+                {i18n._('Remove Widget')}
+              </Widget.DropdownMenuItem>
+            </Widget.DropdownButton>
+          </Widget.Controls>
+        </Widget.Header>
+        {isReady && (
+          <Widget.Content aria-hidden={isCollapsed} sx={{ display: isCollapsed ? 'none' : 'block' }}>
+            <Box p="3x">
               <Smoothie
-                state={state}
-                actions={actions}
+                controllerState={state.controller.state}
+                panel={state.panel}
+                setPanelExpanded={setPanelExpanded}
               />
-            </Widget.Content>
-          )}
-        </Widget>
-      </WidgetConfigProvider>
-    );
-  }
+            </Box>
+          </Widget.Content>
+        )}
+      </Widget>
+      {isControllerModalOpen && (
+        <Controller
+          controllerSettings={state.controller.settings}
+          controllerState={state.controller.state}
+          onClose={() => setIsControllerModalOpen(false)}
+        />
+      )}
+    </WidgetConfigProvider>
+  );
+}
+
+/**
+ * @param {{ get: (path: string, defaultValue?: unknown) => unknown }} config
+ */
+function getInitialState(config) {
+  return {
+    connected: !!controller.connection.ident,
+    controller: {
+      settings: controller.settings || {},
+      state: controller.state || {},
+      type: controller.type,
+    },
+    panel: {
+      modalGroups: { expanded: config.get('panel.modalGroups.expanded') },
+      statusReports: { expanded: config.get('panel.statusReports.expanded') },
+    },
+  };
+}
+
+/**
+ * @param {object} currentState
+ * @param {object} nextState
+ */
+function mergeControllerState(currentState, nextState) {
+  return {
+    ...currentState,
+    ...nextState,
+    ...(nextState.parserstate && {
+      parserstate: { ...currentState.parserstate, ...nextState.parserstate },
+    }),
+    ...(nextState.status && {
+      status: { ...currentState.status, ...nextState.status },
+    }),
+  };
 }
 
 export default SmoothieWidget;

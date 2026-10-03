@@ -4,6 +4,13 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Checkbox,
+  Flex,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -27,18 +34,7 @@ import React, {
   useState,
 } from 'react';
 import { Form, Field, FormSpy } from 'react-final-form';
-import { connect } from 'react-redux';
-import Select, { components as SelectComponents } from 'react-select';
 import { useTransition, animated } from 'react-spring'; // TODO: remove
-import * as connectionActions from '@app/actions/connection';
-import * as serialportActions from '@app/actions/serialport';
-import { Checkbox } from '@app/components/Checkbox'; // TODO: remove
-import Clickable from '@app/components/Clickable';
-import InlineError from '@app/components/InlineError';
-import Input from '@app/components/FormControl/Input'; // TODO: remove
-import FormGroup from '@app/components/FormGroup';
-import { Container, Row, Col } from '@app/components/GridSystem'; // TODO: remove
-import ModalTemplate from '@app/components/ModalTemplate'; // TODO: remove
 import {
   GRBL,
   MARLIN,
@@ -49,15 +45,17 @@ import {
   CONNECTION_TYPE_SERIAL,
   CONNECTION_TYPE_SOCKET,
   CONNECTION_STATE_CONNECTED,
-  CONNECTION_STATE_CONNECTING,
   CONNECTION_STATE_DISCONNECTED,
-  CONNECTION_STATE_DISCONNECTING,
 } from '@app/constants/connection';
-import useMount from '@app/hooks/useMount';
+import useConnection from '@app/hooks/useConnection';
 import usePrevious from '@app/hooks/usePrevious';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import portal from '@app/lib/portal';
+import {
+  useSerialBaudRatesQuery,
+  useSerialPortsQuery,
+} from '@app/queries/serialport';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 
@@ -272,21 +270,36 @@ function DismissibleTransition({
   );
 }
 
-function Connection({
-  connection,
-  isConnected,
-  isConnecting,
-  isDisconnected,
-  isDisconnecting,
-  isFetchingSerialPorts,
-  isFetchingSerialBaudRates,
-  serialPorts,
-  serialBaudRates,
-  openConnection,
-  closeConnection,
-  fetchSerialPorts,
-  fetchSerialBaudRates,
-}) {
+function Connection() {
+  const {
+    state: connectionState,
+    type,
+    ident,
+    options,
+    error,
+    isOpening,
+    isClosing,
+    open: openConnection,
+    close: closeConnection,
+  } = useConnection();
+  const {
+    data: ports,
+    isFetching: isFetchingSerialPorts,
+    refetch: fetchSerialPorts,
+  } = useSerialPortsQuery();
+  const {
+    data: baudRates,
+    isFetching: isFetchingSerialBaudRates,
+    refetch: fetchSerialBaudRates,
+  } = useSerialBaudRatesQuery();
+  const connection = { type, ident, options, error };
+  const serialPorts = ensureArray(ports);
+  const serialBaudRates = ensureArray(baudRates);
+  const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
+  const isConnecting = isOpening;
+  const isDisconnected = (connectionState === CONNECTION_STATE_DISCONNECTED) ||
+    (connectionState === 'error' && !isOpening && !isClosing);
+  const isDisconnecting = isClosing;
   const config = useWidgetConfig();
   const initialValues = getMemoizedInitialValues({ config, serialPorts, serialBaudRates });
   const canRefreshSerialPorts = isDisconnected && !isFetchingSerialPorts;
@@ -324,13 +337,6 @@ function Connection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection.error]);
 
-  { // Fetch ports and baud rates only after the initial render
-    useMount(() => {
-      fetchSerialPorts();
-      fetchSerialBaudRates();
-    });
-  }
-
   { // Auto reconnect for serial connection
     useEffect(() => {
       const connectionType = config.get('connection.type');
@@ -362,7 +368,7 @@ function Connection({
       _set(options, 'connection.type', connectionType);
       _set(options, 'connection.options', { path, baudRate, rtscts, pin });
 
-      openConnection(options);
+      openConnection(options).catch(() => {});
 
       // Set autoReconnectedRef.current to true when attempting to connect.
       autoReconnectedRef.current = true;
@@ -400,7 +406,7 @@ function Connection({
       _set(options, 'connection.type', connectionType);
       _set(options, 'connection.options', { host, port });
 
-      openConnection(options);
+      openConnection(options).catch(() => {});
 
       // Set autoReconnectedRef.current to true when attempting to connect.
       autoReconnectedRef.current = true;
@@ -436,10 +442,10 @@ function Connection({
           </DismissibleTransition>
         )}
       </Box>
-      <Container
-        fluid
+      <Box
+        p="3x"
         style={{
-          padding: '.75rem',
+          width: '100%',
         }}
       >
         <Form
@@ -479,7 +485,7 @@ function Connection({
                   };
 
                   return (
-                    <FormGroup>
+                    <Box mb="4x">
                       <ButtonGroup variant="default">
                         {canSelectGrbl && (
                           <Button
@@ -518,11 +524,11 @@ function Connection({
                           </Button>
                         )}
                       </ButtonGroup>
-                    </FormGroup>
+                    </Box>
                   );
                 }}
               </Field>
-              <FormGroup>
+              <Box mb="4x">
                 <Field name="connection.type">
                   {({ input, meta }) => {
                     const isSerialDisabled = !isDisconnected;
@@ -561,7 +567,7 @@ function Connection({
                     );
                   }}
                 </Field>
-              </FormGroup>
+              </Box>
               <Field name="connection.type" subscription={{ value: true }}>
                 {({ input, meta }) => {
                   const connectionType = input.value;
@@ -569,12 +575,12 @@ function Connection({
                   if (connectionType === CONNECTION_TYPE_SERIAL) {
                     return (
                       <>
-                        <FormGroup>
-                          <TextLabel mb="2x">
+                        <Box mb="4x">
+                          <TextLabel htmlFor="connection-serial-port" mb="2x">
                             {i18n._('Serial port')}
                           </TextLabel>
-                          <Row style={{ alignItems: 'center' }}>
-                            <Col>
+                          <Flex align="center">
+                            <Box flex="auto">
                               <Field name="connection.serial.path">
                                 {({ input, meta }) => {
                                   const canSelectSerialPort = isDisconnected && !isFetchingSerialPorts;
@@ -588,59 +594,51 @@ function Connection({
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Select
-                                      components={{
-                                        Option: SerialPortOption,
-                                        SingleValue: SerialPortSingleValue,
-                                      }}
-                                      value={value}
-                                      onChange={(option) => {
-                                        const { value } = option;
-                                        input.onChange(value);
-
-                                        config.set('connection.serial.path', value);
-                                      }}
-                                      isClearable={false}
-                                      isDisabled={isDisabled}
-                                      isLoading={isFetchingSerialPorts}
-                                      isSearchable={false}
-                                      noOptionsMessage={() => i18n._('No ports available')}
-                                      options={options}
-                                      placeholder={i18n._('Choose a port')}
-                                    />
+                                    <Box data-test="connection-serial-port">
+                                      <SerialConnectionMenu
+                                        id="connection-serial-port"
+                                        label={i18n._('Serial port')}
+                                        options={options}
+                                        value={value}
+                                        disabled={isDisabled}
+                                        placeholder={i18n._('Choose a port')}
+                                        emptyText={i18n._('No ports available')}
+                                        onSelect={(selected) => {
+                                          input.onChange(selected);
+                                          config.set('connection.serial.path', selected);
+                                        }}
+                                      />
+                                    </Box>
                                   );
                                 }}
                               </Field>
-                            </Col>
-                            <Col width="auto" style={{ width: 30 }}>
+                            </Box>
+                            <Box flex="none" width="30px">
                               <Space width={12} />
-                              <Clickable
+                              <Button
+                                aria-label={i18n._('Refresh')}
+                                variant="ghost"
                                 disabled={!canRefreshSerialPorts}
                                 onClick={() => {
                                   fetchSerialPorts();
                                 }}
                                 title={i18n._('Refresh')}
                               >
-                                {({ hovered }) => (
-                                  <FontAwesomeIcon
-                                    icon="sync"
-                                    fixedWidth
-                                    spin={isFetchingSerialPorts}
-                                    style={{
-                                      opacity: hovered ? 1 : 0.5,
-                                    }}
-                                  />
-                                )}
-                              </Clickable>
-                            </Col>
-                          </Row>
-                        </FormGroup>
-                        <FormGroup>
-                          <TextLabel mb="2x">
+                                <FontAwesomeIcon
+                                  icon="sync"
+                                  fixedWidth
+                                  spin={isFetchingSerialPorts}
+                                />
+                              </Button>
+                            </Box>
+                          </Flex>
+                        </Box>
+                        <Box mb="4x">
+                          <TextLabel htmlFor="connection-baud-rate" mb="2x">
                             {i18n._('Baud rate')}
                           </TextLabel>
-                          <Row style={{ alignItems: 'center' }}>
-                            <Col>
+                          <Flex align="center">
+                            <Box flex="auto">
                               <Field name="connection.serial.baudRate">
                                 {({ input, meta }) => {
                                   const canSelectSerialBaudRate = isDisconnected && !isFetchingSerialBaudRates;
@@ -652,49 +650,45 @@ function Connection({
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Select
-                                      value={value}
-                                      onChange={(option) => {
-                                        const { value } = option;
-                                        input.onChange(value);
-
-                                        config.set('connection.serial.baudRate', value);
-                                      }}
-                                      isClearable={false}
-                                      isDisabled={isDisabled}
-                                      isLoading={isFetchingSerialBaudRates}
-                                      isSearchable={false}
-                                      options={options}
-                                      placeholder={i18n._('Choose a baud rate')}
-                                    />
+                                    <Box data-test="connection-baud-rate">
+                                      <SerialConnectionMenu
+                                        id="connection-baud-rate"
+                                        label={i18n._('Baud rate')}
+                                        options={options}
+                                        value={value}
+                                        disabled={isDisabled}
+                                        placeholder={i18n._('Choose a baud rate')}
+                                        onSelect={(selected) => {
+                                          input.onChange(selected);
+                                          config.set('connection.serial.baudRate', selected);
+                                        }}
+                                      />
+                                    </Box>
                                   );
                                 }}
                               </Field>
-                            </Col>
-                            <Col width="auto" style={{ width: 30 }}>
+                            </Box>
+                            <Box flex="none" width="30px">
                               <Space width={12} />
-                              <Clickable
+                              <Button
+                                aria-label={i18n._('Refresh')}
+                                variant="ghost"
                                 disabled={!canRefreshSerialBaudRates}
                                 onClick={() => {
                                   fetchSerialBaudRates();
                                 }}
                                 title={i18n._('Refresh')}
                               >
-                                {({ hovered }) => (
-                                  <FontAwesomeIcon
-                                    icon="sync"
-                                    fixedWidth
-                                    spin={isFetchingSerialBaudRates}
-                                    style={{
-                                      opacity: hovered ? 1 : 0.5,
-                                    }}
-                                  />
-                                )}
-                              </Clickable>
-                            </Col>
-                          </Row>
-                        </FormGroup>
-                        <FormGroup>
+                                <FontAwesomeIcon
+                                  icon="sync"
+                                  fixedWidth
+                                  spin={isFetchingSerialBaudRates}
+                                />
+                              </Button>
+                            </Box>
+                          </Flex>
+                        </Box>
+                        <Box mb="4x">
                           <Field name="connection.serial.pin.dtr">
                             {({ input, meta }) => {
                               const canChange = isDisconnected;
@@ -761,8 +755,8 @@ function Connection({
                               );
                             }}
                           </Field>
-                        </FormGroup>
-                        <FormGroup>
+                        </Box>
+                        <Box mb="4x">
                           <Field name="connection.serial.pin.rts">
                             {({ input, meta }) => {
                               const canChange = isDisconnected;
@@ -829,8 +823,8 @@ function Connection({
                               );
                             }}
                           </Field>
-                        </FormGroup>
-                        <FormGroup>
+                        </Box>
+                        <Box mb="4x">
                           <Field name="connection.serial.rtscts">
                             {({ input, meta }) => {
                               const canChange = isDisconnected;
@@ -853,7 +847,7 @@ function Connection({
                               );
                             }}
                           </Field>
-                        </FormGroup>
+                        </Box>
                       </>
                     );
                   }
@@ -861,7 +855,7 @@ function Connection({
                   if (connectionType === CONNECTION_TYPE_SOCKET) {
                     return (
                       <>
-                        <FormGroup>
+                        <Box mb="4x">
                           <TextLabel mb="2x">
                             {i18n._('Host')}
                           </TextLabel>
@@ -878,6 +872,7 @@ function Connection({
                                   <>
                                     <Input
                                       {...input}
+                                      aria-label={i18n._('Host')}
                                       type="text"
                                       disabled={isDisabled}
                                       onChange={(event) => {
@@ -888,15 +883,17 @@ function Connection({
                                       }}
                                     />
                                     {(meta.error && meta.touched) && (
-                                      <InlineError>{meta.error}</InlineError>
+                                      <Text fontSize="sm" lineHeight="sm" color="error.text">
+                                        {meta.error}
+                                      </Text>
                                     )}
                                   </>
                                 );
                               }}
                             </Field>
                           </Box>
-                        </FormGroup>
-                        <FormGroup>
+                        </Box>
+                        <Box mb="4x">
                           <TextLabel mb="2x">
                             {i18n._('Port')}
                           </TextLabel>
@@ -913,6 +910,7 @@ function Connection({
                                   <>
                                     <Input
                                       {...input}
+                                      aria-label={i18n._('Port')}
                                       type="number"
                                       min={0}
                                       max={65535}
@@ -929,14 +927,16 @@ function Connection({
                                       }}
                                     />
                                     {(meta.error && meta.touched) && (
-                                      <InlineError>{meta.error}</InlineError>
+                                      <Text fontSize="sm" lineHeight="sm" color="error.text">
+                                        {meta.error}
+                                      </Text>
                                     )}
                                   </>
                                 );
                               }}
                             </Field>
                           </Box>
-                        </FormGroup>
+                        </Box>
                       </>
                     );
                   }
@@ -944,7 +944,7 @@ function Connection({
                   return null;
                 }}
               </Field>
-              <FormGroup>
+              <Box mb="4x">
                 <Field name="autoReconnect">
                   {({ input, meta }) => {
                     const canChange = isDisconnected;
@@ -967,7 +967,7 @@ function Connection({
                     );
                   }}
                 </Field>
-              </FormGroup>
+              </Box>
               <FormSpy
                 subscription={{
                   values: true,
@@ -975,7 +975,7 @@ function Connection({
                 }}
               >
                 {({ values, invalid }) => {
-                  const canOpenConnection = (() => {
+                  const canOpenConnection = isDisconnected && (() => {
                     const connectionType = _get(values, 'connection.type');
 
                     if (connectionType === CONNECTION_TYPE_SERIAL) {
@@ -1013,38 +1013,39 @@ function Connection({
                       },
                       [CONNECTION_TYPE_SOCKET]: {
                         host: _get(values, 'connection.socket.host'),
-                        port: _get(values, 'connection.serial.port'),
+                        port: Number(_get(values, 'connection.socket.port')),
                       },
                     }[connectionType]));
 
-                    openConnection(options);
+                    openConnection(options).catch(() => {});
                   };
                   const confirmCloseConnection = (e) => {
                     portal(({ onClose }) => (
                       <Modal
+                        autoFocus
+                        closeOnEsc={false}
+                        closeOnInteractOutside
+                        ensureFocus
+                        isClosable
                         isOpen={true}
                         onClose={onClose}
                       >
                         <ModalOverlay />
                         <ModalContent>
                           <ModalBody>
-                            <ModalTemplate type="warning">
-                              {({ PrimaryMessage, DescriptiveMessage }) => (
-                                <DescriptiveMessage>
-                                  {i18n._('Are you sure you want to close the connection?')}
-                                </DescriptiveMessage>
-                              )}
-                            </ModalTemplate>
+                            <Alert severity="warning">
+                              {i18n._('Are you sure you want to close the connection?')}
+                            </Alert>
                           </ModalBody>
                           <ModalFooter>
                             <Button onClick={onClose}>
                               {i18n._('Cancel')}
                             </Button>
                             <Button
-                              btnStyle="primary"
+                              variant="primary"
                               onClick={chainedFunction(
                                 (e) => {
-                                  closeConnection();
+                                  closeConnection().catch(() => {});
                                   fetchSerialPorts();
                                   fetchSerialBaudRates();
                                 },
@@ -1063,7 +1064,7 @@ function Connection({
                     <>
                       {(isDisconnected || isConnecting) && (
                         <Button
-                          btnStyle={canOpenConnection ? 'primary' : 'secondary'}
+                          variant={canOpenConnection ? 'primary' : 'secondary'}
                           disabled={!canOpenConnection}
                           onClick={handleOpenConnection}
                           style={{
@@ -1079,7 +1080,7 @@ function Connection({
                       )}
                       {(isConnected || isDisconnecting) && (
                         <Button
-                          btnStyle="danger"
+                          variant="emphasis"
                           disabled={!canCloseConnection}
                           onClick={confirmCloseConnection}
                           style={{
@@ -1100,101 +1101,54 @@ function Connection({
             </>
           )}
         </Form>
-      </Container>
+      </Box>
     </>
   );
 }
 
-const mapStateToProps = (store) => {
-  const connection = _get(store, 'connection', {});
-  const connectionState = _get(store, 'connection.state');
-  const isConnected = (connectionState === CONNECTION_STATE_CONNECTED);
-  const isConnecting = (connectionState === CONNECTION_STATE_CONNECTING);
-  const isDisconnected = (connectionState === CONNECTION_STATE_DISCONNECTED);
-  const isDisconnecting = (connectionState === CONNECTION_STATE_DISCONNECTING);
-  const isFetchingSerialPorts = _get(store, 'serialport.isFetchingPorts');
-  const isFetchingSerialBaudRates = _get(store, 'serialport.isFetchingBaudRates');
-  const serialPorts = ensureArray(_get(store, 'serialport.ports'));
-  const serialBaudRates = ensureArray(_get(store, 'serialport.baudRates'));
+export default Connection;
 
-  return {
-    connection, // requires deep comparison
-    isConnected,
-    isConnecting,
-    isDisconnected,
-    isDisconnecting,
-    isFetchingSerialPorts,
-    isFetchingSerialBaudRates,
-    serialPorts,
-    serialBaudRates,
-  };
-};
-
-const mapDispatchToProps = {
-  openConnection: connectionActions.openConnection,
-  closeConnection: connectionActions.closeConnection,
-  fetchSerialPorts: serialportActions.fetchPorts,
-  fetchSerialBaudRates: serialportActions.fetchBaudRates,
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  {
-    // Use isEqual to perform a deep comparison between objects.
-    areStatePropsEqual: _isEqual,
-  }
-)(Connection);
-
-function SerialPortOption({
-  children,
-  ...props
-}) {
-  const data = _get(props, 'data');
-  const connected = !!data.connected;
-  const manufacturer = data.manufacturer;
-
+/**
+ * @param {{id: string, label: string, options: Array, value: object | null, disabled: boolean, placeholder: string, emptyText?: string, onSelect: Function}} props
+ */
+function SerialConnectionMenu({ id, label, options, value, disabled, placeholder, emptyText, onSelect }) {
   return (
-    <SelectComponents.Option {...props}>
-      <Container fluid>
-        <Row>
-          <Col style={{ wordBreak: 'break-all' }}>
-            {children}
-          </Col>
-          <Col width="auto">
-            <Space width={8} />
-            <FontAwesomeIcon icon="lock" fixedWidth style={{ opacity: (connected ? 1 : 0) }} />
-          </Col>
-        </Row>
-      </Container>
-      {manufacturer && (
-        <Box ml="6x">
-          <Text>
-            {i18n._('Manufacturer: {{manufacturer}}', { manufacturer })}
-          </Text>
-        </Box>
-      )}
-    </SelectComponents.Option>
-  );
-}
-
-function SerialPortSingleValue({
-  children,
-  ...props
-}) {
-  const data = _get(props, 'data');
-  const connected = !!data.connected;
-
-  return (
-    <SelectComponents.SingleValue {...props}>
-      {connected && (
-        <>
-          <FontAwesomeIcon icon="lock" fixedWidth />
-          <Space width={8} />
-        </>
-      )}
-      {children}
-    </SelectComponents.SingleValue>
+    <Menu matchWidth>
+      <MenuButton
+        id={id}
+        aria-label={label}
+        disabled={disabled}
+        width="100%"
+        variant="secondary"
+      >
+        {value?.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
+        {value?.connected && <Space width={8} />}
+        {value?.label || placeholder}
+      </MenuButton>
+      <MenuList maxHeight={200} overflowY="auto">
+        {options.length === 0 && <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>}
+        {options.map(option => (
+          <MenuItem
+            key={option.value}
+            aria-current={option.value === value?.value ? 'true' : undefined}
+            onClick={() => onSelect(option.value)}
+            onKeyDown={(event) => {
+              if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                onSelect(option.value);
+              }
+            }}
+            width="100%"
+          >
+            <Flex align="center">
+              <Box flex="auto" style={{ wordBreak: 'break-all' }}>{option.label}</Box>
+              {option.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
+            </Flex>
+            {option.manufacturer && (
+              <Text ml="6x">{i18n._('Manufacturer: {{manufacturer}}', { manufacturer: option.manufacturer })}</Text>
+            )}
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
   );
 }

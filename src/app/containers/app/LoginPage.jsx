@@ -4,8 +4,11 @@ import {
   Box,
   Button,
   Flex,
+  FormControl,
+  FormErrorMessage,
+  FormInput,
+  FormLabel,
   Image,
-  Input,
   Link,
   Stack,
   Text,
@@ -16,9 +19,6 @@ import qs from 'qs';
 import React, { useState } from 'react';
 import { Form, Field } from 'react-final-form';
 import { Navigate, useLocation } from 'react-router-dom';
-import axios from '@app/api/axios';
-import FormGroup from '@app/components/FormGroup';
-import InlineError from '@app/components/InlineError';
 import settings from '@app/config/settings';
 import * as analytics from '@app/lib/analytics';
 import controller from '@app/lib/controller';
@@ -27,6 +27,8 @@ import x from '@app/lib/json-stringify';
 import log from '@app/lib/log';
 import * as user from '@app/lib/user';
 import config from '@app/store/config';
+import { useAppStateQuery } from '@app/queries/appState';
+import { useSigninMutation } from '@app/queries/session';
 
 const required = value => {
   return ensureString(value).trim().length > 0
@@ -36,9 +38,12 @@ const required = value => {
 
 const forgotPasswordLink = 'https://github.com/cncjs/cncjs/wiki/FAQ#forgot-your-password';
 
+/** @returns {JSX.Element|null} */
 const LoginPage = () => {
   const location = useLocation();
   const { from } = location.state || { from: { pathname: '/' } };
+  const signinMutation = useSigninMutation();
+  const appStateQuery = useAppStateQuery();
   const [state, setState] = useState({
     alertMessage: '',
     authenticating: false,
@@ -53,6 +58,10 @@ const LoginPage = () => {
   };
 
   const handleFormSubmit = async (values, form) => {
+    if (state.authenticating || signinMutation.isLoading) {
+      return;
+    }
+
     setState(prevState => ({
       ...prevState,
       alertMessage: '',
@@ -62,7 +71,20 @@ const LoginPage = () => {
 
     const name = _get(values, 'name');
     const password = _get(values, 'password');
-    const { authenticated } = await user.signin({ name, password });
+    let authenticated = false;
+    let token = null;
+
+    try {
+      ({ authenticated, token } = await signinMutation.mutateAsync({ name, password }));
+    } catch (error) {
+      setState(prevState => ({
+        ...prevState,
+        alertMessage: i18n._('Authentication failed.'),
+        authenticating: false,
+        redirectToReferrer: false
+      }));
+      return;
+    }
 
     if (!authenticated) {
       setState(prevState => ({
@@ -75,9 +97,17 @@ const LoginPage = () => {
     }
 
     // Anonymous usage data collection
-    const url = 'api/state';
-    const res = await axios.get(url);
-    const { allowAnonymousUsageDataCollection } = res.data;
+    let appState;
+    try {
+      ({ data: appState } = await appStateQuery.refetch({ throwOnError: true }));
+    } catch (error) {
+      setState(prevState => ({ ...prevState,
+        alertMessage: i18n._('An error occurred while fetching data.'),
+        authenticating: false,
+        redirectToReferrer: false }));
+      return;
+    }
+    const { allowAnonymousUsageDataCollection } = appState;
     if (allowAnonymousUsageDataCollection) {
       log.debug('Initializing anonymous usage data collection');
       analytics.initialize();
@@ -85,7 +115,7 @@ const LoginPage = () => {
 
     // Controller connection
     log.debug('Establishing controller connection');
-    const token = config.get('session.token');
+    token = token || config.get('session.token');
     const host = '';
     const options = {
       query: 'token=' + token
@@ -156,47 +186,27 @@ const LoginPage = () => {
         </Stack>
         <Form
           onSubmit={handleFormSubmit}
-          render={({ handleSubmit, values }) => (
+          render={({ handleSubmit }) => (
             <>
-              <FormGroup>
-                <Field
-                  name="name"
-                  validate={required}
-                >
-                  {({ input, meta }) => (
-                    <>
-                      <Input
-                        {...input}
-                        type="text"
-                        placeholder={i18n._('Username')}
-                      />
-                      {(meta.error && meta.touched) && (
-                        <InlineError>{meta.error}</InlineError>
-                      )}
-                    </>
-                  )}
-                </Field>
-              </FormGroup>
-              <FormGroup>
-                <Field
-                  name="password"
-                  validate={required}
-                >
-                  {({ input, meta }) => (
-                    <>
-                      <Input
-                        {...input}
-                        type="password"
-                        placeholder={i18n._('Password')}
-                      />
-                      {(meta.error && meta.touched) && (
-                        <InlineError>{meta.error}</InlineError>
-                      )}
-                    </>
-                  )}
-                </Field>
-              </FormGroup>
-              <FormGroup>
+              <Field name="name" validate={required}>
+                {({ input, meta }) => (
+                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
+                    <FormLabel>{i18n._('Username')}</FormLabel>
+                    <FormInput {...input} type="text" placeholder={i18n._('Username')} />
+                    <FormErrorMessage errors={meta.error} />
+                  </FormControl>
+                )}
+              </Field>
+              <Field name="password" validate={required}>
+                {({ input, meta }) => (
+                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
+                    <FormLabel>{i18n._('Password')}</FormLabel>
+                    <FormInput {...input} type="password" placeholder={i18n._('Password')} />
+                    <FormErrorMessage errors={meta.error} />
+                  </FormControl>
+                )}
+              </Field>
+              <Box mb="4x">
                 <Flex
                   alignItems="center"
                   justifyContent="space-between"
@@ -208,6 +218,7 @@ const LoginPage = () => {
                   </Box>
                   <Box>
                     <Button
+                      disabled={state.authenticating || signinMutation.isLoading}
                       variant="primary"
                       onClick={handleSubmit}
                     >
@@ -223,7 +234,7 @@ const LoginPage = () => {
                     </Button>
                   </Box>
                 </Flex>
-              </FormGroup>
+              </Box>
             </>
           )}
         />

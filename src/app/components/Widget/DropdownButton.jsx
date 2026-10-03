@@ -1,67 +1,45 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { Button } from '../Buttons';
-import Dropdown from '../Dropdown';
+import { Menu, MenuList, MenuToggle } from '@tonic-ui/react';
+import React, { Children, cloneElement, isValidElement } from 'react';
 import styles from './index.styl';
 
-class DropdownButton extends Component {
-  static propTypes = {
-    ...Dropdown.propTypes,
+/**
+ * @param {{
+ *   children: React.ReactNode,
+ *   dropup?: boolean,
+ *   onSelect?: (eventKey: unknown, event: React.SyntheticEvent) => void,
+ *   style?: object,
+ *   toggle: React.ReactNode,
+ * }} props
+ */
+function DropdownButton({ children, dropup = false, onSelect, style, toggle, ...toggleProps }) {
+  const items = Children.map(children, child => {
+    if (!isValidElement(child)) {
+      return child;
+    }
 
-    // One of: 'default', 'primary', 'emphasis', 'flat', 'link'
-    btnStyle: Button.propTypes.btnStyle,
-
-    // toggle
-    toggle: PropTypes.node.isRequired,
-
-    // Accessible label for the toggle button
-    'aria-label': PropTypes.string,
-
-    // Whether to prevent a caret from being rendered next to the title.
-    noCaret: PropTypes.bool
-  };
-
-  static defaultProps = {
-    noCaret: true
-  };
-
-  render() {
-    const { toggle, style, children, ...props } = this.props;
-
-    // Split component props
-    const dropdownProps = {};
-    const toggleProps = {};
-    Object.keys(props).forEach(propName => {
-      const propValue = props[propName];
-      if (Dropdown.ControlledComponent.propTypes[propName]) {
-        dropdownProps[propName] = propValue;
-      } else {
-        toggleProps[propName] = propValue;
-      }
+    const onItemSelect = child.props.onSelect;
+    return cloneElement(child, {
+      onSelect: (eventKey, event) => {
+        onItemSelect?.(eventKey, event);
+        onSelect?.(eventKey, event);
+      },
     });
+  });
 
-    return (
-      <Dropdown
-        {...dropdownProps}
-        style={{
-          ...style,
-          float: 'left'
-        }}
-      >
-        <Dropdown.Toggle
-          aria-haspopup="menu"
-          {...toggleProps}
-          className={styles.widgetButton}
-          componentClass="a"
-        >
-          {toggle}
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          {children}
-        </Dropdown.Menu>
-      </Dropdown>
-    );
-  }
+  return (
+    <Menu
+      placement={dropup ? 'top-start' : 'bottom-start'}
+      style={{
+        ...style,
+        float: 'left',
+      }}
+    >
+      <MenuToggle {...toggleProps} className={styles.widgetButton}>
+        {toggle}
+      </MenuToggle>
+      <MenuList>{items}</MenuList>
+    </Menu>
+  );
 }
 
 export default DropdownButton;
