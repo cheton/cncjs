@@ -160,7 +160,7 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   return (
     <Box>
       <Box
-        color="text._fixed.light.primary"
+        color="text._fixed.light.accent"
         sx={{
           display: 'inline-block',
           position: 'absolute',
