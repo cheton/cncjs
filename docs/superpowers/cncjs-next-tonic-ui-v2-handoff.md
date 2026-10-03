@@ -21,9 +21,9 @@
 | HEAD | `ae070b9f`（B3 已 commit/push；R6 尚未 commit） |
 | 工作樹 | R6 source fixes、tests、browser artifacts 與 ledger 納入本次交付 commit |
 | 未 push | 使用者已授權 R6 commit/push；接手時以 git status/log 核對實際狀態 |
-| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。W3 completed。 |
+| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。W3 與 V3 completed。 |
 | 最近完成 | R6 browser/performance gates completed；B3 HEAD `ae070b9f`，R6 尚未 commit |
-| 下一步推薦 | V3 in_progress：3.0.0-alpha.1 與 semantic tokens 已遷移，local gates pass，CI production pending。 |
+| 下一步推薦 | V3 已完成；下一步評估原生 Dropdown／Autocomplete 的實際 consumers 與互動契約。 |
 | Open gaps | advanced Visualizer 14 gates、13 個通用 widget view contracts 及雙 viewport 主題已通過；controller replay、matched performance、console classification 與 cleanup 未完成 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -40,7 +40,7 @@
 
 ## V3 current execution — 2026-10-03
 
-User authorized Tonic UI3 alpha and semantic color tokens. All seven Tonic packages resolve3.0.0-alpha.1; existing exports retained. JSX/Stylus semantic roles migrated, legacy app colorStyle removed, native CSS variable/provider API corrected. Explicit domain palettes/diagrams/camera/WebGL colors preserved. Alpha icons peers and riskLevel gradient paths corrected in scoped configuration. Local frontend78/504, Node22/641 natural exit (prior SocketConnection exclusion), lint0errors/4warnings, guard68fixtures/0violations, immutable/dev compile pass. CI-only production pending; no new V3 browser execution is claimed. See [V3 plan/evidence](plans/2026-09-07-tonic-ui-v2/10-tonic-ui-v3-alpha.md).
+User authorized Tonic UI3 alpha and semantic color tokens. All seven Tonic packages resolve3.0.0-alpha.1; existing exports retained. JSX/Stylus semantic roles migrated, legacy app colorStyle removed, native CSS variable/provider API corrected. Explicit domain palettes/diagrams/camera/WebGL colors preserved. Alpha icons peers and riskLevel gradient paths corrected in scoped configuration. Local frontend78/504, Node22/641 natural exit (prior SocketConnection exclusion), lint0errors/4warnings, guard68fixtures/0violations, immutable/dev compile pass. CI-only production/package passes on c82280d9 (run37116468021); downloaded artifact confirms Spinner/semantic CSS/entrypoints. V3 completed; separate platform workflow still running at snapshot, no new V3 browser execution claimed. See [V3 plan/evidence](plans/2026-09-07-tonic-ui-v2/10-tonic-ui-v3-alpha.md).
 
 ## W3 current execution — 2026-10-02
 
@@ -177,7 +177,7 @@ Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/wi
 
 ## Deferred Tonic UI v3 reference
 
-This checkpoint uses the installed Tonic UI v2 API. After all major components have migrated to Tonic UI, upgrade all Tonic UI packages to `3.0.0-alpha.1`. That version provides native semantic color tokens, autocomplete, and dropdown support for light/dark mode. Do not use those v3 APIs before the package upgrade.
+The original v2 checkpoint deferred v3 APIs until all major components migrated. V3 dependency/semantic-token migration completed on2026-10-03 using `3.0.0-alpha.1`. Native Dropdown/Autocomplete consumer substitutions can now be assessed as separate slices.
 
 - Local v3 source: `/home/cheton/Code/trendmicro-frontend/tonic-ui`
 - Color token guide: `/home/cheton/Code/trendmicro-frontend/tonic-ui/packages/react-docs/pages/migrations/migrating-color-tokens-from-v2-to-v3`
@@ -190,7 +190,7 @@ This checkpoint uses the installed Tonic UI v2 API. After all major components h
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1 overlays 與 P2 controlled forms 已完成；P3 implementation/import gates 已通過，但 browser evidence deferred，故仍為 in_progress。Login、十個 Administration drawers、Macro New/Edit modals 已遷移，九個無 production 使用者的 legacy P2 家族已移除，零匯入回歸測試已加入。Connection 兩個 selector 已改 Tonic Menu；P2 keyboard/invalid-submit audit 已完成。P3 browser evidence 仍待 R6；P4 已在使用者指示 go next 後完成，下一項 R6（browser/model deferred）。react-final-form v7 升級排在 P2 後面。所有主要元件完成 Tonic UI migration 後，才升級所有 Tonic UI packages 到 3.0.0-alpha.1，屆時再評估 Dropdown。
+P1–P6、B3、R6、W3 已完成。V3 已將七個 Tonic 套件升級至 3.0.0-alpha.1，並遷移 UI semantic color tokens；frontend78/504、Node22/641、lint/guard/immutable/dev compile 與 CI production/package gate 通過。尚未重跑 V3 browser visual validation；完整平台打包在最後 snapshot 仍執行中。後續評估 Dropdown／Autocomplete consumers；react-final-form v7 維持獨立升級。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。

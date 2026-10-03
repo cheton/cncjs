@@ -40,11 +40,18 @@
       "invalidTokens": 0,
       "unresolvedReferences": 0,
       "cssVariables": 2142
+    },
+    "stylusVariables": {
+      "variables": 21,
+      "missing": 0
     }
   },
   "productionBuild": {
     "location": "CI only",
-    "status": "pending"
+    "status": "success",
+    "revision": "c82280d91fd0b46436e936dfa09c1be9ddd62815",
+    "run": "https://github.com/cheton/cncjs/actions/runs/37116468021",
+    "packageReview": "package-review.json"
   },
   "browser": "No new V3 browser execution or screenshots; R6 evidence is historical, not V3 visual validation",
   "preservedDomainColors": [
@@ -61,5 +68,10 @@
     "TonicProvider useCSSVariables",
     "correct three riskLevel gradient reference paths",
     "document root color scheme ownership/cleanup"
-  ]
+  ],
+  "platformWorkflow": {
+    "status": "in_progress at snapshot",
+    "run": "https://github.com/cheton/cncjs/actions/runs/37116471004",
+    "completionClaim": false
+  }
 }
