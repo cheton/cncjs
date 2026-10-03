@@ -6,7 +6,6 @@ import {
   Flex,
   Space,
   Text,
-  useColorStyle,
 } from '@tonic-ui/react';
 import _difference from 'lodash/difference';
 import _get from 'lodash/get';
@@ -83,7 +82,6 @@ const Workspace = ({
   location,
   ...props
 }) => {
-  const [colorStyle] = useColorStyle();
   const [modal, setModal] = useState({
     name: MODAL_NONE,
     params: {}
@@ -520,9 +518,10 @@ const Workspace = ({
                   display={hidePrimaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
                   position="relative"
-                  backgroundColor={colorStyle.background.secondary}
-                  color={colorStyle.color.primary}
-                  borderRight={`1px solid ${colorStyle.divider}`}
+                  backgroundColor="background.high"
+                  color="text.primary"
+                  borderRight="1px solid"
+                  borderColor="border.secondary"
                 >
                   <Box px="3x" py="3x" flex="none">
                     <Flex align="center" flexWrap="wrap" gap="2x">
@@ -584,9 +583,10 @@ const Workspace = ({
                     width="50px"
                     paddingTop="10px"
                     textAlign="center"
-                    backgroundColor={colorStyle.background.secondary}
-                    color={colorStyle.color.primary}
-                    borderRight={`1px solid ${colorStyle.divider}`}
+                    backgroundColor="background.high"
+                    color="text.primary"
+                    borderRight="1px solid"
+                    borderColor="border.secondary"
                   >
                     <Button
                       aria-label={i18n._('Show left panel')}
@@ -612,9 +612,10 @@ const Workspace = ({
                     width="50px"
                     paddingTop="10px"
                     textAlign="center"
-                    backgroundColor={colorStyle.background.secondary}
-                    color={colorStyle.color.primary}
-                    borderLeft={`1px solid ${colorStyle.divider}`}
+                    backgroundColor="background.high"
+                    color="text.primary"
+                    borderLeft="1px solid"
+                    borderColor="border.secondary"
                   >
                     <Button
                       aria-label={i18n._('Show right panel')}
@@ -633,9 +634,10 @@ const Workspace = ({
                   display={hideSecondaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
                   position="relative"
-                  backgroundColor={colorStyle.background.secondary}
-                  color={colorStyle.color.primary}
-                  borderLeft={`1px solid ${colorStyle.divider}`}
+                  backgroundColor="background.high"
+                  color="text.primary"
+                  borderLeft="1px solid"
+                  borderColor="border.secondary"
                 >
                   <Box px="3x" py="3x" flex="none">
                     <Flex align="center" flexWrap="wrap" gap="2x">

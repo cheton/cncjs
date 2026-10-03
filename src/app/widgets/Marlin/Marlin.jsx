@@ -10,6 +10,7 @@ import {
   InputGroupAddon,
   LinearProgress,
   Space,
+  useTheme,
   Text,
 } from '@tonic-ui/react';
 import { ensureArray, ensurePositiveNumber } from 'ensure-type';
@@ -35,6 +36,7 @@ import IconHeatedBed from './icons/heated-bed';
  * }} props
  */
 function Marlin({ actions, state }) {
+  const theme = useTheme();
   const extruderPowerMax = useRef(127);
   const heatedBedPowerMax = useRef(127);
   const none = '–';
@@ -77,7 +79,7 @@ function Marlin({ actions, state }) {
             <HeaterInput
               icon={(
                 <FadeInOut disabled={!extruderIsHeating} from={0.3} to={1}>
-                  <IconExtruder color={extruderIsHeating ? '#000' : '#666'} size={24} />
+                  <IconExtruder color={theme.get(extruderIsHeating ? 'colors.text.primary' : 'colors.text.tertiary')} size={24} />
                 </FadeInOut>
               )}
               label={i18n._('Extruder')}
@@ -90,7 +92,7 @@ function Marlin({ actions, state }) {
             <HeaterInput
               icon={(
                 <FadeInOut disabled={!heatedBedIsHeating} from={0.3} to={1}>
-                  <IconHeatedBed color={heatedBedIsHeating ? '#000' : '#666'} size={24} />
+                  <IconHeatedBed color={theme.get(heatedBedIsHeating ? 'colors.text.primary' : 'colors.text.tertiary')} size={24} />
                 </FadeInOut>
               )}
               label={i18n._('Heated Bed')}
@@ -193,7 +195,7 @@ function ReportRow({ children, label }) {
       <Box
         flex="1"
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          backgroundColor: 'actions.hovered',
           borderRadius: '.25rem',
           fontSize: '.75rem',
           minHeight: '22px',

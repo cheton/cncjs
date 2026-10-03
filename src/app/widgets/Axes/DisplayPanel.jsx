@@ -59,7 +59,7 @@ const taskbarButtonSx = {
   backgroundImage: 'none',
   backgroundColor: 'inherit',
   opacity: 0.6,
-  '&:hover': { opacity: 0.8, backgroundColor: '#e6e6e6', textDecoration: 'none' },
+  '&:hover': { opacity: 0.8, backgroundColor: 'actions.hovered', textDecoration: 'none' },
   '&:disabled': { opacity: 0.3, cursor: 'not-allowed' },
   '&:disabled:hover': { backgroundColor: 'inherit' },
 };

@@ -18,12 +18,12 @@ const mapReceiveBufferSizeToColor = (rx) => {
   // info: >=16
   rx = ensurePositiveNumber(rx);
   if (rx >= 16) {
-    return '#17a2b8';
+    return 'info.icon';
   }
   if (rx >= 8) {
-    return '#ffc107';
+    return 'warning.icon';
   }
-  return '#dc3545';
+  return 'error.icon';
 };
 
 // Hook

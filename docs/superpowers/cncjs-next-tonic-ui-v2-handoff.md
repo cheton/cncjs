@@ -23,7 +23,7 @@
 | 未 push | 使用者已授權 R6 commit/push；接手時以 git status/log 核對實際狀態 |
 | Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。W3 completed。 |
 | 最近完成 | R6 browser/performance gates completed；B3 HEAD `ae070b9f`，R6 尚未 commit |
-| 下一步推薦 | W3 已完成；後續 Tonic UI 3 alpha 升級依原定計畫另行啟動。 |
+| 下一步推薦 | V3 in_progress：3.0.0-alpha.1 與 semantic tokens 已遷移，local gates pass，CI production pending。 |
 | Open gaps | advanced Visualizer 14 gates、13 個通用 widget view contracts 及雙 viewport 主題已通過；controller replay、matched performance、console classification 與 cleanup 未完成 |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
@@ -37,6 +37,10 @@
 - Latest validation: frontend78suites/501tests, lint0errors/4existingwarnings, guard361files/18domainclasses/0violations, development compilation and final diff/protected-boundary checks pass. Node20suites/635tests pass with SocketConnection exclusion/forceExit;112inherited simulator intervals mean clean Node shutdown is not proven.
 - Console patterns classified against baseline; Macro nested-button/keyboard and Webcam provider/live-settings regressions fixed test-first and browser-verified. All synthetic users/machines/commands/events/macros removed, owned R6 processes stopped, ports8000/8080/8082 closed. All17locales retain only9required Machines keys beyond HEAD.
 - Auto-review originally rejected broad /tmp deletion. The user subsequently authorized cleanup: all reviewed R6 temporary config/auth/log/fixture files, baseline checkout and temporary Playwright caches are now deleted; repository evidence remains.
+
+## V3 current execution — 2026-10-03
+
+User authorized Tonic UI3 alpha and semantic color tokens. All seven Tonic packages resolve3.0.0-alpha.1; existing exports retained. JSX/Stylus semantic roles migrated, legacy app colorStyle removed, native CSS variable/provider API corrected. Explicit domain palettes/diagrams/camera/WebGL colors preserved. Alpha icons peers and riskLevel gradient paths corrected in scoped configuration. Local frontend78/504, Node22/641 natural exit (prior SocketConnection exclusion), lint0errors/4warnings, guard68fixtures/0violations, immutable/dev compile pass. CI-only production pending; no new V3 browser execution is claimed. See [V3 plan/evidence](plans/2026-09-07-tonic-ui-v2/10-tonic-ui-v3-alpha.md).
 
 ## W3 current execution — 2026-10-02
 

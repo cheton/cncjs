@@ -58,7 +58,7 @@ function StartProbeModal({
               <ModalHeader>{i18n._('Start Probing')}</ModalHeader>
               <ModalBody>
                 <Box mb="4x">
-                  <Text color="red:60">
+                  <Text color="error.text">
                     {i18n._('The Z-axis will descend until electrical contact is detected. If probe wires are not connected, the tool, workpiece, or machine may be damaged.')}
                   </Text>
                 </Box>
@@ -71,7 +71,7 @@ function StartProbeModal({
                     />
                   </Box>
                   <Box flex="1">
-                    <Text color="gray:60" mb="1x" textAlign="center">
+                    <Text color="text.secondary" mb="1x" textAlign="center">
                       {i18n._('{{count}} points', { count: totalPoints })}
                     </Text>
                     <ProbeAreaDiagram

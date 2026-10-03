@@ -10,7 +10,8 @@ function Taskbar({ children, style, ...props }) {
     <Box
       {...props}
       style={{
-        borderTop: '1px solid #ddd',
+        borderTop: '1px solid',
+        borderColor: 'border.secondary',
         ...style
       }}
     >

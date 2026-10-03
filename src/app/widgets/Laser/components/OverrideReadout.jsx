@@ -10,7 +10,7 @@ const OverrideReadout = ({ children }) => (
       display: 'inline-block',
       fontSize: '.75rem',
       fontWeight: 'bold',
-      backgroundColor: 'rgba(0, 0, 0, 0.03)',
+      backgroundColor: 'actions.hovered',
     }}
   >
     {children}

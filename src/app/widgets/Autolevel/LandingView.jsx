@@ -1,4 +1,4 @@
-import { Box, Button, Text, useColorStyle } from '@tonic-ui/react';
+import { Box, Button, Text } from '@tonic-ui/react';
 import React from 'react';
 import i18n from '@app/lib/i18n';
 import styles from './LandingView.styl';
@@ -7,11 +7,11 @@ import styles from './LandingView.styl';
  * @param {{onStartNewProbe?: Function, onLoadProbeFile?: Function}} props
  */
 function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} }) {
-  const [colorStyle] = useColorStyle();
   const pathCardStyle = {
-    backgroundColor: colorStyle.background.secondary,
-    border: `1px solid ${colorStyle.divider}`,
-    '&:hover': { backgroundColor: colorStyle.background.tertiary },
+    backgroundColor: 'background.high',
+    border: '1px solid',
+    borderColor: 'border.secondary',
+    '&:hover': { backgroundColor: 'background.medium' },
   };
 
   return (
@@ -20,12 +20,12 @@ function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} })
         <Box
           alignItems="center" className={styles.pathTitle} display="flex"
           gap="1x"
-          color={colorStyle.color.primary}
+          color="text.primary"
         >
           <span aria-label={i18n._('Target')} role="img" style={{ fontSize: 22 }}>🎯</span>
           {i18n._('PROBE NEW SURFACE')}
         </Box>
-        <Text className={styles.pathDescription} color={colorStyle.color.secondary}>
+        <Text className={styles.pathDescription} color="text.secondary">
           {i18n._('Set up the probe area and probe the work surface to generate height compensation data.')}
         </Text>
         <Button onClick={onStartNewProbe} variant="ghost">
@@ -36,12 +36,12 @@ function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} })
         <Box
           alignItems="center" className={styles.pathTitle} display="flex"
           gap="1x"
-          color={colorStyle.color.primary}
+          color="text.primary"
         >
           <span aria-label={i18n._('Wrench')} role="img" style={{ fontSize: 22 }}>🔧</span>
           {i18n._('APPLY COMPENSATION')}
         </Box>
-        <Text className={styles.pathDescription} color={colorStyle.color.secondary}>
+        <Text className={styles.pathDescription} color="text.secondary">
           {i18n._('Load a previously saved .probe file and apply it to your G-code.')}
         </Text>
         <Button onClick={onLoadProbeFile} variant="ghost">

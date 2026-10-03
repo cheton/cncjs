@@ -1,4 +1,5 @@
-import { useColorMode } from '@tonic-ui/react';
+import { useTheme } from '@emotion/react';
+import { Box, useColorMode, useTheme as useTonicTheme } from '@tonic-ui/react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import config from '@app/store/config';
@@ -89,6 +90,7 @@ test('returns to the live system theme after leaving an initially automatic appe
   changeSystemTheme(true);
 
   expect(screen.getByLabelText('Current theme')).toHaveTextContent('dark');
+  expect(document.documentElement).toHaveAttribute('data-color-scheme', 'dark');
 });
 
 test('stops following the system when returning to an initially explicit appearance', () => {
@@ -105,4 +107,54 @@ test('stops following the system when returning to an initially explicit appeara
   changeSystemTheme(true);
 
   expect(screen.getByLabelText('Current theme')).toHaveTextContent('light');
+  expect(document.documentElement).toHaveAttribute('data-color-scheme', 'light');
+});
+
+function SemanticThemeProbe() {
+  const theme = useTheme();
+  const resolvedTheme = useTonicTheme();
+  return (
+    <Box
+      data-testid="semantic-theme" color="text.primary"
+      data-text-color={resolvedTheme.get('colors.text.primary')}
+    >
+      {String(theme.useCSSVariables)}
+    </Box>
+  );
+}
+
+test('provides CSS variable definitions for semantic tokens and both color modes', () => {
+  mockAppearance = 'light';
+  installSystemTheme();
+  render(<GlobalProvider><SemanticThemeProbe /></GlobalProvider>);
+
+  expect(screen.getByTestId('semantic-theme')).toHaveTextContent('true');
+  const rules = Array.from(document.styleSheets).flatMap(sheet => (
+    Array.from(sheet.cssRules).map(rule => rule.cssText)
+  )).join('\n');
+  expect(rules).toContain('--tonic-colors-text-primary-light:');
+  expect(rules).toContain('--tonic-colors-text-primary-dark:');
+  expect(rules).toContain('var(--tonic-colors-text-primary');
+});
+
+test('restores the host color scheme when the application unmounts', () => {
+  mockAppearance = 'dark';
+  document.documentElement.setAttribute('data-color-scheme', 'host');
+  const view = render(<GlobalProvider><SemanticThemeProbe /></GlobalProvider>);
+  expect(document.documentElement).toHaveAttribute('data-color-scheme', 'dark');
+  view.unmount();
+  expect(document.documentElement).toHaveAttribute('data-color-scheme', 'host');
+  document.documentElement.removeAttribute('data-color-scheme');
+});
+
+test('resolves semantic foreground colors after the automatic theme changes', () => {
+  mockAppearance = 'auto';
+  const changeSystemTheme = installSystemTheme();
+  render(<GlobalProvider><SemanticThemeProbe /></GlobalProvider>);
+  const probe = screen.getByTestId('semantic-theme');
+  const lightColor = probe.getAttribute('data-text-color');
+  expect(lightColor).toContain('#000000');
+  changeSystemTheme(true);
+  expect(probe.getAttribute('data-text-color')).toContain('#ffffff');
+  expect(probe.getAttribute('data-text-color')).not.toBe(lightColor);
 });

@@ -138,8 +138,8 @@ function CameraIconButton({ children, label, onClick, selected = false }) {
           padding: '8px',
           width: '36px',
           _hover: {
-            backgroundColor: selected ? 'rgba(255, 255, 255, .7)' : '#e6e6e6',
-            color: '#333',
+            backgroundColor: selected ? 'actions.selected' : 'actions.enabled',
+            color: 'text.primary',
             filter: 'invert(0%)',
           },
         }}
@@ -177,8 +177,8 @@ function RepeatableCameraButton({ children, label, onClick }) {
           padding: '8px',
           width: '36px',
           _hover: {
-            backgroundColor: '#e6e6e6',
-            color: '#333',
+            backgroundColor: 'actions.hovered',
+            color: 'text.primary',
             filter: 'invert(0%)',
           },
         }}

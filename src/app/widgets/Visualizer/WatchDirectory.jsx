@@ -121,7 +121,7 @@ function DirectoryChildren({
   }
   if (nodes.length === 0) {
     return (
-      <Box px="3x" py="2x" color="black:secondary">
+      <Box px="3x" py="2x" color="text.secondary">
         {i18n._('Empty directory')}
       </Box>
     );

@@ -33,8 +33,6 @@ import {
   Text,
   TextLabel,
   Tooltip,
-  useColorMode,
-  useColorStyle,
   usePortalManager,
 } from '@tonic-ui/react';
 import {
@@ -117,7 +115,6 @@ const Events = () => {
     },
   });
   const portal = usePortalManager();
-  const [colorMode] = useColorMode();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchEventsQuery.isFetching;
   const isLoadingData = fetchEventsQuery.isFetching;
@@ -348,14 +345,8 @@ const Events = () => {
   ]);
 
   const renderExpandedRow = useCallback(({ row }) => {
-    const tableBorderColor = {
-      dark: 'gray:70',
-      light: 'gray:30',
-    }[colorMode];
-    const dividerColor = {
-      dark: 'gray:60',
-      light: 'gray:30',
-    }[colorMode];
+    const tableBorderColor = 'border.secondary';
+    const dividerColor = 'border.secondary';
     const value = row.original.action;
 
     return (
@@ -409,11 +400,8 @@ const Events = () => {
         </Flex>
       </Flex>
     );
-  }, [
-    colorMode,
-  ]);
+  }, []);
 
-  const [colorStyle] = useColorStyle();
   const theme = useTheme();
   const font = [theme.fontWeights.semibold, theme.fontSizes.sm, theme.fonts.base].join(' ');
   const { table, headerRef, setTableWidth } = useResourceTable({
@@ -494,17 +482,17 @@ const Events = () => {
                 aria-label={i18n._('Refresh')}
                 border={1}
                 borderColor="transparent"
-                color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                color="text.secondary"
                 lineHeight={1}
                 onClick={handleClickRefresh}
                 px="2x"
                 py="2x"
                 transition="all .2s"
-                _active={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focus={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focusActive={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focusHover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
-                _hover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
+                _active={{ color: 'text.secondary' }}
+                _focus={{ color: 'text.secondary' }}
+                _focusActive={{ color: 'text.secondary' }}
+                _focusHover={{ color: 'text.primary' }}
+                _hover={{ color: 'text.primary' }}
               >
                 <Icon
                   as={RefreshIcon}
@@ -577,8 +565,8 @@ const Events = () => {
                         <Fragment key={row.id}>
                           <TableRow
                             data-selected={row.getIsSelected() ? '' : undefined}
-                            _hover={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .12)' : 'rgba(0, 0, 0, .12)' }}
-                            _selected={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .08)' : 'rgba(0, 0, 0, .08)' }}
+                            _hover={{ backgroundColor: 'actions.hovered' }}
+                            _selected={{ backgroundColor: 'actions.selected' }}
                           >
                             {row.getVisibleCells().map(cell => (
                               <TableCell
@@ -606,8 +594,8 @@ const Events = () => {
       </Box>
       <Box flex="none">
         <Flex
-          align="center" justify="flex-end" backgroundColor={colorStyle.background.secondary}
-          color={totalCount === 0 ? colorStyle.color.disabled : undefined}
+          align="center" justify="flex-end" backgroundColor="background.high"
+          color={totalCount === 0 ? 'text.disabled' : undefined}
           px="6x" py="3x" gap="2x"
         >
           <Text>{i18n._('Total: {{count}}', { count: totalCount })}</Text>

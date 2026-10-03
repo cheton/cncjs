@@ -175,7 +175,7 @@ function Webcam({
         sx={{
           display: disabled ? 'none' : 'block',
           minHeight: isFullscreen ? '100%' : 240,
-          backgroundColor: '#000',
+          backgroundColor: 'background._fixed.dark.low',
           overflow: 'hidden',
           position: 'relative',
           textAlign: 'center',
@@ -282,13 +282,13 @@ function Webcam({
           </Box>
           <Box
             sx={{
-              backgroundColor: '#000',
+              backgroundColor: 'background._fixed.dark.low',
               padding: '.125rem .75rem',
               display: 'flex',
               alignItems: 'center',
             }}
           >
-            <Text sx={{ color: '#f5f5f5', fontSize: '14px', textShadow: '0 0 5px #333' }}>{scale}x</Text>
+            <Text sx={{ color: 'text._fixed.dark.primary', fontSize: '14px', textShadow: '0 0 5px #333' }}>{scale}x</Text>
             <Box sx={{ flex: 1 }}>
               {mediaSource === MEDIA_SOURCE_LOCAL && (
                 <ControlButton

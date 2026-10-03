@@ -7,8 +7,6 @@ import {
   Icon,
   Spinner,
   Text,
-  useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import { WarningCircleIcon } from '@tonic-ui/react-icons';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -24,8 +22,6 @@ import {
 
 const GeneralSettings = () => {
   const [formState, setFormState] = useState({});
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle({ colorMode });
   const toast = useToast();
   const query = useGeneralSettingsQuery({
     onError: () => {
@@ -126,7 +122,7 @@ const GeneralSettings = () => {
                   </Field>
                 </Box>
                 <Flex alignItems="center" columnGap="2x" ml="6x">
-                  <Icon as={WarningCircleIcon} color={colorStyle.color.error} />
+                  <Icon as={WarningCircleIcon} color="error.text" />
                   <Text>{i18n._('Enabling this option may cause machine damage if you don\'t have an Emergency Stop button to prevent a dangerous situation.')}</Text>
                 </Flex>
               </Box>
@@ -156,7 +152,7 @@ const GeneralSettings = () => {
             </Box>
             <Flex
               flex="none"
-              backgroundColor={colorStyle?.background?.secondary}
+              backgroundColor="background.high"
               alignItems="center"
               justifyContent="flex-start"
               px="6x"

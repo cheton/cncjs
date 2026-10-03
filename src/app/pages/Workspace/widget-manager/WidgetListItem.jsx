@@ -36,7 +36,8 @@ function WidgetListItem({
   return (
     <Box
       sx={{
-        border: '1px solid #ddd',
+        border: '1px solid',
+        borderColor: 'border.secondary',
         height: '100%',
       }}
     >

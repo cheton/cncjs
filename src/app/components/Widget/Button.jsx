@@ -28,10 +28,10 @@ function Button({ disabled, href, inverted = false, onClick, sx, ...props }) {
         justifyContent: 'center',
         padding: '2px 8px',
         ...(inverted && {
-          backgroundColor: 'gray:80',
-          color: 'white:primary',
+          backgroundColor: 'actions.selected',
+          color: 'text.primary',
           _disabled: { opacity: 0.4 },
-          _hover: { backgroundColor: 'gray:90' },
+          _hover: { backgroundColor: 'actions.selectedHovered' },
         }),
         ...sx,
       }}

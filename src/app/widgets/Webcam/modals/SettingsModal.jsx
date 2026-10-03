@@ -113,7 +113,7 @@ function SettingsModal({ onClose }) {
                       />
                     )}
                     </Field>
-                    <Text color="gray:60" fontSize="sm" mt="1x">{i18n._('The URL should point to a stream in one of the following formats: Motion JPEG (mjpeg), RTSP, or H264 (MP4).')}</Text>
+                    <Text color="text.secondary" fontSize="sm" mt="1x">{i18n._('The URL should point to a stream in one of the following formats: Motion JPEG (mjpeg), RTSP, or H264 (MP4).')}</Text>
                   </Box>
                 </FormControl>
               </ModalBody>

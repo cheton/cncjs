@@ -883,7 +883,7 @@ function Connection() {
                                       }}
                                     />
                                     {(meta.error && meta.touched) && (
-                                      <Text fontSize="sm" lineHeight="sm" color="red:50">
+                                      <Text fontSize="sm" lineHeight="sm" color="error.text">
                                         {meta.error}
                                       </Text>
                                     )}
@@ -927,7 +927,7 @@ function Connection() {
                                       }}
                                     />
                                     {(meta.error && meta.touched) && (
-                                      <Text fontSize="sm" lineHeight="sm" color="red:50">
+                                      <Text fontSize="sm" lineHeight="sm" color="error.text">
                                         {meta.error}
                                       </Text>
                                     )}

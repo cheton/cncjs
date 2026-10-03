@@ -3889,7 +3889,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.14.0":
+"@emotion/styled@npm:^11.14.1":
   version: 11.14.1
   resolution: "@emotion/styled@npm:11.14.1"
   dependencies:
@@ -5701,93 +5701,94 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tonic-ui/react-base@npm:^2.0.4":
-  version: 2.0.4
-  resolution: "@tonic-ui/react-base@npm:2.0.4"
+"@tonic-ui/react-base@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/react-base@npm:3.0.0-alpha.1"
   dependencies:
     "@emotion/is-prop-valid": 1.x
-    "@emotion/styled": ^11.14.0
-    "@tonic-ui/styled-system": ^2.2.1
+    "@tonic-ui/styled-system": ^3.0.0-alpha.1
     ensure-type: ^1.5.1
   peerDependencies:
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  checksum: 4ccf28c7e6c1010a983494b2c52c100143d396feebc3b0e8a163ae91139e6578b02b24d7df6c0638f441ebe34dbde89df1d7f907710ab7c6067e86d75cc45a89
+    "@emotion/react": ^11.0.0
+    "@emotion/styled": ^11.0.0
+    react: ^18.3.0 || ^19.0.0
+    react-dom: ^18.3.0 || ^19.0.0
+  checksum: f74ef0217fa5244cf6e245e1eb52dc360cb2b855d2a2d1595efc4607a42d22a01d3014a6b88f98c46e0ce252c4827d7d960acd340b64c72ff9c674f989c86d8c
   languageName: node
   linkType: hard
 
-"@tonic-ui/react-hooks@npm:^2.0.0, @tonic-ui/react-hooks@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "@tonic-ui/react-hooks@npm:2.2.1"
+"@tonic-ui/react-hooks@npm:3.0.0-alpha.1, @tonic-ui/react-hooks@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/react-hooks@npm:3.0.0-alpha.1"
   dependencies:
-    "@tonic-ui/utils": ^2.2.0
+    "@tonic-ui/utils": ^3.0.0-alpha.1
   peerDependencies:
-    react: ^16.14.0 || ^17 || ^18 || ^19
-  checksum: d9245573af0ffc95592e4ecbd4a65355d8fcfb4836d85e0bfb580c729bc817a9ec4cbd72531ad19feec75077ac1ed6af666a7055332e59c6ccd8706c4a424642
+    react: ^18.3.0 || ^19.0.0
+  checksum: 03ac746ebc21581a77b3514fbbf8691d89f80003005ebe1e73df272d31b30cef058ce394214c52f0364286cf915b49db4c6ee30f7273ba4eee9755acaf94feaa
   languageName: node
   linkType: hard
 
-"@tonic-ui/react-icons@npm:^2.0.0, @tonic-ui/react-icons@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@tonic-ui/react-icons@npm:2.1.3"
+"@tonic-ui/react-icons@npm:3.0.0-alpha.1, @tonic-ui/react-icons@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/react-icons@npm:3.0.0-alpha.1"
   dependencies:
-    "@tonic-ui/react-base": ^2.0.4
+    "@tonic-ui/react-base": ^3.0.0-alpha.1
   peerDependencies:
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  checksum: 3fa0f021fbce506b770ae263f9d7662ea8c20e545ba8ecbeeae15b404930e3bef7f385e9034882b6c8ba9edf6178db4c05e918e6238c9ffe284edd661884b7f1
+    react: ^18.3.0 || ^19.0.0
+    react-dom: ^18.3.0 || ^19.0.0
+  checksum: 1bcbcb7e3c53ad4e57829ce46b9c6fb8f4a55659d62fa45d79dad92b714a34bd4befe0f8ae9a74ec1ff7842597871a3f8397b64f8e679c36531b6841b69fccef
   languageName: node
   linkType: hard
 
-"@tonic-ui/react@npm:^2.0.0":
-  version: 2.15.0
-  resolution: "@tonic-ui/react@npm:2.15.0"
+"@tonic-ui/react@npm:3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/react@npm:3.0.0-alpha.1"
   dependencies:
-    "@emotion/react": ^11.14.0
-    "@emotion/styled": ^11.14.0
     "@popperjs/core": 2.x
-    "@tonic-ui/react-base": ^2.0.4
-    "@tonic-ui/react-hooks": ^2.2.1
-    "@tonic-ui/react-icons": ^2.1.3
-    "@tonic-ui/styled-system": ^2.2.1
-    "@tonic-ui/theme": ^2.0.1
-    "@tonic-ui/utils": ^2.3.0
+    "@tonic-ui/react-base": ^3.0.0-alpha.1
+    "@tonic-ui/react-hooks": ^3.0.0-alpha.1
+    "@tonic-ui/react-icons": ^3.0.0-alpha.1
+    "@tonic-ui/styled-system": ^3.0.0-alpha.1
+    "@tonic-ui/theme": ^3.0.0-alpha.1
+    "@tonic-ui/utils": ^3.0.0-alpha.1
     date-fns: ^4.4.0
     ensure-type: ^1.5.1
     micro-memoize: 5.x
     react-focus-lock: 2.x
-    react-is: ^16.14.0 || ^17 || ^18 || ^19
+    react-is: ^18.3.0 || ^19.0.0
     react-transition-group: 4.x
   peerDependencies:
-    react: ^16.14.0 || ^17 || ^18 || ^19
-    react-dom: ^16.14.0 || ^17 || ^18 || ^19
-  checksum: cc9f72af926a0c269c314a6a899680b43b50ccb97ec978d6c968726f083639756212fef05c22d20dcefd069598f977f7bf5c005292feb382892fdb0a9133735d
+    "@emotion/react": ^11.0.0
+    "@emotion/styled": ^11.0.0
+    react: ^18.3.0 || ^19.0.0
+    react-dom: ^18.3.0 || ^19.0.0
+  checksum: 31497ab9284cb646890fcb392c4c36e1ff3d352cd5552dc55eed078574edb0edba307c1aba0740d9be7453559fe143f8adad1e7bd109615d8acc2c8f5368e412
   languageName: node
   linkType: hard
 
-"@tonic-ui/styled-system@npm:^2.2.1":
-  version: 2.2.1
-  resolution: "@tonic-ui/styled-system@npm:2.2.1"
+"@tonic-ui/styled-system@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/styled-system@npm:3.0.0-alpha.1"
   dependencies:
-    "@tonic-ui/utils": ^2.2.0
+    "@tonic-ui/utils": ^3.0.0-alpha.1
     ensure-type: ^1.5.1
-  checksum: e3d917babad8516a593618d1e9ce8d9a8b8560f34758d11558931f4e6a1b463fc061ea587a115416e67ac61d7f0204acb06aca0726676a419fb0d4dbc98f185c
+  checksum: 2a7963eb969e29a5affd31191c10290486d8e54a2ae83e0303429f0a74765b31fa4c457401293b25ab49c947d565e6615185ca03ce5323a618d39d639ea5641c
   languageName: node
   linkType: hard
 
-"@tonic-ui/theme@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@tonic-ui/theme@npm:2.0.1"
-  checksum: c352c570f5bed18183e5c6604ed5116a7d8ff691e4fdeec11af6e929942b20bff2f5f015c9c6cc80f8586a0014379a5bf38e5ddeb8587bc319b997784cb2939a
+"@tonic-ui/theme@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/theme@npm:3.0.0-alpha.1"
+  checksum: cc4eab5f354026ce254020dac016f50432b120de3f01cd4fae0713bb4c3502afabf541151b39973a9bbc893c62fb5893cb5477faa2f75b3248077a19acbc08b5
   languageName: node
   linkType: hard
 
-"@tonic-ui/utils@npm:^2.2.0, @tonic-ui/utils@npm:^2.3.0":
-  version: 2.3.0
-  resolution: "@tonic-ui/utils@npm:2.3.0"
+"@tonic-ui/utils@npm:^3.0.0-alpha.1":
+  version: 3.0.0-alpha.1
+  resolution: "@tonic-ui/utils@npm:3.0.0-alpha.1"
   dependencies:
     ensure-type: ^1.5.1
-  checksum: ce6afcd5a8adcc3bc80ecb2a98ad4c8b43acaba30a06515fc7e7df6f821e5075eb198036cd2823853c8bec0a605c270d3678efff92607f0685b846ca4d38b16b
+  checksum: 0f4fd907a177f1247149735cbd59df17e34a90e44a86ca25b2146efff432754006534334d7fc0f465305524865dcc14fd0b0c85d93731fe7e9c51c02dd4165ea
   languageName: node
   linkType: hard
 
@@ -9199,6 +9200,7 @@ __metadata:
     "@electron/rebuild": ^3.7.2
     "@emotion/babel-preset-css-prop": ~11.12.0
     "@emotion/react": ^11.14.0
+    "@emotion/styled": ^11.14.1
     "@fortawesome/fontawesome-free": ~6.2.0
     "@fortawesome/fontawesome-svg-core": ~6.2.0
     "@fortawesome/free-brands-svg-icons": ~6.2.0
@@ -9212,9 +9214,9 @@ __metadata:
     "@testing-library/jest-dom": 6.6.3
     "@testing-library/react": 14.3.1
     "@testing-library/user-event": 14.5.2
-    "@tonic-ui/react": ^2.0.0
-    "@tonic-ui/react-hooks": ^2.0.0
-    "@tonic-ui/react-icons": ^2.0.0
+    "@tonic-ui/react": 3.0.0-alpha.1
+    "@tonic-ui/react-hooks": 3.0.0-alpha.1
+    "@tonic-ui/react-icons": 3.0.0-alpha.1
     "@trendmicro/babel-config": ~1.0.2
     awilix: ~4.3.1
     awilix-express: ~3.0.0
@@ -19812,13 +19814,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^16.14.0 || ^17 || ^18 || ^19":
-  version: 19.2.8
-  resolution: "react-is@npm:19.2.8"
-  checksum: ec955b3b167cbe041a1f474063d15aa0c5a4d67a75b95e3e4090e9b964986a1fcf66370f3aa4deb34342c898e5d95da37d725d089c40e537598e0c3cc8bba00e
-  languageName: node
-  linkType: hard
-
 "react-is@npm:^17.0.1":
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
@@ -19830,6 +19825,13 @@ __metadata:
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
   checksum: e20fe84c86ff172fc8d898251b7cc2c43645d108bf96d0b8edf39b98f9a2cae97b40520ee7ed8ee0085ccc94736c4886294456033304151c3f94978cec03df21
+  languageName: node
+  linkType: hard
+
+"react-is@npm:^18.3.0 || ^19.0.0":
+  version: 19.3.0
+  resolution: "react-is@npm:19.3.0"
+  checksum: c7170b2f1f8bc91cb14c94849a5463a84360b8737d9829aa48c9ef314c1442bc87a2e93e167da45c74ebdbf5b912bdc2fab3c993df495adde3223d533edd6f3b
   languageName: node
   linkType: hard
 

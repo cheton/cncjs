@@ -9,7 +9,6 @@ import {
   ModalFooter,
   Stack,
   Text,
-  useColorStyle,
 } from '@tonic-ui/react';
 import ModalWarningIcon from '@app/icons/ModalWarningIcon';
 import _get from 'lodash/get';
@@ -22,7 +21,6 @@ const ConfirmRestoreDefaultsModal = ({
   onConfirm,
   ...rest
 }) => {
-  const [colorStyle] = useColorStyle();
   const systemInformationQuery = useSystemInformationQuery();
   const configFile = _get(systemInformationQuery.data, 'userStore.file');
 
@@ -39,7 +37,7 @@ const ConfirmRestoreDefaultsModal = ({
         <ModalBody>
           <Flex columnGap="4x">
             <ModalWarningIcon
-              color={colorStyle?.color?.warning}
+              color="warning.icon"
               size="12x"
             />
             <Stack spacing="1x">

@@ -200,7 +200,7 @@ function ReportRow({ children, label }) {
       </Text>
       <Box
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          backgroundColor: 'actions.hovered',
           borderRadius: '.25rem',
           fontSize: '.75rem',
           padding: '.125rem .5rem',

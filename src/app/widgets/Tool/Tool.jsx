@@ -117,7 +117,7 @@ function Tool({
   }, []);
 
   if (!value) {
-    return <Box color="gray:60">{i18n._('No available tool configuration')}</Box>;
+    return <Box color="text.secondary">{i18n._('No available tool configuration')}</Box>;
   }
 
   const displayUnits = units === METRIC_UNITS ? i18n._('mm') : i18n._('in');
@@ -234,7 +234,7 @@ function Tool({
                     )}
                   </Box>
                   {!editable && ensureString(value.toolProbeCustomCommands).length > 0 && <Text as="pre" maxHeight="150px" overflow="auto">{value.toolProbeCustomCommands}</Text>}
-                  {!editable && ensureString(value.toolProbeCustomCommands).length === 0 && <Text color="red:60">{i18n._('Warning: No custom tool probe commands are defined')}</Text>}
+                  {!editable && ensureString(value.toolProbeCustomCommands).length === 0 && <Text color="error.text">{i18n._('Warning: No custom tool probe commands are defined')}</Text>}
                   {editable && (
                     <Box>
                       <Box mb="2x">
@@ -251,7 +251,7 @@ function Tool({
                           <MenuList maxHeight="180px" overflow="auto">
                             {variables.map(variable => (typeof variable === 'object' ? (
                               <Text
-                                key={variable.text} color="gray:60" px="3x"
+                                key={variable.text} color="text.secondary" px="3x"
                                 py="2x"
                               >{variable.text}
                               </Text>

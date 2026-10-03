@@ -50,7 +50,7 @@ function TestProbeModal({
             <>
               <ModalHeader>{i18n._('Test Probe')}</ModalHeader>
               <ModalBody>
-                <Text color="red:60" mb="4x">
+                <Text color="error.text" mb="4x">
                   {i18n._('The Z-axis will descend until electrical contact is detected. If probe wires are not connected, the tool, workpiece, or machine may be damaged.')}
                 </Text>
                 <Text mb="4x">{i18n._('A single probe test will be performed at the current XY position.')}</Text>

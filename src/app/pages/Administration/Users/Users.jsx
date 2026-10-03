@@ -29,8 +29,6 @@ import {
   Switch,
   Text,
   Tooltip,
-  useColorMode,
-  useColorStyle,
   usePortalManager,
 } from '@tonic-ui/react';
 import {
@@ -59,7 +57,6 @@ import {
 
 /** @returns {JSX.Element} */
 const Users = () => {
-  const [colorMode] = useColorMode();
   // pagination
   const rowsPerPageOptions = ROWS_PER_PAGE_OPTIONS;
   const [page, setPage] = useState(1);
@@ -289,7 +286,6 @@ const Users = () => {
     handleToggleStatusById,
   ]);
 
-  const [colorStyle] = useColorStyle();
   const theme = useTheme();
   const font = [theme.fontWeights.semibold, theme.fontSizes.sm, theme.fonts.base].join(' ');
   const { table, headerRef, setTableWidth } = useResourceTable({
@@ -370,17 +366,17 @@ const Users = () => {
                 aria-label={i18n._('Refresh')}
                 border={1}
                 borderColor="transparent"
-                color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                color="text.secondary"
                 lineHeight={1}
                 onClick={handleClickRefresh}
                 px="2x"
                 py="2x"
                 transition="all .2s"
-                _active={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focus={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focusActive={{ color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary' }}
-                _focusHover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
-                _hover={{ color: colorMode === 'dark' ? 'white:primary' : 'black:primary' }}
+                _active={{ color: 'text.secondary' }}
+                _focus={{ color: 'text.secondary' }}
+                _focusActive={{ color: 'text.secondary' }}
+                _focusHover={{ color: 'text.primary' }}
+                _hover={{ color: 'text.primary' }}
               >
                 <Icon
                   as={RefreshIcon}
@@ -453,8 +449,8 @@ const Users = () => {
                         <Fragment key={row.id}>
                           <TableRow
                             data-selected={row.getIsSelected() ? '' : undefined}
-                            _hover={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .12)' : 'rgba(0, 0, 0, .12)' }}
-                            _selected={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .08)' : 'rgba(0, 0, 0, .08)' }}
+                            _hover={{ backgroundColor: 'actions.hovered' }}
+                            _selected={{ backgroundColor: 'actions.selected' }}
                           >
                             {row.getVisibleCells().map(cell => (
                               <TableCell
@@ -478,8 +474,8 @@ const Users = () => {
       </Box>
       <Box flex="none">
         <Flex
-          align="center" justify="flex-end" backgroundColor={colorStyle.background.secondary}
-          color={totalCount === 0 ? colorStyle.color.disabled : undefined}
+          align="center" justify="flex-end" backgroundColor="background.high"
+          color={totalCount === 0 ? 'text.disabled' : undefined}
           px="6x" py="3x" gap="2x"
         >
           <Text>{i18n._('Total: {{count}}', { count: totalCount })}</Text>

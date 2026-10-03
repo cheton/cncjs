@@ -66,7 +66,7 @@ function ConfirmDeleteMacro({
             {name}
           </Text>
           {error && (
-            <Text color="red:50" mt="2x">
+            <Text color="error.text" mt="2x">
               {error}
             </Text>
           )}

@@ -37,7 +37,7 @@ function StopProbeModal({ onCancel = () => {}, onConfirm = () => {} }) {
       <ModalContent>
         <ModalHeader>{i18n._('Stop Probing')}</ModalHeader>
         <ModalBody>
-          <Box color="red:60">
+          <Box color="error.text">
             <Text mb="2x">{i18n._('Are you sure you want to stop probing?')}</Text>
             <Text>{i18n._('This will reset the controller and cancel the probe cycle.')}</Text>
           </Box>

@@ -11,7 +11,7 @@ function DigitalReadout({ children, label, value }) {
       <Box
         mr="2x"
         sx={{
-          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+          backgroundColor: 'actions.hovered',
           borderRadius: '.25rem',
           fontSize: '.875rem',
           padding: '.25rem .375rem',

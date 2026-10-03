@@ -160,7 +160,7 @@ function Probe({ isActionable, units, wcs }) {
                         <Box
                           as="span"
                           className="fa-layers fa-fw"
-                          sx={{ color: '#222', cursor: 'help', opacity: 0.5 }}
+                          sx={{ color: 'text.primary', cursor: 'help', opacity: 0.5 }}
                         >
                           <FontAwesomeIcon icon={['far', 'circle']} />
                           <FontAwesomeIcon icon="info" transform="shrink-8" />

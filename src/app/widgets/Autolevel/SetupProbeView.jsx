@@ -52,9 +52,9 @@ function NumberField({
           type="number"
           value={value}
         />
-        {unit && <Text color="gray:60">{unit}</Text>}
+        {unit && <Text color="text.secondary">{unit}</Text>}
       </Box>
-      {error && <Text color="red:60" fontSize="sm">{error}</Text>}
+      {error && <Text color="error.text" fontSize="sm">{error}</Text>}
     </FormControl>
   );
 }
@@ -183,7 +183,7 @@ function SetupProbeView({
       </Box>
       <Box className={styles.section}>
         <Text className={styles.sectionTitle}>{i18n._('Probe Area')}</Text>
-        <Text color="gray:60" textAlign="center">
+        <Text color="text.secondary" textAlign="center">
           {i18n._('{{count}} points', { count: totalPoints })}
         </Text>
         <ProbeAreaDiagram
@@ -291,7 +291,7 @@ function SetupProbeView({
               value={probeProgress.current}
               variant="determinate"
             />
-            <Text color="gray:60">{probeProgress.percentage}%</Text>
+            <Text color="text.secondary">{probeProgress.percentage}%</Text>
           </Box>
         )}
         {!isProbing ? (

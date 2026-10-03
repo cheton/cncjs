@@ -77,7 +77,7 @@ const FieldTextarea = forwardRef((
                 alignItems="center"
                 height="8x"
               >
-                <Icon as={WarningCircleIcon} mx="3x" color="red:50" />
+                <Icon as={WarningCircleIcon} mx="3x" color="error.text" />
               </Flex>
             )}
           </Flex>

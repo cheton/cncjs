@@ -183,7 +183,7 @@ function NewMacro({
               <ModalFooter>
                 <FormSpy subscription={{ submitError: true }}>
                   {({ submitError }) => submitError && (
-                    <Text color="red:50" mr="auto">
+                    <Text color="error.text" mr="auto">
                       {submitError}
                     </Text>
                   )}

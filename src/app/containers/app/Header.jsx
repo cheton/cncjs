@@ -16,7 +16,6 @@ import {
   Space,
   Text,
   useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import {
   ArrowLeftIcon,
@@ -226,7 +225,6 @@ const LanguageMenuItems = forwardRef((props, ref) => {
 
 const MainMenuItems = forwardRef((props, ref) => {
   const [, navigateMenu] = useContext(MenuStateContext);
-  const [colorStyle] = useColorStyle();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -245,10 +243,10 @@ const MainMenuItems = forwardRef((props, ref) => {
         <>
           <Flex alignItems="center" columnGap="3x" px="3x">
             <Avatar
-              backgroundColor={colorStyle.background.tertiary}
-              color={colorStyle.color.secondary}
+              backgroundColor="background.medium"
+              color="text.secondary"
               _hover={{
-                color: colorStyle.color.primary,
+                color: 'text.primary',
               }}
             >
               <FontAwesomeIcon icon="user" style={{ width: 24, height: 24 }} />
@@ -379,8 +377,6 @@ const Header = forwardRef((
   },
   ref,
 ) => {
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle();
   const location = useLocation();
   const [menu, setMenu] = useState('main');
   const shouldPreventDefaultOnLossFocus = useRef(false);
@@ -400,8 +396,8 @@ const Header = forwardRef((
       as="header"
       ref={ref}
       aria-label="Application header"
-      backgroundColor={colorStyle?.background?.secondary}
-      color={colorStyle?.color?.primary}
+      backgroundColor="background.high"
+      color="text.primary"
       justifyContent="space-between"
       {...rest}
     >
@@ -413,7 +409,7 @@ const Header = forwardRef((
           aria-label={i18n._('Toggle navigation')}
           border={1}
           borderColor="transparent"
-          color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+          color="text.secondary"
           lineHeight={1}
           px="2x"
           py="2x"
@@ -422,19 +418,19 @@ const Header = forwardRef((
           height="10x"
           onClick={onToggle}
           _active={{
-            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            color: 'text.secondary',
           }}
           _focus={{
-            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            color: 'text.secondary',
           }}
           _focusActive={{
-            color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+            color: 'text.secondary',
           }}
           _focusHover={{
-            color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+            color: 'text.primary',
           }}
           _hover={{
-            color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+            color: 'text.primary',
           }}
         >
           <Icon as={MenuIcon} size="6x" />
@@ -447,7 +443,7 @@ const Header = forwardRef((
             window.open(url, '_blank');
           }}
           title={`${settings.productName} ${settings.version}`}
-          color={colorStyle?.color?.primary}
+          color="text.primary"
           px="2x"
           position="relative"
         >
@@ -471,7 +467,7 @@ const Header = forwardRef((
           </Flex>
         </ButtonBase>
         <Text
-          color={colorStyle?.color?.tertiary}
+          color="text.tertiary"
           fontFamily="mono"
           fontSize="xs"
           lineHeight="1"
@@ -497,10 +493,10 @@ const Header = forwardRef((
         >
           <MenuToggle>
             <Avatar
-              backgroundColor={colorStyle.background.tertiary}
-              color={colorStyle.color.secondary}
+              backgroundColor="background.medium"
+              color="text.secondary"
               _hover={{
-                color: colorStyle.color.primary,
+                color: 'text.primary',
               }}
             >
               <FontAwesomeIcon icon="user" style={{ width: 24, height: 24 }} />

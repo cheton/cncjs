@@ -101,8 +101,9 @@ function ReportRow({ children, label }) {
         {label}
       </Box>
       <Box
-        bg="#f5f5f5"
-        border="1px solid #e3e3e3"
+        bg="background.high"
+        border="1px solid"
+        borderColor="border.secondary"
         borderRadius="sm"
         minHeight="22px"
         overflow="hidden"

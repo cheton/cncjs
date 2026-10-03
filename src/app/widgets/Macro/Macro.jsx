@@ -7,8 +7,6 @@ import {
   Space,
   Spinner,
   Text,
-  useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import { ensureArray } from 'ensure-type';
 import _get from 'lodash/get';
@@ -53,21 +51,10 @@ function Macro({
   canLoadMacro,
   canRunMacro,
 }) {
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle({ colorMode });
-  const secondaryColor = colorStyle?.color?.secondary;
-  const borderColor = {
-    dark: 'gray:60',
-    light: 'gray:30'
-  }[colorMode];
-  const dividerColor = {
-    dark: 'gray:60',
-    light: 'gray:30'
-  }[colorMode];
-  const toolbarBackgroundColor = {
-    dark: 'gray:90',
-    light: 'gray:10',
-  }[colorMode];
+  const secondaryColor = 'text.secondary';
+  const borderColor = 'border.secondary';
+  const dividerColor = 'border.secondary';
+  const toolbarBackgroundColor = 'background.high';
   const fetchMacrosQuery = useFetchMacrosQuery();
   const macros = ensureArray(fetchMacrosQuery.data?.records);
   const hasData = fetchMacrosQuery.data !== undefined;

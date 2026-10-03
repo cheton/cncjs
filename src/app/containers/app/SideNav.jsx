@@ -11,8 +11,6 @@ import {
   Scrollbar,
   Space,
   Text,
-  useColorMode,
-  useColorStyle,
 } from '@tonic-ui/react';
 import { MenuIcon } from '@tonic-ui/react-icons';
 import { ensureArray, ensureString } from 'ensure-type';
@@ -33,8 +31,6 @@ const SideNav = forwardRef((
   },
   ref,
 ) => {
-  const [colorMode] = useColorMode();
-  const [colorStyle] = useColorStyle({ colorMode });
   const navigate = useNavigate();
   const location = useLocation();
   const handleViewReleases = useCallback(() => {
@@ -66,10 +62,11 @@ const SideNav = forwardRef((
         ref={ref}
         aria-label="Main navigation"
         sx={{
-          backgroundColor: colorStyle?.background?.primary,
-          color: colorStyle?.color?.primary,
+          backgroundColor: 'background.highest',
+          color: 'text.primary',
           border: 0,
-          boxShadow: `1px 0 0 0 ${colorStyle.divider}`,
+          borderRight: '1px solid',
+          borderColor: 'border.secondary',
           width: layout.sidenav.width,
           whiteSpace: 'nowrap',
         }}
@@ -86,7 +83,7 @@ const SideNav = forwardRef((
             aria-label="Close navigation"
             border={1}
             borderColor="transparent"
-            color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+            color="text.secondary"
             lineHeight={1}
             px="2x"
             py="2x"
@@ -95,19 +92,19 @@ const SideNav = forwardRef((
             height="10x"
             onClick={onClose}
             _active={{
-              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+              color: 'text.secondary',
             }}
             _focus={{
-              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+              color: 'text.secondary',
             }}
             _focusActive={{
-              color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+              color: 'text.secondary',
             }}
             _focusHover={{
-              color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+              color: 'text.primary',
             }}
             _hover={{
-              color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+              color: 'text.primary',
             }}
           >
             <Icon as={MenuIcon} size="6x" />
@@ -116,7 +113,7 @@ const SideNav = forwardRef((
           <ButtonBase
             onClick={handleViewReleases}
             title={`${settings.productName} ${settings.version}`}
-            color={colorStyle?.color?.primary}
+            color="text.primary"
             px="2x"
             position="relative"
           >
@@ -140,7 +137,7 @@ const SideNav = forwardRef((
             </Flex>
           </ButtonBase>
           <Text
-            color={colorStyle?.color?.tertiary}
+            color="text.tertiary"
             fontFamily="mono"
             fontSize="xs"
             lineHeight="1"
@@ -199,7 +196,7 @@ const SideNav = forwardRef((
                   py="2x"
                   alignItems="center"
                   columnGap="4x"
-                  color={colorStyle.color.secondary}
+                  color="text.secondary"
                 >
                   {route.icon && (
                     <Icon as={route.icon} size="6x" />

@@ -33,8 +33,6 @@ import {
   Text,
   TextLabel,
   Tooltip,
-  useColorMode,
-  useColorStyle,
   usePortalManager,
 } from '@tonic-ui/react';
 import {
@@ -120,7 +118,6 @@ const Commands = () => {
   });
   const runCommandMutation = useRunCommandMutation();
   const portal = usePortalManager();
-  const [colorMode] = useColorMode();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchCommandsQuery.isFetching;
   const isLoadingData = fetchCommandsQuery.isFetching;
@@ -341,14 +338,8 @@ const Commands = () => {
   ]);
 
   const renderExpandedRow = useCallback(({ row }) => {
-    const tableBorderColor = {
-      dark: 'gray:70',
-      light: 'gray:30',
-    }[colorMode];
-    const dividerColor = {
-      dark: 'gray:60',
-      light: 'gray:30',
-    }[colorMode];
+    const tableBorderColor = 'border.secondary';
+    const dividerColor = 'border.secondary';
     const value = row.original.action;
 
     return (
@@ -392,7 +383,7 @@ const Commands = () => {
                   aria-label={i18n._('Run')}
                   border={1}
                   borderColor="transparent"
-                  color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                  color="text.secondary"
                   disabled={!row.original.enabled}
                   lineHeight={1}
                   onClick={handleClickRunCommandById(row.original.id)}
@@ -400,19 +391,19 @@ const Commands = () => {
                   py="2x"
                   transition="all .2s"
                   _active={{
-                    color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                    color: 'text.secondary',
                   }}
                   _focus={{
-                    color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                    color: 'text.secondary',
                   }}
                   _focusActive={{
-                    color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                    color: 'text.secondary',
                   }}
                   _focusHover={{
-                    color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+                    color: 'text.primary',
                   }}
                   _hover={{
-                    color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+                    color: 'text.primary',
                   }}
                 >
                   <PlayIcon />
@@ -436,11 +427,9 @@ const Commands = () => {
       </Flex>
     );
   }, [
-    colorMode,
     handleClickRunCommandById,
   ]);
 
-  const [colorStyle] = useColorStyle();
   const theme = useTheme();
   const font = [theme.fontWeights.semibold, theme.fontSizes.sm, theme.fonts.base].join(' ');
   const { table, headerRef, setTableWidth } = useResourceTable({
@@ -521,26 +510,26 @@ const Commands = () => {
                 aria-label={i18n._('Refresh')}
                 border={1}
                 borderColor="transparent"
-                color={colorMode === 'dark' ? 'white:secondary' : 'black:secondary'}
+                color="text.secondary"
                 lineHeight={1}
                 onClick={handleClickRefresh}
                 px="2x"
                 py="2x"
                 transition="all .2s"
                 _active={{
-                  color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                  color: 'text.secondary',
                 }}
                 _focus={{
-                  color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                  color: 'text.secondary',
                 }}
                 _focusActive={{
-                  color: colorMode === 'dark' ? 'white:secondary' : 'black:secondary',
+                  color: 'text.secondary',
                 }}
                 _focusHover={{
-                  color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+                  color: 'text.primary',
                 }}
                 _hover={{
-                  color: colorMode === 'dark' ? 'white:primary' : 'black:primary',
+                  color: 'text.primary',
                 }}
               >
                 <Icon
@@ -582,7 +571,7 @@ const Commands = () => {
                 {isLoadingData && (
                   <Flex
                     role="status" position="absolute" inset={0}
-                    align="center" justify="center" backgroundColor="rgba(0, 0, 0, .7)"
+                    align="center" justify="center" backgroundColor="_shadow.medium"
                     zIndex={1}
                   >
                     <Spinner /><Text ml="2x">{i18n._('Loading...')}</Text>
@@ -614,8 +603,8 @@ const Commands = () => {
                         <Fragment key={row.id}>
                           <TableRow
                             data-selected={row.getIsSelected() ? '' : undefined}
-                            _hover={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .12)' : 'rgba(0, 0, 0, .12)' }}
-                            _selected={{ backgroundColor: colorMode === 'dark' ? 'rgba(255, 255, 255, .08)' : 'rgba(0, 0, 0, .08)' }}
+                            _hover={{ backgroundColor: 'actions.hovered' }}
+                            _selected={{ backgroundColor: 'actions.selected' }}
                           >
                             {row.getVisibleCells().map(cell => (
                               <TableCell
@@ -643,8 +632,8 @@ const Commands = () => {
       </Box>
       <Box flex="none">
         <Flex
-          align="center" justify="flex-end" backgroundColor={colorStyle.background.secondary}
-          color={totalCount === 0 ? colorStyle.color.disabled : undefined}
+          align="center" justify="flex-end" backgroundColor="background.high"
+          color={totalCount === 0 ? 'text.disabled' : undefined}
           px="6x" py="3x" gap="2x"
         >
           <Text>{i18n._('Total: {{count}}', { count: totalCount })}</Text>

@@ -67,9 +67,10 @@ function ControllerData({ children }) {
     <Box
       as="pre"
       sx={{
-        background: '#000',
-        border: '1px solid #ddd',
-        color: '#fff',
+        background: 'background._fixed.dark.low',
+        border: '1px solid',
+        borderColor: 'border.secondary',
+        color: 'text._fixed.dark.primary',
         fontFamily: 'Consolas, Menlo, Monaco, monospace',
         height: 'max(50vh, 200px)',
         margin: 0,

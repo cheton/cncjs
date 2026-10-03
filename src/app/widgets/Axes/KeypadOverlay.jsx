@@ -17,12 +17,14 @@ const keypadInfotip = () => {
       marginRight: 10
     },
     divider: {
-      borderTop: '1px solid #ccc',
+      borderTop: '1px solid',
+      borderColor: 'border.secondary',
       marginTop: 5,
       paddingTop: 5
     },
     kbd: {
-      border: '1px solid #aaa',
+      border: '1px solid',
+      borderColor: 'border.secondary',
       padding: '1px 4px',
       fontFamily: 'sans-serif',
       whiteSpace: 'nowrap'

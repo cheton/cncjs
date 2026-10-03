@@ -3,17 +3,17 @@ import {
   PortalManager,
   ToastManager,
   TonicProvider,
-  createTheme,
+  useColorMode,
 } from '@tonic-ui/react';
 import {
   useConst,
   useEffectOnce,
 } from '@tonic-ui/react-hooks';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider as ReduxProvider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import colorStyle from '@app/config/color-style';
+import theme from '@app/config/theme';
 import i18next from '@app/i18next';
 import '@app/runtime/connectionRuntimeSingleton';
 import config from '@app/store/config';
@@ -31,6 +31,27 @@ const queryClient = new QueryClient({
   },
 });
 
+function DocumentColorScheme() {
+  const [colorMode] = useColorMode();
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.getAttribute('data-color-scheme');
+    root.setAttribute('data-color-scheme', colorMode);
+    return () => {
+      if (previous === null) {
+        root.removeAttribute('data-color-scheme');
+      } else {
+        root.setAttribute('data-color-scheme', previous);
+      }
+    };
+  }, [colorMode]);
+  return null;
+}
+
+/**
+ * @param {Object} props
+ * @param {React.ReactNode} props.children
+ */
 export function GlobalProvider({ children }) {
   const initialColorModeState = useConst(() => {
     const appearance = config.get('settings.appearance') ?? 'auto'; // The appearance value is one of 'auto', 'light', 'dark'
@@ -71,14 +92,11 @@ export function GlobalProvider({ children }) {
       <QueryClientProvider client={queryClient}>
         <TonicProvider
           colorMode={colorModeState}
-          colorStyle={{
-            defaultValue: colorStyle,
-          }}
-          theme={createTheme({
-            cssVariables: true, // Enable CSS theme variables
-          })}
+          theme={theme}
+          useCSSVariables={true}
           useCSSBaseline={true}
         >
+          <DocumentColorScheme />
           <ToastManager
             placement="bottom-right"
             TransitionProps={{

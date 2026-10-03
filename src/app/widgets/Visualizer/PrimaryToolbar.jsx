@@ -61,35 +61,20 @@ import {
 
 const controllerStateStyles = {
   'controller-state-default': {
-    color: '#222',
-    backgroundColor: '#fff',
-    border: '1px solid #e3e3e3',
+    color: 'text.primary',
+    backgroundColor: 'background.highest',
+    border: '1px solid',
+    borderColor: 'border.secondary',
   },
-  'controller-state-primary': {
-    color: '#fff',
-    backgroundColor: '#337ab7',
-    border: '1px solid #2e6da4',
-  },
-  'controller-state-success': {
-    color: '#fff',
-    backgroundColor: '#5cb85c',
-    border: '1px solid #4cae4c',
-  },
-  'controller-state-info': {
-    color: '#fff',
-    backgroundColor: '#5bc0de',
-    border: '1px solid #46b8da',
-  },
-  'controller-state-warning': {
-    color: '#fff',
-    backgroundColor: '#f0ad4e',
-    border: '1px solid #eea236',
-  },
-  'controller-state-danger': {
-    color: '#fff',
-    backgroundColor: '#d9534f',
-    border: '1px solid #d43f3a',
-  },
+  ...Object.fromEntries([
+    ['primary', 'info'], ['success', 'success'], ['info', 'info'],
+    ['warning', 'warning'], ['danger', 'error'],
+  ].map(([state, appearance]) => [`controller-state-${state}`, {
+    color: `${appearance}._onOverlay.text`,
+    backgroundColor: `${appearance}._overlay`,
+    border: '1px solid',
+    borderColor: `${appearance}.border`,
+  }])),
 };
 
 const workCoordinateSystems = [
@@ -180,7 +165,7 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
             />
           </Flex>
           <MenuList>
-            <Box px="3x" py="2x" color="#222">
+            <Box px="3x" py="2x" color="text.primary">
               <Box as="span">{i18n._('WebGL')}: </Box>
               <Box
                 as="span"

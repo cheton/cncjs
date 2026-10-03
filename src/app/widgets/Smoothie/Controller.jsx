@@ -92,9 +92,10 @@ function PreviewCode({ children }) {
 }
 
 const previewSx = {
-  background: '#000',
-  border: '1px solid #ddd',
-  color: '#fff',
+  background: 'background._fixed.dark.low',
+  border: '1px solid',
+  borderColor: 'border.secondary',
+  color: 'text._fixed.dark.primary',
   height: 'max(50vh, 200px)',
   overflowY: 'auto',
   position: 'relative',

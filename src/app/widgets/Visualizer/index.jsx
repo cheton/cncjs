@@ -158,41 +158,41 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   }
 
   return (
-    <div>
-      <div
-        style={{
+    <Box>
+      <Box
+        color="text._fixed.light.primary"
+        sx={{
           display: 'inline-block',
           position: 'absolute',
           bottom: 8,
           left: 8,
           fontSize: '1.5rem',
-          color: '#000',
           opacity: 0.5,
-          ...style,
         }}
+        style={style}
         {...props}
       >
         {name}
-      </div>
+      </Box>
       {isProbeCompensationApplied && (
-        <div
-          style={{
+        <Box
+          sx={{
             position: 'absolute',
             top: 8,
             right: 8,
             fontSize: '1.2rem',
-            color: '#d9534f',
+            color: 'warning._onOverlay.text',
             fontWeight: 'bold',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'background.highest',
             padding: '4px 8px',
             borderRadius: '3px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+            boxShadow: 'low.main',
           }}
         >
           {i18n._('Probe Compensation Applied')}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
 

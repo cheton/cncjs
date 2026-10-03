@@ -70,10 +70,10 @@ function Dashboard({ show = false, state = {} }) {
   const sent = gcode.sent || 0;
   const total = gcode.total || 0;
   const viewerStyle = {
-    backgroundColor: '#fff',
+    backgroundColor: 'background.highest',
     border: '1px solid transparent',
-    borderColor: '#ccc',
-    boxShadow: '0 1px 1px rgba(0, 0, 0, .05)',
+    borderColor: 'border.secondary',
+    boxShadow: 'low.main',
     marginBottom: 10,
     display: show ? 'block' : 'none',
   };
@@ -82,9 +82,10 @@ function Dashboard({ show = false, state = {} }) {
     <Box className={styles.dashboard} style={viewerStyle}>
       <Box
         style={{
-          backgroundColor: '#fafafa',
-          borderBottom: '1px solid #ccc',
-          color: '#333',
+          backgroundColor: 'background.highest',
+          borderBottom: '1px solid',
+          borderColor: 'border.secondary',
+          color: 'text.primary',
           height: 30,
           padding: '5px 10px',
         }}

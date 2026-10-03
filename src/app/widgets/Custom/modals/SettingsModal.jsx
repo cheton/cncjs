@@ -76,7 +76,7 @@ function SettingsModal({
                           maxLength={256}
                         />
                         {(meta.error && meta.touched) && (
-                          <Text fontSize="sm" lineHeight="sm" color="red:50">
+                          <Text fontSize="sm" lineHeight="sm" color="error.text">
                             {meta.error}
                           </Text>
                         )}
@@ -96,7 +96,7 @@ function SettingsModal({
                           placeholder="/widget/"
                         />
                         {(meta.error && meta.touched) && (
-                          <Text fontSize="sm" lineHeight="sm" color="red:50">
+                          <Text fontSize="sm" lineHeight="sm" color="error.text">
                             {meta.error}
                           </Text>
                         )}
@@ -108,7 +108,7 @@ function SettingsModal({
                   {({ invalid, submitError }) => (
                     <ModalFooter>
                       {submitError && (
-                        <Text fontSize="sm" lineHeight="sm" color="red:50">
+                        <Text fontSize="sm" lineHeight="sm" color="error.text">
                           {submitError}
                         </Text>
                       )}

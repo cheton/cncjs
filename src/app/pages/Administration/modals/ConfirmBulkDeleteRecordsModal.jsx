@@ -7,7 +7,6 @@ import {
   ModalFooter,
   Stack,
   Text,
-  useColorStyle,
 } from '@tonic-ui/react';
 import ModalInfoIcon from '@app/icons/ModalInfoIcon';
 import React, { forwardRef } from 'react';
@@ -23,8 +22,6 @@ const ConfirmBulkDeleteRecordsModal = forwardRef((
   },
   ref,
 ) => {
-  const [colorStyle] = useColorStyle();
-
   return (
     <Modal
       closeOnEsc
@@ -38,7 +35,7 @@ const ConfirmBulkDeleteRecordsModal = forwardRef((
         <ModalBody>
           <Flex columnGap="4x" mb="6x">
             <ModalInfoIcon
-              color={colorStyle?.color?.info}
+              color="info.icon"
               size="12x"
             />
             <Stack spacing="1x">

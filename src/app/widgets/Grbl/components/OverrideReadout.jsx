@@ -8,7 +8,7 @@ function OverrideReadout({ children }) {
   return (
     <Box
       sx={{
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        backgroundColor: 'actions.hovered',
         display: 'inline-block',
         fontSize: '.75rem',
         fontWeight: 'bold',

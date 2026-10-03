@@ -195,7 +195,7 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
         <Text className={styles.sectionTitle}>{i18n._('Probe Compensation')}</Text>
         {pipeline.pipelineState === PIPELINE_EMPTY && (
           <Box>
-            {!hasProbeData && <Text color="red:60">{i18n._('Insufficient probe data. At least 3 points are required for surface compensation.')}</Text>}
+            {!hasProbeData && <Text color="error.text">{i18n._('Insufficient probe data. At least 3 points are required for surface compensation.')}</Text>}
             {hasProbeData && (
               <Button onClick={() => fileInputRef.current?.click()} variant="secondary">
                 <i aria-hidden="true" className="fa fa-folder-open" /> {i18n._('Load G-code file')}
@@ -234,7 +234,7 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
                 filename: pipeline.gcodeFileName,
               })}
             </Text>
-            <Text color="red:60">{pipeline.errorMessage}</Text>
+            <Text color="error.text">{pipeline.errorMessage}</Text>
             {pipeline.originalGcode && (
               <Button onClick={() => runPipeline(pipeline.gcodeFileName, pipeline.originalGcode)} variant="primary">
                 {i18n._('Retry')}
