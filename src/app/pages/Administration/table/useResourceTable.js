@@ -2,6 +2,10 @@ import { getCoreRowModel, getExpandedRowModel, useReactTable } from '@tanstack/r
 import { useEffect, useRef, useState } from 'react';
 import { getColumnSizing } from './columnSizing';
 
+// Pending queries can normalize to a fresh empty array on each render. Keep
+// TanStack's row model stable so automatic page resets do not retrigger it.
+const EMPTY_ROWS = [];
+
 /**
  * Uses canvas.measureText to compute and return the width of the given text of given font in pixels.
  *
@@ -31,7 +35,7 @@ export default function useResourceTable({ columns, data, rowSelection, onRowSel
   const headerRef = useRef(null);
   const [tableWidth, setTableWidth] = useState(0);
   const table = useReactTable({
-    data,
+    data: data.length === 0 ? EMPTY_ROWS : data,
     columns,
     defaultColumn: { minSize: 80 },
     state: { rowSelection },

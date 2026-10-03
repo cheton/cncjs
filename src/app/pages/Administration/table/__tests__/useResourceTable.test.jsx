@@ -42,3 +42,26 @@ test('measured column sizing settles when a caller recreates its column definiti
   });
   expect(renderCount).toBeLessThan(8);
 });
+
+test('empty query results retain the row model across renders and still accept loaded records', () => {
+  const { result, rerender } = renderHook(({ records }) => {
+    const [rowSelection, setRowSelection] = useState({});
+    const { table } = useResourceTable({
+      columns: [{ id: 'name', accessorKey: 'name', header: 'Name' }],
+      data: records || [],
+      rowSelection,
+      onRowSelectionChange: setRowSelection,
+      font: '600 14px Arial',
+    });
+    return table.getCoreRowModel();
+  }, { initialProps: { records: undefined } });
+
+  const pendingRows = result.current;
+  expect(pendingRows.rows).toHaveLength(0);
+  rerender({ records: undefined });
+  expect(result.current).toBe(pendingRows);
+  rerender({ records: [] });
+  expect(result.current).toBe(pendingRows);
+  rerender({ records: data });
+  expect(result.current.rows.map(row => row.original)).toEqual(data);
+});
