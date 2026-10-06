@@ -44,17 +44,17 @@ function WidgetListItem({
       <Box
         mb="3x"
         sx={{
-          backgroundColor: '#f5f6f7',
-          borderBottom: '1px solid #f0f0f0',
+          backgroundColor: 'background.medium',
+          borderBottom: '1px solid',
+          borderColor: 'border.secondary',
           padding: '12px',
           textAlign: 'center',
         }}
       >
-        <Flex justify="center">
+        <Flex justify="center" color="text.secondary">
           <FontAwesomeIcon
             icon="list-alt"
             style={{
-              color: '#666',
               filter: checked ? 'drop-shadow(4px 4px 4px rgba(0, 0, 0, 0.3))' : 'none',
               fontSize: 100,
               opacity: checked ? 1 : 0.6,

@@ -127,7 +127,7 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
                 {activeIndex === 1 && (
                   <>
                     {mdiQuery.isError && (
-                      <Box role="alert" color="danger" mb="2x">
+                      <Box role="alert" color="error.text" mb="2x">
                         {i18n._('An unexpected error has occurred.')}
                         <Button size="sm" onClick={() => mdiQuery.refetch()}>
                           {i18n._('Retry')}
@@ -147,7 +147,7 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
                 {activeIndex === 2 && <ShuttleXpress value={draft.shuttleXpress} onChange={updateShuttleXpress} />}
               </TabPanel>
               {error && (
-                <Box role="alert" color="danger" mt="2x">
+                <Box role="alert" color="error.text" mt="2x">
                   {errorMessage}
                 </Box>
               )}

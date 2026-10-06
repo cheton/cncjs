@@ -390,20 +390,12 @@ const Commands = () => {
                   px="2x"
                   py="2x"
                   transition="all .2s"
-                  _active={{
-                    color: 'text.secondary',
-                  }}
-                  _focus={{
-                    color: 'text.secondary',
-                  }}
-                  _focusActive={{
-                    color: 'text.secondary',
-                  }}
-                  _focusHover={{
-                    color: 'text.primary',
-                  }}
-                  _hover={{
-                    color: 'text.primary',
+                  sx={{
+                    '&:focus': { color: 'text.secondary' },
+                    '&:hover': { color: 'text.accent' },
+                    '&:focus:hover': { color: 'text.accent' },
+                    '&:active': { color: 'text.secondary' },
+                    '&:focus:active': { color: 'text.secondary' },
                   }}
                 >
                   <PlayIcon />
@@ -516,20 +508,12 @@ const Commands = () => {
                 px="2x"
                 py="2x"
                 transition="all .2s"
-                _active={{
-                  color: 'text.secondary',
-                }}
-                _focus={{
-                  color: 'text.secondary',
-                }}
-                _focusActive={{
-                  color: 'text.secondary',
-                }}
-                _focusHover={{
-                  color: 'text.primary',
-                }}
-                _hover={{
-                  color: 'text.primary',
+                sx={{
+                  '&:focus': { color: 'text.secondary' },
+                  '&:hover': { color: 'text.accent' },
+                  '&:focus:hover': { color: 'text.accent' },
+                  '&:active': { color: 'text.secondary' },
+                  '&:focus:active': { color: 'text.secondary' },
                 }}
               >
                 <Icon

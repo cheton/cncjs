@@ -11,12 +11,12 @@ const NavLink = forwardRef((
   ref
 ) => {
   const color = 'text.primary';
-  const activeBackgroundColor = 'background.high';
-  const activeColor = 'text.primary';
-  const hoverBackgroundColor = 'background.high';
-  const hoverColor = 'text.primary';
-  const selectedBackgroundColor = 'background.medium';
-  const selectedColor = 'text.primary';
+  const activeBackgroundColor = 'actions.active';
+  const activeColor = 'text.accent';
+  const hoverBackgroundColor = 'actions.hovered';
+  const hoverColor = 'text.accent';
+  const selectedBackgroundColor = 'actions.current';
+  const selectedColor = 'text.accent';
 
   return (
     <Link

@@ -184,12 +184,13 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
             color: 'warning._onOverlay.text',
             fontWeight: 'bold',
             backgroundColor: 'background.highest',
-            padding: '4px 8px',
             borderRadius: '3px',
             boxShadow: 'low.main',
           }}
         >
-          {i18n._('Probe Compensation Applied')}
+          <Box sx={{ backgroundColor: 'warning._overlay', borderRadius: 'inherit', padding: '4px 8px' }}>
+            {i18n._('Probe Compensation Applied')}
+          </Box>
         </Box>
       )}
     </Box>

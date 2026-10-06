@@ -122,7 +122,7 @@ const GeneralSettings = () => {
                   </Field>
                 </Box>
                 <Flex alignItems="center" columnGap="2x" ml="6x">
-                  <Icon as={WarningCircleIcon} color="error.text" />
+                  <Icon as={WarningCircleIcon} color="error.icon" />
                   <Text>{i18n._('Enabling this option may cause machine damage if you don\'t have an Emergency Stop button to prevent a dangerous situation.')}</Text>
                 </Flex>
               </Box>

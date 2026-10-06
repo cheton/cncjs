@@ -8,10 +8,10 @@ import styles from './LandingView.styl';
  */
 function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} }) {
   const pathCardStyle = {
-    backgroundColor: 'background.high',
+    backgroundColor: 'background.medium',
     border: '1px solid',
     borderColor: 'border.secondary',
-    '&:hover': { backgroundColor: 'background.medium' },
+    '&:hover': { backgroundColor: 'actions.hovered' },
   };
 
   return (

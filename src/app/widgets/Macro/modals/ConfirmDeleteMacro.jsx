@@ -47,7 +47,7 @@ function ConfirmDeleteMacro({
   return (
     <Modal
       closeOnEsc
-      closeOnOutsideClick
+      closeOnInteractOutside
       isClosable={!isSubmitting}
       isOpen
       onClose={handleClose}

@@ -123,7 +123,7 @@ const MainPage = forwardRef((props, ref) => {
       )}
       <Box
         as="main"
-        backgroundColor="background.highest"
+        backgroundColor="background.low"
         ml={{
           xs: 0,
           md: layout.mininav.defaultWidth,

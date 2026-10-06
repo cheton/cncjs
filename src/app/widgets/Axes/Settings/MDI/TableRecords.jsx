@@ -191,7 +191,7 @@ function TableRecords({
             ))}
           </TableBody>
         </Table>
-        {error && <Box role="alert" color="danger">{i18n._('An unexpected error has occurred.')}</Box>}
+        {error && <Box role="alert" color="error.text">{i18n._('An unexpected error has occurred.')}</Box>}
         {!error && loading && <Box role="status"><Spinner /><Space width="2x" />{i18n._('Loading...')}</Box>}
         {!error && !loading && records.length === 0 && <Box>{i18n._('No data to display')}</Box>}
       </Box>

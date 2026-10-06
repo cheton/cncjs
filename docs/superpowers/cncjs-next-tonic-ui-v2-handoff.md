@@ -6,6 +6,8 @@ Current visual checkpoint (2026-10-06): **V3-V completed**. GPT-6-Luna xhigh per
 
 舊路徑 `docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md` 已移除，內容併入本檔；歷史 checkpoint 保留在 [execution-log](plans/2026-09-07-tonic-ui-v2/execution-log.md) 與 Git history。
 
+Latest source follow-up (2026-10-06): **V3-GV completed and user accepted for commit**. React/React DOM ranges enforce 18.3; eight deprecated focus groups use native CSS pseudo selectors in `sx` without data-state aliases, and four outside-interaction props use `closeOnInteractOutside`. Semantic surfaces, status colors and fixed-mode previews follow the official guide. Existing frontend 78 suites / 505 tests, lint 0 errors / 4 existing warnings, guard 0 violations / 68 fixtures and immutable offline install pass. Fresh visual evidence and owned cleanup are in the [V3-GV report](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/report.json); [root acceptance](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/root-acceptance.json) records the final alias-only adjustment, exact source hashes and remaining focus/console-warning limitations. Inter/DM Mono loading remains outside this slice.
+
 ## 接手第一步
 
 1. 讀本檔全部（快照、本輪重點、hard rules）。
@@ -20,10 +22,10 @@ Current visual checkpoint (2026-10-06): **V3-V completed**. GPT-6-Luna xhigh per
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| Validated source | `fbea2042`（Toast/table/filename fixes 已 commit/push；final evidence commit follows，實際 HEAD 以 Git 核對） |
-| 工作樹 | Source clean after scanner locale restoration; final V3-V evidence/ledger delivery |
+| Validated source | V3-GV tested `5e8757b4` plus source diff recorded in the report; final native-selector cleanup and delivery are recorded in root acceptance. Check actual HEAD with Git. |
+| 工作樹 | Guide follow-up source and accepted V3-GV evidence delivered together in this commit |
 | Delivery | 使用者既有 commit/push 授權持續有效；接手時以 git status/log 核對實際狀態 |
-| Active task | None；R6、W3、V3、V3-V completed。Browser 使用 GPT-6-Luna xhigh。 |
+| Active task | None; R6, W3, V3, V3-V and V3-GV completed. Browser work uses GPT-6-Luna xhigh. |
 | 最近完成 | V3-V browser evidence、root review、source fixes、CI production/four-platform 與 owned cleanup |
 | 下一步推薦 | V3 已完成；下一步評估原生 Dropdown／Autocomplete 的實際 consumers 與互動契約。 |
 | Open gaps | No required V3-V gate remains. Retain inherited768pane clipping, disabled/static dark SVG contrast and headless/replay limitations; no fullR6performance/hardware rerun. |

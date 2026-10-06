@@ -43,7 +43,7 @@ const SideNav = forwardRef((
       ref={ref}
       backdrop={true}
       closeOnEsc={true}
-      closeOnOutsideClick={true}
+      closeOnInteractOutside={true}
       isOpen={isOpen}
       onClose={onClose}
       placement="left"
@@ -62,7 +62,7 @@ const SideNav = forwardRef((
         ref={ref}
         aria-label="Main navigation"
         sx={{
-          backgroundColor: 'background.highest',
+          backgroundColor: 'background.high',
           color: 'text.primary',
           border: 0,
           borderRight: '1px solid',
@@ -91,20 +91,12 @@ const SideNav = forwardRef((
             width="10x"
             height="10x"
             onClick={onClose}
-            _active={{
-              color: 'text.secondary',
-            }}
-            _focus={{
-              color: 'text.secondary',
-            }}
-            _focusActive={{
-              color: 'text.secondary',
-            }}
-            _focusHover={{
-              color: 'text.primary',
-            }}
-            _hover={{
-              color: 'text.primary',
+            sx={{
+              '&:focus': { color: 'text.secondary' },
+              '&:hover': { color: 'text.accent' },
+              '&:focus:hover': { color: 'text.accent' },
+              '&:active': { color: 'text.secondary' },
+              '&:focus:active': { color: 'text.secondary' },
             }}
           >
             <Icon as={MenuIcon} size="6x" />

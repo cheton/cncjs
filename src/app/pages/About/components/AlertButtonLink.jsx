@@ -5,7 +5,7 @@ import {
 import React, { forwardRef } from 'react';
 
 const AlertButtonLink = forwardRef((props, ref) => {
-  const borderColor = 'text.primary';
+  const borderColor = 'border.primary';
   const color = 'text.primary';
   const _hoverBackgroundColor = 'actions.hovered';
 

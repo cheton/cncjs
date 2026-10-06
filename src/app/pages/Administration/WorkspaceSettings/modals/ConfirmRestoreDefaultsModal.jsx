@@ -27,7 +27,7 @@ const ConfirmRestoreDefaultsModal = ({
   return (
     <Modal
       closeOnEsc
-      closeOnOutsideClick
+      closeOnInteractOutside
       isClosable
       isOpen={true}
       onClose={onClose}

@@ -26,7 +26,7 @@ const ConfirmImportWorkspaceSettingsModal = ({
   return (
     <Modal
       closeOnEsc
-      closeOnOutsideClick
+      closeOnInteractOutside
       isClosable
       isOpen={true}
       onClose={onClose}

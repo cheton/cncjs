@@ -481,15 +481,16 @@ const Workspace = ({
                 position="fixed"
                 right="0"
                 sx={{
-                  backgroundColor: 'rgba(255, 255, 255, .7)',
-                  border: `4px dashed ${!isConnected ? 'rgba(0, 0, 0, .2)' : '#1e90ff'}`,
+                  backgroundColor: 'background.medium',
+                  border: '4px dashed',
+                  borderColor: isConnected ? 'info.border' : 'border.secondary',
                 }}
                 textAlign="center"
                 top="48px"
                 zIndex="1000"
               >
                 <Text
-                  color="#666"
+                  color="text.secondary"
                   size="4xl"
                 >
                   {isConnected && (
@@ -500,7 +501,9 @@ const Workspace = ({
                   )}
                   {!isConnected && (
                     <>
-                      <FontAwesomeIcon icon="times-circle" color="#db3d44" size="2x" />
+                      <Box color="error.icon">
+                        <FontAwesomeIcon icon="times-circle" size="2x" />
+                      </Box>
                       <Box>{i18n._('You cannot upload files to the workspace when the connection is not established.')}</Box>
                     </>
                   )}

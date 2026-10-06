@@ -53,7 +53,7 @@ function CreateRecord({ onSave, onCancel }) {
           {i18n._('New')}
         </ModalHeader>
         <ModalBody>
-          {error && <Text color="danger">{i18n._('This field is required.')}</Text>}
+          {error && <Text color="error.text">{i18n._('This field is required.')}</Text>}
           <Box>
             <Box mb="3x">
               <TextLabel mb="2x">{i18n._('Name')}</TextLabel>
