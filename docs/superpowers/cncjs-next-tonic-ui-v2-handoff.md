@@ -1,5 +1,7 @@
 # CNCjs next → Tonic UI v2 — 交接入口
 
+Current visual checkpoint (2026-10-06): **V3-V completed**. GPT-6-Luna xhigh performed browser operations; root independently reviewed screenshots, assertions and owned cleanup. Theme matrix7, UI routes15/15, filename/badge2 and all four controller light/dark8cases/32gates pass. Source fixes f050804e/fbea2042 and latest-source production/four-platform CI pass. See [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) and [final evidence](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-20261003-luna/README.md).
+
 本檔是**唯一**的跨 session 交接入口：bootstrap、現況、hard rules、恢復 prompt 都在這裡。
 
 舊路徑 `docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md` 已移除，內容併入本檔；歷史 checkpoint 保留在 [execution-log](plans/2026-09-07-tonic-ui-v2/execution-log.md) 與 Git history。
@@ -13,18 +15,18 @@
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-10-02）
+## 現況快照（2026-10-06）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| HEAD | `ae070b9f`（B3 已 commit/push；R6 尚未 commit） |
-| 工作樹 | R6 source fixes、tests、browser artifacts 與 ledger 納入本次交付 commit |
-| 未 push | 使用者已授權 R6 commit/push；接手時以 git status/log 核對實際狀態 |
-| Active task | **R6 completed（2026-10-02）**；使用者指定 GPT-6-Luna extra-high。W3 與 V3 completed。 |
-| 最近完成 | R6 browser/performance gates completed；B3 HEAD `ae070b9f`，R6 尚未 commit |
+| Validated source | `fbea2042`（Toast/table/filename fixes 已 commit/push；final evidence commit follows，實際 HEAD 以 Git 核對） |
+| 工作樹 | Source clean after scanner locale restoration; final V3-V evidence/ledger delivery |
+| Delivery | 使用者既有 commit/push 授權持續有效；接手時以 git status/log 核對實際狀態 |
+| Active task | None；R6、W3、V3、V3-V completed。Browser 使用 GPT-6-Luna xhigh。 |
+| 最近完成 | V3-V browser evidence、root review、source fixes、CI production/four-platform 與 owned cleanup |
 | 下一步推薦 | V3 已完成；下一步評估原生 Dropdown／Autocomplete 的實際 consumers 與互動契約。 |
-| Open gaps | advanced Visualizer 14 gates、13 個通用 widget view contracts 及雙 viewport 主題已通過；controller replay、matched performance、console classification 與 cleanup 未完成 |
+| Open gaps | No required V3-V gate remains. Retain inherited768pane clipping, disabled/static dark SVG contrast and headless/replay limitations; no fullR6performance/hardware rerun. |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
 本表是撰寫當下的事實，**不是當前狀態**——本檔與後續 doc commit 都會推進 HEAD。接手時一律自行實測；若與 [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 不一致，以 STATUS 為準。
