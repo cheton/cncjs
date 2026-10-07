@@ -67,6 +67,30 @@ describe('Macro mutation modal contracts', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
+  test.each([
+    ['New', NewMacro, { onClose: jest.fn() }, mockUseCreateMacroMutation],
+    ['Edit', EditMacro, { id: 'm1', name: '', content: '', onClose: jest.fn() }, mockUseUpdateMacroMutation],
+  ])('%s Macro inserts a chosen variable in place of the command selection', async (title, Component, props, mutationHook) => {
+    const user = userEvent.setup();
+    mutationHook.mockReturnValue({ isLoading: false, mutateAsync: jest.fn() });
+    if (title === 'Edit') {
+      mockUseDeleteMacroMutation.mockReturnValue({ isLoading: false, mutateAsync: jest.fn() });
+    }
+    renderAppUI(<Component {...props} />);
+    const content = screen.getByRole('textbox', { name: /^Macro Commands/ });
+    fireEvent.change(content, { target: { value: 'G0 X1' } });
+    content.setSelectionRange(3, 5);
+    await user.click(screen.getByRole('button', { name: 'Macro Variables' }));
+    const option = screen.getByRole('menuitem', { name: '%wait' });
+    if (title === 'Edit') {
+      option.focus();
+      await user.keyboard('{Enter}');
+    } else {
+      await user.click(option);
+    }
+    expect(content).toHaveValue('G0 %wait\n');
+  });
+
   test('NewMacro waits for create success before closing', async () => {
     let resolveCreate;
     const mutateAsync = jest.fn(() => new Promise(resolve => {

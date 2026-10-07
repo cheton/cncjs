@@ -1967,3 +1967,25 @@ User supplied an Axes screenshot and requested clearer Machine/Work Position hea
 Per the user's earlier instruction, removed the unused root `react-focus-lock` dependency with `yarn remove react-focus-lock`; no application source import remained. `yarn why react-focus-lock` confirms the lockfile still needs the transitive `react-focus-lock@2.13.7` dependency of `@tonic-ui/react@3.0.0-alpha.1`.
 
 Verification: focused Axes suite passed (1 suite / 22 tests); full frontend passed (79 suites / 508 tests). `yarn lint` exited 0 (5 ESLint warnings and 28 Stylint warnings in the repo); changed-file ESLint had 0 errors / 1 existing `DisplayPanel` max-lines warning, and changed-file Stylint emitted no warnings. The development server served the CNCjs sign-in page, but no authenticated widget view was available; no browser visual pass is claimed. User visual confirmation remains pending.
+
+### 2026-10-07 — Macro variable selectors use DropdownToggle defaults
+
+Updated `CreateMacroDrawer` and `UpdateMacroDrawer` to use the documented `DropdownToggle` render-prop API with `getToggleProps()`, preserving the existing `LinkButton` styling. Removed `MenuToggle`, explicit `placement="bottom-end"`, and custom `slotProps.content` max-height/overflow overrides; Tonic defaults to `bottom-start` placement and `40vh` content max-height.
+
+Verification: full frontend passed (79 suites / 508 tests); targeted ESLint on both modified files reported no issues. No authenticated browser visual pass was run.
+
+### 2026-10-07 — Dropdown content sizing defaults
+
+Removed added content max-height and overflow overrides from Connection baud, New/Edit Macro, Tool variables, and Visualizer machine-profile Dropdowns. These use Tonic's viewport-based sizing. Removed Tool's redundant bottom-start placement; Widget DropdownButton uses default placement unless dropup is requested. Preserved intentional Header end alignment, footer upward menus, and dropup behavior. Autocomplete and unrelated scroll containers are unchanged.
+
+Verification: frontend 79 suites / 508 tests passed. Targeted ESLint: zero errors, one existing Connection hook-use-state warning. No browser visual pass claimed.
+
+### 2026-10-07 — V3-UI-C direct Tonic widget actions
+
+Migrated action controls in 15 widget entry points to native Tonic Button and data-driven Dropdown/DropdownToggle. Removed the local Widget Button, DropdownButton, and DropdownMenuItem implementations, their exports, obsolete wrapper-only test suite, and unused disabled/inverted CSS branches. Workspace test mocks now use the native selection API. Kept Widget layout/fullscreen/drag composition and specialized camera, iframe, syntax-preview, and repeat-action behavior because Tonic does not fully replace those contracts.
+
+New/Edit Macro menus now use renderToggle, display variable text, and route insertion through onChange for both mouse and keyboard activation. Regression cases cover replacing a selected command range through mouse and Enter activation. Removed additional Dropdown height/overflow settings; retained intentional upward and end alignment.
+
+GPT-6-Luna xhigh verified the real local workspace in Chromium 153: New/Edit Macro menus each exposed 26 items; at a 400px-high viewport they used 160px max-height with auto overflow and scrolled. Mouse and ArrowDown/Enter inserted the variable; Escape closed the menu. Tool policy exposed five items with viewport-based height, and camera placement remained top-start. No page errors; no resource mutation requests reported. These bounded checks do not close the older V3-T/FIX-003/FIX-004 or full R6 visual/performance gates. Final targeted ESLint: zero errors, nine warnings; Widget Stylint passed. Integrated frontend checkpoint: 78 suites / 507 tests passed; latest-source focused checkpoint follows separately.
+
+Follow-up: review of Luna's actual 1440x900 screenshot showed ModalBody clipping the Macro popup at the footer (menu computed bottom 734, clip at 633.5), so the last options were unreachable. Added Tonic `portalled` to the two Macro Dropdowns, keeping the default 360px max-height and auto overflow. Re-verification (Luna, Chromium 153): popup rendered outside the dialog (`menuInsideDialogDom: false`, `menuOutsideBodyAndFooter: true`), 26 items with `scrollHeight 1348` / `clientHeight 360`, last option `[zmax]` scrolled into view and inserted, `ArrowDown`+`Enter` inserted `%wait`, `Escape` closed the menu and returned focus inside the modal. Focused final-source suites passed (3 suites / 50 tests), Macro modals ESLint exited 0, no macro API mutations occurred.

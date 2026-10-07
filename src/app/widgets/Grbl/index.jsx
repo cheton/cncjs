@@ -1,12 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
+  Button,
+  Dropdown,
+  DropdownToggle,
   Space,
 } from '@tonic-ui/react';
 import _get from 'lodash/get';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import i18n from '@app/lib/i18n';
 import controller from '@app/lib/controller';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
@@ -23,6 +27,17 @@ import FeedOverride from './FeedOverride';
 import SpindleOverride from './SpindleOverride';
 import RapidOverride from './RapidOverride';
 import ControllerModal from './modals/ControllerModal';
+
+const widgetActionSx = {
+  alignSelf: 'stretch',
+  border: 0,
+  borderRadius: 0,
+  minHeight: 'auto',
+  backgroundColor: 'inherit',
+  color: 'inherit',
+  _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+  _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+};
 
 /**
  * @param {{
@@ -64,80 +79,81 @@ function GrblWidget({
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             {isReady && (
-              <Widget.Button
+              <Button
+                variant="ghost"
+                className={widgetStyles.widgetButton}
+                sx={widgetActionSx}
                 aria-label="Grbl controller info"
                 onClick={(event) => {
                   setIsControllerModalOpen(true);
                 }}
               >
                 <i className="fa fa-info" />
-              </Widget.Button>
+              </Button>
             )}
             {isReady && (
-              <Widget.DropdownButton
-                aria-label="Grbl commands"
-                toggle={<i className="fa fa-th-large" />}
-              >
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.write('?')}
-                >
-                  {i18n._('Status Report (?)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$C')}
-                >
-                  {i18n._('Check G-code Mode ($C)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.command('homing')}
-                >
-                  {i18n._('Homing ($H)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.command('unlock')}
-                >
-                  {i18n._('Kill Alarm Lock ($X)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.command('sleep')}
-                >
-                  {i18n._('Sleep ($SLP)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem divider />
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$')}
-                >
-                  {i18n._('Help ($)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$$')}
-                >
-                  {i18n._('Settings ($$)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$#')}
-                >
-                  {i18n._('View G-code Parameters ($#)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$G')}
-                >
-                  {i18n._('View G-code Parser State ($G)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$I')}
-                >
-                  {i18n._('View Build Info ($I)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem
-                  onSelect={() => controller.writeln('$N')}
-                >
-                  {i18n._('View Startup Blocks ($N)')}
-                </Widget.DropdownMenuItem>
-              </Widget.DropdownButton>
+              <Dropdown
+                style={{ display: 'flex', alignSelf: 'stretch' }}
+                items={[
+                  {
+                    label: i18n._('Status Report (?)'),
+                    action: () => controller.write('?'),
+                  },
+                  {
+                    label: i18n._('Check G-code Mode ($C)'),
+                    action: () => controller.writeln('$C'),
+                  },
+                  {
+                    label: i18n._('Homing ($H)'),
+                    action: () => controller.command('homing'),
+                  },
+                  {
+                    label: i18n._('Kill Alarm Lock ($X)'),
+                    action: () => controller.command('unlock'),
+                  },
+                  {
+                    label: i18n._('Sleep ($SLP)'),
+                    action: () => controller.command('sleep'),
+                  },
+                  { type: 'divider' },
+                  {
+                    label: i18n._('Help ($)'),
+                    action: () => controller.writeln('$'),
+                  },
+                  {
+                    label: i18n._('Settings ($$)'),
+                    action: () => controller.writeln('$$'),
+                  },
+                  {
+                    label: i18n._('View G-code Parameters ($#)'),
+                    action: () => controller.writeln('$#'),
+                  },
+                  {
+                    label: i18n._('View G-code Parser State ($G)'),
+                    action: () => controller.writeln('$G'),
+                  },
+                  {
+                    label: i18n._('View Build Info ($I)'),
+                    action: () => controller.writeln('$I'),
+                  },
+                  {
+                    label: i18n._('View Startup Blocks ($N)'),
+                    action: () => controller.writeln('$N'),
+                  },
+                ]}
+                onChange={(item) => item.action?.()}
+                renderToggle={() => (
+                  <DropdownToggle aria-label="Grbl commands" className={widgetStyles.widgetButton}>
+                    <i className="fa fa-th-large" />
+                  </DropdownToggle>
+                )}
+              />
             )}
             {isReady && (
-              <Widget.Button
+              <Button
+                variant="ghost"
+                className={widgetStyles.widgetButton}
+                sx={widgetActionSx}
                 aria-label={isCollapsed ? 'Expand' : 'Collapse'}
                 aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
@@ -148,23 +164,60 @@ function GrblWidget({
                 <FontAwesomeIcon icon="chevron-down" fixedWidth />}
                 {!isCollapsed &&
                 <FontAwesomeIcon icon="chevron-up" fixedWidth />}
-              </Widget.Button>
+              </Button>
             )}
             {isFullscreen && (
-              <Widget.Button
+              <Button
+                variant="ghost"
+                className={widgetStyles.widgetButton}
+                sx={widgetActionSx}
                 title={i18n._('Exit Full Screen')}
                 onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
               >
                 <FontAwesomeIcon icon="compress" fixedWidth />
-              </Widget.Button>
+              </Button>
             )}
-            <Widget.DropdownButton
-              aria-label="More options"
-              title={i18n._('More')}
-              toggle={(
-                <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
-              )}
-              onSelect={(eventKey) => {
+            <Dropdown
+              style={{ display: 'flex', alignSelf: 'stretch' }}
+              items={[
+                {
+                  value: 'fullscreen',
+                  label: (
+                    <>
+                      {!isFullscreen && (
+                        <FontAwesomeIcon icon="expand" fixedWidth />
+                      )}
+                      {isFullscreen && (
+                        <FontAwesomeIcon icon="compress" fixedWidth />
+                      )}
+                      <Space width="2x" />
+                      {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
+                    </>
+                  ),
+                  props: { disabled: !isReady },
+                },
+                {
+                  value: 'fork',
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon="code-branch" fixedWidth />
+                      <Space width="2x" />
+                      {i18n._('Fork Widget')}
+                    </>
+                  ),
+                },
+                {
+                  value: 'remove',
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon="times" fixedWidth />
+                      <Space width="2x" />
+                      {i18n._('Remove Widget')}
+                    </>
+                  ),
+                },
+              ]}
+              onChange={({ value: eventKey }) => {
                 if (eventKey === 'fullscreen') {
                   onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                 } else if (eventKey === 'fork') {
@@ -173,28 +226,12 @@ function GrblWidget({
                   onRemove();
                 }
               }}
-            >
-              <Widget.DropdownMenuItem eventKey="fullscreen" disabled={!isReady}>
-                {!isFullscreen && (
-                  <FontAwesomeIcon icon="expand" fixedWidth />
-                )}
-                {isFullscreen && (
-                  <FontAwesomeIcon icon="compress" fixedWidth />
-                )}
-                <Space width="2x" />
-                {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="fork">
-                <FontAwesomeIcon icon="code-branch" fixedWidth />
-                <Space width="2x" />
-                {i18n._('Fork Widget')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="remove">
-                <FontAwesomeIcon icon="times" fixedWidth />
-                <Space width="2x" />
-                {i18n._('Remove Widget')}
-              </Widget.DropdownMenuItem>
-            </Widget.DropdownButton>
+              renderToggle={() => (
+                <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
+                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                </DropdownToggle>
+              )}
+            />
           </Widget.Controls>
         </Widget.Header>
         {isReady && (

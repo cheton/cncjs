@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Space } from '@tonic-ui/react';
+import { Button, Dropdown, DropdownToggle, Space } from '@tonic-ui/react';
 import cx from 'classnames';
 import { ensureArray } from 'ensure-type';
 import get from 'lodash/get';
@@ -8,6 +8,7 @@ import map from 'lodash/map';
 import mapValues from 'lodash/mapValues';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import combokeys from '@app/lib/combokeys';
 import controller from '@app/lib/controller';
 import { preventDefault } from '@app/lib/dom-events';
@@ -53,6 +54,24 @@ import {
   getJogDistance,
   shouldHandleJogEvent,
 } from './state';
+
+const widgetActionSx = {
+  alignSelf: 'stretch',
+  border: 0,
+  borderRadius: 0,
+  minHeight: 'auto',
+  backgroundColor: 'inherit',
+  color: 'inherit',
+  _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+  _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+};
+
+const widgetSelectedActionSx = {
+  backgroundColor: 'actions.selected',
+  color: 'text.primary',
+  _hover: { backgroundColor: 'actions.selectedHovered', color: 'text.primary' },
+  _disabled: { backgroundColor: 'actions.selected', color: 'text.primary', opacity: 0.4 },
+};
 
 const noop = () => {};
 
@@ -434,36 +453,59 @@ export function AxesWidgetContent({
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             <KeypadOverlay show={displayState.canClick && displayState.jog.keypad}>
-              <Widget.Button
+              <Button
+                variant="ghost" className={widgetStyles.widgetButton} sx={{ ...widgetActionSx, ...(displayState.jog.keypad && widgetSelectedActionSx) }}
                 aria-label="Toggle keypad jogging" title={i18n._('Keypad jogging')} onClick={onToggleKeypadJogging}
-                inverted={displayState.jog.keypad} disabled={!displayState.canClick}
+                aria-pressed={displayState.jog.keypad} disabled={!displayState.canClick}
               >
                 <FontAwesomeIcon icon="keyboard" fixedWidth />
-              </Widget.Button>
+              </Button>
             </KeypadOverlay>
-            <Widget.Button
+            <Button
+              variant="ghost" className={widgetStyles.widgetButton} sx={{ ...widgetActionSx, ...(!displayState.mdi.disabled && widgetSelectedActionSx) }}
               aria-label="Toggle manual data input mode" title={i18n._('Manual Data Input')} onClick={onToggleMDIMode}
-              inverted={!displayState.mdi.disabled}
+              aria-pressed={!displayState.mdi.disabled}
             >
               <Space width={8} />{i18n._('MDI')}<Space width={8} />
-            </Widget.Button>
-            <Widget.Button
+            </Button>
+            <Button
+              variant="ghost"
+              className={widgetStyles.widgetButton}
+              sx={widgetActionSx}
               aria-label={isCollapsed ? 'Expand' : 'Collapse'} aria-expanded={!isCollapsed} disabled={isFullscreen}
               title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
             >
               {isCollapsed && <FontAwesomeIcon icon="chevron-down" fixedWidth />}
               {!isCollapsed && <FontAwesomeIcon icon="chevron-up" fixedWidth />}
-            </Widget.Button>
-            {isFullscreen && <Widget.Button title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}><FontAwesomeIcon icon="compress" fixedWidth /></Widget.Button>}
-            <Widget.DropdownButton
-              aria-label="More options" title={i18n._('More')} toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
-              onSelect={onMoreOptionsSelect}
-            >
-              <Widget.DropdownMenuItem eventKey="settings"><FontAwesomeIcon icon="cog" fixedWidth /><Space width={8} />{i18n._('Settings')}</Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="fullscreen"><FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth /><Space width={8} />{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="fork"><FontAwesomeIcon icon="code-branch" fixedWidth /><Space width={8} />{i18n._('Fork Widget')}</Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="remove"><FontAwesomeIcon icon="times" fixedWidth /><Space width={8} />{i18n._('Remove Widget')}</Widget.DropdownMenuItem>
-            </Widget.DropdownButton>
+            </Button>
+            {isFullscreen && <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}><FontAwesomeIcon icon="compress" fixedWidth /></Button>}
+            <Dropdown
+              style={{ display: 'flex', alignSelf: 'stretch' }}
+              items={[
+                {
+                  value: 'settings',
+                  label: (<><FontAwesomeIcon icon="cog" fixedWidth /><Space width={8} />{i18n._('Settings')}</>),
+                },
+                {
+                  value: 'fullscreen',
+                  label: (<><FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth /><Space width={8} />{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</>),
+                },
+                {
+                  value: 'fork',
+                  label: (<><FontAwesomeIcon icon="code-branch" fixedWidth /><Space width={8} />{i18n._('Fork Widget')}</>),
+                },
+                {
+                  value: 'remove',
+                  label: (<><FontAwesomeIcon icon="times" fixedWidth /><Space width={8} />{i18n._('Remove Widget')}</>),
+                },
+              ]}
+              onChange={(item) => onMoreOptionsSelect(item.value)}
+              renderToggle={() => (
+                <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
+                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                </DropdownToggle>
+              )}
+            />
           </Widget.Controls>
         </Widget.Header>
         <Widget.Content aria-hidden={isCollapsed} className={cx(styles['widget-content'], { [styles.hidden]: isCollapsed })}>

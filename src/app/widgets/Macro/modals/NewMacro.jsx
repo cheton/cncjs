@@ -29,7 +29,7 @@ import { useCreateMacroMutation } from '@app/queries/macros';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 import variables from '../shared/variables';
 
-const mapMacroVariablesToMenuItems = (variables, onInsert) => ensureArray(variables).flatMap((x) => {
+const mapMacroVariablesToMenuItems = variables => ensureArray(variables).flatMap((x) => {
   if (x.role === 'group') {
     return [
       {
@@ -39,12 +39,12 @@ const mapMacroVariablesToMenuItems = (variables, onInsert) => ensureArray(variab
           <MenuGroup title={x.title} />
         ),
       },
-      ...mapMacroVariablesToMenuItems(x.children, onInsert),
+      ...mapMacroVariablesToMenuItems(x.children),
     ];
   }
 
   if (x.role === 'menuitem') {
-    return [{ value: x.value, props: { px: '6x', onClick: () => onInsert(x.value) } }];
+    return [{ value: x.value, content: x.value, props: { px: '6x' } }];
   }
 
   return [];
@@ -149,16 +149,18 @@ function NewMacro({
                           </Box>
                           <Box>
                             <Dropdown
-                              items={mapMacroVariablesToMenuItems(variables, insertAtCaret)}
-                              slotProps={{ content: { maxHeight: 180, overflowY: 'auto' } }}
+                              portalled
+                              items={mapMacroVariablesToMenuItems(variables)}
+                              onChange={item => insertAtCaret(item.value)}
                               renderItem={item => item?.content}
-                            >
-                              <DropdownButton variant="ghost">
-                                <FontAwesomeIcon icon="plus" fixedWidth />
-                                <Space width={8} />
-                                {i18n._('Macro Variables')}
-                              </DropdownButton>
-                            </Dropdown>
+                              renderToggle={() => (
+                                <DropdownButton variant="ghost">
+                                  <FontAwesomeIcon icon="plus" fixedWidth />
+                                  <Space width={8} />
+                                  {i18n._('Macro Variables')}
+                                </DropdownButton>
+                              )}
+                            />
                           </Box>
                         </Flex>
                         <FormTextarea

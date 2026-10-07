@@ -1,9 +1,13 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  Button,
+  Dropdown,
+  DropdownToggle,
   Space,
 } from '@tonic-ui/react';
 import React, { useState } from 'react';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import i18n from '@app/lib/i18n';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import WidgetConfigConsumer from '@app/widgets/shared/WidgetConfigConsumer';
@@ -57,75 +61,172 @@ function CustomWidgetBody({
           {title}
         </Widget.Title>
         <Widget.Controls className={sortable.filterClassName}>
-          <Widget.Button
+          <Button
+            className={widgetStyles.widgetButton}
+            sx={{
+              border: 0,
+              minHeight: 0,
+              borderRadius: 0,
+              backgroundColor: 'inherit',
+              color: 'inherit',
+              _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _active: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+            }}
             aria-label={i18n._(disabled ? 'Enable widget' : 'Disable widget')}
             title={disabled ? i18n._('Enable') : i18n._('Disable')}
-            type="default"
             onClick={() => config.set('disabled', !disabled)}
           >
             <FontAwesomeIcon
               icon={disabled ? 'toggle-off' : 'toggle-on'}
               fixedWidth
             />
-          </Widget.Button>
-          <Widget.Button
+          </Button>
+          <Button
+            className={widgetStyles.widgetButton}
+            sx={{
+              border: 0,
+              minHeight: 0,
+              borderRadius: 0,
+              backgroundColor: 'inherit',
+              color: 'inherit',
+              _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _active: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+            }}
             aria-label={i18n._('Refresh content')}
             disabled={disabled}
+            onClickCapture={(event) => {
+              if (disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            }}
             title={i18n._('Refresh')}
-            onClick={() => emitter.emit('refresh', true)}
+            onClick={(event) => {
+              if (disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+              }
+              emitter.emit('refresh', true);
+            }}
           >
             <FontAwesomeIcon icon="redo-alt" fixedWidth />
-          </Widget.Button>
-          <Widget.Button
+          </Button>
+          <Button
+            className={widgetStyles.widgetButton}
+            sx={{
+              border: 0,
+              minHeight: 0,
+              borderRadius: 0,
+              backgroundColor: 'inherit',
+              color: 'inherit',
+              _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _active: { backgroundColor: 'actions.hovered', color: 'inherit' },
+              _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+            }}
             aria-label={i18n._(isCollapsed ? 'Expand' : 'Collapse')}
             aria-expanded={!isCollapsed}
             disabled={isFullscreen}
+            onClickCapture={(event) => {
+              if (isFullscreen) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+            }}
             title={i18n._(isCollapsed ? 'Expand' : 'Collapse')}
-            onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
+            onClick={(event) => {
+              if (isFullscreen) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+              }
+              onViewChange(isCollapsed ? 'normal' : 'collapsed');
+            }}
           >
             <FontAwesomeIcon
               icon={isCollapsed ? 'chevron-down' : 'chevron-up'}
               fixedWidth
             />
-          </Widget.Button>
+          </Button>
           {isFullscreen && (
-            <Widget.Button
+            <Button
+              className={widgetStyles.widgetButton}
+              sx={{
+                border: 0,
+                minHeight: 0,
+                borderRadius: 0,
+                backgroundColor: 'inherit',
+                color: 'inherit',
+                _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+                _active: { backgroundColor: 'actions.hovered', color: 'inherit' },
+                _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+              }}
               title={i18n._('Exit Full Screen')}
               onClick={() => onViewChange('normal')}
             >
               <FontAwesomeIcon icon="compress" fixedWidth />
-            </Widget.Button>
+            </Button>
           )}
-          <Widget.DropdownButton
-            aria-label={i18n._('More options')}
-            title={i18n._('More')}
-            toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
-            onSelect={select}
-          >
-            <Widget.DropdownMenuItem eventKey="settings">
-              <FontAwesomeIcon icon="cog" fixedWidth />
-              <Space width={8} />
-              {i18n._('Settings')}
-            </Widget.DropdownMenuItem>
-            <Widget.DropdownMenuItem eventKey="fullscreen">
-              <FontAwesomeIcon
-                icon={isFullscreen ? 'compress' : 'expand'}
-                fixedWidth
-              />
-              <Space width={8} />
-              {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
-            </Widget.DropdownMenuItem>
-            <Widget.DropdownMenuItem eventKey="fork">
-              <FontAwesomeIcon icon="code-branch" fixedWidth />
-              <Space width={8} />
-              {i18n._('Fork Widget')}
-            </Widget.DropdownMenuItem>
-            <Widget.DropdownMenuItem eventKey="remove">
-              <FontAwesomeIcon icon="times" fixedWidth />
-              <Space width={8} />
-              {i18n._('Remove Widget')}
-            </Widget.DropdownMenuItem>
-          </Widget.DropdownButton>
+          <Dropdown
+            style={{ display: 'flex', alignSelf: 'stretch' }}
+            items={[
+              {
+                value: 'settings',
+                label: (
+                  <>
+                    <FontAwesomeIcon icon="cog" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Settings')}
+                  </>
+                ),
+              },
+              {
+                value: 'fullscreen',
+                label: (
+                  <>
+                    <FontAwesomeIcon
+                      icon={isFullscreen ? 'compress' : 'expand'}
+                      fixedWidth
+                    />
+                    <Space width={8} />
+                    {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
+                  </>
+                ),
+              },
+              {
+                value: 'fork',
+                label: (
+                  <>
+                    <FontAwesomeIcon icon="code-branch" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Fork Widget')}
+                  </>
+                ),
+              },
+              {
+                value: 'remove',
+                label: (
+                  <>
+                    <FontAwesomeIcon icon="times" fixedWidth />
+                    <Space width={8} />
+                    {i18n._('Remove Widget')}
+                  </>
+                ),
+              },
+            ]}
+            onChange={({ value }) => select(value)}
+            renderToggle={() => (
+              <DropdownToggle
+                className={widgetStyles.widgetButton}
+                aria-label={i18n._('More options')}
+                title={i18n._('More')}
+              >
+                <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+              </DropdownToggle>
+            )}
+          />
         </Widget.Controls>
       </Widget.Header>
       <Widget.Content

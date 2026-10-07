@@ -261,8 +261,6 @@ function Tool({
                         >TLO
                         </Button>
                         <Dropdown
-                          placement="bottom-start"
-                          slotProps={{ content: { maxHeight: '180px', overflow: 'auto' } }}
                           items={variables.map(variable => (typeof variable === 'object' ? (
                             {
                               value: variable.text,

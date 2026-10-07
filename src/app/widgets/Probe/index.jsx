@@ -1,7 +1,14 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Box, Space } from '@tonic-ui/react';
+import {
+  Box,
+  Button,
+  Dropdown,
+  DropdownToggle,
+  Space,
+} from '@tonic-ui/react';
 import React from 'react';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import i18n from '@app/lib/i18n';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import Probe from './Probe';
@@ -46,34 +53,69 @@ function ProbeWidget({
             {i18n._('Probe')}
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
-            <Widget.Button
+            <Button
+              className={widgetStyles.widgetButton}
+              sx={{
+                border: 0,
+                minHeight: 0,
+                borderRadius: 0,
+                backgroundColor: 'inherit',
+                color: 'inherit',
+                _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+                _active: { backgroundColor: 'actions.hovered', color: 'inherit' },
+                _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+              }}
               aria-label={i18n._(isCollapsed ? 'Expand' : 'Collapse')}
               aria-expanded={!isCollapsed}
               disabled={isFullscreen}
+              onClickCapture={(event) => {
+                if (isFullscreen) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }
+              }}
               title={i18n._(isCollapsed ? 'Expand' : 'Collapse')}
-              onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
+              onClick={(event) => {
+                if (isFullscreen) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+                }
+                onViewChange(isCollapsed ? 'normal' : 'collapsed');
+              }}
             >
               <FontAwesomeIcon
                 icon={isCollapsed ? 'chevron-down' : 'chevron-up'}
                 fixedWidth
               />
-            </Widget.Button>
-            <Widget.DropdownButton
-              aria-label={i18n._('More options')}
-              title={i18n._('More')}
-              toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
-              onSelect={select}
-            >
-              <Widget.DropdownMenuItem eventKey="fullscreen">
-                {i18n._('Full Screen')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="fork">
-                {i18n._('Fork Widget')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="remove">
-                {i18n._('Remove Widget')}
-              </Widget.DropdownMenuItem>
-            </Widget.DropdownButton>
+            </Button>
+            <Dropdown
+              style={{ display: 'flex', alignSelf: 'stretch' }}
+              items={[
+                {
+                  value: 'fullscreen',
+                  label: i18n._('Full Screen'),
+                },
+                {
+                  value: 'fork',
+                  label: i18n._('Fork Widget'),
+                },
+                {
+                  value: 'remove',
+                  label: i18n._('Remove Widget'),
+                },
+              ]}
+              onChange={({ value }) => select(value)}
+              renderToggle={() => (
+                <DropdownToggle
+                  className={widgetStyles.widgetButton}
+                  aria-label={i18n._('More options')}
+                  title={i18n._('More')}
+                >
+                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                </DropdownToggle>
+              )}
+            />
           </Widget.Controls>
         </Widget.Header>
         <Widget.Content

@@ -1,7 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Box, Space } from '@tonic-ui/react';
+import { Box, Button, Dropdown, DropdownToggle, Space } from '@tonic-ui/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import { SMOOTHIE } from '@app/constants/controller';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
@@ -9,6 +10,17 @@ import WidgetConfig from '@app/widgets/shared/WidgetConfig';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
 import Controller from './Controller';
 import Smoothie from './Smoothie';
+
+const widgetActionSx = {
+  alignSelf: 'stretch',
+  border: 0,
+  borderRadius: 0,
+  minHeight: 'auto',
+  backgroundColor: 'inherit',
+  color: 'inherit',
+  _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+  _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+};
 
 /**
  * @param {{
@@ -108,35 +120,53 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             {isReady && (
-              <Widget.Button aria-label="Smoothie controller info" onClick={() => setIsControllerModalOpen(true)}>
+              <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} aria-label="Smoothie controller info" onClick={() => setIsControllerModalOpen(true)}>
                 <i aria-hidden="true" className="fa fa-info" />
-              </Widget.Button>
+              </Button>
             )}
             {isReady && (
-              <Widget.DropdownButton aria-label="Smoothie commands" toggle={<i aria-hidden="true" className="fa fa-th-large" />}>
-                <Widget.DropdownMenuItem onSelect={() => controller.write('?')}>
-                  {i18n._('Status Report (?)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem onSelect={() => controller.command('homing')}>
-                  {i18n._('Homing ($H)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem onSelect={() => controller.command('unlock')}>
-                  {i18n._('Kill Alarm Lock ($X)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem divider />
-                <Widget.DropdownMenuItem onSelect={() => controller.writeln('help')}>
-                  {i18n._('Help')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem onSelect={() => controller.writeln('$#')}>
-                  {i18n._('View G-code Parameters ($#)')}
-                </Widget.DropdownMenuItem>
-                <Widget.DropdownMenuItem onSelect={() => controller.writeln('$G')}>
-                  {i18n._('View G-code Parser State ($G)')}
-                </Widget.DropdownMenuItem>
-              </Widget.DropdownButton>
+              <Dropdown
+                style={{ display: 'flex', alignSelf: 'stretch' }}
+                items={[
+                  {
+                    label: i18n._('Status Report (?)'),
+                    action: () => controller.write('?'),
+                  },
+                  {
+                    label: i18n._('Homing ($H)'),
+                    action: () => controller.command('homing'),
+                  },
+                  {
+                    label: i18n._('Kill Alarm Lock ($X)'),
+                    action: () => controller.command('unlock'),
+                  },
+                  { type: 'divider' },
+                  {
+                    label: i18n._('Help'),
+                    action: () => controller.writeln('help'),
+                  },
+                  {
+                    label: i18n._('View G-code Parameters ($#)'),
+                    action: () => controller.writeln('$#'),
+                  },
+                  {
+                    label: i18n._('View G-code Parser State ($G)'),
+                    action: () => controller.writeln('$G'),
+                  },
+                ]}
+                onChange={(item) => item.action?.()}
+                renderToggle={() => (
+                  <DropdownToggle aria-label="Smoothie commands" className={widgetStyles.widgetButton}>
+                    <i aria-hidden="true" className="fa fa-th-large" />
+                  </DropdownToggle>
+                )}
+              />
             )}
             {isReady && (
-              <Widget.Button
+              <Button
+                variant="ghost"
+                className={widgetStyles.widgetButton}
+                sx={widgetActionSx}
                 aria-label={isCollapsed ? 'Expand' : 'Collapse'}
                 aria-expanded={!isCollapsed}
                 disabled={isFullscreen}
@@ -144,18 +174,49 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                 onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
               >
                 <FontAwesomeIcon icon={isCollapsed ? 'chevron-down' : 'chevron-up'} fixedWidth />
-              </Widget.Button>
+              </Button>
             )}
             {isFullscreen && (
-              <Widget.Button title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}>
+              <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}>
                 <FontAwesomeIcon icon="compress" fixedWidth />
-              </Widget.Button>
+              </Button>
             )}
-            <Widget.DropdownButton
-              aria-label="More options"
-              title={i18n._('More')}
-              toggle={<FontAwesomeIcon icon="ellipsis-v" fixedWidth />}
-              onSelect={(eventKey) => {
+            <Dropdown
+              style={{ display: 'flex', alignSelf: 'stretch' }}
+              items={[
+                {
+                  value: 'fullscreen',
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth />
+                      <Space width="2x" />
+                      {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
+                    </>
+                  ),
+                  props: { disabled: !isReady },
+                },
+                {
+                  value: 'fork',
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon="code-branch" fixedWidth />
+                      <Space width="2x" />
+                      {i18n._('Fork Widget')}
+                    </>
+                  ),
+                },
+                {
+                  value: 'remove',
+                  label: (
+                    <>
+                      <FontAwesomeIcon icon="times" fixedWidth />
+                      <Space width="2x" />
+                      {i18n._('Remove Widget')}
+                    </>
+                  ),
+                },
+              ]}
+              onChange={({ value: eventKey }) => {
                 if (eventKey === 'fullscreen') {
                   onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                 } else if (eventKey === 'fork') {
@@ -164,23 +225,12 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                   onRemove();
                 }
               }}
-            >
-              <Widget.DropdownMenuItem eventKey="fullscreen" disabled={!isReady}>
-                <FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth />
-                <Space width="2x" />
-                {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="fork">
-                <FontAwesomeIcon icon="code-branch" fixedWidth />
-                <Space width="2x" />
-                {i18n._('Fork Widget')}
-              </Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="remove">
-                <FontAwesomeIcon icon="times" fixedWidth />
-                <Space width="2x" />
-                {i18n._('Remove Widget')}
-              </Widget.DropdownMenuItem>
-            </Widget.DropdownButton>
+              renderToggle={() => (
+                <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
+                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                </DropdownToggle>
+              )}
+            />
           </Widget.Controls>
         </Widget.Header>
         {isReady && (

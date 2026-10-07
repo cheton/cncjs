@@ -22,11 +22,11 @@ Latest source follow-up (2026-10-06): **V3-GV completed and user accepted for co
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| Validated source | This local commit records the current worktree snapshot; check actual HEAD with Git. No browser visual pass is claimed. |
-| 工作樹 | Current delivery includes V3-T/V3-DS, V3-DS-F, FIX-003, FIX-004, and two new task files. Visual confirmation remains pending. |
-| Delivery | User authorized one local commit for the current work; no push is authorized or requested. |
-| Active task | V3-T + FIX-003 + FIX-004 implemented; visual confirmation pending. V3-DS/V3-DS-F implementation and tests are complete. The local dev app served the sign-in page, so no authenticated browser pass is claimed. |
-| 最近完成 | V3-DS：Connection serial port→Autocomplete、baud→Dropdown；3 個 native Select→Dropdown；Menu→Dropdown 取代。V3-DS-F 修正 v3 breakpoint mismatch、MiniNav hover flyout、Header FocusLock；unused root `react-focus-lock` dependency removed per user request (`@tonic-ui/react` retains it transitively at 2.13.7). FIX-004 improves Axes header/keypad spacing. Frontend 79/508; lint exits 0. |
+| Validated source | `83dcb3d7` is pushed to `origin/feat/tonic-ui-v2-migration`; the macro-dropdown follow-up below is uncommitted. |
+| 工作樹 | Uncommitted V3-UI-C direct Tonic UI action migration plus Dropdown default-sizing cleanup. Integrated frontend 78/507; focused final-source 3 suites/50 tests; targeted ESLint 0 errors/9 warnings; Widget Stylint clean. |
+| Delivery | User authorized commit and push of these follow-ups to `origin/feat/tonic-ui-v2-migration`. Check Git for the resulting commit and push state. |
+| Active task | V3-UI-C completed with bounded GPT-6-Luna xhigh browser evidence; V3-T, FIX-003, and FIX-004 remain in_progress on their pre-existing visual gates. No prior authenticated browser pass is inferred. |
+| 最近完成 | V3-UI-C：15 個 widget 動作控制改為原生 Tonic Button／Dropdown，刪除本地 Widget Button/DropdownButton/DropdownMenuItem、exports、舊封裝測試與無用 CSS；保留 Widget 版面殼與 camera/iframe/preview/repeat 行為。Macro 變數選單改用 `renderToggle`／`onChange`（滑鼠與鍵盤皆可插入）並加 `portalled` 修正 Modal 裁切。Luna 以 Chromium 153 實測：26 項選單、360px 預設高度可捲動、入口不被 ModalBody 裁切、末項可捲到並插入、Escape 關閉且焦點回到 modal、無頁面錯誤與 API 寫入。 |
 | 下一步推薦 | 使用者目視確認：1439px 側欄收合、workspace primary/secondary pane scrollbar、MiniNav hover flyout、Connection refresh spacing、quiet light theme，以及 Axes keypad/header layout；之後關閉對應 ledger gates，再回 icon migration I1（I1–I6 延後清單）。 |
 | Open gaps | V3-T, FIX-003, FIX-004 visual checks and V3-DS-F user confirmation remain pending; local browser reached sign-in only. Retain inherited 768-pane clipping, disabled/static dark SVG contrast, headless/replay limitations, and no full R6 performance/hardware rerun. |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |

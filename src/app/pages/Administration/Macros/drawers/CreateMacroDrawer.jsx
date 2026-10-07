@@ -6,9 +6,9 @@ import {
   DrawerBody,
   DrawerFooter,
   DrawerOverlay,
-  LinkButton,
   Dropdown,
-  MenuToggle,
+  DropdownToggle,
+  LinkButton,
   MenuGroup,
   Flex,
   Text,
@@ -108,8 +108,6 @@ const CreateMacroDrawer = ({
                 rows="10"
                 labelAction={(
                   <Dropdown
-                    placement="bottom-end"
-                    slotProps={{ content: { maxHeight: '50vh', overflow: 'auto' } }}
                     items={MACRO_VARIABLE_EXAMPLES.flatMap(group => [
                       {
                         value: group.title,
@@ -145,13 +143,13 @@ const CreateMacroDrawer = ({
                     ])}
                     renderItem={item => item?.content}
                     renderToggle={() => (
-                      <MenuToggle>
-                        {({ getMenuToggleProps }) => (
-                          <LinkButton {...getMenuToggleProps()}>
+                      <DropdownToggle>
+                        {({ getToggleProps }) => (
+                          <LinkButton {...getToggleProps()}>
                             {i18n._('Select variables')}
                           </LinkButton>
                         )}
-                      </MenuToggle>
+                      </DropdownToggle>
                     )}
                   />
                 )}

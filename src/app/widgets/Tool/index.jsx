@@ -1,4 +1,4 @@
-import { Space, Spinner } from '@tonic-ui/react';
+import { Button, Dropdown, DropdownToggle, Space, Spinner } from '@tonic-ui/react';
 import classNames from 'classnames';
 import { ensureNumber, ensureString } from 'ensure-type';
 import produce from 'immer';
@@ -8,6 +8,7 @@ import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Widget from '@app/components/Widget';
+import widgetStyles from '@app/components/Widget/index.styl';
 import {
   IMPERIAL_UNITS,
   METRIC_UNITS,
@@ -27,6 +28,17 @@ import Tool from './Tool';
 import { TOOL_CHANGE_POLICY_IGNORE_M6_COMMANDS } from './constants';
 import styles from './index.styl';
 import { useSaveToolConfigMutation, useToolConfigQuery } from './queries';
+
+const widgetActionSx = {
+  alignSelf: 'stretch',
+  border: 0,
+  borderRadius: 0,
+  minHeight: 'auto',
+  backgroundColor: 'inherit',
+  color: 'inherit',
+  _hover: { backgroundColor: 'actions.hovered', color: 'inherit' },
+  _disabled: { backgroundColor: 'inherit', color: 'text.disabled' },
+};
 
 export const createToolConfigDraft = (tool = {}, units = METRIC_UNITS) => ({
   toolChangePolicy: ensureNumber(get(tool, 'toolChangePolicy', TOOL_CHANGE_POLICY_IGNORE_M6_COMMANDS)),
@@ -232,18 +244,31 @@ function ToolWidget({
             {i18n._('Tool')}
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
-            <Widget.Button aria-label={i18n._('Refresh tool configuration')} title={i18n._('Refresh')} onClick={refresh}>
+            <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} aria-label={i18n._('Refresh tool configuration')} title={i18n._('Refresh')} onClick={refresh}>
               {query.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <i aria-hidden="true" className="fa fa-refresh" />}
-            </Widget.Button>
-            <Widget.Button
+            </Button>
+            <Button
+              variant="ghost"
+              className={widgetStyles.widgetButton}
+              sx={widgetActionSx}
               aria-label={i18n._(isCollapsed ? 'Expand' : 'Collapse')} aria-expanded={!isCollapsed} disabled={isFullscreen}
               title={i18n._(isCollapsed ? 'Expand' : 'Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
             >
               <i aria-hidden="true" className={classNames('fa', isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up')} />
-            </Widget.Button>
-            <Widget.DropdownButton
-              aria-label={i18n._('More options')} title={i18n._('More')} toggle={<i aria-hidden="true" className="fa fa-ellipsis-v" />}
-              onSelect={key => {
+            </Button>
+            <Dropdown
+              style={{ display: 'flex', alignSelf: 'stretch' }}
+              items={[
+                {
+                  value: 'fullscreen',
+                  label: isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen'),
+                },
+                {
+                  value: 'remove',
+                  label: i18n._('Remove Widget'),
+                },
+              ]}
+              onChange={({ value: key }) => {
                 if (key === 'fullscreen') {
                   onViewChange(isFullscreen ? 'normal' : 'fullscreen');
                 }
@@ -251,10 +276,12 @@ function ToolWidget({
                   onRemove();
                 }
               }}
-            >
-              <Widget.DropdownMenuItem eventKey="fullscreen">{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</Widget.DropdownMenuItem>
-              <Widget.DropdownMenuItem eventKey="remove">{i18n._('Remove Widget')}</Widget.DropdownMenuItem>
-            </Widget.DropdownButton>
+              renderToggle={() => (
+                <DropdownToggle aria-label={i18n._('More options')} title={i18n._('More')} className={widgetStyles.widgetButton}>
+                  <i aria-hidden="true" className="fa fa-ellipsis-v" />
+                </DropdownToggle>
+              )}
+            />
           </Widget.Controls>
         </Widget.Header>
         <Widget.Content aria-hidden={isCollapsed} className={classNames(styles['widget-content'], { [styles.hidden]: isCollapsed })}>

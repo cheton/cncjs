@@ -82,41 +82,6 @@ const mockAxios = {
 jest.mock('@app/components/Widget', () => {
   const React = require('react');
   const Primitive = ({ children, ...props }) => React.createElement('div', props, children);
-  const Button = ({ children, ...props }) => React.createElement(
-    'button',
-    { type: 'button', ...props },
-    children
-  );
-  const DropdownMenuItem = ({ children, onSelect, eventKey, ...props }) => React.createElement(
-    'button',
-    {
-      type: 'button',
-      'data-event-key': eventKey,
-      onClick: onSelect,
-      ...props,
-    },
-    children
-  );
-  const DropdownButton = ({ children, toggle, onSelect, 'aria-label': ariaLabel, ...props }) => (
-    React.createElement(
-      'div',
-      { 'data-widget-dropdown': true, ...props },
-      React.createElement(
-        'button',
-        { type: 'button', 'aria-label': ariaLabel || 'More options' },
-        toggle
-      ),
-      React.Children.map(children, child => {
-        if (!React.isValidElement(child)) {
-          return child;
-        }
-
-        return React.cloneElement(child, {
-          onSelect: () => onSelect?.(child.props.eventKey),
-        });
-      })
-    )
-  );
   const Widget = ({ children, fullscreen, ...props }) => React.createElement(
     'section',
     {
@@ -137,9 +102,6 @@ jest.mock('@app/components/Widget', () => {
   Widget.Sortable = Primitive;
   Widget.Title = Primitive;
   Widget.Controls = Primitive;
-  Widget.Button = Button;
-  Widget.DropdownButton = DropdownButton;
-  Widget.DropdownMenuItem = DropdownMenuItem;
   return Widget;
 });
 
@@ -166,7 +128,7 @@ jest.mock('@tonic-ui/react', () => {
     MenuButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     MenuItem: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     MenuList: Primitive,
-    Dropdown: ({ renderToggle, items = [], renderItem }) => {
+    Dropdown: ({ renderToggle, items = [], renderItem, onChange }) => {
       const render = renderItem || ((item) => item?.content ?? item?.label ?? null);
       const toggle = (typeof renderToggle === 'function')
         ? renderToggle({ value: null, items, renderItem: render })
@@ -180,12 +142,21 @@ jest.mock('@tonic-ui/react', () => {
           .filter(item => item && item.type !== 'divider')
           .map((item, index) => React.createElement(
             'button',
-            { key: item?.value ?? index, type: 'button', onClick: item?.props?.onClick },
+            {
+              key: item?.value ?? index,
+              type: 'button',
+              disabled: item?.props?.disabled,
+              onClick: (event) => {
+                item?.props?.onClick?.(event);
+                onChange?.(item);
+              },
+            },
             render(item)
           ))
       );
     },
     DropdownButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
+    DropdownToggle: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
   };
 });
 

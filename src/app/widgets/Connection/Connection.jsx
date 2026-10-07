@@ -1204,7 +1204,6 @@ function SerialBaudSelector({ id, label, options, value, disabled, placeholder, 
           ? <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>
           : renderItems(items)
       )}
-      slotProps={{ content: { maxHeight: 200, overflowY: 'auto' } }}
       onChange={item => onSelect(item?.value ?? null)}
     />
   );

@@ -391,7 +391,6 @@ function SecondaryToolbar({
         {machineProfiles.length > 0 && (
           <Dropdown
             placement="top-end"
-            slotProps={{ content: { maxHeight: 320, overflowY: 'auto' } }}
             items={[
               {
                 value: 'heading',
