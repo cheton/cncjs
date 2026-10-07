@@ -1,5 +1,6 @@
 import {
   Box,
+  useTheme,
 } from '@tonic-ui/react';
 import {
   useConst,
@@ -23,8 +24,9 @@ import MiniNav from './MiniNav';
 import SideNav from './SideNav';
 
 const MainPage = forwardRef((props, ref) => {
-  const notLessThan640 = useMediaQuery('(min-width: 640px)'); // md
-  const notLessThan1024 = useMediaQuery('(min-width: 1024px)'); // lg
+  const theme = useTheme();
+  const notLessThanMd = useMediaQuery(`(min-width: ${theme.breakpoints.md})`); // v3: 744px
+  const notLessThanLg = useMediaQuery(`(min-width: ${theme.breakpoints.lg})`); // v3: 1440px
   const [isMiniNavExpanded, toggleMiniNavExpanded] = useToggle(false);
   const [isSideNavOpen, toggleSideNav] = useToggle(false);
   const location = useLocation();
@@ -56,10 +58,10 @@ const MainPage = forwardRef((props, ref) => {
   }, [location.pathname]);
 
   useEffect(() => {
-    if (notLessThan1024 && isSideNavOpen) {
+    if (notLessThanLg && isSideNavOpen) {
       toggleSideNav(false);
     }
-  }, [notLessThan1024, isSideNavOpen, toggleSideNav]);
+  }, [notLessThanLg, isSideNavOpen, toggleSideNav]);
 
   if (!user.isAuthenticated()) {
     const navigateTo = '/login';
@@ -85,7 +87,7 @@ const MainPage = forwardRef((props, ref) => {
       ref={ref}
       {...props}
     >
-      {!notLessThan1024 && (
+      {!notLessThanLg && (
         <SideNav
           isOpen={isSideNavOpen}
           onClose={() => toggleSideNav(false)}
@@ -93,7 +95,7 @@ const MainPage = forwardRef((props, ref) => {
       )}
       <Header
         onToggle={() => {
-          if (notLessThan1024) {
+          if (notLessThanLg) {
             toggleMiniNavExpanded();
           } else {
             toggleSideNav();
@@ -106,9 +108,9 @@ const MainPage = forwardRef((props, ref) => {
         height={layout.header.height}
         zIndex="fixed"
       />
-      {notLessThan640 && (
+      {notLessThanMd && (
         <MiniNav
-          isExpanded={notLessThan1024 ? isMiniNavExpanded : false}
+          isExpanded={notLessThanLg ? isMiniNavExpanded : false}
           position="fixed"
           top={layout.header.height}
           bottom={0}

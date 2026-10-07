@@ -233,9 +233,8 @@ const MiniNav = forwardRef((
                       }
 
                       if (isDivider) {
-                        const childKey = `menu-divider-${childIndex}`;
                         return (
-                          <MenuDivider key={childKey} />
+                          <MenuDivider key={`menu-divider-${childIndex}`} />
                         );
                       }
 

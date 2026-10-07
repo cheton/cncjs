@@ -1,12 +1,9 @@
 import {
   Box,
   Button,
+  Dropdown,
+  DropdownButton,
   Flex,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
   Space,
 } from '@tonic-ui/react';
 import classNames from 'classnames';
@@ -122,108 +119,162 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
       </Box>
       <ControllerState state={controllerData} />
       <Flex alignItems="center" marginLeft="auto" gap="1x">
-        <Menu>
-          <MenuButton
-            disabled={!canSendCommand}
-            title={i18n._('Work Coordinate System')}
-          >
-            {formatWorkCoordinateSystem(wcs)}
-          </MenuButton>
-          <MenuList>
-            <Box px="3x" py="2x" fontWeight="bold">
-              {i18n._('Work Coordinate System')}
-            </Box>
-            {workCoordinateSystems.map(([code, page]) => (
-              <MenuItem
-                key={code}
-                onClick={() => sendWorkCoordinateSystem(code)}
-                selected={wcs === code}
+        <Dropdown
+          items={[
+            {
+              value: 'heading',
+              type: 'custom',
+              content: (
+                <Box px="3x" py="2x" fontWeight="bold">
+                  {i18n._('Work Coordinate System')}
+                </Box>
+              ),
+            },
+            ...workCoordinateSystems.map(([code, page]) => ({
+              value: code,
+              content: `${code} (${page})`,
+              props: { selected: wcs === code, onClick: () => sendWorkCoordinateSystem(code) },
+            })),
+          ]}
+          renderItem={item => item?.content}
+          renderToggle={() => (
+            <DropdownButton
+              disabled={!canSendCommand}
+              title={i18n._('Work Coordinate System')}
+            >
+              {formatWorkCoordinateSystem(wcs)}
+            </DropdownButton>
+          )}
+        />
+        <Dropdown
+          items={[
+            {
+              value: 'webgl-status',
+              type: 'custom',
+              content: (
+                <Box px="3x" py="2x" color="text.primary">
+                  <Box as="span">{i18n._('WebGL')}: </Box>
+                  <Box
+                    as="span"
+                    color={webGLAvailable ? colornames('royalblue') : colornames('crimson')}
+                  >
+                    {webGLAvailable ? i18n._('Enabled') : i18n._('Disabled')}
+                  </Box>
+                </Box>
+              ),
+            },
+            { type: 'divider' },
+            {
+              value: 'projection-heading',
+              type: 'custom',
+              content: (
+                <Box px="3x" py="2x" fontWeight="bold">
+                  {i18n._('Projection')}
+                </Box>
+              ),
+            },
+            {
+              value: 'perspective',
+              content: (
+                <>
+                  <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection !== 'orthographic' })} />
+                  <Space width={8} />
+                  {i18n._('Perspective Projection')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, selected: state.projection !== 'orthographic', onClick: actions.toPerspectiveProjection },
+            },
+            {
+              value: 'orthographic',
+              content: (
+                <>
+                  <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection === 'orthographic' })} />
+                  <Space width={8} />
+                  {i18n._('Orthographic Projection')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, selected: state.projection === 'orthographic', onClick: actions.toOrthographicProjection },
+            },
+            { type: 'divider' },
+            {
+              value: 'filename',
+              content: (
+                <>
+                  <i aria-hidden="true" className={gcode.displayName ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
+                  <Space width={8} />
+                  {i18n._('Display G-code Filename')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, onClick: actions.toggleGCodeFilename },
+            },
+            {
+              value: 'limits',
+              content: (
+                <>
+                  <i aria-hidden="true" className={limitsVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
+                  <Space width={8} />
+                  {limitsVisible ? i18n._('Hide Limits') : i18n._('Show Limits')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, onClick: actions.toggleLimitsVisibility },
+            },
+            {
+              value: 'coordinate-system',
+              content: (
+                <>
+                  <i aria-hidden="true" className={coordinateSystemVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
+                  <Space width={8} />
+                  {coordinateSystemVisible ? i18n._('Hide Coordinate System') : i18n._('Show Coordinate System')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, onClick: actions.toggleCoordinateSystemVisibility },
+            },
+            {
+              value: 'grid-line-numbers',
+              content: (
+                <>
+                  <i aria-hidden="true" className={gridLineNumbersVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
+                  <Space width={8} />
+                  {gridLineNumbersVisible ? i18n._('Hide Grid Line Numbers') : i18n._('Show Grid Line Numbers')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, onClick: actions.toggleGridLineNumbersVisibility },
+            },
+            {
+              value: 'cutting-tool',
+              content: (
+                <>
+                  <i aria-hidden="true" className={cuttingToolVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
+                  <Space width={8} />
+                  {cuttingToolVisible ? i18n._('Hide Cutting Tool') : i18n._('Show Cutting Tool')}
+                </>
+              ),
+              props: { disabled: !canToggleOptions, onClick: actions.toggleCuttingToolVisibility },
+            },
+          ]}
+          renderItem={item => item?.content}
+          renderToggle={() => (
+            <Flex alignItems="center">
+              <Button
+                aria-label={i18n._('3D View')}
+                title={(!webGLAvailable || disabled)
+                  ? i18n._('Enable 3D View')
+                  : i18n._('Disable 3D View')}
+                onClick={actions.toggle3DView}
+                variant="default"
               >
-                {code} ({page})
-              </MenuItem>
-            ))}
-          </MenuList>
-        </Menu>
-        <Menu>
-          <Flex alignItems="center">
-            <Button
-              aria-label={i18n._('3D View')}
-              title={(!webGLAvailable || disabled)
-                ? i18n._('Enable 3D View')
-                : i18n._('Disable 3D View')}
-              onClick={actions.toggle3DView}
-              variant="default"
-            >
-              <i aria-hidden="true" className={webGLAvailable && !disabled ? 'fa fa-toggle-on' : 'fa fa-toggle-off'} />
-              <Space width={8} />
-              {i18n._('3D View')}
-            </Button>
-            <MenuButton
-              aria-label={i18n._('3D View options')}
-              title={i18n._('3D View options')}
-              variant="default"
-            />
-          </Flex>
-          <MenuList>
-            <Box px="3x" py="2x" color="text.primary">
-              <Box as="span">{i18n._('WebGL')}: </Box>
-              <Box
-                as="span"
-                color={webGLAvailable ? colornames('royalblue') : colornames('crimson')}
-              >
-                {webGLAvailable ? i18n._('Enabled') : i18n._('Disabled')}
-              </Box>
-            </Box>
-            <MenuDivider />
-            <Box px="3x" py="2x" fontWeight="bold">
-              {i18n._('Projection')}
-            </Box>
-            <MenuItem
-              disabled={!canToggleOptions}
-              onClick={actions.toPerspectiveProjection}
-              selected={state.projection !== 'orthographic'}
-            >
-              <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection !== 'orthographic' })} />
-              <Space width={8} />
-              {i18n._('Perspective Projection')}
-            </MenuItem>
-            <MenuItem
-              disabled={!canToggleOptions}
-              onClick={actions.toOrthographicProjection}
-              selected={state.projection === 'orthographic'}
-            >
-              <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection === 'orthographic' })} />
-              <Space width={8} />
-              {i18n._('Orthographic Projection')}
-            </MenuItem>
-            <MenuDivider />
-            <MenuItem disabled={!canToggleOptions} onClick={actions.toggleGCodeFilename}>
-              <i aria-hidden="true" className={gcode.displayName ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-              <Space width={8} />
-              {i18n._('Display G-code Filename')}
-            </MenuItem>
-            <MenuItem disabled={!canToggleOptions} onClick={actions.toggleLimitsVisibility}>
-              <i aria-hidden="true" className={limitsVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-              <Space width={8} />
-              {limitsVisible ? i18n._('Hide Limits') : i18n._('Show Limits')}
-            </MenuItem>
-            <MenuItem disabled={!canToggleOptions} onClick={actions.toggleCoordinateSystemVisibility}>
-              <i aria-hidden="true" className={coordinateSystemVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-              <Space width={8} />
-              {coordinateSystemVisible ? i18n._('Hide Coordinate System') : i18n._('Show Coordinate System')}
-            </MenuItem>
-            <MenuItem disabled={!canToggleOptions} onClick={actions.toggleGridLineNumbersVisibility}>
-              <i aria-hidden="true" className={gridLineNumbersVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-              <Space width={8} />
-              {gridLineNumbersVisible ? i18n._('Hide Grid Line Numbers') : i18n._('Show Grid Line Numbers')}
-            </MenuItem>
-            <MenuItem disabled={!canToggleOptions} onClick={actions.toggleCuttingToolVisibility}>
-              <i aria-hidden="true" className={cuttingToolVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-              <Space width={8} />
-              {cuttingToolVisible ? i18n._('Hide Cutting Tool') : i18n._('Show Cutting Tool')}
-            </MenuItem>
-          </MenuList>
-        </Menu>
+                <i aria-hidden="true" className={webGLAvailable && !disabled ? 'fa fa-toggle-on' : 'fa fa-toggle-off'} />
+                <Space width={8} />
+                {i18n._('3D View')}
+              </Button>
+              <DropdownButton
+                aria-label={i18n._('3D View options')}
+                title={i18n._('3D View options')}
+                variant="default"
+              />
+            </Flex>
+          )}
+        />
       </Flex>
     </Flex>
   );

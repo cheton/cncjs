@@ -7,12 +7,11 @@ import {
   Flex,
   Icon,
   Image,
-  Menu,
+  Dropdown,
+  DropdownToggle,
   MenuDivider,
   MenuGroup,
   MenuItem,
-  MenuList,
-  MenuToggle,
   Space,
   Text,
   useColorMode,
@@ -41,7 +40,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import FocusLock from 'react-focus-lock';
 import { useLocation, useNavigate } from 'react-router-dom';
 import env from '@app/config/env';
 import layout from '@app/config/layout';
@@ -477,55 +475,77 @@ const Header = forwardRef((
         alignItems="center"
         px="4x"
       >
-        <Menu
+        <Dropdown
           placement="bottom-end"
           onOpen={() => {
             setMenu('main');
           }}
-        >
-          <MenuToggle>
-            <Avatar
-              backgroundColor="background.medium"
-              color="text.secondary"
-              _hover={{
-                color: 'text.primary',
-              }}
-            >
-              <FontAwesomeIcon icon="user" style={{ width: 24, height: 24 }} />
-            </Avatar>
-          </MenuToggle>
-          <FocusLock
-            persistentFocus={true}
-          >
-            <MenuList
-              onBlur={(event) => {
+          items={[
+            {
+              value: 'appearance',
+              type: 'custom',
+              content: (
+                <AppearanceMenuItems
+                  display={menu === 'appearance' ? 'block' : 'none'}
+                />
+              ),
+            },
+            {
+              value: 'language',
+              type: 'custom',
+              content: (
+                <LanguageMenuItems
+                  display={menu === 'language' ? 'block' : 'none'}
+                />
+              ),
+            },
+            {
+              value: 'main',
+              type: 'custom',
+              content: (
+                <MainMenuItems
+                  display={menu === 'main' ? 'block' : 'none'}
+                />
+              ),
+            },
+          ]}
+          renderItem={item => item?.content}
+          slotProps={{
+            content: {
+              onBlur: (event) => {
                 if (shouldPreventDefaultOnLossFocus.current) {
                   event.preventDefault();
 
                   // Restore the flag to its initial state
                   shouldPreventDefaultOnLossFocus.current = false;
                 }
-              }}
+              },
               // Create a scrollable area for the menu list
-              maxHeight={`calc(100vh - ${layout.header.height}px)`}
-              overflowY="auto"
+              maxHeight: `calc(100vh - ${layout.header.height}px)`,
+              overflowY: 'auto',
               // Use the intrinsic maximum width of the menu list
-              width="max-content"
-            >
-              <MenuStateContext.Provider value={menuStateContext}>
-                <AppearanceMenuItems
-                  display={menu === 'appearance' ? 'block' : 'none'}
-                />
-                <LanguageMenuItems
-                  display={menu === 'language' ? 'block' : 'none'}
-                />
-                <MainMenuItems
-                  display={menu === 'main' ? 'block' : 'none'}
-                />
-              </MenuStateContext.Provider>
-            </MenuList>
-          </FocusLock>
-        </Menu>
+              width: 'max-content',
+            },
+          }}
+          renderToggle={() => (
+            <DropdownToggle>
+              <Avatar
+                backgroundColor="background.medium"
+                color="text.secondary"
+                _hover={{
+                  color: 'text.primary',
+                }}
+              >
+                <FontAwesomeIcon icon="user" style={{ width: 24, height: 24 }} />
+              </Avatar>
+            </DropdownToggle>
+          )}
+          renderContent={({ items, renderItems }) => (
+            <MenuStateContext.Provider value={menuStateContext}>
+              {renderItems(items)}
+            </MenuStateContext.Provider>
+          )}
+        />
       </Flex>
     </Flex>
   );

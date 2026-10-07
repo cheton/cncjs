@@ -3,13 +3,10 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Dropdown,
+  DropdownButton,
   Flex,
   Image,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
   Space,
   Tooltip,
 } from '@tonic-ui/react';
@@ -345,77 +342,78 @@ function SecondaryToolbar({
                 />
               </RepeatableCameraButton>
             </ButtonGroup>
-            <Menu placement="top-start">
-              <MenuButton
-                aria-label={cameraMode === CAMERA_MODE_PAN ? i18n._('Camera mode: Pan') : i18n._('Camera mode: Rotate')}
-                variant="ghost"
-                sx={{ minWidth: '36px', padding: '8px' }}
-              >
-                <Image
-                  aria-hidden="true"
-                  src={cameraMode === CAMERA_MODE_PAN ? iconMoveCamera : iconRotateCamera}
-                  width={20}
-                  height={20}
-                />
-              </MenuButton>
-              <MenuList>
-                <MenuItem onClick={camera.toPanMode}>
-                  <Image src={iconMoveCamera} width={20} height={20} />
-                  <Space width={4} />
-                  {i18n._('Move the camera')}
-                </MenuItem>
-                <MenuItem onClick={camera.toRotateMode}>
-                  <Image src={iconRotateCamera} width={20} height={20} />
-                  <Space width={4} />
-                  {i18n._('Rotate the camera')}
-                </MenuItem>
-              </MenuList>
-            </Menu>
+            <Dropdown
+              placement="top-start"
+              items={[
+                {
+                  value: 'pan',
+                  content: (
+                    <>
+                      <Image src={iconMoveCamera} width={20} height={20} />
+                      <Space width={4} />
+                      {i18n._('Move the camera')}
+                    </>
+                  ),
+                  props: { onClick: camera.toPanMode },
+                },
+                {
+                  value: 'rotate',
+                  content: (
+                    <>
+                      <Image src={iconRotateCamera} width={20} height={20} />
+                      <Space width={4} />
+                      {i18n._('Rotate the camera')}
+                    </>
+                  ),
+                  props: { onClick: camera.toRotateMode },
+                },
+              ]}
+              renderItem={item => item?.content}
+              renderToggle={() => (
+                <DropdownButton
+                  aria-label={cameraMode === CAMERA_MODE_PAN ? i18n._('Camera mode: Pan') : i18n._('Camera mode: Rotate')}
+                  variant="ghost"
+                  sx={{ minWidth: '36px', padding: '8px' }}
+                >
+                  <Image
+                    aria-hidden="true"
+                    src={cameraMode === CAMERA_MODE_PAN ? iconMoveCamera : iconRotateCamera}
+                    width={20}
+                    height={20}
+                  />
+                </DropdownButton>
+              )}
+            />
           </Flex>
         )}
       </Box>
       <Box width="auto">
         {machineProfiles.length > 0 && (
-          <Menu placement="top-end">
-            <MenuButton
-              aria-label={i18n._('Select machine profile')}
-              variant="ghost"
-              sx={{ minWidth: '36px', padding: '8px' }}
-            >
-              {selectedMachineProfile ? (
-                <Box
-                  as="span"
-                  title={selectedMachineProfile.name}
-                  sx={{
-                    display: 'inline-block',
-                    maxWidth: 120,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    verticalAlign: 'top',
-                  }}
-                >
-                  {selectedMachineProfile.name}
-                </Box>
-              ) : i18n._('No machine profile selected')}
-            </MenuButton>
-            <MenuList maxHeight={320} overflowY="auto">
-              <Box px="3x" py="2x" fontWeight="bold">
-                {i18n._('Machine Profiles')}
-              </Box>
-              <MenuItem
-                onClick={() => selectMachineProfile(CLEAR_MACHINE_PROFILE)}
-                selected={!selectedMachineProfile}
-              >
-                {i18n._('None')}
-              </MenuItem>
-              <MenuDivider />
-              {machineProfiles.map(({ id, name }) => (
-                <MenuItem
-                  key={id}
-                  onClick={() => selectMachineProfile(id)}
-                  selected={id === _get(machineProfile, 'id')}
-                  title={name}
-                >
+          <Dropdown
+            placement="top-end"
+            slotProps={{ content: { maxHeight: 320, overflowY: 'auto' } }}
+            items={[
+              {
+                value: 'heading',
+                type: 'custom',
+                content: (
+                  <Box px="3x" py="2x" fontWeight="bold">
+                    {i18n._('Machine Profiles')}
+                  </Box>
+                ),
+              },
+              {
+                value: CLEAR_MACHINE_PROFILE,
+                content: i18n._('None'),
+                props: {
+                  selected: !selectedMachineProfile,
+                  onClick: () => selectMachineProfile(CLEAR_MACHINE_PROFILE),
+                },
+              },
+              { type: 'divider' },
+              ...machineProfiles.map(({ id, name }) => ({
+                value: id,
+                content: (
                   <Box
                     as="span"
                     sx={{
@@ -428,10 +426,39 @@ function SecondaryToolbar({
                   >
                     {name}
                   </Box>
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+                ),
+                props: {
+                  selected: id === _get(machineProfile, 'id'),
+                  onClick: () => selectMachineProfile(id),
+                  title: name,
+                },
+              })),
+            ]}
+            renderItem={item => item?.content}
+            renderToggle={() => (
+              <DropdownButton
+                aria-label={i18n._('Select machine profile')}
+                variant="ghost"
+                sx={{ minWidth: '36px', padding: '8px' }}
+              >
+                {selectedMachineProfile ? (
+                  <Box
+                    as="span"
+                    title={selectedMachineProfile.name}
+                    sx={{
+                      display: 'inline-block',
+                      maxWidth: 120,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      verticalAlign: 'top',
+                    }}
+                  >
+                    {selectedMachineProfile.name}
+                  </Box>
+                ) : i18n._('No machine profile selected')}
+              </DropdownButton>
+            )}
+          />
         )}
       </Box>
     </Flex>

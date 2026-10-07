@@ -1,6 +1,8 @@
 import {
   Box,
   Button,
+  Dropdown,
+  DropdownButton,
   FormControl,
   Input,
   Modal,
@@ -10,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
   Radio,
-  Select,
   Text,
   TextLabel,
 } from '@tonic-ui/react';
@@ -85,15 +86,32 @@ function SettingsModal({ onClose }) {
                     )}
                   </Field>
                   <Box mt="2x" ml="5x">
-                    <Field name="deviceId">{({ input }) => (
-                      <Select
-                        {...input} aria-label={i18n._('Choose a video device')}
-                        disabled={values.mediaSource !== MEDIA_SOURCE_LOCAL}
-                      >
-                        <option value="__default__">{i18n._('Automatic detection')}</option>
-                        {devices.map(device => <option key={device.deviceId} value={device.deviceId}>{device.label || device.deviceId}</option>)}
-                      </Select>
-                    )}
+                    <Field name="deviceId">{({ input }) => {
+                      const isDisabled = values.mediaSource !== MEDIA_SOURCE_LOCAL;
+                      const deviceOptions = [
+                        { value: '__default__', label: i18n._('Automatic detection') },
+                        ...devices.map(device => ({ value: device.deviceId, label: device.label || device.deviceId })),
+                      ];
+                      return (
+                        <Dropdown
+                          matchWidth
+                          items={deviceOptions}
+                          value={deviceOptions.find(option => option.value === input.value) || null}
+                          renderItem={option => option?.label ?? ''}
+                          renderToggle={({ renderItem, value: selected }) => (
+                            <DropdownButton
+                              aria-label={i18n._('Choose a video device')}
+                              disabled={isDisabled}
+                              width="100%"
+                              variant="secondary"
+                            >
+                              {renderItem(selected)}
+                            </DropdownButton>
+                          )}
+                          onChange={option => input.onChange(option?.value ?? null)}
+                        />
+                      );
+                    }}
                     </Field>
                   </Box>
                 </FormControl>

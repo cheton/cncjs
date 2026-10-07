@@ -153,7 +153,7 @@ test('resolves semantic foreground colors after the automatic theme changes', ()
   render(<GlobalProvider><SemanticThemeProbe /></GlobalProvider>);
   const probe = screen.getByTestId('semantic-theme');
   const lightColor = probe.getAttribute('data-text-color');
-  expect(lightColor).toContain('#000000');
+  expect(lightColor).toContain('#0a0a0a');
   changeSystemTheme(true);
   expect(probe.getAttribute('data-text-color')).toContain('#ffffff');
   expect(probe.getAttribute('data-text-color')).not.toBe(lightColor);

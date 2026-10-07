@@ -1,6 +1,7 @@
 import {
   Box,
-  Select,
+  Dropdown,
+  DropdownButton,
   TextLabel,
 } from '@tonic-ui/react';
 import Slider from 'rc-slider';
@@ -36,6 +37,7 @@ const HERTZ_OPTIONS = [
  */
 function ShuttleXpress({ value, onChange }) {
   const update = nextValue => onChange({ ...value, ...nextValue });
+  const hertzOptions = HERTZ_OPTIONS.map(([hertz, label]) => ({ value: hertz, label: i18n._(label) }));
 
   return (
     <Box>
@@ -63,17 +65,22 @@ function ShuttleXpress({ value, onChange }) {
         <TextLabel mb="2x">
           {i18n._('Repeat Rate: {{hertz}}Hz', { hertz: value.hertz })}
         </TextLabel>
-        <Select
-          aria-label={i18n._('Repeat Rate')}
-          value={value.hertz}
-          onChange={event => update({ hertz: Number(event.target.value) })}
-        >
-          {HERTZ_OPTIONS.map(([hertz, label]) => (
-            <option key={hertz} value={hertz}>
-              {i18n._(label)}
-            </option>
-          ))}
-        </Select>
+        <Dropdown
+          matchWidth
+          items={hertzOptions}
+          value={hertzOptions.find(option => option.value === value.hertz) || null}
+          renderItem={option => option?.label ?? ''}
+          renderToggle={({ renderItem, value: selected }) => (
+            <DropdownButton
+              aria-label={i18n._('Repeat Rate')}
+              width="100%"
+              variant="secondary"
+            >
+              {renderItem(selected)}
+            </DropdownButton>
+          )}
+          onChange={option => update({ hertz: Number(option?.value) })}
+        />
       </Box>
       <Box>
         <TextLabel mb="2x">

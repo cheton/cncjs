@@ -17,18 +17,18 @@ Latest source follow-up (2026-10-06): **V3-GV completed and user accepted for co
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-10-06）
+## 現況快照（2026-10-07）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| Validated source | V3-GV tested `5e8757b4` plus source diff recorded in the report; final native-selector cleanup and delivery are recorded in root acceptance. Check actual HEAD with Git. |
-| 工作樹 | Guide follow-up source and accepted V3-GV evidence delivered together in this commit |
-| Delivery | 使用者既有 commit/push 授權持續有效；接手時以 git status/log 核對實際狀態 |
-| Active task | None; R6, W3, V3, V3-V and V3-GV completed. Browser work uses GPT-6-Luna xhigh. |
-| 最近完成 | V3-V browser evidence、root review、source fixes、CI production/four-platform 與 owned cleanup |
-| 下一步推薦 | V3 已完成；下一步評估原生 Dropdown／Autocomplete 的實際 consumers 與互動契約。 |
-| Open gaps | No required V3-V gate remains. Retain inherited768pane clipping, disabled/static dark SVG contrast and headless/replay limitations; no fullR6performance/hardware rerun. |
+| Validated source | This local commit records the current worktree snapshot; check actual HEAD with Git. No browser visual pass is claimed. |
+| 工作樹 | Current delivery includes V3-T/V3-DS, V3-DS-F, FIX-003, FIX-004, and two new task files. Visual confirmation remains pending. |
+| Delivery | User authorized one local commit for the current work; no push is authorized or requested. |
+| Active task | V3-T + FIX-003 + FIX-004 implemented; visual confirmation pending. V3-DS/V3-DS-F implementation and tests are complete. The local dev app served the sign-in page, so no authenticated browser pass is claimed. |
+| 最近完成 | V3-DS：Connection serial port→Autocomplete、baud→Dropdown；3 個 native Select→Dropdown；Menu→Dropdown 取代。V3-DS-F 修正 v3 breakpoint mismatch、MiniNav hover flyout、Header FocusLock；unused root `react-focus-lock` dependency removed per user request (`@tonic-ui/react` retains it transitively at 2.13.7). FIX-004 improves Axes header/keypad spacing. Frontend 79/508; lint exits 0. |
+| 下一步推薦 | 使用者目視確認：1439px 側欄收合、workspace primary/secondary pane scrollbar、MiniNav hover flyout、Connection refresh spacing、quiet light theme，以及 Axes keypad/header layout；之後關閉對應 ledger gates，再回 icon migration I1（I1–I6 延後清單）。 |
+| Open gaps | V3-T, FIX-003, FIX-004 visual checks and V3-DS-F user confirmation remain pending; local browser reached sign-in only. Retain inherited 768-pane clipping, disabled/static dark SVG contrast, headless/replay limitations, and no full R6 performance/hardware rerun. |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
 本表是撰寫當下的事實，**不是當前狀態**——本檔與後續 doc commit 都會推進 HEAD。接手時一律自行實測；若與 [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 不一致，以 STATUS 為準。

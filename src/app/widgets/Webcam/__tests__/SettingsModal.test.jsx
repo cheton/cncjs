@@ -75,7 +75,7 @@ describe('Webcam settings draft', () => {
 
     expect(screen.getByRole('radio', { name: 'Use a built-in camera or a connected webcam' })).toBeChecked();
     expect(screen.getByRole('radio', { name: 'Connect to an IP camera' })).not.toBeChecked();
-    expect(screen.getByRole('combobox', { name: 'Choose a video device' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose a video device' })).toBeInTheDocument();
   });
 
   test('completes the draft by keyboard alone', async () => {

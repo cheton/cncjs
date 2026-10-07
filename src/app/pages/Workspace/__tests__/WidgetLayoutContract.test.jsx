@@ -166,6 +166,26 @@ jest.mock('@tonic-ui/react', () => {
     MenuButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     MenuItem: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
     MenuList: Primitive,
+    Dropdown: ({ renderToggle, items = [], renderItem }) => {
+      const render = renderItem || ((item) => item?.content ?? item?.label ?? null);
+      const toggle = (typeof renderToggle === 'function')
+        ? renderToggle({ value: null, items, renderItem: render })
+        : null;
+
+      return React.createElement(
+        'div',
+        null,
+        toggle,
+        ...items
+          .filter(item => item && item.type !== 'divider')
+          .map((item, index) => React.createElement(
+            'button',
+            { key: item?.value ?? index, type: 'button', onClick: item?.props?.onClick },
+            render(item)
+          ))
+      );
+    },
+    DropdownButton: ({ children, ...props }) => React.createElement('button', { type: 'button', ...props }, children),
   };
 });
 

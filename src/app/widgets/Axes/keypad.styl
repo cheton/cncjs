@@ -1,12 +1,13 @@
 .keypad {
     button.btn-keypad {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
         font-size: 16px;
         padding: 0;
         width: 100%;
-        line-height: 30px;
-        text-align: center;
-        vertical-align: middle;
-        box-shadow: var(--tonic-shadows-low-main);
+        line-height: 1;
 
         &:active,
         &.active {
@@ -38,5 +39,9 @@
                 transform: translate(1px, 1px);
             }
         }
+    }
+    .col-space {
+        width: 100%;
+        min-width: 0;
     }
 }

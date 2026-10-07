@@ -1,17 +1,14 @@
 import {
   Box,
   Button,
+  Dropdown,
+  DropdownButton,
   Flex,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Space,
 } from '@tonic-ui/react';
 import cx from 'classnames';
 import { ensureArray } from 'ensure-type';
 import _includes from 'lodash/includes';
-import _uniqueId from 'lodash/uniqueId';
 import React from 'react';
 import RepeatableButton from '@app/components/RepeatableButton';
 import {
@@ -50,21 +47,11 @@ function Keypad() {
     ];
     const step = jog.imperial.step;
 
-    return imperialJogSteps.map((value, key) => {
-      const active = (key === step);
-
-      return (
-        <MenuItem
-          key={_uniqueId()}
-          onClick={() => onSelectStep(key)}
-          selected={active}
-        >
-          {value}
-          <Space width={4} />
-          <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
-        </MenuItem>
-      );
-    });
+    return imperialJogSteps.map((stepValue, index) => ({
+      value: index,
+      step: stepValue,
+      props: { selected: index === step },
+    }));
   };
 
   const renderMetricMenuItems = () => {
@@ -75,21 +62,11 @@ function Keypad() {
     ];
     const step = jog.metric.step;
 
-    return metricJogSteps.map((value, key) => {
-      const active = (key === step);
-
-      return (
-        <MenuItem
-          key={_uniqueId()}
-          onClick={() => onSelectStep(key)}
-          selected={active}
-        >
-          {value}
-          <Space width={4} />
-          <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
-        </MenuItem>
-      );
-    });
+    return metricJogSteps.map((stepValue, index) => ({
+      value: index,
+      step: stepValue,
+      props: { selected: index === step },
+    }));
   };
 
   const canChangeUnits = canClick;
@@ -119,13 +96,19 @@ function Keypad() {
   const highlightX = canClickX && (jog.keypad || jog.axis === 'x');
   const highlightY = canClickY && (jog.keypad || jog.axis === 'y');
   const highlightZ = canClickZ && (jog.keypad || jog.axis === 'z');
+  const unitItems = [
+    { value: IMPERIAL_UNITS, label: i18n._('G20 (inch)'), props: { selected: units === IMPERIAL_UNITS } },
+    { value: METRIC_UNITS, label: i18n._('G21 (mm)'), props: { selected: units === METRIC_UNITS } },
+  ];
+  const imperialStepItems = renderImperialMenuItems();
+  const metricStepItems = renderMetricMenuItems();
 
   return (
     <Box className={styles.keypad}>
-      <Flex>
-        <Box flex="8 1 0%">
+      <Flex gap="1x" alignItems="stretch">
+        <Box flex="8 1 0%" minWidth={0}>
           <Box className={styles.rowSpace}>
-            <Flex>
+            <Flex gap="1x">
               <Box flex="1 1 0%">
                 <Box className={styles.colSpace}>
                   <Button
@@ -205,7 +188,7 @@ function Keypad() {
             </Flex>
           </Box>
           <Box className={styles.rowSpace}>
-            <Flex>
+            <Flex gap="1x">
               <Box flex="1 1 0%">
                 <Box className={styles.colSpace}>
                   <Button
@@ -281,7 +264,7 @@ function Keypad() {
             </Flex>
           </Box>
           <Box className={styles.rowSpace}>
-            <Flex>
+            <Flex gap="1x">
               <Box flex="1 1 0%">
                 <Box className={styles.colSpace}>
                   <Button
@@ -361,133 +344,136 @@ function Keypad() {
             </Flex>
           </Box>
         </Box>
-        <Box flex="4 1 0%">
+        <Box flex="4 1 0%" minWidth={0}>
           <Box className={styles.rowSpace}>
-            <Menu
-              style={{
-                width: '100%'
-              }}
-            >
-              <MenuButton
-                disabled={!canChangeUnits}
-                style={{
-                  textAlign: 'right',
-                  width: '100%'
-                }}
-              >
-                {units === IMPERIAL_UNITS && i18n._('G20 (inch)')}
-                {units === METRIC_UNITS && i18n._('G21 (mm)')}
-              </MenuButton>
-              <MenuList>
-                <Box
-                  px="3x"
-                  py="2x"
-                  role="heading"
-                  fontSize="sm"
-                  color="text.secondary"
-                >
-                  {i18n._('Units')}
-                </Box>
-                <MenuItem
-                  selected={units === IMPERIAL_UNITS}
-                  onClick={() => {
-                    controller.command('gcode', 'G20');
+            <Dropdown
+              items={unitItems}
+              value={unitItems.find(item => item.value === units) || null}
+              slotProps={{ root: { style: { width: '100%' } } }}
+              renderItem={item => item?.label ?? ''}
+              renderToggle={({ renderItem, value: selected }) => (
+                <DropdownButton
+                  disabled={!canChangeUnits}
+                  style={{
+                    textAlign: 'right',
+                    width: '100%'
                   }}
                 >
-                  {i18n._('G20 (inch)')}
-                </MenuItem>
-                <MenuItem
-                  selected={units === METRIC_UNITS}
-                  onClick={() => {
-                    controller.command('gcode', 'G21');
-                  }}
-                >
-                  {i18n._('G21 (mm)')}
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  {renderItem(selected)}
+                </DropdownButton>
+              )}
+              renderContent={({ items, renderItems }) => (
+                <>
+                  <Box
+                    px="3x"
+                    py="2x"
+                    role="heading"
+                    fontSize="sm"
+                    color="text.secondary"
+                  >
+                    {i18n._('Units')}
+                  </Box>
+                  {renderItems(items)}
+                </>
+              )}
+              onChange={item => controller.command('gcode', item.value === IMPERIAL_UNITS ? 'G20' : 'G21')}
+            />
           </Box>
           <Box className={styles.rowSpace}>
             {units === IMPERIAL_UNITS && (
-              <Menu
-                style={{
-                  width: '100%'
+              <Dropdown
+                items={imperialStepItems}
+                value={imperialStepItems[jog.imperial.step] || null}
+                slotProps={{
+                  root: { style: { width: '100%' } },
+                  content: { style: { maxHeight: 150, overflowY: 'auto' } },
                 }}
-              >
-                <MenuButton
-                  disabled={!canChangeStep}
-                  style={{
-                    textAlign: 'right',
-                    width: '100%'
-                  }}
-                >
-                  {imperialJogSteps[jog.imperial.step]}
-                  <Space width={4} />
-                  <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
-                </MenuButton>
-                <MenuList
-                  style={{
-                    maxHeight: 150,
-                    overflowY: 'auto'
-                  }}
-                >
-                  <Box
-                    px="3x"
-                    py="2x"
-                    role="heading"
-                    fontSize="sm"
-                    color="text.secondary"
+                renderItem={(item) => (
+                  <>
+                    {item?.step}
+                    <Space width={4} />
+                    <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
+                  </>
+                )}
+                renderToggle={({ renderItem, value: selected }) => (
+                  <DropdownButton
+                    disabled={!canChangeStep}
+                    style={{
+                      textAlign: 'right',
+                      width: '100%'
+                    }}
                   >
-                    {i18n._('Imperial')}
-                  </Box>
-                  {renderImperialMenuItems()}
-                </MenuList>
-              </Menu>
+                    {renderItem(selected)}
+                  </DropdownButton>
+                )}
+                renderContent={({ items, renderItems }) => (
+                  <>
+                    <Box
+                      px="3x"
+                      py="2x"
+                      role="heading"
+                      fontSize="sm"
+                      color="text.secondary"
+                    >
+                      {i18n._('Imperial')}
+                    </Box>
+                    {renderItems(items)}
+                  </>
+                )}
+                onChange={item => onSelectStep(item.value)}
+              />
             )}
             {units === METRIC_UNITS && (
-              <Menu
-                style={{
-                  width: '100%'
+              <Dropdown
+                items={metricStepItems}
+                value={metricStepItems[jog.metric.step] || null}
+                slotProps={{
+                  root: { style: { width: '100%' } },
+                  content: { style: { maxHeight: 150, overflowY: 'auto' } },
                 }}
-              >
-                <MenuButton
-                  disabled={!canChangeStep}
-                  style={{
-                    textAlign: 'right',
-                    width: '100%'
-                  }}
-                >
-                  {metricJogSteps[jog.metric.step]}
-                  <Space width={4} />
-                  <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
-                </MenuButton>
-                <MenuList
-                  style={{
-                    maxHeight: 150,
-                    overflowY: 'auto'
-                  }}
-                >
-                  <Box
-                    px="3x"
-                    py="2x"
-                    role="heading"
-                    fontSize="sm"
-                    color="text.secondary"
+                renderItem={(item) => (
+                  <>
+                    {item?.step}
+                    <Space width={4} />
+                    <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
+                  </>
+                )}
+                renderToggle={({ renderItem, value: selected }) => (
+                  <DropdownButton
+                    disabled={!canChangeStep}
+                    style={{
+                      textAlign: 'right',
+                      width: '100%'
+                    }}
                   >
-                    {i18n._('Metric')}
-                  </Box>
-                  {renderMetricMenuItems()}
-                </MenuList>
-              </Menu>
+                    {renderItem(selected)}
+                  </DropdownButton>
+                )}
+                renderContent={({ items, renderItems }) => (
+                  <>
+                    <Box
+                      px="3x"
+                      py="2x"
+                      role="heading"
+                      fontSize="sm"
+                      color="text.secondary"
+                    >
+                      {i18n._('Metric')}
+                    </Box>
+                    {renderItems(items)}
+                  </>
+                )}
+                onChange={item => onSelectStep(item.value)}
+              />
             )}
           </Box>
           <Box className={styles.rowSpace}>
-            <Flex>
+            <Flex gap="1x">
               <Box flex="1 1 0%">
                 <RepeatableButton
                   aria-label="Decrease step size"
                   disabled={!canStepBackward}
-                  style={{ marginRight: 2.5 }}
+                  width="100%"
                   onClick={onStepBackward}
                 >
                   <i aria-hidden="true" className="fa fa-minus" />
@@ -497,6 +483,7 @@ function Keypad() {
                 <RepeatableButton
                   aria-label="Increase step size"
                   disabled={!canStepForward}
+                  width="100%"
                   onClick={onStepForward}
                 >
                   <i aria-hidden="true" className="fa fa-plus" />

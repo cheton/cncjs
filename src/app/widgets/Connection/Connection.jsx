@@ -1,16 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Alert,
+  Autocomplete,
+  AutocompleteInput,
   Box,
   Button,
   ButtonGroup,
   Checkbox,
+  Dropdown,
+  DropdownButton,
   Flex,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -30,6 +30,7 @@ import _set from 'lodash/set';
 import memoize from 'micro-memoize';
 import React, {
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -594,8 +595,8 @@ function Connection() {
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Box data-test="connection-serial-port">
-                                      <SerialConnectionMenu
+                                    <Box data-test="connection-serial-port" width="100%">
+                                      <SerialPortSelector
                                         id="connection-serial-port"
                                         label={i18n._('Serial port')}
                                         options={options}
@@ -613,24 +614,22 @@ function Connection() {
                                 }}
                               </Field>
                             </Box>
-                            <Box flex="none" width="30px">
-                              <Space width={12} />
-                              <Button
-                                aria-label={i18n._('Refresh')}
-                                variant="ghost"
-                                disabled={!canRefreshSerialPorts}
-                                onClick={() => {
-                                  fetchSerialPorts();
-                                }}
-                                title={i18n._('Refresh')}
-                              >
-                                <FontAwesomeIcon
-                                  icon="sync"
-                                  fixedWidth
-                                  spin={isFetchingSerialPorts}
-                                />
-                              </Button>
-                            </Box>
+                            <Space width={8} />
+                            <Button
+                              aria-label={i18n._('Refresh')}
+                              variant="ghost"
+                              disabled={!canRefreshSerialPorts}
+                              onClick={() => {
+                                fetchSerialPorts();
+                              }}
+                              title={i18n._('Refresh')}
+                            >
+                              <FontAwesomeIcon
+                                icon="sync"
+                                fixedWidth
+                                spin={isFetchingSerialPorts}
+                              />
+                            </Button>
                           </Flex>
                         </Box>
                         <Box mb="4x">
@@ -650,8 +649,8 @@ function Connection() {
                                   const value = _find(options, { value: input.value }) || null;
 
                                   return (
-                                    <Box data-test="connection-baud-rate">
-                                      <SerialConnectionMenu
+                                    <Box data-test="connection-baud-rate" width="100%">
+                                      <SerialBaudSelector
                                         id="connection-baud-rate"
                                         label={i18n._('Baud rate')}
                                         options={options}
@@ -668,24 +667,22 @@ function Connection() {
                                 }}
                               </Field>
                             </Box>
-                            <Box flex="none" width="30px">
-                              <Space width={12} />
-                              <Button
-                                aria-label={i18n._('Refresh')}
-                                variant="ghost"
-                                disabled={!canRefreshSerialBaudRates}
-                                onClick={() => {
-                                  fetchSerialBaudRates();
-                                }}
-                                title={i18n._('Refresh')}
-                              >
-                                <FontAwesomeIcon
-                                  icon="sync"
-                                  fixedWidth
-                                  spin={isFetchingSerialBaudRates}
-                                />
-                              </Button>
-                            </Box>
+                            <Space width={8} />
+                            <Button
+                              aria-label={i18n._('Refresh')}
+                              variant="ghost"
+                              disabled={!canRefreshSerialBaudRates}
+                              onClick={() => {
+                                fetchSerialBaudRates();
+                              }}
+                              title={i18n._('Refresh')}
+                            >
+                              <FontAwesomeIcon
+                                icon="sync"
+                                fixedWidth
+                                spin={isFetchingSerialBaudRates}
+                              />
+                            </Button>
                           </Flex>
                         </Box>
                         <Box mb="4x">
@@ -1111,44 +1108,104 @@ export default Connection;
 /**
  * @param {{id: string, label: string, options: Array, value: object | null, disabled: boolean, placeholder: string, emptyText?: string, onSelect: Function}} props
  */
-function SerialConnectionMenu({ id, label, options, value, disabled, placeholder, emptyText, onSelect }) {
+function SerialPortSelector({ id, label, options, value, disabled, placeholder, emptyText, onSelect }) {
+  // Referentially stable item — the hook syncs the input text to
+  // `getItemLabel(value)` when the `value` ref changes; re-creating the item
+  // on every render would clobber typed filter text on unrelated re-renders.
+  const stableValue = useMemo(
+    () => value,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [value?.value, value?.label, value?.manufacturer, value?.connected],
+  );
+
+  // The hook's default filter matches the whole input text, which the value-sync
+  // keeps equal to the committed label — that would pre-filter the list down to
+  // the selected port. Filter only on text the user actually typed (a suffix
+  // after the label, or a full replacement) so the closed state lists every port.
+  const getItemLabel = item => item?.label ?? '';
+  const filterItems = (items, { inputValue }) => {
+    const committed = stableValue ? getItemLabel(stableValue) : '';
+    let q = inputValue;
+    if (inputValue === committed) {
+      q = '';
+    } else if (inputValue.startsWith(committed)) {
+      q = inputValue.slice(committed.length);
+    }
+    q = q.trim().toLowerCase();
+    if (!q) {
+      return items;
+    }
+    return items.filter(item => getItemLabel(item).toLowerCase().includes(q));
+  };
+
   return (
-    <Menu matchWidth>
-      <MenuButton
-        id={id}
-        aria-label={label}
-        disabled={disabled}
-        width="100%"
-        variant="secondary"
-      >
-        {value?.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
-        {value?.connected && <Space width={8} />}
-        {value?.label || placeholder}
-      </MenuButton>
-      <MenuList maxHeight={200} overflowY="auto">
-        {options.length === 0 && <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>}
-        {options.map(option => (
-          <MenuItem
-            key={option.value}
-            aria-current={option.value === value?.value ? 'true' : undefined}
-            onClick={() => onSelect(option.value)}
-            onKeyDown={(event) => {
-              if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
-                onSelect(option.value);
-              }
-            }}
-            width="100%"
-          >
-            <Flex align="center">
-              <Box flex="auto" style={{ wordBreak: 'break-all' }}>{option.label}</Box>
-              {option.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
-            </Flex>
-            {option.manufacturer && (
-              <Text ml="6x">{i18n._('Manufacturer: {{manufacturer}}', { manufacturer: option.manufacturer })}</Text>
-            )}
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
+    <Autocomplete
+      items={options}
+      value={stableValue}
+      matchWidth
+      getItemLabel={getItemLabel}
+      filterItems={filterItems}
+      renderItem={(item) => (
+        <>
+          <Flex align="center">
+            <Box flex="auto" style={{ wordBreak: 'break-all' }}>{item?.label}</Box>
+            {item?.connected && <FontAwesomeIcon icon="lock" fixedWidth />}
+          </Flex>
+          {item?.manufacturer && (
+            <Text ml="6x">{i18n._('Manufacturer: {{manufacturer}}', { manufacturer: item.manufacturer })}</Text>
+          )}
+        </>
+      )}
+      renderInput={({ inputProps, isClearable, isLoading, onClearInput, ref }) => (
+        <AutocompleteInput
+          ref={ref}
+          inputProps={{ ...inputProps, id, 'aria-label': label }}
+          disabled={disabled}
+          placeholder={placeholder}
+          isClearable={isClearable}
+          isLoading={isLoading}
+          onClearInput={onClearInput}
+        />
+      )}
+      renderContent={({ items, renderItems }) => (
+        items.length === 0
+          ? <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>
+          : renderItems(items)
+      )}
+      slotProps={{ content: { maxHeight: 200, overflowY: 'auto' } }}
+      onChange={item => onSelect(item?.value ?? null)}
+    />
+  );
+}
+
+/**
+ * @param {{id: string, label: string, options: Array, value: object | null, disabled: boolean, placeholder: string, emptyText?: string, onSelect: Function}} props
+ */
+function SerialBaudSelector({ id, label, options, value, disabled, placeholder, emptyText, onSelect }) {
+  return (
+    <Dropdown
+      items={options}
+      value={value}
+      matchWidth
+      renderItem={item => item?.label ?? placeholder}
+      renderToggle={({ renderItem, value: selected }) => (
+        <DropdownButton
+          id={id}
+          aria-label={label}
+          disabled={disabled}
+          width="100%"
+          variant="secondary"
+        >
+          {renderItem(selected)}
+        </DropdownButton>
+      )}
+      renderContent={({ items, renderItems }) => (
+        items.length === 0
+          ? <Text px="3x" py="2x">{emptyText || i18n._('No options available')}</Text>
+          : renderItems(items)
+      )}
+      slotProps={{ content: { maxHeight: 200, overflowY: 'auto' } }}
+      onChange={item => onSelect(item?.value ?? null)}
+    />
   );
 }

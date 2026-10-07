@@ -8,11 +8,9 @@ import {
   FormInput,
   FormLabel,
   FormTextarea,
-  Menu,
-  MenuButton,
-  MenuList,
+  Dropdown,
+  DropdownButton,
   MenuGroup,
-  MenuItem,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -23,7 +21,6 @@ import {
   Text,
 } from '@tonic-ui/react';
 import { ensureArray } from 'ensure-type';
-import _uniqueId from 'lodash/uniqueId';
 import React, { useRef } from 'react';
 import { FORM_ERROR } from 'final-form';
 import { Form, Field, FormSpy } from 'react-final-form';
@@ -32,24 +29,25 @@ import { useCreateMacroMutation } from '@app/queries/macros';
 import { composeValidators, required } from '@app/widgets/shared/validations';
 import variables from '../shared/variables';
 
-const mapMacroVariablesToMenuGroupItems = (variables) => ensureArray(variables).map(x => {
+const mapMacroVariablesToMenuItems = (variables, onInsert) => ensureArray(variables).flatMap((x) => {
   if (x.role === 'group') {
-    return (
-      <MenuGroup key={_uniqueId()} role="group" title={x.title}>
-        {mapMacroVariablesToMenuGroupItems(x.children)}
-      </MenuGroup>
-    );
+    return [
+      {
+        value: x.title,
+        type: 'custom',
+        content: (
+          <MenuGroup title={x.title} />
+        ),
+      },
+      ...mapMacroVariablesToMenuItems(x.children, onInsert),
+    ];
   }
 
   if (x.role === 'menuitem') {
-    return (
-      <MenuItem key={_uniqueId()} role="menuitem" px="6x">
-        {x.value}
-      </MenuItem>
-    );
+    return [{ value: x.value, props: { px: '6x', onClick: () => onInsert(x.value) } }];
   }
 
-  return null;
+  return [];
 });
 
 function NewMacro({
@@ -128,6 +126,19 @@ function NewMacro({
                   validate={composeValidators(required)}
                 >
                   {({ input, meta }) => {
+                    const insertAtCaret = (text) => {
+                      const textarea = contentRef.current;
+                      if (!textarea) {
+                        return;
+                      }
+
+                      const caretPos = textarea.selectionStart;
+                      const front = (textarea.value).substring(0, caretPos);
+                      const back = (textarea.value).substring(textarea.selectionEnd, textarea.value.length);
+                      const value = front + text + back;
+                      input.onChange(value);
+                    };
+
                     return (
                       <FormControl error={Boolean(meta.error && meta.touched)} mb="4x">
                         <Flex align="center" justify="space-between">
@@ -137,36 +148,17 @@ function NewMacro({
                             </FormLabel>
                           </Box>
                           <Box>
-                            <Menu>
-                              <MenuButton variant="ghost">
+                            <Dropdown
+                              items={mapMacroVariablesToMenuItems(variables, insertAtCaret)}
+                              slotProps={{ content: { maxHeight: 180, overflowY: 'auto' } }}
+                              renderItem={item => item?.content}
+                            >
+                              <DropdownButton variant="ghost">
                                 <FontAwesomeIcon icon="plus" fixedWidth />
                                 <Space width={8} />
                                 {i18n._('Macro Variables')}
-                              </MenuButton>
-                              <MenuList
-                                onClick={(event) => {
-                                  if (event.target.getAttribute('role') !== 'menuitem') {
-                                    return;
-                                  }
-
-                                  const textarea = contentRef.current;
-                                  if (!textarea) {
-                                    return;
-                                  }
-
-                                  const textToInsert = event.target.innerHTML;
-                                  const caretPos = textarea.selectionStart;
-                                  const front = (textarea.value).substring(0, caretPos);
-                                  const back = (textarea.value).substring(textarea.selectionEnd, textarea.value.length);
-                                  const value = front + textToInsert + back;
-                                  input.onChange(value);
-                                }}
-                                maxHeight={180}
-                                overflowY="auto"
-                              >
-                                {mapMacroVariablesToMenuGroupItems(variables)}
-                              </MenuList>
-                            </Menu>
+                              </DropdownButton>
+                            </Dropdown>
                           </Box>
                         </Flex>
                         <FormTextarea

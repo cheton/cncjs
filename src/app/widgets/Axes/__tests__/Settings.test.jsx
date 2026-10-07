@@ -71,7 +71,7 @@ describe('Axes controlled Settings tabs', () => {
       await user.click(general);
       expect(screen.getByRole('spinbutton', { name: 'Custom Jog Distance (mm) 1' })).toHaveValue(2.5);
       await user.click(screen.getByRole('tab', { name: 'ShuttleXpress' }));
-      expect(screen.getByRole('combobox', { name: 'Repeat Rate' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Repeat Rate' })).toBeInTheDocument();
       await user.click(screen.getByRole('button', { name: 'Save Changes' }));
       await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
       expect(config.set).toHaveBeenCalledWith('jog.metric.distances', [2.5]);
@@ -171,9 +171,9 @@ describe('Axes controlled Settings tabs', () => {
 
     renderAppUI(<ShuttleXpress value={value} onChange={onChange} />);
 
-    fireEvent.change(screen.getByRole('combobox', { name: 'Repeat Rate' }), {
-      target: { value: '5' },
-    });
+    const repeatRate = screen.getByRole('button', { name: 'Repeat Rate' });
+    fireEvent.click(repeatRate);
+    fireEvent.click(screen.getByRole('menuitem', { name: '5 Times per Second' }));
     expect(onChange).toHaveBeenLastCalledWith({ ...value, hertz: 5 });
 
     const minimumFeed = screen.getByRole('slider', { name: 'Minimum feed rate' });

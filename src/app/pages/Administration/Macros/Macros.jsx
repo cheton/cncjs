@@ -3,10 +3,8 @@ import {
   Box,
   Collapse,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Dropdown,
+  DropdownButton,
   Pagination,
   PaginationItem,
   Spinner,
@@ -468,22 +466,24 @@ const Macros = () => {
           px="6x" py="3x" gap="2x"
         >
           <Text>{i18n._('Total: {{count}}', { count: totalCount })}</Text>
-          <Menu placement="top">
-            <MenuButton disabled={totalCount === 0} variant="ghost">
-              {i18n._('{{rowsPerPage}} per page', { rowsPerPage })}
-            </MenuButton>
-            <MenuList>
-              {rowsPerPageOptions.map(option => (
-                <MenuItem
-                  key={option} onClick={() => {
-                    changePage(1); setRowsPerPage(option);
-                  }}
-                >
-                  {option}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </Menu>
+          <Dropdown
+            placement="top"
+            items={rowsPerPageOptions.map(option => ({
+              value: option,
+              content: option,
+              props: {
+                onClick: () => {
+                  changePage(1); setRowsPerPage(option);
+                },
+              },
+            }))}
+            renderItem={item => item?.content}
+            renderToggle={() => (
+              <DropdownButton disabled={totalCount === 0} variant="ghost">
+                {i18n._('{{rowsPerPage}} per page', { rowsPerPage })}
+              </DropdownButton>
+            )}
+          />
           <Input
             aria-label={i18n._('Page')} disabled={totalCount === 0} width="10x"
             px={0} textAlign="center"

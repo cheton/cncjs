@@ -1,7 +1,7 @@
 import {
   Box, Button, ButtonGroup, FormControl, FormInput, FormLabel, FormTextarea,
-  Image, InputGroup, InputGroupAddon, Menu, MenuButton, MenuItem, MenuList,
-  Select, Text, Tooltip,
+  Image, InputGroup, InputGroupAddon,
+  Dropdown, DropdownButton, Text, Tooltip,
 } from '@tonic-ui/react';
 import { ensureNumber, ensureString } from 'ensure-type';
 import React, { useEffect, useRef, useState } from 'react';
@@ -164,9 +164,25 @@ function Tool({
             <Field name="toolChangePolicy">{({ input }) => (
               <FormControl>
                 <FormLabel>{i18n._('Tool Change Policy')}</FormLabel>
-                <Select {...input} aria-label={i18n._('Tool Change Policy')} onChange={event => input.onChange(ensureNumber(event.target.value))}>
-                  {policyOptions.map(([option, label]) => <option key={option} value={option}>{i18n._(label)}</option>)}
-                </Select>
+                <Dropdown
+                  matchWidth
+                  items={policyOptions.map(([option, label]) => ({ value: option, label: i18n._(label) }))}
+                  value={input.value === null || input.value === undefined
+                    ? null
+                    : policyOptions.map(([option, label]) => ({ value: option, label: i18n._(label) }))
+                      .find(option => Number(option.value) === Number(input.value)) || null}
+                  renderItem={option => option?.label ?? ''}
+                  renderToggle={({ renderItem, value: selected }) => (
+                    <DropdownButton
+                      aria-label={i18n._('Tool Change Policy')}
+                      width="100%"
+                      variant="secondary"
+                    >
+                      {renderItem(selected)}
+                    </DropdownButton>
+                  )}
+                  onChange={option => input.onChange(ensureNumber(option?.value))}
+                />
                 {policy === TOOL_CHANGE_POLICY_IGNORE_M6_COMMANDS && <Text fontStyle="italic">{i18n._('This option skips the M6 command and pauses controller operations, giving you full manual control over the tool change process.')}</Text>}
                 {policy === TOOL_CHANGE_POLICY_SEND_M6_COMMANDS && <Text fontStyle="italic">{i18n._('This will send the line exactly as it is to the controller.')}</Text>}
               </FormControl>
@@ -244,29 +260,42 @@ function Tool({
                           variant="secondary"
                         >TLO
                         </Button>
-                        <Menu placement="bottom-start">
-                          <MenuButton ml="2x" size="sm" variant="secondary">
-                            {i18n._('Insert variable')}
-                          </MenuButton>
-                          <MenuList maxHeight="180px" overflow="auto">
-                            {variables.map(variable => (typeof variable === 'object' ? (
-                              <Text
-                                key={variable.text} color="text.secondary" px="3x"
-                                py="2x"
-                              >{variable.text}
-                              </Text>
-                            ) : (
-                              <MenuItem
-                                key={variable} onClick={() => {
+                        <Dropdown
+                          placement="bottom-start"
+                          slotProps={{ content: { maxHeight: '180px', overflow: 'auto' } }}
+                          items={variables.map(variable => (typeof variable === 'object' ? (
+                            {
+                              value: variable.text,
+                              type: 'custom',
+                              content: (
+                                <Text
+                                  key={variable.text} color="text.secondary" px="3x"
+                                  py="2x"
+                                >{variable.text}
+                                </Text>
+                              ),
+                            }
+                          ) : (
+                            {
+                              value: variable,
+                              content: variable,
+                              props: {
+                                key: variable,
+                                onClick: () => {
                                   const textarea = textareaRef.current; if (textarea) {
                                     insertAtCaret(textarea, variable); setCustomCommands(textarea.value);
                                   }
-                                }}
-                              >{variable}
-                              </MenuItem>
-                            )))}
-                          </MenuList>
-                        </Menu>
+                                },
+                              },
+                            }
+                          )))}
+                          renderItem={item => item?.content}
+                          renderToggle={() => (
+                            <DropdownButton ml="2x" size="sm" variant="secondary">
+                              {i18n._('Insert variable')}
+                            </DropdownButton>
+                          )}
+                        />
                       </Box>
                       <FormTextarea
                         aria-label={i18n._('Custom Tool Probe Commands')} ref={textareaRef} value={customCommands}

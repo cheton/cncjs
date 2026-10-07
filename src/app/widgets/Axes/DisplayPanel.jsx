@@ -2,17 +2,16 @@ import { ensureArray } from 'ensure-type';
 import {
   Box,
   Button,
+  Dropdown as TonicDropdown,
+  DropdownToggle,
   Image,
-  Menu,
   MenuDivider,
   MenuItem as TonicMenuItem,
-  MenuList,
-  MenuToggle,
   Tooltip,
 } from '@tonic-ui/react';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
-import React, { Children, cloneElement, isValidElement } from 'react';
+import React, { Children, isValidElement } from 'react';
 import {
   AXIS_E,
   AXIS_X,
@@ -247,23 +246,59 @@ function AxisCommandMenu({ children, disabled = false, onSelect }) {
   const toggle = items.find(child => isValidElement(child) && child.type === AxisCommandMenuToggle);
   const list = items.find(child => isValidElement(child) && child.type === AxisCommandMenuList);
 
+  // The `Dropdown` engine is data-driven — lift the item tree into item
+  // objects (the JSX elements are never rendered, they are the data source).
+  const menuItems = Children.toArray(list?.props.children).map(child => {
+    if (!isValidElement(child)) {
+      return child;
+    }
+    const { eventKey, header, divider } = child.props;
+    if (divider) {
+      return { type: 'divider' };
+    }
+    if (header) {
+      return { type: 'custom', content: child.props.children };
+    }
+    return {
+      value: eventKey,
+      content: child.props.children,
+      props: {
+        disabled: child.props.disabled,
+        selected: child.props.active,
+      },
+    };
+  });
+
   return (
-    <Menu>
-      <MenuToggle
-        aria-label={toggle.props['aria-label']}
-        className={toggle.props.className}
-        disabled={disabled}
-      >
-        {toggle.props.children}
-      </MenuToggle>
-      <MenuList>
-        {Children.map(list.props.children, child => (
-          isValidElement(child)
-            ? cloneElement(child, { onSelect })
-            : child
-        ))}
-      </MenuList>
-    </Menu>
+    <TonicDropdown
+      items={menuItems}
+      onChange={item => onSelect?.(item?.value)}
+      renderItem={(item) => {
+        if (item?.type === 'custom') {
+          return (
+            <Box
+              px="3x"
+              py="2x"
+              role="heading"
+              fontSize="sm"
+              color="text.secondary"
+            >
+              {item.content}
+            </Box>
+          );
+        }
+        return item?.content;
+      }}
+      renderToggle={() => (
+        <DropdownToggle
+          aria-label={toggle?.props['aria-label']}
+          className={toggle?.props.className}
+          disabled={disabled}
+        >
+          {toggle?.props.children}
+        </DropdownToggle>
+      )}
+    />
   );
 }
 
@@ -1495,13 +1530,17 @@ function DisplayPanel() {
 
   return (
     <Box className={styles.displayPanel} sx={{ mb: '10px', '&:last-child': { mb: 0 } }}>
-      <table className="table-bordered">
+      <table className="table-bordered" style={{ width: '100%', tableLayout: 'fixed' }}>
         <thead>
           <tr>
-            <th title={i18n._('Axis')}>{i18n._('Axis')}</th>
-            <th title={i18n._('Machine Position')}>{i18n._('Machine Position')}</th>
-            <th title={i18n._('Work Position')}>{i18n._('Work Position')}</th>
-            <th className={styles.action}>
+            <th scope="col" className={styles.coordinate} title={i18n._('Axis')}>{i18n._('Axis')}</th>
+            <th scope="col" className={styles.positionHeading} title={i18n._('Machine Position')}>
+              <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Machine Position')}</Box>
+            </th>
+            <th scope="col" className={styles.positionHeading} title={i18n._('Work Position')}>
+              <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Work Position')}</Box>
+            </th>
+            <th scope="col" className={styles.action}>
               {renderActionDropdown({ wcs })}
             </th>
           </tr>

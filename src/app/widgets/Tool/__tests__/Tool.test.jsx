@@ -336,7 +336,7 @@ describe('Tool widget draft ownership', () => {
     );
 
     try {
-      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Tool Change Policy' })).toHaveValue('0'));
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Tool Change Policy' })).toHaveTextContent('Ignore M6 commands (Default)'));
       await new Promise(resolve => {
         setTimeout(() => resolve(), 150);
       });
@@ -356,9 +356,11 @@ describe('Tool widget draft ownership', () => {
     );
 
     try {
-      const policy = await screen.findByRole('combobox', { name: 'Tool Change Policy' });
-      fireEvent.change(policy, { target: { value: '1' } });
-      fireEvent.change(policy, { target: { value: '0' } });
+      const policy = await screen.findByRole('button', { name: 'Tool Change Policy' });
+      fireEvent.click(policy);
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Send M6 commands' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Tool Change Policy' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Ignore M6 commands (Default)' }));
 
       await waitFor(() => expect(mockSetToolConfig).toHaveBeenCalledTimes(1));
       expect(mockSetToolConfig).toHaveBeenCalledWith({

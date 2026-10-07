@@ -165,59 +165,59 @@ beforeEach(() => {
 });
 
 describe('Connection form', () => {
-  test('reads serial metadata from TanStack Query and commits menu selection', async () => {
+  test('reads serial metadata from TanStack Query and commits selector choice', async () => {
     renderAppUI(<Connection />);
 
-    const serialPort = screen.getByRole('button', { name: 'Serial port' });
+    const serialPort = screen.getByRole('combobox', { name: 'Serial port' });
     const baudRate = screen.getByRole('button', { name: 'Baud rate' });
 
-    expect(serialPort).toHaveTextContent('/dev/ttyUSB0');
+    expect(serialPort).toHaveValue('/dev/ttyUSB0');
     expect(baudRate).toHaveTextContent('115200');
 
     fireEvent.click(serialPort);
-    expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ })).toHaveTextContent('Manufacturer: {{manufacturer}}');
-    fireEvent.click(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ }));
+    expect(screen.getByRole('option', { name: /\/dev\/ttyUSB1/ })).toHaveTextContent('Manufacturer: {{manufacturer}}');
+    fireEvent.click(screen.getByRole('option', { name: /\/dev\/ttyUSB1/ }));
     fireEvent.click(baudRate);
     fireEvent.click(screen.getByRole('menuitem', { name: '250000' }));
 
     expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.path', '/dev/ttyUSB1');
     expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.baudRate', 250000);
     await waitFor(() => expect(baudRate).toHaveFocus());
-    expect(serialPort).toHaveTextContent('/dev/ttyUSB1');
+    expect(serialPort).toHaveValue('/dev/ttyUSB1');
     expect(baudRate).toHaveTextContent('250000');
   });
 
-  test('serial menus are disabled while connected and show an empty port message', () => {
+  test('serial selectors are disabled while connected and show an empty port message', () => {
     mockPortsQuery.data = [];
     const { rerender } = renderAppUI(<Connection />);
-    fireEvent.click(screen.getByRole('button', { name: 'Serial port' }));
+    fireEvent.click(screen.getByRole('combobox', { name: 'Serial port' }));
     expect(screen.getByText('No ports available')).toBeInTheDocument();
 
     mockConnection = createConnection({ state: 'connected', ident: 'serial:/dev/ttyUSB0' });
     rerender(<Connection />);
-    expect(screen.getByRole('button', { name: 'Serial port' })).toBeDisabled();
+    expect(screen.getByRole('combobox', { name: 'Serial port' })).toBeDisabled();
   });
 
-  test('serial menu supports keyboard selection, Escape, and focus return', async () => {
+  test('serial port supports keyboard selection, Escape, and focus retention', async () => {
     renderAppUI(<Connection />);
-    const serialPort = screen.getByRole('button', { name: 'Serial port' });
+    const serialPort = screen.getByRole('combobox', { name: 'Serial port' });
 
     serialPort.focus();
+    fireEvent.keyDown(serialPort, { key: 'ArrowDown' });
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    fireEvent.keyDown(serialPort, { key: 'ArrowDown' });
+    await waitFor(() => expect(screen.getByRole('option', { name: /\/dev\/ttyUSB1/ })).toHaveAttribute('aria-selected', 'true'));
     fireEvent.keyDown(serialPort, { key: 'Enter' });
-    const menu = screen.getByRole('menu');
-    fireEvent.keyDown(menu, { key: 'ArrowDown' });
-    await waitFor(() => expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB0/ })).toHaveFocus());
-    fireEvent.keyDown(menu, { key: 'ArrowDown' });
-    await waitFor(() => expect(screen.getByRole('menuitem', { name: /\/dev\/ttyUSB1/ })).toHaveFocus());
-    fireEvent.keyDown(document.activeElement, { key: 'Enter' });
 
     expect(mockConfigSet).toHaveBeenCalledWith('connection.serial.path', '/dev/ttyUSB1');
-    await waitFor(() => expect(serialPort).toHaveFocus());
+    expect(serialPort).toHaveFocus();
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
 
-    fireEvent.click(serialPort);
-    fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' });
+    fireEvent.keyDown(serialPort, { key: 'ArrowDown' });
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    fireEvent.keyDown(serialPort, { key: 'Escape' });
     await waitFor(() => {
-      expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
       expect(serialPort).toHaveFocus();
     });
   });

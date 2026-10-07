@@ -1,5 +1,5 @@
-import { Menu, MenuList, MenuToggle } from '@tonic-ui/react';
-import React, { Children, cloneElement, isValidElement } from 'react';
+import { Box, Dropdown, DropdownToggle } from '@tonic-ui/react';
+import React, { Children, isValidElement } from 'react';
 import styles from './index.styl';
 
 /**
@@ -17,28 +17,73 @@ function DropdownButton({ children, dropup = false, onSelect, style, toggle, ...
       return child;
     }
 
-    const onItemSelect = child.props.onSelect;
-    return cloneElement(child, {
-      onSelect: (eventKey, event) => {
-        onItemSelect?.(eventKey, event);
-        onSelect?.(eventKey, event);
+    const {
+      active = false,
+      divider = false,
+      header = false,
+      eventKey,
+      onClick,
+      onSelect: onItemSelect,
+      children: content,
+      ...rest
+    } = child.props;
+
+    if (divider) {
+      return { ...rest, type: 'divider' };
+    }
+
+    if (header) {
+      return {
+        ...rest,
+        type: 'custom',
+        content: (
+          <Box
+            {...rest}
+            px="3x"
+            py="2x"
+            role="heading"
+            fontSize="sm"
+            color="text.secondary"
+          >
+            {content}
+          </Box>
+        ),
+      };
+    }
+
+    return {
+      ...rest,
+      key: child.key,
+      value: eventKey,
+      content,
+      props: {
+        ...rest,
+        selected: active,
+        onClick: (event) => {
+          onClick?.(event);
+          onItemSelect?.(eventKey, event);
+          onSelect?.(eventKey, event);
+        },
       },
-    });
+    };
   });
 
   return (
-    <Menu
+    <Dropdown
       placement={dropup ? 'top-start' : 'bottom-start'}
       style={{
         ...style,
-        float: 'left',
+        display: 'flex',
+        alignSelf: 'stretch',
       }}
-    >
-      <MenuToggle {...toggleProps} className={styles.widgetButton}>
-        {toggle}
-      </MenuToggle>
-      <MenuList>{items}</MenuList>
-    </Menu>
+      items={items}
+      renderItem={(item) => item?.content}
+      renderToggle={() => (
+        <DropdownToggle {...toggleProps} className={styles.widgetButton}>
+          {toggle}
+        </DropdownToggle>
+      )}
+    />
   );
 }
 

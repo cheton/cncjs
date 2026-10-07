@@ -1,16 +1,19 @@
 import { ButtonLink, LinkButton } from '@tonic-ui/react';
+import cx from 'classnames';
 import React from 'react';
+import styles from './index.styl';
 
 /**
- * @param {{ disabled?: boolean, href?: string, inverted?: boolean, onClick?: Function, sx?: object }} props
+ * @param {{ className?: string, disabled?: boolean, href?: string, inverted?: boolean, onClick?: Function, sx?: object }} props
  * @returns {JSX.Element}
  */
-function Button({ disabled, href, inverted = false, onClick, sx, ...props }) {
+function Button({ className, disabled, href, inverted = false, onClick, sx, ...props }) {
   const Component = href ? ButtonLink : LinkButton;
 
   return (
     <Component
       {...props}
+      className={cx(className, styles.widgetButton)}
       disabled={disabled}
       href={href}
       onClick={(event) => {

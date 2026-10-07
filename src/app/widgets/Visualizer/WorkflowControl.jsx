@@ -2,11 +2,9 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Dropdown,
+  DropdownButton,
   Flex,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Space,
 } from '@tonic-ui/react';
 import get from 'lodash/get';
@@ -121,30 +119,45 @@ function WorkflowControl({ state = {}, actions = {} }) {
           >
             {i18n._('Upload G-code')}
           </Button>
-          <Menu>
-            <MenuButton
-              id="upload-dropdown"
-              aria-label={i18n._('Upload G-code options')}
-              variant="primary"
-              disabled={!canUpload}
-            />
-            <MenuList>
-              <Box px="3x" py="2x" fontWeight="bold">
-                {i18n._('Watch Directory')}
-              </Box>
-              <MenuItem
-                onClick={() => {
-                  if (typeof actions.openModal === 'function') {
-                    actions.openModal(MODAL_WATCH_DIRECTORY);
-                  }
-                }}
-              >
-                <i aria-hidden="true" className="fa fa-search" />
-                <Space width={8} />
-                {i18n._('Browse...')}
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          <Dropdown
+            items={[
+              {
+                value: 'watch-directory-heading',
+                type: 'custom',
+                content: (
+                  <Box px="3x" py="2x" fontWeight="bold">
+                    {i18n._('Watch Directory')}
+                  </Box>
+                ),
+              },
+              {
+                value: 'browse',
+                content: (
+                  <>
+                    <i aria-hidden="true" className="fa fa-search" />
+                    <Space width={8} />
+                    {i18n._('Browse...')}
+                  </>
+                ),
+                props: {
+                  onClick: () => {
+                    if (typeof actions.openModal === 'function') {
+                      actions.openModal(MODAL_WATCH_DIRECTORY);
+                    }
+                  },
+                },
+              },
+            ]}
+            renderItem={item => item?.content}
+            renderToggle={() => (
+              <DropdownButton
+                id="upload-dropdown"
+                aria-label={i18n._('Upload G-code options')}
+                variant="primary"
+                disabled={!canUpload}
+              />
+            )}
+          />
         </ButtonGroup>
         <ButtonGroup>
           <Button

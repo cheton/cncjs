@@ -159,6 +159,38 @@ describe('Axes position input', () => {
     }
   });
 
+  test('identifies machine and work position columns by their headers', () => {
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: false,
+          units: 'mm',
+          axes: ['x'],
+          machinePosition: { x: '1.000' },
+          workPosition: { x: '1.000' },
+          jog: { axis: '', keypad: false },
+          controller: { type: 'Grbl' },
+          positionInput: null,
+        },
+        onGetWorkCoordinateSystem: () => 'G54',
+        onGetJogDistance: () => 1,
+        onJog: jest.fn(),
+        onSetPositionInput: jest.fn(),
+        onSetWorkOffsets: jest.fn(),
+      }}
+      >
+        <DisplayPanel />
+      </AxesProvider>
+    );
+
+    try {
+      expect(screen.getByRole('columnheader', { name: 'Machine Position' })).toHaveAttribute('scope', 'col');
+      expect(screen.getByRole('columnheader', { name: 'Work Position' })).toHaveAttribute('scope', 'col');
+    } finally {
+      view.dispose();
+    }
+  });
+
   test('uses the provider jog callback for a visible axis movement', () => {
     const onJog = jest.fn();
     const view = renderAppUI(

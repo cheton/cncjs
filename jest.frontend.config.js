@@ -11,11 +11,15 @@ module.exports = {
     }],
   },
   moduleNameMapper: {
+    // Asset mocks must precede the `@app` alias: Jest applies the first
+    // matching pattern, and aliased asset requests (e.g.
+    // `@app/images/logo.png`) would otherwise resolve to the raw file and
+    // fail to parse.
+    '\\.(styl|css)$': '<rootDir>/src/app/test/styleMock.js',
+    '\\.(png|jpe?g|gif|svg|woff2?|ttf|eot)$': '<rootDir>/src/app/test/fileMock.js',
     '^@app$': '<rootDir>/src/app',
     '^@app/(.*)$': '<rootDir>/src/app/$1',
     '^app/(.*)$': '<rootDir>/src/app/$1',
-    '\\.(styl|css)$': '<rootDir>/src/app/test/styleMock.js',
-    '\\.(png|jpe?g|gif|svg|woff2?|ttf|eot)$': '<rootDir>/src/app/test/fileMock.js',
   },
   setupFilesAfterEnv: ['<rootDir>/src/app/test/setup.js'],
   clearMocks: true,

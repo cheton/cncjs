@@ -1,10 +1,8 @@
 import {
   Box,
   Button,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
+  Dropdown,
+  DropdownButton,
   Space,
 } from '@tonic-ui/react';
 import {
@@ -805,28 +803,49 @@ function AutolevelWidget({
           >
             {isCollapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
           </Button>
-          <Menu>
-            <MenuButton aria-label={i18n._('More')} title={i18n._('More')} variant="ghost">
-              <MoreIcon />
-            </MenuButton>
-            <MenuList>
-              <MenuItem onClick={toggleFullscreen}>
-                <FontAwesomeIcon fixedWidth icon={isFullscreen ? faCompress : faExpand} />
-                <Space width={4} />
-                {i18n._(isFullscreen ? 'Exit Full Screen' : 'Enter Full Screen')}
-              </MenuItem>
-              <MenuItem onClick={onFork}>
-                <FontAwesomeIcon fixedWidth icon={faCodeBranch} />
-                <Space width={4} />
-                {i18n._('Fork Widget')}
-              </MenuItem>
-              <MenuItem onClick={onRemove}>
-                <CloseIcon />
-                <Space width={4} />
-                {i18n._('Remove Widget')}
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          <Dropdown
+            items={[
+              {
+                value: 'fullscreen',
+                content: (
+                  <>
+                    <FontAwesomeIcon fixedWidth icon={isFullscreen ? faCompress : faExpand} />
+                    <Space width={4} />
+                    {i18n._(isFullscreen ? 'Exit Full Screen' : 'Enter Full Screen')}
+                  </>
+                ),
+                props: { onClick: toggleFullscreen },
+              },
+              {
+                value: 'fork',
+                content: (
+                  <>
+                    <FontAwesomeIcon fixedWidth icon={faCodeBranch} />
+                    <Space width={4} />
+                    {i18n._('Fork Widget')}
+                  </>
+                ),
+                props: { onClick: onFork },
+              },
+              {
+                value: 'remove',
+                content: (
+                  <>
+                    <CloseIcon />
+                    <Space width={4} />
+                    {i18n._('Remove Widget')}
+                  </>
+                ),
+                props: { onClick: onRemove },
+              },
+            ]}
+            renderItem={item => item?.content}
+            renderToggle={() => (
+              <DropdownButton aria-label={i18n._('More')} title={i18n._('More')} variant="ghost">
+                <MoreIcon />
+              </DropdownButton>
+            )}
+          />
         </Box>
       </Box>
       <Box

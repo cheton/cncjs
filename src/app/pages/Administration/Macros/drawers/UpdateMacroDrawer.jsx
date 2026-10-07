@@ -8,11 +8,9 @@ import {
   DrawerOverlay,
   Flex,
   LinkButton,
-  Menu,
+  Dropdown,
   MenuToggle,
-  MenuList,
   MenuGroup,
-  MenuItem,
   Spinner,
   Text,
 } from '@tonic-ui/react';
@@ -125,47 +123,53 @@ const UpdateMacroDrawer = ({
                     infoTipLabel={i18n._('Input the G-code commands to execute with this macro.')}
                     rows="10"
                     labelAction={(
-                      <Menu placement="bottom-end">
-                        <MenuToggle>
-                          {({ getMenuToggleProps }) => (
-                            <LinkButton {...getMenuToggleProps()}>
-                              {i18n._('Select variables')}
-                            </LinkButton>
-                          )}
-                        </MenuToggle>
-                        <MenuList
-                          maxHeight="50vh"
-                          overflow="auto"
-                        >
-                          {MACRO_VARIABLE_EXAMPLES.map(group => (
-                            <MenuGroup
-                              key={group.title}
-                              title={group.title}
-                            >
-                              {group.data.map(item => (
-                                <MenuItem
-                                  key={item}
-                                  value={item}
-                                  onKeyDown={(event) => {
-                                    if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
-                                      event.preventDefault();
-                                      event.currentTarget.click();
-                                    }
-                                  }}
-                                  onClick={(event) => {
-                                    const el = gcodeInputRef.current;
-                                    const value = event.currentTarget.value;
-                                    const textareaValue = insertAtCaret(el, value);
-                                    form.change('action', textareaValue);
-                                  }}
-                                >
-                                  {item}
-                                </MenuItem>
-                              ))}
-                            </MenuGroup>
-                          ))}
-                        </MenuList>
-                      </Menu>
+                      <Dropdown
+                        placement="bottom-end"
+                        slotProps={{ content: { maxHeight: '50vh', overflow: 'auto' } }}
+                        items={MACRO_VARIABLE_EXAMPLES.flatMap(group => [
+                          {
+                            value: group.title,
+                            type: 'custom',
+                            content: (
+                              <MenuGroup
+                                key={group.title}
+                                title={group.title}
+                              />
+                            ),
+                          },
+                          ...group.data.map(item => (
+                            {
+                              value: item,
+                              content: item,
+                              props: {
+                                value: item,
+                                onKeyDown: (event) => {
+                                  if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) {
+                                    event.preventDefault();
+                                    event.currentTarget.click();
+                                  }
+                                },
+                                onClick: (event) => {
+                                  const el = gcodeInputRef.current;
+                                  const value = event.currentTarget.value;
+                                  const textareaValue = insertAtCaret(el, value);
+                                  form.change('action', textareaValue);
+                                },
+                              },
+                            }
+                          )),
+                        ])}
+                        renderItem={item => item?.content}
+                        renderToggle={() => (
+                          <MenuToggle>
+                            {({ getMenuToggleProps }) => (
+                              <LinkButton {...getMenuToggleProps()}>
+                                {i18n._('Select variables')}
+                              </LinkButton>
+                            )}
+                          </MenuToggle>
+                        )}
+                      />
                     )}
                   />
                 </>
