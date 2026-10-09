@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import pubsub from 'pubsub-js';
 import { renderAppUI } from '@app/test/render';
 import WidgetConfigProvider from '@app/widgets/shared/WidgetConfigProvider';
@@ -156,7 +156,7 @@ test('keeps each fork iframe URL isolated when the host changes widget ids', () 
   config.unset(['widgets', 'custom:two']);
 });
 
-test('keeps the URL draft local until Settings saves it', () => {
+test('keeps the URL draft local until Settings saves it', async () => {
   setCustomConfig('custom', {
     title: 'Custom',
     url: '/saved/',
@@ -185,7 +185,7 @@ test('keeps the URL draft local until Settings saves it', () => {
   });
   fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
 
-  expect(config.get(['widgets', 'custom', 'url'])).toBe('/saved-after-draft/');
+  await waitFor(() => expect(config.get(['widgets', 'custom', 'url'])).toBe('/saved-after-draft/'));
   expect(onClose).toHaveBeenCalledTimes(2);
 });
 

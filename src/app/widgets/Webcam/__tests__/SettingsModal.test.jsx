@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import { MEDIA_SOURCE_LOCAL, MEDIA_SOURCE_STREAM } from '../constants';
@@ -54,7 +54,7 @@ describe('Webcam settings draft', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('writes all settings only when saved', () => {
+  test('writes all settings only when saved', async () => {
     const onClose = jest.fn();
     renderAppUI(<SettingsModal onClose={onClose} />);
 
@@ -63,6 +63,7 @@ describe('Webcam settings draft', () => {
       target: { value: 'http://camera.example/stream' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
 
     expect(mockSetConfig).toHaveBeenCalledWith('mediaSource', MEDIA_SOURCE_STREAM);
     expect(mockSetConfig).toHaveBeenCalledWith('deviceId', '__default__');

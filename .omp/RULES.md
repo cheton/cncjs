@@ -5,7 +5,7 @@
 * Document function component props using JSDoc.
 * Do not add `propTypes`.
 * Define runtime default values in function parameters. When removing `defaultProps`, preserve the existing default values.
-* Do not use native form submission, such as `<Box as="form" onSubmit={submit}>`. Use `react-final-form` with `FormControl` components instead.
+* Do not use uncontrolled native form submission. Use `react-hook-form` with `FormControl` components: initialize with `useForm({ mode: 'onSubmit' })`, wrap the form in `FormProvider`, and read fields via `register`/`Controller` + `useFormContext`. Render the form as `<form noValidate onSubmit={form.handleSubmit(...)}>` and drive field error state from `formState.errors` (never the native `required` attribute).
 
 ## Tonic UI migration
 

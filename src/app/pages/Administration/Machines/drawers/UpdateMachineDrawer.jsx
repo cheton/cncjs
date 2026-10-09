@@ -11,13 +11,11 @@ import {
   Spinner,
   Text,
 } from '@tonic-ui/react';
-import memoize from 'micro-memoize';
-import React, { useCallback } from 'react';
-import { Form } from 'react-final-form';
+import { FormProvider, useForm } from 'react-hook-form';
+import React, { useCallback, useEffect } from 'react';
 import useToast from '@app/hooks/useToast';
 import i18n from '@app/lib/i18n';
 import FieldInput from '@app/pages/Administration/components/FieldInput';
-import * as validations from '@app/pages/Administration/validations';
 import {
   DEFAULT_MACHINE_PROFILE_LIMITS,
   MACHINE_PROFILE_LIMIT_FIELDS,
@@ -30,8 +28,6 @@ import {
   useReadMachineQuery,
   useUpdateMachineMutation,
 } from '../queries';
-
-const getMemoizedState = memoize(state => ({ ...state }));
 
 /** @param {{ id: string, onClose?: Function }} props */
 const UpdateMachineDrawer = ({
@@ -66,13 +62,31 @@ const UpdateMachineDrawer = ({
     },
   });
 
-  const initialValues = getMemoizedState({
-    name: readMachineQuery.data?.name,
-    limits: {
-      ...DEFAULT_MACHINE_PROFILE_LIMITS,
-      ...readMachineQuery.data?.limits,
+  const methods = useForm({
+    defaultValues: {
+      name: '',
+      limits: { ...DEFAULT_MACHINE_PROFILE_LIMITS },
     },
+    mode: 'onSubmit',
   });
+  const {
+    reset,
+    handleSubmit,
+  } = methods;
+
+  // Populate the form once the record loads. `reset` does not run validation,
+  // so no invalid state flashes when the edit form opens.
+  useEffect(() => {
+    if (readMachineQuery.data) {
+      reset({
+        name: readMachineQuery.data.name,
+        limits: {
+          ...DEFAULT_MACHINE_PROFILE_LIMITS,
+          ...readMachineQuery.data.limits,
+        },
+      });
+    }
+  }, [readMachineQuery.data, reset]);
 
   const handleFormSubmit = useCallback((values) => {
     updateMachineMutation.mutate({
@@ -98,78 +112,73 @@ const UpdateMachineDrawer = ({
       {...rest}
     >
       <DrawerOverlay />
-      <Form
-        initialValues={initialValues}
-        onSubmit={handleFormSubmit}
-        validate={(values) => {
-          return {
-            name: validations.required(values.name),
-            ...validateMachineProfileLimits(values),
-          };
-        }}
-        render={({ form }) => (
-          <DrawerContent>
-            <DrawerHeader>
-              <Text>
-                {i18n._('Machine Details')}
-              </Text>
-            </DrawerHeader>
-            <DrawerBody>
-              {readMachineQuery.isFetching && (
-                <Spinner />
-              )}
-              {!(readMachineQuery.isFetching) && (
-                <>
+      <FormProvider {...methods}>
+        <DrawerContent
+          as="form"
+          noValidate
+          onSubmit={handleSubmit(handleFormSubmit)}
+        >
+          <DrawerHeader>
+            <Text>
+              {i18n._('Machine Details')}
+            </Text>
+          </DrawerHeader>
+          <DrawerBody>
+            {readMachineQuery.isFetching && (
+              <Spinner />
+            )}
+            {!(readMachineQuery.isFetching) && (
+              <>
+                <FieldInput
+                  name="name"
+                  label={i18n._('Machine name:')}
+                  required
+                  placeholder={i18n._('e.g., CNC Router')}
+                />
+                <Text fontWeight="bold" mb="2x">{i18n._('Limits')}</Text>
+                {MACHINE_PROFILE_LIMIT_FIELDS.map(({ key, axis, bound }) => (
                   <FieldInput
-                    name="name"
-                    label={i18n._('Machine name:')}
+                    key={key}
+                    name={`limits.${key}`}
+                    deps={bound === 'min' ? `limits.${axis.toLowerCase()}max` : undefined}
+                    label={getMachineProfileLimitLabel(axis, bound)}
                     required
-                    placeholder={i18n._('e.g., CNC Router')}
+                    type="number"
+                    step="any"
+                    validate={(_value, formValues) => validateMachineProfileLimits(formValues).limits?.[key]}
                   />
-                  <Text fontWeight="bold" mb="2x">{i18n._('Limits')}</Text>
-                  {MACHINE_PROFILE_LIMIT_FIELDS.map(({ key, axis, bound }) => (
-                    <FieldInput
-                      key={key}
-                      name={`limits.${key}`}
-                      label={getMachineProfileLimitLabel(axis, bound)}
-                      required
-                      type="number"
-                      step="any"
-                    />
-                  ))}
-                </>
-              )}
-            </DrawerBody>
-            <DrawerFooter>
-              <Flex
-                alignItems="center"
-                columnGap="2x"
+                ))}
+              </>
+            )}
+          </DrawerBody>
+          <DrawerFooter>
+            <Flex
+              alignItems="center"
+              columnGap="2x"
+            >
+              <Button
+                type="button"
+                onClick={onClose}
+                sx={{
+                  minWidth: 80,
+                }}
               >
-                <Button
-                  onClick={onClose}
-                  sx={{
-                    minWidth: 80,
-                  }}
-                >
-                  {i18n._('Cancel')}
-                </Button>
-                <Button
-                  variant="primary"
-                  disabled={isFormDisabled}
-                  onClick={() => {
-                    form.submit();
-                  }}
-                  sx={{
-                    minWidth: 80,
-                  }}
-                >
-                  {i18n._('Save')}
-                </Button>
-              </Flex>
-            </DrawerFooter>
-          </DrawerContent>
-        )}
-      />
+                {i18n._('Cancel')}
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={isFormDisabled}
+                sx={{
+                  minWidth: 80,
+                }}
+              >
+                {i18n._('Save')}
+              </Button>
+            </Flex>
+          </DrawerFooter>
+        </DrawerContent>
+      </FormProvider>
     </Drawer>
   );
 };

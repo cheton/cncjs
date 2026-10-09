@@ -1,12 +1,12 @@
 # CNCjs next → Tonic UI v2 — 交接入口
 
-Current visual checkpoint (2026-10-06): **V3-V completed**. GPT-6-Luna xhigh performed browser operations; root independently reviewed screenshots, assertions and owned cleanup. Theme matrix7, UI routes15/15, filename/badge2 and all four controller light/dark8cases/32gates pass. Source fixes f050804e/fbea2042 and latest-source production/four-platform CI pass. See [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) and [final evidence](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-20261003-luna/README.md).
+Latest checkpoint (2026-10-09): **RHF completed**. All Administration, login, and widget forms use React Hook Form 7.89.0; `react-final-form` and `final-form` are removed. Frontend 80 suites / 515 tests pass; full lint exits 0 (13 ESLint and 28 Stylint warnings); UI migration has zero violations and 68 passing contract tests. See [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) and the [RHF plan and verification](plans/2026-10-08-react-hook-form/PLAN.md). Existing visual gates remain pending.
 
 本檔是**唯一**的跨 session 交接入口：bootstrap、現況、hard rules、恢復 prompt 都在這裡。
 
 舊路徑 `docs/superpowers/plans/2026-09-07-tonic-ui-v2/HANDOFF.md` 已移除，內容併入本檔；歷史 checkpoint 保留在 [execution-log](plans/2026-09-07-tonic-ui-v2/execution-log.md) 與 Git history。
 
-Latest source follow-up (2026-10-06): **V3-GV completed and user accepted for commit**. React/React DOM ranges enforce 18.3; eight deprecated focus groups use native CSS pseudo selectors in `sx` without data-state aliases, and four outside-interaction props use `closeOnInteractOutside`. Semantic surfaces, status colors and fixed-mode previews follow the official guide. Existing frontend 78 suites / 505 tests, lint 0 errors / 4 existing warnings, guard 0 violations / 68 fixtures and immutable offline install pass. Fresh visual evidence and owned cleanup are in the [V3-GV report](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/report.json); [root acceptance](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/root-acceptance.json) records the final alias-only adjustment, exact source hashes and remaining focus/console-warning limitations. Inter/DM Mono loading remains outside this slice.
+Historical V3-GV checkpoint (2026-10-06): completed with user-accepted evidence. See the [report](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/report.json), [root acceptance](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-guide-20261006-luna/root-acceptance.json), and [V3-V evidence](plans/2026-09-07-tonic-ui-v2/artifacts/browser/v3-20261003-luna/README.md). Their scope, focus/console-warning limitations, and excluded Inter/DM Mono loading are unchanged.
 
 ## 接手第一步
 
@@ -17,21 +17,30 @@ Latest source follow-up (2026-10-06): **V3-GV completed and user accepted for co
 5. 實測並核對：`git status --short`、`git rev-parse HEAD`、`git log --oneline origin/feat/tonic-ui-v2-migration..HEAD`。**不要 reset 未知差異。**
 6. 貼上下方「恢復 prompt」開始工作。
 
-## 現況快照（2026-10-07）
+## 現況快照（2026-10-09）
 
 | 項目 | 撰寫時的值 |
 | --- | --- |
 | Branch | `feat/tonic-ui-v2-migration` |
-| Validated source | `83dcb3d7` is pushed to `origin/feat/tonic-ui-v2-migration`; the macro-dropdown follow-up below is uncommitted. |
-| 工作樹 | Uncommitted V3-UI-C direct Tonic UI action migration plus Dropdown default-sizing cleanup. Integrated frontend 78/507; focused final-source 3 suites/50 tests; targeted ESLint 0 errors/9 warnings; Widget Stylint clean. |
-| Delivery | User authorized commit and push of these follow-ups to `origin/feat/tonic-ui-v2-migration`. Check Git for the resulting commit and push state. |
-| Active task | V3-UI-C completed with bounded GPT-6-Luna xhigh browser evidence; V3-T, FIX-003, and FIX-004 remain in_progress on their pre-existing visual gates. No prior authenticated browser pass is inferred. |
-| 最近完成 | V3-UI-C：15 個 widget 動作控制改為原生 Tonic Button／Dropdown，刪除本地 Widget Button/DropdownButton/DropdownMenuItem、exports、舊封裝測試與無用 CSS；保留 Widget 版面殼與 camera/iframe/preview/repeat 行為。Macro 變數選單改用 `renderToggle`／`onChange`（滑鼠與鍵盤皆可插入）並加 `portalled` 修正 Modal 裁切。Luna 以 Chromium 153 實測：26 項選單、360px 預設高度可捲動、入口不被 ModalBody 裁切、末項可捲到並插入、Escape 關閉且焦點回到 modal、無頁面錯誤與 API 寫入。 |
+| Validated source | RHF migration and accompanying handoff changes are delivered together; resolve the resulting commit from Git rather than a hardcoded HEAD. |
+| 工作樹 | RHF source, tests, dependency cleanup, rules, plan, changelog, and handoff updates prepared for user-authorized delivery. Frontend 80/515; full lint 0 errors (13 ESLint / 28 Stylint warnings); guard 358 files / 18 domain classes / 0 violations and 68 passing fixtures. |
+| Delivery | User explicitly authorized commit and push to `origin/feat/tonic-ui-v2-migration`, including handoff updates. This authorization covers this delivery only; check Git for the resulting commit/push state. |
+| Active task | RHF is completed. V3-T, FIX-003, and FIX-004 remain in_progress on their existing visual gates; no new authenticated application browser pass is claimed. |
+| 最近完成 | RHF: all ten Administration drawers, GeneralSettings, shared fields, LoginPage, Autolevel/Probe/Webcam/Custom/Macro modals, and Probe/Tool/Connection inline forms migrated. Reviewed fixes preserve drawer placement, Settings scrolling, linked errors, paired machine limits, macro insertion validation, pending-submit guards, safety confirmation, and dirty-field/config reset behavior. |
 | 下一步推薦 | 使用者目視確認：1439px 側欄收合、workspace primary/secondary pane scrollbar、MiniNav hover flyout、Connection refresh spacing、quiet light theme，以及 Axes keypad/header layout；之後關閉對應 ledger gates，再回 icon migration I1（I1–I6 延後清單）。 |
-| Open gaps | V3-T, FIX-003, FIX-004 visual checks and V3-DS-F user confirmation remain pending; local browser reached sign-in only. Retain inherited 768-pane clipping, disabled/static dark SVG contrast, headless/replay limitations, and no full R6 performance/hardware rerun. |
+| Open gaps | V3-T, FIX-003, FIX-004 visual checks and V3-DS-F user confirmation remain pending. RHF browser checks used real component surfaces with fixtures, not an authenticated application run. Retain inherited 768-pane clipping, disabled/static dark SVG contrast, headless/replay limitations, and no new full R6 performance/hardware rerun. |
 | BR0 | 使用者明確 `waived`，**不是 passed**；未驗證 browser gates 延後至 R6 |
 
 本表是撰寫當下的事實，**不是當前狀態**——本檔與後續 doc commit 都會推進 HEAD。接手時一律自行實測；若與 [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) 不一致，以 STATUS 為準。
+
+## RHF completed — 2026-10-09
+
+- [Plan and acceptance](plans/2026-10-08-react-hook-form/PLAN.md): `useForm({ mode: 'onSubmit' })`, `FormProvider`, registered/controlled fields, and `noValidate` forms replace all Final Form ownership. Error state comes from RHF, not native `required`.
+- Browser component checks verified neutral New Command borders on open, errors after failed Add, delayed Edit loading without invalid flashes, a pinned GeneralSettings footer with a scrolling body, login validation/failure draft retention, probe confirmation, Tool keyboard save, and invalid/valid socket submission. Fixture boundaries were used; older authenticated visual gates are not closed.
+- Final commands: `yarn test:frontend --runInBand --silent` (80 suites / 515 tests); `yarn lint` (exit 0, zero errors, 13 ESLint / 28 Stylint warnings); `yarn check:ui-migration` (358 files / 18 domain classes / zero violations); `yarn test:ui-migration` (68 tests). No retired dependency matches in src/app, package.json, or yarn.lock; neither old package resolves.
+- All smoke browser tabs are closed and the task-owned smoke server is stopped. No fresh production build, CI result, simulator/hardware run, or authenticated application pass is claimed.
+- Resume the pending visual confirmations listed above. Do not restart RHF migration or a Final Form v7 upgrade. Icon migration remains a separate user-selected slice.
+
 
 ## R6 completed — 2026-10-02
 
@@ -61,7 +70,7 @@ P1 已通過零匯入 gate。**P2 已於 2026-09-24 完成**：legacy family 零
 
 P1 migrated the modal, menu, tooltip, action, link, and notification consumers to Tonic UI v2. All P1 legacy families are deleted. Widget Button uses Tonic `LinkButton`/`ButtonLink` and `sx`; Keypad uses direct Tonic `Button size="sm"`. The exact source import and family-file scans are empty, and the direct `react-bootstrap-buttons` and `rc-trigger` dependencies are removed. The final frontend suite passed 62 suites / 379 tests; changed-file ESLint and diff checks passed. The zero-consumer legacy `Paginations` family and deprecated Administration pagination file were also deleted; active `TablePagination` remains for P4. Browser, simulator, and build evidence remain deferred to R6.
 
-P2 forms should pair `react-final-form` ownership with the installed Tonic UI v2 `FormControl` family. The current lock has `react-final-form` 6.5.9 and `final-form` 4.20.10. The user placed any v7 upgrade after P2 form migration; it is not a P2 prerequisite. If one becomes necessary, assess the [official v6→v7 guide](https://github.com/final-form/react-final-form/blob/main/MIGRATION_V7.md) as a separate dependency slice.
+Historical P2 used React Final Form with Tonic FormControl. The completed [RHF migration](plans/2026-10-08-react-hook-form/PLAN.md) supersedes that ownership and its proposed Final Form v7 upgrade: current forms use React Hook Form 7.89.0, and both retired packages are removed.
 
 The first P2 slice (`5322f77b`) migrates Login from legacy `FormGroup`/`InlineError` to Tonic `FormControl`, `FormLabel`, `FormInput`, and `FormErrorMessage` while retaining `react-final-form`. Its new regression was RED on the missing accessible labels, then passed with linked required errors and invalid-submit suppression. Full frontend passed 62 suites / 380 tests; targeted ESLint and diff checks passed. P2 remains in progress because other family consumers remain.
 
@@ -71,7 +80,7 @@ The third P2 slice (`425271c0`) migrates Macro New/Edit modal fields to Tonic fo
 
 Fresh inventory found no production imports of the nine legacy P2 families, so the unused modules were removed in `b117c4c3` and a source import regression was added. Fresh full frontend passed 63 suites / 384 tests.
 
-The Connection serial port and baud rate selectors now use installed Tonic Menu (`9f56e397`), matching the user's decision; both prior selectors were not searchable. Keyboard, selection, empty state, disabled state, and focus return have focused regressions. `react-select` was removed from dependencies. Tonic Dropdown can be assessed after the planned `3.0.0-alpha.1` upgrade.
+Historical Connection selectors used Tonic Menu in `9f56e397`. V3-DS subsequently migrated serial port to searchable Autocomplete and baud rate to Dropdown. RHF preserves their selected values, metadata, disabled states, keyboard/focus contracts, refresh actions, and config updates; these substitutions are not pending assessment.
 
 **P2 keyboard/invalid-submit audit (2026-09-24, `924007e4`) closed the task.** The audit extended the Administration drawer table so all ten create/update drawers prove keyboard-only entry, primary-button activation, linked errors, and mutation suppression; it also fixed three drawers whose validators targeted `name`/`data` while their fields are `title`/`commands`. It found and closed two real production gaps test-first: the Webcam settings modal still rendered a native `<label><input type="radio">` pair and an unnamed native `<select>` (now Tonic `Radio`/`Select` with accessible names), and the Spindle speed input had no accessible name (now `aria-label`, deliberately not a hard-coded `id` because forkable widgets can mount duplicates). Connection socket Host/Port gained `aria-label` values; the Laser `rc-slider` test mock was deleted so the real slider is exercised; Webcam, Autolevel, Probe, Tool, Custom settings, and the previously untested GeneralSettings form gained keyboard-only and invalid-gate regressions. Production source now has no native `input`/`select`/`label`; rc-slider stays in exactly five audited consumers. Fresh full frontend 64 suites / 421 tests, ESLint 0 errors / 7 pre-existing warnings, `git diff --check` clean. Browser evidence remains deferred to R6.
 
@@ -181,7 +190,7 @@ Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/wi
 
 ## Deferred Tonic UI v3 reference
 
-The original v2 checkpoint deferred v3 APIs until all major components migrated. V3 dependency/semantic-token migration completed on2026-10-03 using `3.0.0-alpha.1`. Native Dropdown/Autocomplete consumer substitutions can now be assessed as separate slices.
+The original v2 checkpoint deferred v3 APIs until the major components migrated. V3 dependency/semantic-token migration completed on 2026-10-03 using `3.0.0-alpha.1`; the user-directed Dropdown/Autocomplete substitutions are completed under V3-DS. RHF now owns the migrated forms; existing visual gates remain recorded in STATUS.
 
 - Local v3 source: `/home/cheton/Code/trendmicro-frontend/tonic-ui`
 - Color token guide: `/home/cheton/Code/trendmicro-frontend/tonic-ui/packages/react-docs/pages/migrations/migrating-color-tokens-from-v2-to-v3`
@@ -194,7 +203,7 @@ The original v2 checkpoint deferred v3 APIs until all major components migrated.
 請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
-P1–P6、B3、R6、W3 已完成。V3 已將七個 Tonic 套件升級至 3.0.0-alpha.1，並遷移 UI semantic color tokens；frontend78/504、Node22/641、lint/guard/immutable/dev compile 與 CI production/package gate 通過。尚未重跑 V3 browser visual validation；完整平台打包在最後 snapshot 仍執行中。後續評估 Dropdown／Autocomplete consumers；react-final-form v7 維持獨立升級。
+P1–P6、B3、R6、W3、V3、V3-V、V3-GV、V3-DS、V3-DS-F、V3-UI-C 與 RHF 已完成。RHF 計畫在 plans/2026-10-08-react-hook-form/PLAN.md；frontend 80 suites/515 tests、lint 0 errors（13 ESLint/28 Stylint warnings）、guard 0 violations/68 tests 通過。react-final-form/final-form 已移除，不再安排 v7 升級或已完成的 selector 評估。V3-T、FIX-003、FIX-004 的 visual gates 及 V3-DS-F user confirmation 仍待確認；RHF browser evidence 僅為 fixture-backed component surfaces，不代表新的 authenticated application、CI、hardware 或 R6 performance pass。
 G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）、useSyncExternalStore 或等價訂閱介面、HTTP server state 走 TanStack Query；Redux 只用於尚未遷移的 widgets。
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。
@@ -221,6 +230,7 @@ G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）�
 | [04-general-widgets](plans/2026-09-07-tonic-ui-v2/04-general-widgets.md) | G1–G8 任務定義（下一個 G2 在此） |
 | [09a-browser-procedure](plans/2026-09-07-tonic-ui-v2/details/09a-browser-procedure.md) | BR0／R6 可重跑 browser 程序 |
 | [G1 前端 runtime 計畫](plans/2026-09-19-connection-frontend-runtime.md) | 為何 server protocol 不動的決策記錄 |
+| [RHF plan](plans/2026-10-08-react-hook-form/PLAN.md) | React Hook Form cutover、review fixes、final verification 與 browser evidence 範圍 |
 | `plans/2026-09-07-tonic-ui-v2/artifacts/` | browser／simulator 驗證產物 |
 
 ## Suggested skills

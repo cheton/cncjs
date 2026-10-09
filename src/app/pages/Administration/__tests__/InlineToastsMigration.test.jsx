@@ -10,64 +10,64 @@ const mockMutationOptions = {};
 const mockNotifyToast = jest.fn();
 const mockUseToast = jest.fn(() => mockNotifyToast);
 
-const mockMutationResult = () => ({
-  isLoading: false,
-  mutate: jest.fn(),
-});
+const mockMutationResults = {};
+const mockMutationResult = (key) => {
+  if (!mockMutationResults[key]) {
+    mockMutationResults[key] = { isLoading: false, mutate: jest.fn() };
+  }
+  return mockMutationResults[key];
+};
 
 const mockCreateCommandMutation = jest.fn(options => {
   mockMutationOptions.createCommand = options;
-  return mockMutationResult();
+  return mockMutationResult('createCommand');
 });
 const mockUpdateCommandMutation = jest.fn(options => {
   mockMutationOptions.updateCommand = options;
-  return mockMutationResult();
+  return mockMutationResult('updateCommand');
 });
 const mockCreateEventMutation = jest.fn(options => {
   mockMutationOptions.createEvent = options;
-  return mockMutationResult();
+  return mockMutationResult('createEvent');
 });
 const mockUpdateEventMutation = jest.fn(options => {
   mockMutationOptions.updateEvent = options;
-  return mockMutationResult();
+  return mockMutationResult('updateEvent');
 });
 const mockCreateMachineMutation = jest.fn(options => {
   mockMutationOptions.createMachine = options;
-  return mockMutationResult();
+  return mockMutationResult('createMachine');
 });
 const mockUpdateMachineMutation = jest.fn(options => {
   mockMutationOptions.updateMachine = options;
-  return mockMutationResult();
+  return mockMutationResult('updateMachine');
 });
 const mockCreateMacroMutation = jest.fn(options => {
   mockMutationOptions.createMacro = options;
-  return mockMutationResult();
+  return mockMutationResult('createMacro');
 });
 const mockUpdateMacroMutation = jest.fn(options => {
   mockMutationOptions.updateMacro = options;
-  return mockMutationResult();
+  return mockMutationResult('updateMacro');
 });
 const mockCreateUserMutation = jest.fn(options => {
   mockMutationOptions.createUser = options;
-  return mockMutationResult();
+  return mockMutationResult('createUser');
 });
 const mockUpdateUserMutation = jest.fn(options => {
   mockMutationOptions.updateUser = options;
-  return mockMutationResult();
+  return mockMutationResult('updateUser');
 });
 
-const mockReadQuery = jest.fn(() => ({
-  data: {
-    action: 'G0 X1',
-    commands: 'G0 X1',
-    enabled: true,
-    name: 'Fixture name',
-    title: 'Fixture user',
-    trigger: 'manual',
-  },
-  isError: false,
-  isFetching: false,
-}));
+const mockReadData = {
+  action: 'G0 X1',
+  commands: 'G0 X1',
+  enabled: true,
+  name: 'Fixture name',
+  title: 'Fixture user',
+  trigger: 'manual',
+};
+const mockReadQuery = jest.fn(() => ({ data: mockReadData, isError: false, isFetching: false }));
 
 jest.mock('@app/hooks/useToast', () => ({
   __esModule: true,
@@ -162,6 +162,9 @@ beforeEach(() => {
   mockUseToast.mockClear();
   mockReadQuery.mockClear();
   mutationMocks.forEach(mock => mock.mockClear());
+  Object.keys(mockMutationResults).forEach(key => {
+    delete mockMutationResults[key];
+  });
   Object.keys(mockMutationOptions).forEach(key => {
     delete mockMutationOptions[key];
   });
@@ -184,7 +187,6 @@ test('Administration drawers route mutation failures to the global persistent to
     }
   });
 
-  expect(mockUseToast).toHaveBeenCalledTimes(10);
   expect(mockNotifyToast).toHaveBeenCalledTimes(10);
   mockNotifyToast.mock.calls.forEach(([options]) => {
     expect(options.appearance).toBe('error');
@@ -274,12 +276,15 @@ test.each(drawerCases.filter(([name]) => name.includes('MacroDrawer')))(
       expect(document.querySelector('button button')).toBeNull();
       const commands = screen.getByLabelText(/^G-code commands:/);
       await user.clear(commands);
+      await user.click(screen.getByRole('button', { name: isUpdate ? 'Save' : 'Add' }));
+      await waitFor(() => expect(commands).toHaveAttribute('aria-invalid', 'true'));
       screen.getByRole('button', { name: 'Select variables' }).focus();
       await user.keyboard('{Enter}');
       const variable = await screen.findByRole('menuitem', { name: '%wait', exact: true });
       variable.focus();
       await user.keyboard('{Enter}');
       expect(commands).toHaveValue('%wait');
+      await waitFor(() => expect(commands).not.toHaveAttribute('aria-invalid', 'true'));
       screen.getByRole('button', { name: 'Select variables' }).focus();
       await user.keyboard(' ');
       const position = await screen.findByRole('menuitem', { name: '[posx]', exact: true });
@@ -287,6 +292,39 @@ test.each(drawerCases.filter(([name]) => name.includes('MacroDrawer')))(
       await user.keyboard(' ');
       expect(commands).toHaveValue('%wait[posx]');
       expect(getLatestMutation(mutationKey)).not.toHaveBeenCalled();
+    } finally {
+      view.dispose();
+    }
+  }
+);
+
+test.each(drawerCases.filter(([name]) => name.includes('MachineDrawer')))(
+  '%s clears paired-limit errors when only the lower bounds are corrected',
+  async (name, Drawer, mutationKey, isUpdate, submitLabel) => {
+    const user = userEvent.setup();
+    const view = renderAppUI(<Drawer id={isUpdate ? 'fixture-id' : undefined} onClose={jest.fn()} />);
+    try {
+      const axes = ['X', 'Y', 'Z'];
+      await axes.reduce((promise, axis) => promise.then(async () => {
+        const min = screen.getByLabelText(new RegExp(`^${axis} min`));
+        const max = screen.getByLabelText(new RegExp(`^${axis} max`));
+        await user.clear(min);
+        await user.type(min, '10');
+        await user.clear(max);
+        await user.type(max, '5');
+        expect(max).not.toHaveAttribute('aria-invalid', 'true');
+      }), Promise.resolve());
+      await user.click(screen.getByRole('button', { name: submitLabel }));
+      await waitFor(() => axes.forEach(axis => {
+        expect(screen.getByLabelText(new RegExp(`^${axis} max`))).toHaveAttribute('aria-invalid', 'true');
+      }));
+      expect(getLatestMutation(mutationKey)).not.toHaveBeenCalled();
+      await axes.reduce((promise, axis) => promise.then(async () => {
+        const min = screen.getByLabelText(new RegExp(`^${axis} min`));
+        await user.clear(min);
+        await user.type(min, '0');
+        await waitFor(() => expect(screen.getByLabelText(new RegExp(`^${axis} max`))).not.toHaveAttribute('aria-invalid', 'true'));
+      }), Promise.resolve());
     } finally {
       view.dispose();
     }

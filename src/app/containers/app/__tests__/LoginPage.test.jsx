@@ -145,6 +145,13 @@ describe('LoginPage session mutation boundary', () => {
     fireEvent.blur(name);
     fireEvent.blur(password);
 
+    expect(name).not.toHaveAttribute('aria-invalid', 'true');
+    expect(password).not.toHaveAttribute('aria-invalid', 'true');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    const submit = screen.getByRole('button', { name: 'Sign In' });
+    submit.focus();
+    await user.keyboard('{Enter}');
     const errors = await screen.findAllByRole('alert');
     expect(errors).toHaveLength(2);
     expect(name).toHaveAttribute('aria-invalid', 'true');
@@ -152,9 +159,6 @@ describe('LoginPage session mutation boundary', () => {
     expect(name.getAttribute('aria-describedby')).toContain(errors[0].id);
     expect(password.getAttribute('aria-describedby')).toContain(errors[1].id);
 
-    const submit = screen.getByRole('button', { name: 'Sign In' });
-    submit.focus();
-    await user.keyboard('{Enter}');
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 });

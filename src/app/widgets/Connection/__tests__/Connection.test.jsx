@@ -106,7 +106,10 @@ const mockConfig = {
 
 jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
   __esModule: true,
-  default: () => mockConfig,
+  default: () => ({
+    get: (...args) => mockConfig.get(...args),
+    set: (...args) => mockConfig.set(...args),
+  }),
 }));
 
 jest.mock('react-spring', () => ({
@@ -222,12 +225,12 @@ describe('Connection form', () => {
     });
   });
 
-  test('sends the complete serial connection payload through useConnection', () => {
+  test('sends the complete serial connection payload through useConnection', async () => {
     renderAppUI(<Connection />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
 
-    expect(mockOpen).toHaveBeenCalledWith({
+    await waitFor(() => expect(mockOpen).toHaveBeenCalledWith({
       controller: { type: 'grbl' },
       connection: {
         type: 'serial',
@@ -238,7 +241,7 @@ describe('Connection form', () => {
           pin: { dtr: null, rts: null },
         },
       },
-    });
+    }));
   });
 
   test('refreshes serial metadata when disconnected', () => {
@@ -294,6 +297,23 @@ describe('Connection form', () => {
         },
       },
     });
+  });
+
+  test('validates socket port on submit and does not block serial with inactive socket errors', async () => {
+    renderAppUI(<Connection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Wi-Fi' }));
+    const port = screen.getByRole('spinbutton', { name: 'Port' });
+    fireEvent.change(port, { target: { value: '70000' } });
+    fireEvent.blur(port);
+    expect(port).not.toHaveAttribute('aria-invalid', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    await waitFor(() => expect(port).toHaveAttribute('aria-invalid', 'true'));
+    expect(mockOpen).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Serial Port' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+    await waitFor(() => expect(mockOpen).toHaveBeenCalledWith(expect.objectContaining({
+      connection: expect.objectContaining({ type: 'serial' }),
+    })));
   });
 
   test('disables a duplicate open while the runtime is awaiting confirmation', () => {

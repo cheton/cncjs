@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   CONNECTION_STATE_CONNECTED,
@@ -116,13 +116,13 @@ describe('Probe modal command contract', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('sends exactly one complete WCS probe command from the preview', () => {
+  test('sends exactly one complete WCS probe command from the preview', async () => {
     const onClose = jest.fn();
 
     renderAppUI(<ProbeModal onClose={onClose} probeData={probeData} />);
     fireEvent.click(screen.getByRole('button', { name: 'Run Probe' }));
 
-    expect(mockCommand).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockCommand).toHaveBeenCalledTimes(1));
     expect(mockCommand).toHaveBeenCalledWith('gcode', [
       '; Z-Probe',
       'G91',
@@ -138,7 +138,7 @@ describe('Probe modal command contract', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('opens a preview with the controlled probe draft without sending G-code', () => {
+  test('opens a preview with the controlled probe draft without sending G-code', async () => {
     renderAppUI(<Probe />);
 
     fireEvent.click(screen.getByRole('button', { name: 'X' }));
@@ -148,8 +148,8 @@ describe('Probe modal command contract', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Probe Axis X' }));
 
+    await waitFor(() => expect(mockPortal).toHaveBeenCalledTimes(1));
     expect(mockCommand).not.toHaveBeenCalled();
-    expect(mockPortal).toHaveBeenCalledTimes(1);
     const modal = mockPortal.mock.calls[0][0]({ onClose: jest.fn() });
     expect(modal.props.probeData).toEqual({
       probeAxis: 'X',
@@ -178,7 +178,7 @@ describe('Probe modal command contract', () => {
     openPreview.focus();
     await user.keyboard('{Enter}');
 
-    expect(mockPortal).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockPortal).toHaveBeenCalledTimes(1));
     expect(mockConfigSet).toHaveBeenCalledWith('probeDepth', 12);
     expect(mockCommand).not.toHaveBeenCalled();
   });

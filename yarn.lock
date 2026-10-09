@@ -3039,7 +3039,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:7.x, @babel/runtime@npm:^7.10.0, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:7.x, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.29.7
   resolution: "@babel/runtime@npm:7.29.7"
   checksum: bc311855c6dbf5356030979584ca0f8b6cee39fe058175b02e85a73e246fc76ae30248b0d40e70c2652101faeb43279468ed2d086a670673eb9783c1fee1df2b
@@ -9280,7 +9280,6 @@ __metadata:
     express: ~4.18.1
     express-jwt: ~7.7.5
     file-loader: ~6.2.0
-    final-form: ~4.20.6
     find-imports: ~1.1.0
     frac: ~1.1.2
     gcode-interpreter: ^3.0.0
@@ -9340,9 +9339,9 @@ __metadata:
     react: ^18.3.0
     react-dom: ^18.3.0
     react-dropzone: ~11.2.4
-    react-final-form: ~6.5.2
     react-ga4: ^2.1.0
     react-helmet: ~6.1.0
+    react-hook-form: ^7.89.0
     react-hot-loader: ~4.13.0
     react-i18next: ~12.0.0
     react-icon-base: ~2.1.2
@@ -12808,15 +12807,6 @@ __metadata:
   dependencies:
     to-regex-range: ^5.0.1
   checksum: b4abfbca3839a3d55e4ae5ec62e131e2e356bf4859ce8480c64c4876100f4df292a63e5bb1618e1d7460282ca2b305653064f01654474aa35c68000980f17798
-  languageName: node
-  linkType: hard
-
-"final-form@npm:~4.20.6":
-  version: 4.20.10
-  resolution: "final-form@npm:4.20.10"
-  dependencies:
-    "@babel/runtime": ^7.10.0
-  checksum: 92491998d7e284ce47453a54ea94e949aa5852d9307fe8875da9107d2eb966542cbca6f73bd306407eddfbd8d5c8d40cbd6d198358439b5cc4b8c8caea6d8e7b
   languageName: node
   linkType: hard
 
@@ -19682,18 +19672,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-final-form@npm:~6.5.2":
-  version: 6.5.9
-  resolution: "react-final-form@npm:6.5.9"
-  dependencies:
-    "@babel/runtime": ^7.15.4
-  peerDependencies:
-    final-form: ^4.20.4
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0
-  checksum: 2ab79b1b0230545af1b93b324e2ce61992087beda344f762e1c1306867c177ca6258651e992515fa6681a790f94380a388c18e898ffb20468562e62c83c6b289
-  languageName: node
-  linkType: hard
-
 "react-focus-lock@npm:2.x":
   version: 2.13.7
   resolution: "react-focus-lock@npm:2.13.7"
@@ -19732,6 +19710,19 @@ __metadata:
   peerDependencies:
     react: ">=16.3.0"
   checksum: a4998479dab7fc1c2799eddefb1870a9d881b5f71cfdf97979a9882e42f4bb50402d55335f308f461e735e01a06f46b16cc7b4e6bcb22c7a4a6f85a753c5c106
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.89.0":
+  version: 7.89.0
+  resolution: "react-hook-form@npm:7.89.0"
+  peerDependencies:
+    "@types/react": "*"
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 804c78996afcb17c7fe8e8c6c1c9344ac51c7e7a1e96531dba6896405f91a97061f64e7be17829e4e56496254f04bd06747d5ad1d12f2b91797696689418f27c
   languageName: node
   linkType: hard
 

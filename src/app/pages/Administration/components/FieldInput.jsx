@@ -8,16 +8,22 @@ import {
 } from '@tonic-ui/react';
 import { WarningCircleIcon } from '@tonic-ui/react-icons';
 import {
-  isNullOrUndefined,
-} from '@tonic-ui/utils';
+  get,
+  useFormContext,
+  useFormState,
+} from 'react-hook-form';
+import {
+  useMergeRefs,
+} from '@tonic-ui/react-hooks';
 import React, { forwardRef } from 'react';
-import { Field } from 'react-final-form';
+import i18n from '@app/lib/i18n';
 import FieldTextLabel from './FieldTextLabel';
 
 /**
  * @param {object} props
  * @param {string} props.name
  * @param {Function} [props.validate]
+ * @param {string|string[]} [props.deps] - Fields to revalidate when this field changes.
  * @param {React.ReactNode} [props.label]
  * @param {boolean} [props.required]
  * @param {React.ReactNode} [props.infoTipLabel]
@@ -27,6 +33,7 @@ const FieldInput = forwardRef((
   {
     name,
     validate,
+    deps,
     label,
     required = false,
     infoTipLabel,
@@ -34,58 +41,68 @@ const FieldInput = forwardRef((
     ...rest
   },
   ref,
-) => (
-  <Field name={name} validate={validate}>
-    {({ input, meta }) => {
-      const error = meta.submitFailed && !isNullOrUndefined(meta.error);
+) => {
+  const { register } = useFormContext();
+  const { errors } = useFormState({ name });
+  const fieldError = get(errors, name);
+  const error = fieldError && (fieldError.message || i18n._('Invalid value.'));
 
-      return (
-        <FormControl
-          error={error}
-          mb="4x"
+  const rules = { deps };
+
+  if (validate) {
+    rules.validate = validate;
+  } else if (required) {
+    rules.required = i18n._('This field is required.');
+  }
+
+  const registerProps = register(name, rules);
+  const mergedRef = useMergeRefs(ref, registerProps.ref);
+  return (
+    <FormControl
+      error={!!error}
+      mb="4x"
+    >
+      {label && (
+        <Flex
+          alignItems="center"
+          justifyContent="space-between"
         >
-          {label && (
-            <Flex
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Flex alignItems="center">
-                <FormLabel required={required}>{label}</FormLabel>
-                {infoTipLabel && <FieldTextLabel infoTipLabel={infoTipLabel} />}
-              </Flex>
-              {labelAction}
-            </Flex>
-          )}
-          <Flex
-            position="relative"
-            alignItems="center"
-            width="100%"
-          >
-            <FormInput
-              ref={ref}
-              {...input}
-              name={name}
-              pr={error ? '10x' : undefined}
-              required={required}
-              {...rest}
-            />
-            {error && (
-              <Flex
-                position="absolute"
-                right={0}
-                top={0}
-                alignItems="center"
-                height="8x"
-              >
-                <Icon as={WarningCircleIcon} mx="3x" color="error.icon" />
-              </Flex>
-            )}
+          <Flex alignItems="center">
+            <FormLabel required={required}>{label}</FormLabel>
+            {infoTipLabel && <FieldTextLabel infoTipLabel={infoTipLabel} />}
           </Flex>
-          <FormErrorMessage errors={error ? [meta.error] : []} />
-        </FormControl>
-      );
-    }}
-  </Field>
-));
+          {labelAction}
+        </Flex>
+      )}
+      <Flex
+        position="relative"
+        alignItems="center"
+        width="100%"
+      >
+        <FormInput
+          {...registerProps}
+          ref={mergedRef}
+          name={name}
+          aria-required={required || undefined}
+          aria-invalid={!!error || undefined}
+          pr={error ? '10x' : undefined}
+          {...rest}
+        />
+        {error && (
+          <Flex
+            position="absolute"
+            right={0}
+            top={0}
+            alignItems="center"
+            height="8x"
+          >
+            <Icon as={WarningCircleIcon} mx="3x" color="error.icon" />
+          </Flex>
+        )}
+      </Flex>
+      <FormErrorMessage errors={error ? [error] : []} />
+    </FormControl>
+  );
+});
 
 export default FieldInput;

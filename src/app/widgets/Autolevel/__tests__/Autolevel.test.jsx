@@ -126,11 +126,12 @@ function GCodeMutationProbe() {
   );
 }
 
-const startFullProbe = () => {
+const startFullProbe = async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Start New Probe' }));
   fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
   fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
   fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+  await screen.findByText('Probing progress: 0/9 points');
 };
 
 const emitProbePoint = (current, z = -0.2) => {
@@ -315,7 +316,7 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('confirms a full probe once with display-unit values and computed total points', () => {
+  test('confirms a full probe once with display-unit values and computed total points', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
@@ -323,6 +324,7 @@ describe('Autolevel workflow owner', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
       fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
       fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+      await screen.findByText('Probing progress: 0/9 points');
 
       expect(mockCommand).toHaveBeenCalledWith('autolevel:start', {
         mode: 'full',
@@ -344,7 +346,7 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('appends controller probe updates and publishes all points as a read-only visualization', () => {
+  test('appends controller probe updates and publishes all points as a read-only visualization', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
@@ -352,6 +354,7 @@ describe('Autolevel workflow owner', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
       fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
       fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+      await screen.findByText('Probing progress: 0/9 points');
       mockPublish.mockClear();
 
       emitController('autolevel:update', {
@@ -393,7 +396,7 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('completes into Apply and does not accept a later point after stop cleanup', () => {
+  test('completes into Apply and does not accept a later point after stop cleanup', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
@@ -401,6 +404,7 @@ describe('Autolevel workflow owner', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
       fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
       fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+      await screen.findByText('Probing progress: 0/9 points');
       emitController('autolevel:update', {
         current: 1,
         total: 9,
@@ -434,11 +438,11 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('hides the overlay and rejects late updates after a probing disconnect', () => {
+  test('hides the overlay and rejects late updates after a probing disconnect', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
-      startFullProbe();
+      await startFullProbe();
       emitProbePoint(1, -0.2);
       mockPublish.mockClear();
 
@@ -601,7 +605,7 @@ describe('Autolevel workflow owner', () => {
 
     try {
       expect(mockLoadGCode).not.toHaveBeenCalled();
-      startFullProbe();
+      await startFullProbe();
       emitProbePoint(1, -0.2);
       emitProbePoint(2, -0.3);
       emitProbePoint(3, -0.1);
@@ -648,7 +652,7 @@ describe('Autolevel workflow owner', () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
-      startFullProbe();
+      await startFullProbe();
       emitProbePoint(1, -0.2);
       emitProbePoint(2, -0.3);
       emitProbePoint(3, -0.1);

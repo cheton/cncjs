@@ -133,11 +133,15 @@ const emitProbePoint = (current, z) => {
   });
 };
 
-const startFullProbe = () => {
+const startFullProbe = async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Start New Probe' }));
   fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
   fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm probe wires are correctly connected' }));
-  fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+  await act(() => {
+    fireEvent.click(screen.getAllByRole('button', { name: 'Start Probing' }).at(-1));
+    return Promise.resolve();
+  });
+  await screen.findByText('Probing progress: 0/9 points');
 };
 
 function VisualizerProbe() {
@@ -263,14 +267,15 @@ describe('Autolevel Visualizer integration acceptance', () => {
     }
   });
 
-  test('preserves start, stop, and hide ordering for a probe workflow', () => {
+  test('preserves start, stop, and hide ordering for a probe workflow', async () => {
+    jest.useFakeTimers();
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 
     try {
       mockCommand.mockClear();
       mockPublish.mockClear();
       mockTrace.length = 0;
-      startFullProbe();
+      await startFullProbe();
 
       expect(mockCommand).toHaveBeenCalledWith('autolevel:start', {
         mode: 'full',
@@ -311,6 +316,7 @@ describe('Autolevel Visualizer integration acceptance', () => {
       ]);
     } finally {
       view.dispose();
+      jest.useRealTimers();
     }
   });
 
@@ -344,7 +350,7 @@ describe('Autolevel Visualizer integration acceptance', () => {
         zmin: -1,
         zmax: 0,
       };
-      startFullProbe();
+      await startFullProbe();
       act(() => jest.advanceTimersByTime(50));
       emitProbePoint(1, -0.2);
       emitProbePoint(2, -0.3);

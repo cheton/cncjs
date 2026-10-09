@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import StartProbeModal from '../StartProbeModal';
@@ -58,7 +58,7 @@ describe('Autolevel probe dialogs', () => {
     }
   });
 
-  test('requires confirmation and invokes start probing only once', () => {
+  test('requires confirmation and invokes start probing only once', async () => {
     const onConfirm = jest.fn();
     const view = renderAppUI(
       <StartProbeModal
@@ -74,7 +74,7 @@ describe('Autolevel probe dialogs', () => {
       fireEvent.click(confirm);
       fireEvent.click(confirm);
 
-      expect(onConfirm).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(onConfirm).toHaveBeenCalledTimes(1));
     } finally {
       view.dispose();
     }

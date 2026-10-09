@@ -174,7 +174,7 @@ describe('Tool controlled form', () => {
       const textarea = screen.getByRole('textbox', { name: 'Custom Tool Probe Commands' });
       textarea.focus();
       await user.clear(textarea);
-      await user.keyboard('G91');
+      await user.keyboard('G0 Z5');
 
       const save = screen.getByRole('button', { name: 'Save custom tool probe commands' });
       save.focus();
@@ -182,7 +182,7 @@ describe('Tool controlled form', () => {
 
       expect(onChange).toHaveBeenLastCalledWith({
         ...value,
-        toolProbeCustomCommands: 'G91',
+        toolProbeCustomCommands: 'G0 Z5',
       });
     } finally {
       view.dispose();
@@ -237,6 +237,29 @@ describe('Tool controlled form', () => {
       fireEvent.click(screen.getByRole('menuitem', { name: '[tool_probe_command]' }));
 
       expect(textarea).toHaveValue('G91[tool_probe_command]G38.2');
+    } finally {
+      view.dispose();
+    }
+  });
+
+  test('preserves a dirty field while adopting untouched fields from external configuration', () => {
+    const onChange = jest.fn();
+    const props = {
+      connected: true,
+      controller: { type: 'Grbl' },
+      units: 'mm',
+      onChange,
+    };
+    const view = renderAppUI(<Tool {...props} value={value} />);
+
+    try {
+      fireEvent.change(screen.getByRole('spinbutton', { name: 'Tool Change X' }), {
+        target: { value: '42' },
+      });
+      view.rerender(<Tool {...props} value={{ ...value, toolChangeX: 9, toolChangeY: 8 }} />);
+      expect(screen.getByRole('spinbutton', { name: 'Tool Change X' })).toHaveValue(42);
+      expect(screen.getByRole('spinbutton', { name: 'Tool Change Y' })).toHaveValue(8);
+      expect(onChange).toHaveBeenLastCalledWith({ ...value, toolChangeX: '42', toolChangeY: 8 });
     } finally {
       view.dispose();
     }

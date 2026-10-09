@@ -70,7 +70,7 @@ describe('Custom SettingsModal Tonic contract', () => {
     mockConfigSet.mockClear();
   });
 
-  test('submits the draft and closes only after config writes succeed', () => {
+  test('submits the draft and closes only after config writes succeed', async () => {
     const onClose = jest.fn();
 
     renderAppUI(<SettingsModal onClose={onClose} />);
@@ -79,6 +79,7 @@ describe('Custom SettingsModal Tonic contract', () => {
       target: { value: 'Updated title' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
 
     expect(mockConfigSet).toHaveBeenNthCalledWith(1, 'title', 'Updated title');
     expect(mockConfigSet).toHaveBeenNthCalledWith(2, 'url', '/widget/');
@@ -104,7 +105,7 @@ describe('Custom SettingsModal Tonic contract', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('keeps the draft open when a config write fails', () => {
+  test('keeps the draft open when a config write fails', async () => {
     const onClose = jest.fn();
     mockConfigSet.mockImplementationOnce(() => {
       throw new Error('save failed');
@@ -112,12 +113,10 @@ describe('Custom SettingsModal Tonic contract', () => {
 
     renderAppUI(<SettingsModal onClose={onClose} />);
 
-    expect(() => {
-      fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
-    }).not.toThrow();
-    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Save Changes' }));
+    expect(await screen.findByText('save failed')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Existing title')).toBeInTheDocument();
-    expect(screen.getByText('save failed')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   test('cancels without writing config', () => {

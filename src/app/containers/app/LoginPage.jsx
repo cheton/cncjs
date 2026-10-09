@@ -16,8 +16,8 @@ import {
 import { ensureString } from 'ensure-type';
 import _get from 'lodash/get';
 import qs from 'qs';
-import React, { useState } from 'react';
-import { Form, Field } from 'react-final-form';
+import React, { useRef, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { Navigate, useLocation } from 'react-router-dom';
 import settings from '@app/config/settings';
 import * as analytics from '@app/lib/analytics';
@@ -49,6 +49,12 @@ const LoginPage = () => {
     authenticating: false,
     redirectToReferrer: false
   });
+  const methods = useForm({
+    defaultValues: { name: '', password: '' },
+    mode: 'onSubmit',
+  });
+  const { register, formState: { errors, touchedFields } } = methods;
+  const authenticatingRef = useRef(false);
 
   const clearAlertMessage = () => {
     setState(prevState => ({
@@ -57,11 +63,11 @@ const LoginPage = () => {
     }));
   };
 
-  const handleFormSubmit = async (values, form) => {
-    if (state.authenticating || signinMutation.isLoading) {
+  const handleFormSubmit = async (values) => {
+    if (authenticatingRef.current || state.authenticating || signinMutation.isLoading) {
       return;
     }
-
+    authenticatingRef.current = true;
     setState(prevState => ({
       ...prevState,
       alertMessage: '',
@@ -77,6 +83,7 @@ const LoginPage = () => {
     try {
       ({ authenticated, token } = await signinMutation.mutateAsync({ name, password }));
     } catch (error) {
+      authenticatingRef.current = false;
       setState(prevState => ({
         ...prevState,
         alertMessage: i18n._('Authentication failed.'),
@@ -87,6 +94,7 @@ const LoginPage = () => {
     }
 
     if (!authenticated) {
+      authenticatingRef.current = false;
       setState(prevState => ({
         ...prevState,
         alertMessage: i18n._('Authentication failed.'),
@@ -101,6 +109,7 @@ const LoginPage = () => {
     try {
       ({ data: appState } = await appStateQuery.refetch({ throwOnError: true }));
     } catch (error) {
+      authenticatingRef.current = false;
       setState(prevState => ({ ...prevState,
         alertMessage: i18n._('An error occurred while fetching data.'),
         authenticating: false,
@@ -121,6 +130,7 @@ const LoginPage = () => {
       query: 'token=' + token
     };
     controller.connect(host, options, () => {
+      authenticatingRef.current = false;
       // @see "app/index.jsx"
       setState(prevState => ({
         ...prevState,
@@ -184,60 +194,57 @@ const LoginPage = () => {
             {i18n._('Sign in to {{name}}', { name: settings.productName })}
           </Text>
         </Stack>
-        <Form
-          onSubmit={handleFormSubmit}
-          render={({ handleSubmit }) => (
-            <>
-              <Field name="name" validate={required}>
-                {({ input, meta }) => (
-                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
-                    <FormLabel>{i18n._('Username')}</FormLabel>
-                    <FormInput {...input} type="text" placeholder={i18n._('Username')} />
-                    <FormErrorMessage errors={meta.error} />
-                  </FormControl>
-                )}
-              </Field>
-              <Field name="password" validate={required}>
-                {({ input, meta }) => (
-                  <FormControl mb="4x" error={Boolean(meta.error && meta.touched)}>
-                    <FormLabel>{i18n._('Password')}</FormLabel>
-                    <FormInput {...input} type="password" placeholder={i18n._('Password')} />
-                    <FormErrorMessage errors={meta.error} />
-                  </FormControl>
-                )}
-              </Field>
-              <Box mb="4x">
-                <Flex
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Link href={forgotPasswordLink}>
-                      {i18n._('Forgot your password?')}
-                    </Link>
-                  </Box>
-                  <Box>
-                    <Button
-                      disabled={state.authenticating || signinMutation.isLoading}
-                      variant="primary"
-                      onClick={handleSubmit}
-                    >
-                      <Flex alignItems="center" columnGap="2x">
-                        {state.authenticating && (
-                          <FontAwesomeIcon icon="circle-notch" spin />
-                        )}
-                        {!state.authenticating && (
-                          <FontAwesomeIcon icon="sign-in-alt" />
-                        )}
-                        {i18n._('Sign In')}
-                      </Flex>
-                    </Button>
-                  </Box>
-                </Flex>
-              </Box>
-            </>
-          )}
-        />
+        <FormProvider {...methods}>
+          <Box as="form" noValidate onSubmit={methods.handleSubmit(handleFormSubmit)}>
+            <FormControl mb="4x" error={Boolean(errors.name && touchedFields.name)}>
+              <FormLabel>{i18n._('Username')}</FormLabel>
+              <FormInput
+                {...register('name', { validate: required })}
+                type="text"
+                placeholder={i18n._('Username')}
+              />
+              <FormErrorMessage errors={touchedFields.name ? errors.name?.message : undefined} />
+            </FormControl>
+            <FormControl mb="4x" error={Boolean(errors.password && touchedFields.password)}>
+              <FormLabel>{i18n._('Password')}</FormLabel>
+              <FormInput
+                {...register('password', { validate: required })}
+                type="password"
+                placeholder={i18n._('Password')}
+              />
+              <FormErrorMessage errors={touchedFields.password ? errors.password?.message : undefined} />
+            </FormControl>
+            <Box mb="4x">
+              <Flex
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box>
+                  <Link href={forgotPasswordLink}>
+                    {i18n._('Forgot your password?')}
+                  </Link>
+                </Box>
+                <Box>
+                  <Button
+                    disabled={state.authenticating || signinMutation.isLoading}
+                    variant="primary"
+                    type="submit"
+                  >
+                    <Flex alignItems="center" columnGap="2x">
+                      {state.authenticating && (
+                        <FontAwesomeIcon icon="circle-notch" spin />
+                      )}
+                      {!state.authenticating && (
+                        <FontAwesomeIcon icon="sign-in-alt" />
+                      )}
+                      {i18n._('Sign In')}
+                    </Flex>
+                  </Button>
+                </Box>
+              </Flex>
+            </Box>
+          </Box>
+        </FormProvider>
       </Box>
     </Box>
   );
