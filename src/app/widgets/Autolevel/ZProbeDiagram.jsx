@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import i18n from '@app/lib/i18n';
 import { METRIC_UNITS } from '@app/constants';
@@ -16,6 +15,9 @@ const WORKPIECE_TOP_Y = 68;
 const WORKPIECE_BOTTOM_Y = 88;
 const ARROW_END_Y = 115;
 
+/**
+ * @param {{clearanceZ?: number, startZ?: number, endZ?: number, feedrate?: number, units?: string}} props
+ */
 const ZProbeDiagram = ({ clearanceZ, startZ, endZ, feedrate, units, ...props }) => {
   const displayUnits = toDisplayUnits(units);
   const feedrateUnits = (units === METRIC_UNITS) ? i18n._('mm/min') : i18n._('in/min');
@@ -134,14 +136,6 @@ const ZProbeDiagram = ({ clearanceZ, startZ, endZ, feedrate, units, ...props }) 
       </text>
     </svg>
   );
-};
-
-ZProbeDiagram.propTypes = {
-  clearanceZ: PropTypes.number,
-  startZ: PropTypes.number,
-  endZ: PropTypes.number,
-  feedrate: PropTypes.number,
-  units: PropTypes.string,
 };
 
 export default ZProbeDiagram;

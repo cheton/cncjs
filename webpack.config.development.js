@@ -1,4 +1,4 @@
-const fs = require('fs');
+const appTemplate = require('./scripts/app-template');
 const path = require('path');
 const dotenv = require('dotenv');
 const ESLintPlugin = require('eslint-webpack-plugin');
@@ -137,6 +137,7 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+      SUPPRESS_WEBGL_WARNING: '0',
       BUILD_VERSION: buildVersion,
       LANGUAGES: buildConfig.languages,
       TRACKING_ID: buildConfig.analytics.trackingId,
@@ -164,7 +165,7 @@ module.exports = {
         return new HtmlWebpackPlugin({
           filename,
           templateContent: (() => {
-            return fs.readFileSync(template, 'utf8')
+            return appTemplate(template)
               .replace(/{{dir}}/g, 'ltr')
               .replace(/{{title}}/g, `CNCjs ${buildVersion}`)
               .replace(/{{webroot}}/g, '/')
@@ -176,7 +177,7 @@ module.exports = {
       return (
         new HtmlWebpackPlugin({
           filename,
-          template,
+          templateContent: () => appTemplate(template),
         })
       );
     })(),

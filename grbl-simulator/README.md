@@ -17,6 +17,10 @@ telnet localhost 3000
 
 ## Usage with CNCjs
 
+`yarn dev` starts the simulator automatically on Linux and macOS. Do not run
+`start-with-cncjs.sh` separately when using `yarn dev`; that would compete for
+`/tmp/ttyGRBL`.
+
 ```bash
 # Automatically finds an available port and creates virtual serial port
 ./start-with-cncjs.sh
