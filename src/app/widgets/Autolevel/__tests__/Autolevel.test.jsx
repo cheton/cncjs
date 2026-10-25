@@ -505,32 +505,6 @@ describe('Autolevel workflow owner', () => {
     }
   });
 
-  test('keeps the fullscreen layout when its root and content use sx styles', () => {
-    const view = renderAppUI(<AutolevelWidget {...widgetProps} view="fullscreen" />);
-
-    try {
-      expect(screen.getByRole('region')).toHaveStyle({
-        position: 'fixed',
-        top: '48px',
-        left: '60px',
-        right: '0px',
-        bottom: '0px',
-        margin: '0px',
-        zIndex: '1000',
-      });
-      expect(view.container.querySelector('[data-widget-content]')).toHaveStyle({
-        position: 'absolute',
-        top: '34px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px',
-      });
-      expect(view.container.querySelector('[data-sortable-handle]')).toHaveStyle({ display: 'none' });
-    } finally {
-      view.dispose();
-    }
-  });
-
   test('uses Tonic widget header-control icons and Font Awesome only for unsupported commands', async () => {
     const view = renderAppUI(<AutolevelWidget {...widgetProps} />);
 

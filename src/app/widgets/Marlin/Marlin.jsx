@@ -5,9 +5,10 @@ import {
   AccordionItem,
   Box,
   Button,
-  Input,
+  InputControl,
   InputGroup,
   InputGroupAddon,
+  InputGroupAppend,
   LinearProgress,
   Space,
   useTheme,
@@ -171,7 +172,7 @@ function setHeatedBedTemperature(deg) {
  */
 function ReportSection({ children, isExpanded, onToggle, title }) {
   return (
-    <Accordion>
+    <Accordion border={1} borderColor="border.secondary">
       <AccordionItem isExpanded={isExpanded} onToggle={onToggle}>
         <AccordionHeader>{title}</AccordionHeader>
         <AccordionBody>{children}</AccordionBody>
@@ -185,15 +186,17 @@ function ReportSection({ children, isExpanded, onToggle, title }) {
  */
 function ReportRow({ children, label }) {
   return (
-    <Box alignItems="center" display="flex" mb="1x">
-      <Text
-        flex="0 0 40%" overflow="hidden" textOverflow="ellipsis"
-        title={label} whiteSpace="nowrap"
-      >
-        {label}
-      </Text>
+    <Box alignItems="center" display="flex" mb="2x">
+      <Box width="50%">
+        <Text
+          overflow="hidden" textOverflow="ellipsis"
+          title={label} whiteSpace="nowrap"
+        >
+          {label}
+        </Text>
+      </Box>
       <Box
-        flex="1"
+        width="50%"
         sx={{
           backgroundColor: 'actions.hovered',
           borderRadius: '.25rem',
@@ -216,16 +219,12 @@ function ReportRow({ children, label }) {
  */
 function PowerProgress({ max, value }) {
   return (
-    <Box position="relative">
+    <Box>
       <LinearProgress
         aria-label={String(value)} max={max} min={0}
         value={value} variant="determinate"
       />
-      <Text
-        left="2x" position="absolute" top="50%"
-        transform="translateY(-50%)"
-      >{value}
-      </Text>
+      <Text>{value}</Text>
     </Box>
   );
 }
@@ -249,12 +248,19 @@ function HeaterInput({ icon, label, onCancel, onChange, onSubmit, submitTitle, v
         <Space width="2x" />
         <Text>{label}</Text>
       </Box>
-      <InputGroup size="sm" width="120px">
-        <Input
-          aria-label={label} min="0" step="1"
-          type="number" value={value} onChange={onChange}
+      <InputGroup width="120px">
+        <InputControl
+          flex="1"
+          min={0}
+          slotProps={{ input: { 'aria-label': label } }}
+          step={1}
+          type="number"
+          value={value}
+          onChange={onChange}
         />
-        <InputGroupAddon>{i18n._('°C')}</InputGroupAddon>
+        <InputGroupAppend>
+          <InputGroupAddon>{i18n._('°C')}</InputGroupAddon>
+        </InputGroupAppend>
       </InputGroup>
       <Space width="2x" />
       <Button

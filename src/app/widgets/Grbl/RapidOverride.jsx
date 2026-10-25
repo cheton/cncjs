@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Space,
   Text,
 } from '@tonic-ui/react';
 import { ensurePositiveNumber } from 'ensure-type';
@@ -27,16 +26,14 @@ function RapidOverride({
   }
 
   return (
-    <Box alignItems="center" display="flex" justifyContent="center">
+    <Box alignItems="center" display="grid" gap="1x" gridTemplateColumns="16px 45px minmax(0, 1fr) 24px">
       <Text fontFamily="mono" fontSize="1.5rem">
         R
       </Text>
-      <Space width="2x" />
       <OverrideReadout>
         {(value >= 0) ? `${value}%` : none}
       </OverrideReadout>
-      <Space width="2x" />
-      <ButtonGroup size="sm">
+      <ButtonGroup size="sm" minWidth="0" sx={{ '& > button': { flex: 1, minWidth: 0, px: '1x' } }}>
         <RepeatableButton
           onClick={() => {
             controller.command('rapid_override', 25);
@@ -62,10 +59,11 @@ function RapidOverride({
           <Text>{i18n._('100%')}</Text>
         </RepeatableButton>
       </ButtonGroup>
-      <Space width="2x" />
       <Button
         aria-label="Reset rapid override"
         variant="ghost"
+        size="sm"
+        sx={{ minWidth: '24px', width: '24px', p: 0 }}
         onClick={() => {
           controller.command('rapid_override', 0);
         }}

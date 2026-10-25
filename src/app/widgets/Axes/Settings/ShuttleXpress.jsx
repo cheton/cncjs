@@ -7,6 +7,7 @@ import {
 import Slider from 'rc-slider';
 import React from 'react';
 import i18n from '@app/lib/i18n';
+import sliderStyles from './sliderStyles';
 
 const FEEDRATE_RANGE = [100, 2500];
 const FEEDRATE_STEP = 50;
@@ -48,18 +49,20 @@ function ShuttleXpress({ value, onChange }) {
             max: value.feedrateMax,
           })}
         </TextLabel>
-        <Slider.Range
-          ariaLabelGroupForHandles={[
-            i18n._('Minimum feed rate'),
-            i18n._('Maximum feed rate'),
-          ]}
-          allowCross={false}
-          value={[value.feedrateMin, value.feedrateMax]}
-          min={FEEDRATE_RANGE[0]}
-          max={FEEDRATE_RANGE[1]}
-          step={FEEDRATE_STEP}
-          onChange={([feedrateMin, feedrateMax]) => update({ feedrateMin, feedrateMax })}
-        />
+        <Box sx={sliderStyles}>
+          <Slider.Range
+            ariaLabelGroupForHandles={[
+              i18n._('Minimum feed rate'),
+              i18n._('Maximum feed rate'),
+            ]}
+            allowCross={false}
+            value={[value.feedrateMin, value.feedrateMax]}
+            min={FEEDRATE_RANGE[0]}
+            max={FEEDRATE_RANGE[1]}
+            step={FEEDRATE_STEP}
+            onChange={([feedrateMin, feedrateMax]) => update({ feedrateMin, feedrateMax })}
+          />
+        </Box>
       </Box>
       <Box mb="4x">
         <TextLabel mb="2x">
@@ -75,6 +78,7 @@ function ShuttleXpress({ value, onChange }) {
               aria-label={i18n._('Repeat Rate')}
               width="100%"
               variant="secondary"
+              justifyContent="space-between"
             >
               {renderItem(selected)}
             </DropdownButton>
@@ -86,14 +90,16 @@ function ShuttleXpress({ value, onChange }) {
         <TextLabel mb="2x">
           {i18n._('Distance Overshoot: {{overshoot}}x', { overshoot: value.overshoot })}
         </TextLabel>
-        <Slider
-          ariaLabelForHandle={i18n._('Distance Overshoot')}
-          value={value.overshoot}
-          min={OVERSHOOT_RANGE[0]}
-          max={OVERSHOOT_RANGE[1]}
-          step={OVERSHOOT_STEP}
-          onChange={overshoot => update({ overshoot })}
-        />
+        <Box sx={sliderStyles}>
+          <Slider
+            ariaLabelForHandle={i18n._('Distance Overshoot')}
+            value={value.overshoot}
+            min={OVERSHOOT_RANGE[0]}
+            max={OVERSHOOT_RANGE[1]}
+            step={OVERSHOOT_STEP}
+            onChange={overshoot => update({ overshoot })}
+          />
+        </Box>
       </Box>
     </Box>
   );

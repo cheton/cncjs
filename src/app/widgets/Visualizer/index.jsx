@@ -16,6 +16,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  useColorMode,
 } from '@tonic-ui/react';
 import {
   UPDATE_BOUNDING_BOX,
@@ -160,14 +161,13 @@ function GCodeName({ name, isProbeCompensationApplied, style, ...props }) {
   return (
     <Box>
       <Box
-        color="text._fixed.light.accent"
+        color="text.secondary"
         sx={{
           display: 'inline-block',
           position: 'absolute',
           bottom: 8,
           left: 8,
           fontSize: '1.5rem',
-          opacity: 0.5,
         }}
         style={style}
         {...props}
@@ -323,6 +323,7 @@ const getIsAgitated = state => {
  * @param {{widgetId: string}} props
  */
 function VisualizerWidget({ widgetId }) {
+  const [colorMode] = useColorMode();
   const config = useMemo(() => new WidgetConfig(widgetId), [widgetId]);
   const [state, setState] = useState(() => getInitialState(config));
   const stateRef = useRef(state);
@@ -348,6 +349,7 @@ function VisualizerWidget({ widgetId }) {
   const isAgitated = getIsAgitated(state);
 
   const viewState = {
+    colorMode,
     cameraPosition: state.cameraPosition,
     cameraMode: state.cameraMode,
     isAgitated,
@@ -1020,7 +1022,9 @@ function VisualizerWidget({ widgetId }) {
         <Widget.Header flex="none" padding="5px 10px" fixed>
           <PrimaryToolbar state={stateForRender} actions={actions} />
         </Widget.Header>
+        <WorkflowControl state={stateForRender} actions={actions} />
         <Widget.Content
+          backgroundColor="background.highest"
           style={{
             position: 'relative',
             flex: '1 1 auto',
@@ -1032,7 +1036,6 @@ function VisualizerWidget({ widgetId }) {
           {state.modal.name === MODAL_WATCH_DIRECTORY && (
             <WatchDirectory state={stateForRender} actions={actions} />
           )}
-          <WorkflowControl state={stateForRender} actions={actions} />
           <Dashboard show={showDashboard} state={stateForRender} />
           {engineAvailable && (
             <Visualizer containerRef={containerRef} show={showVisualizer} />

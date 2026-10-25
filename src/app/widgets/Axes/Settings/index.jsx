@@ -114,16 +114,16 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
         <ModalHeader>{i18n._('Axes Settings')}</ModalHeader>
         <ModalBody padding={false}>
           <Tabs index={activeIndex} onChange={setActiveIndex}>
-            <TabList aria-label={i18n._('Axes Settings')} sx={{ mt: '15px', pl: '15px' }}>
+            <TabList aria-label={i18n._('Axes Settings')}>
               <Tab index={0}>{i18n._('General')}</Tab>
               <Tab index={1}>{i18n._('Custom Commands')}</Tab>
               <Tab index={2}>{i18n._('ShuttleXpress')}</Tab>
             </TabList>
-            <TabPanels padding="2x 3x" minHeight="240px">
-              <TabPanel index={0} padding={0}>
+            <TabPanels px="3x" py="2x" minHeight="240px">
+              <TabPanel index={0}>
                 {activeIndex === 0 && <General value={draft.general} onChange={updateGeneral} />}
               </TabPanel>
-              <TabPanel index={1} padding={0}>
+              <TabPanel index={1}>
                 {activeIndex === 1 && (
                   <>
                     {mdiQuery.isError && (
@@ -143,7 +143,7 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
                   </>
                 )}
               </TabPanel>
-              <TabPanel index={2} padding={0}>
+              <TabPanel index={2}>
                 {activeIndex === 2 && <ShuttleXpress value={draft.shuttleXpress} onChange={updateShuttleXpress} />}
               </TabPanel>
               {error && (
@@ -154,7 +154,7 @@ function Settings({ config, onSave = () => {}, onCancel = () => {} }) {
             </TabPanels>
           </Tabs>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter gap="2x">
           <Button disabled={saving} onClick={close}>
             {i18n._('Cancel')}
           </Button>

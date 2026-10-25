@@ -239,7 +239,7 @@ function ToolWidget({
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
               <i aria-hidden="true" className="fa fa-bars" />
-              <Space width="8" />
+              <Space width={4} />
             </Widget.Sortable>
             {i18n._('Tool')}
           </Widget.Title>

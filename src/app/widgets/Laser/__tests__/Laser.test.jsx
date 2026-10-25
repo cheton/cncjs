@@ -90,10 +90,10 @@ describe('Laser widget command contracts', () => {
     renderLaserTest();
 
     const power = screen.getByRole('slider', { name: 'Laser power' });
-    expect(power).toHaveAttribute('aria-valuemin', '0');
-    expect(power).toHaveAttribute('aria-valuemax', '100');
-    expect(power).toHaveAttribute('aria-valuenow', '10');
-    fireEvent.keyDown(power, { key: 'ArrowRight', keyCode: 39, which: 39 });
+    expect(power).toHaveAttribute('min', '0');
+    expect(power).toHaveAttribute('max', '100');
+    expect(power).toHaveValue('10');
+    fireEvent.change(power, { target: { value: '11' } });
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Test duration in milliseconds' }), {
       target: { value: '400' },
     });

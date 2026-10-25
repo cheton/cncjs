@@ -1,4 +1,4 @@
-import { Box, Space, Text } from '@tonic-ui/react';
+import { Box, Text } from '@tonic-ui/react';
 import React from 'react';
 
 /**
@@ -6,9 +6,8 @@ import React from 'react';
  */
 function DigitalReadout({ children, label, value }) {
   return (
-    <Box alignItems="center" display="flex" justifyContent="center">
+    <Box alignItems="center" display="grid" gap="1x" gridTemplateColumns="16px 45px minmax(0, 1fr)">
       <Text fontFamily="mono" fontSize="1.5rem">{label}</Text>
-      <Space width="2x" />
       <Box
         sx={{
           backgroundColor: 'actions.hovered',
@@ -21,7 +20,6 @@ function DigitalReadout({ children, label, value }) {
       >
         {value}
       </Box>
-      <Space width="2x" />
       {children}
     </Box>
   );

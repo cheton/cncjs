@@ -271,7 +271,6 @@ describe('Axes position input', () => {
           workPosition: { x: '1.000' },
           jog: { axis: '', keypad: false },
           controller: { type: GRBL },
-          controllerType: GRBL,
           positionInput: null,
         },
         onGetWorkCoordinateSystem: () => 'G54',

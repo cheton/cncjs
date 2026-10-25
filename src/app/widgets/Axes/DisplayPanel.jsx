@@ -1,17 +1,17 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ensureArray } from 'ensure-type';
 import {
   Box,
   Button,
   Dropdown as TonicDropdown,
   DropdownToggle,
-  Image,
   MenuDivider,
   MenuItem as TonicMenuItem,
   Tooltip,
 } from '@tonic-ui/react';
 import includes from 'lodash/includes';
 import noop from 'lodash/noop';
-import React, { Children, isValidElement } from 'react';
+import React, { Children, isValidElement, useEffect, useRef, useState } from 'react';
 import {
   AXIS_E,
   AXIS_X,
@@ -34,11 +34,6 @@ import PositionLabel from './components/PositionLabel';
 import PositionInput from './components/PositionInput';
 import Taskbar from './components/Taskbar';
 import { useAxes } from './context';
-import iconMinus from './images/minus.svg';
-import iconPlus from './images/plus.svg';
-import iconHome from './images/home.svg';
-import iconPin from './images/pin.svg';
-import iconPencil from './images/pencil.svg';
 import styles from './index.styl';
 
 const taskbarButtonSx = {
@@ -57,9 +52,9 @@ const taskbarButtonSx = {
   userSelect: 'none',
   backgroundImage: 'none',
   backgroundColor: 'inherit',
-  opacity: 0.6,
-  '&:hover': { opacity: 0.8, backgroundColor: 'actions.hovered', textDecoration: 'none' },
-  '&:disabled': { opacity: 0.3, cursor: 'not-allowed' },
+  color: 'text.primary',
+  '&:hover': { backgroundColor: 'actions.hovered', textDecoration: 'none' },
+  '&:disabled': { color: 'text.secondary', opacity: 0.65, cursor: 'not-allowed' },
   '&:disabled:hover': { backgroundColor: 'inherit' },
 };
 
@@ -242,6 +237,24 @@ function AxisCommandMenuItem({
  * }} props
  */
 function AxisCommandMenu({ children, disabled = false, onSelect }) {
+  const rootRef = useRef(null);
+  const menuRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+    const handleOutsidePointerDown = event => {
+      if (!rootRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    const document = rootRef.current.ownerDocument;
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
+  }, [isOpen]);
+
   const items = Children.toArray(children);
   const toggle = items.find(child => isValidElement(child) && child.type === AxisCommandMenuToggle);
   const list = items.find(child => isValidElement(child) && child.type === AxisCommandMenuList);
@@ -271,6 +284,11 @@ function AxisCommandMenu({ children, disabled = false, onSelect }) {
 
   return (
     <TonicDropdown
+      ref={rootRef}
+      isOpen={isOpen}
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
+      slotProps={{ content: { ref: menuRef } }}
       items={menuItems}
       onChange={item => onSelect?.(item?.value)}
       renderItem={(item) => {
@@ -327,7 +345,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdown = ({ wcs }) => {
-    const { canClick, controllerType, axes } = context.state;
+    const { canClick, controller: { type: controllerType }, axes } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -350,7 +368,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-caret-down" />
+          <FontAwesomeIcon icon="caret-down" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -474,7 +492,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisX = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -497,7 +515,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -616,7 +634,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisY = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -639,7 +657,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -758,7 +776,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisZ = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -781,7 +799,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -900,7 +918,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisA = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -923,7 +941,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -1042,7 +1060,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisB = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -1065,7 +1083,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -1184,7 +1202,7 @@ function DisplayPanel() {
   };
 
   const renderActionDropdownForAxisC = ({ wcs }) => {
-    const { canClick, controllerType } = context.state;
+    const { canClick, controller: { type: controllerType } } = context.state;
     const {
       canGoToWork,
       canSetWCSOffset,
@@ -1207,7 +1225,7 @@ function DisplayPanel() {
           compact
           noCaret
         >
-          <i aria-hidden="true" className="fa fa-fw fa-ellipsis-v" />
+          <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           {wcs === 'G54' &&
@@ -1394,7 +1412,7 @@ function DisplayPanel() {
                     controller.command('gcode', `G28.3 ${axisLabel}0`);
                   }}
                 >
-                  <Image src={iconPin} width={14} height={14} />
+                  <FontAwesomeIcon icon="map-marker-alt" fixedWidth />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -1412,7 +1430,7 @@ function DisplayPanel() {
                     controller.command('gcode', axisHomingCommand);
                   }}
                 >
-                  <Image src={iconHome} width={14} height={14} />
+                  <FontAwesomeIcon icon="home" fixedWidth />
                 </Button>
               </Tooltip>
             </Box>
@@ -1451,7 +1469,7 @@ function DisplayPanel() {
                     onJog({ [axis]: -distance });
                   }}
                 >
-                  <Image src={iconMinus} width={14} height={14} />
+                  <FontAwesomeIcon icon="minus" fixedWidth />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -1470,7 +1488,7 @@ function DisplayPanel() {
                     onJog({ [axis]: distance });
                   }}
                 >
-                  <Image src={iconPlus} width={14} height={14} />
+                  <FontAwesomeIcon icon="plus" fixedWidth />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -1488,7 +1506,7 @@ function DisplayPanel() {
                     onSetWorkOffsets(axis, 0);
                   }}
                 >
-                  <Image src={iconPin} width={14} height={14} />
+                  <FontAwesomeIcon icon="map-marker-alt" fixedWidth />
                 </Button>
               </Tooltip>
               <Tooltip
@@ -1505,7 +1523,7 @@ function DisplayPanel() {
                   disabled={!canModifyWorkPosition}
                   onClick={showPositionInput(axis, wpos)}
                 >
-                  <Image src={iconPencil} width={14} height={14} />
+                  <FontAwesomeIcon icon="pencil-alt" fixedWidth />
                 </Button>
               </Tooltip>
             </Box>
@@ -1529,8 +1547,16 @@ function DisplayPanel() {
   const hasAxisC = includes(axes, AXIS_C);
 
   return (
-    <Box className={styles.displayPanel} sx={{ mb: '10px', '&:last-child': { mb: 0 } }}>
-      <table className="table-bordered" style={{ width: '100%', tableLayout: 'fixed' }}>
+    <Box
+      className={styles.displayPanel}
+      sx={{
+        mb: '10px',
+        '&:last-child': { mb: 0 },
+        '& table': { borderCollapse: 'collapse' },
+        '& th, & td': { border: 1, borderColor: 'border.secondary' },
+      }}
+    >
+      <table style={{ width: '100%', tableLayout: 'fixed' }}>
         <thead>
           <tr>
             <th scope="col" className={styles.coordinate} title={i18n._('Axis')}>{i18n._('Axis')}</th>

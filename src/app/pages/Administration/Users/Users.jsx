@@ -66,6 +66,9 @@ const Users = () => {
     setRowSelection({});
   }, []);
 
+  // manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const queryClient = useQueryClient();
   const fetchUsersQuery = useFetchUsersQuery({
     meta: {
@@ -109,7 +112,10 @@ const Users = () => {
   const portal = usePortalManager();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchUsersQuery.isFetching;
-  const isLoadingData = fetchUsersQuery.isFetching;
+  // Show the full-table loading overlay for the initial fetch and explicit
+  // refreshes only; background fetches (e.g. mutation invalidations) keep the
+  // rendered records visible. React Query v4 `isLoading` means "no data yet".
+  const isLoadingData = fetchUsersQuery.isLoading || isRefreshing;
   const data = ensureArray(fetchUsersQuery.data?.records);
   const totalCount = fetchUsersQuery.data?.pagination?.totalRecords ?? 0;
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -166,8 +172,15 @@ const Users = () => {
     clearRowSelection();
   }, [rowSelection, bulkDisableUsersMutation, clearRowSelection]);
 
-  const handleClickRefresh = useCallback(() => {
-    fetchUsersQuery.refetch();
+  const handleClickRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Join an in-flight fetch instead of cancelling it so the overlay stays
+      // visible until the request settles, whether it succeeds or fails.
+      await fetchUsersQuery.refetch({ cancelRefetch: false });
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchUsersQuery]);
 
   const handleClickViewUserDetailsById = useCallback((id) => () => {
@@ -429,7 +442,7 @@ const Users = () => {
                     gap="2x"
                   >
                     <Text>{i18n._('An unexpected error has occurred.')}</Text>
-                    <Button onClick={() => fetchUsersQuery.refetch()}>{i18n._('Retry')}</Button>
+                    <Button onClick={handleClickRefresh}>{i18n._('Retry')}</Button>
                   </Flex>
                 )}
                 {!isLoadingData && !fetchUsersQuery.isError && data.length === 0 && (

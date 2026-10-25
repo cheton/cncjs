@@ -1,6 +1,6 @@
 import {
   Box, Button, ButtonGroup, FormControl, FormInput, FormLabel, FormTextarea,
-  Image, InputGroup, InputGroupAddon,
+  InputGroup, InputGroupAddon, InputGroupAppend, InputGroupPrepend,
   Dropdown, DropdownButton, Text, Tooltip,
 } from '@tonic-ui/react';
 import { ensureNumber, ensureString } from 'ensure-type';
@@ -21,6 +21,15 @@ import {
 import iconPin from './images/pin.svg';
 import insertAtCaret from './insertAtCaret';
 import variables from './variables';
+
+const positionPinSx = {
+  display: 'block',
+  width: '14px',
+  height: '14px',
+  backgroundColor: 'currentColor',
+  mask: `url("${iconPin}") center / contain no-repeat`,
+  WebkitMask: `url("${iconPin}") center / contain no-repeat`,
+};
 
 const TOOL_PROBE_OVERRIDE_WCS_EXAMPLE = `
 ; Probe the tool
@@ -188,17 +197,21 @@ function Tool({
       render={({ field }) => (
         <FormControl>
           <FormLabel>{label}</FormLabel>
-          <InputGroup size="sm">
+          <InputGroup>
             <FormInput
               {...field}
               aria-label={label}
+              flex="1"
+              minWidth="0"
               min={0}
               step={step}
               type="number"
               value={field.value ?? ''}
               onChange={event => field.onChange(getNextValue(event.target.value))}
             />
-            <InputGroupAddon>{unit}</InputGroupAddon>
+            <InputGroupAppend>
+              <InputGroupAddon>{unit}</InputGroupAddon>
+            </InputGroupAppend>
           </InputGroup>
         </FormControl>
       )}
@@ -248,26 +261,31 @@ function Tool({
                   key={axis}
                   name={`toolChange${axis.toUpperCase()}`}
                   render={({ field }) => (
-                    <InputGroup size="sm" mb="2x">
-                      <InputGroupAddon>{axis.toUpperCase()}</InputGroupAddon>
+                    <InputGroup mb="2x">
+                      <InputGroupPrepend>
+                        <InputGroupAddon>{axis.toUpperCase()}</InputGroupAddon>
+                      </InputGroupPrepend>
                       <FormInput
                         {...field}
                         aria-label={i18n._(`Tool Change ${axis.toUpperCase()}`)}
+                        flex="1"
+                        minWidth="0"
                         type="number"
                         value={field.value ?? ''}
                       />
-                      <InputGroupAddon>{displayUnits}</InputGroupAddon>
-                      <Button
-                        aria-label={i18n._(`Use machine ${axis.toUpperCase()} position`)}
-                        disabled={!canClick}
-                        onClick={() => machinePosition[axis] !== undefined && field.onChange(machinePosition[axis])}
-                        variant="secondary"
-                      >
-                        <Image
-                          alt="" height="14" src={iconPin}
-                          width="14"
-                        />
-                      </Button>
+                      <InputGroupAppend>
+                        <InputGroupAddon>{displayUnits}</InputGroupAddon>
+                      </InputGroupAppend>
+                      <InputGroupAppend>
+                        <Button
+                          aria-label={i18n._(`Use machine ${axis.toUpperCase()} position`)}
+                          disabled={!canClick}
+                          onClick={() => machinePosition[axis] !== undefined && field.onChange(machinePosition[axis])}
+                          variant="secondary"
+                        >
+                          <Box as="span" aria-hidden="true" sx={positionPinSx} />
+                        </Button>
+                      </InputGroupAppend>
                     </InputGroup>
                   )}
                 />
@@ -280,26 +298,31 @@ function Tool({
                   key={axis}
                   name={`toolProbe${axis.toUpperCase()}`}
                   render={({ field }) => (
-                    <InputGroup size="sm" mb="2x">
-                      <InputGroupAddon>{axis.toUpperCase()}</InputGroupAddon>
+                    <InputGroup mb="2x">
+                      <InputGroupPrepend>
+                        <InputGroupAddon>{axis.toUpperCase()}</InputGroupAddon>
+                      </InputGroupPrepend>
                       <FormInput
                         {...field}
                         aria-label={i18n._(`Tool Probe ${axis.toUpperCase()}`)}
+                        flex="1"
+                        minWidth="0"
                         type="number"
                         value={field.value ?? ''}
                       />
-                      <InputGroupAddon>{displayUnits}</InputGroupAddon>
-                      <Button
-                        aria-label={i18n._(`Use machine probe ${axis.toUpperCase()} position`)}
-                        disabled={!canClick}
-                        onClick={() => machinePosition[axis] !== undefined && field.onChange(machinePosition[axis])}
-                        variant="secondary"
-                      >
-                        <Image
-                          alt="" height="14" src={iconPin}
-                          width="14"
-                        />
-                      </Button>
+                      <InputGroupAppend>
+                        <InputGroupAddon>{displayUnits}</InputGroupAddon>
+                      </InputGroupAppend>
+                      <InputGroupAppend>
+                        <Button
+                          aria-label={i18n._(`Use machine probe ${axis.toUpperCase()} position`)}
+                          disabled={!canClick}
+                          onClick={() => machinePosition[axis] !== undefined && field.onChange(machinePosition[axis])}
+                          variant="secondary"
+                        >
+                          <Box as="span" aria-hidden="true" sx={positionPinSx} />
+                        </Button>
+                      </InputGroupAppend>
                     </InputGroup>
                   )}
                 />
@@ -319,7 +342,21 @@ function Tool({
                     </Button>
                   )}
                 </Box>
-                {!editable && ensureString(value.toolProbeCustomCommands).length > 0 && <Text as="pre" maxHeight="150px" overflow="auto">{value.toolProbeCustomCommands}</Text>}
+                {!editable && ensureString(value.toolProbeCustomCommands).length > 0 && (
+                  <Text
+                    as="pre"
+                    backgroundColor="background.low"
+                    border="1px solid"
+                    borderColor="border.primary"
+                    borderRadius="sm"
+                    m="0"
+                    p="3x"
+                    maxHeight="150px"
+                    overflow="auto"
+                  >
+                    {value.toolProbeCustomCommands}
+                  </Text>
+                )}
                 {!editable && ensureString(value.toolProbeCustomCommands).length === 0 && <Text color="error.text">{i18n._('Warning: No custom tool probe commands are defined')}</Text>}
                 {editable && (
                   <Box>
@@ -442,7 +479,21 @@ function Tool({
                       </Tooltip>
                     )}
                   </Box>
-                  {connected ? <Text as="pre" maxHeight="150px" overflow="auto">{commands}</Text> : <Text fontStyle="italic">{i18n._('Connect to the controller to view the tool probe commands.')}</Text>}
+                  {connected ? (
+                    <Text
+                      as="pre"
+                      backgroundColor="background.low"
+                      border="1px solid"
+                      borderColor="border.primary"
+                      borderRadius="sm"
+                      m="0"
+                      p="3x"
+                      maxHeight="150px"
+                      overflow="auto"
+                    >
+                      {commands}
+                    </Text>
+                  ) : <Text fontStyle="italic">{i18n._('Connect to the controller to view the tool probe commands.')}</Text>}
                 </FormControl>
               </Box>
             )}

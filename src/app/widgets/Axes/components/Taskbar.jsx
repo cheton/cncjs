@@ -9,11 +9,9 @@ function Taskbar({ children, style, ...props }) {
   return (
     <Box
       {...props}
-      style={{
-        borderTop: '1px solid',
-        borderColor: 'border.secondary',
-        ...style
-      }}
+      borderTop="1px solid"
+      borderColor="border.secondary"
+      style={style}
     >
       {children}
     </Box>

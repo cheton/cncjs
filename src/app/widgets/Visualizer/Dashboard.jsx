@@ -4,6 +4,7 @@ import {
   Image,
   LinearProgress,
   LinkButton,
+  Text,
 } from '@tonic-ui/react';
 import { ensurePositiveNumber } from 'ensure-type';
 import escape from 'lodash/escape';
@@ -22,6 +23,7 @@ function Dashboard({ show = false, state = {} }) {
   const viewerRef = useRef(null);
   const [visibleHeight, setVisibleHeight] = useState(0);
   const content = state.gcode?.content || '';
+  const total = state.gcode?.total || 0;
   const lines = useMemo(() => content
     .split('\n')
     .filter(line => line.trim().length > 0), [content]);
@@ -51,7 +53,7 @@ function Dashboard({ show = false, state = {} }) {
     if (show) {
       resizeVirtualList();
     }
-  }, [resizeVirtualList, show]);
+  }, [resizeVirtualList, show, lines.length, total]);
 
   const renderItem = useCallback(({ index, style }) => (
     <Box key={index} style={style}>
@@ -68,32 +70,34 @@ function Dashboard({ show = false, state = {} }) {
   const filename = gcode.name || 'noname.nc';
   const filesize = gcode.ready ? formatBytes(gcode.size, 0) : '';
   const sent = gcode.sent || 0;
-  const total = gcode.total || 0;
-  const viewerStyle = {
-    backgroundColor: 'background.highest',
-    border: '1px solid transparent',
-    borderColor: 'border.secondary',
-    boxShadow: 'low.main',
-    marginBottom: 10,
-    display: show ? 'block' : 'none',
-  };
 
   return (
-    <Box className={styles.dashboard} style={viewerStyle}>
+    <Box
+      aria-label={i18n._('G-code dashboard')}
+      className={styles.dashboard}
+      position="absolute"
+      top={0}
+      right="10px"
+      bottom="10px"
+      left="10px"
+      display={show ? 'flex' : 'none'}
+      flexDirection="column"
+      backgroundColor="background.highest"
+      border={1}
+      borderColor="border.secondary"
+    >
       <Box
-        style={{
-          backgroundColor: 'background.highest',
-          borderBottom: '1px solid',
-          borderColor: 'border.secondary',
-          color: 'text.primary',
-          height: 30,
-          padding: '5px 10px',
-        }}
+        flex="none"
+        px="2x"
+        py="1x"
+        borderBottom={1}
+        borderColor="border.secondary"
+        color="text.primary"
       >
         {i18n._('G-code')}
       </Box>
-      <Box style={{ height: 'calc(100% - 30px)', padding: 10 }}>
-        <Flex justifyContent="space-between" style={{ marginBottom: 10 }}>
+      <Box display="flex" flexDirection="column" flex="1" minHeight="0" padding="10px">
+        <Flex flex="none" justifyContent="space-between" mb="2x">
           <Box as="span" whiteSpace="nowrap">
             {gcode.ready && (
               <LinkButton
@@ -111,32 +115,33 @@ function Dashboard({ show = false, state = {} }) {
             {filesize}
           </Box>
         </Flex>
-        <Box position="relative" style={{ marginBottom: 10 }}>
+        <Box position="relative" flex="none" mb="10px">
           <LinearProgress
             aria-label={i18n._('G-code progress')}
+            height="20px"
+            borderRadius="4px"
+            color="#5bc0de"
             min={0}
-            max={total}
+            max={Math.max(total, 1)}
             value={sent}
             variant="determinate"
           />
           {total > 0 && (
-            <Box
-              as="span"
-              position="absolute"
-              top={0}
-              right={0}
-              bottom={0}
-              left={0}
-              textAlign="center"
-              className={styles.progressbarLabel}
-            >
+            <Text position="absolute" inset="0" fontSize="sm" lineHeight="20px" textAlign="center" color="text.primary">
               {sent}&nbsp;/&nbsp;{total}
-            </Box>
+            </Text>
           )}
         </Box>
         <Box
           ref={viewerRef}
-          className={`${styles.gcodeViewer} ${lines.length === 0 ? styles.gcodeViewerDisabled : ''}`}
+          className={styles.gcodeViewer}
+          position="relative"
+          flex="1"
+          minHeight="0"
+          border={1}
+          borderColor="border.secondary"
+          backgroundColor={lines.length === 0 ? 'background.high' : 'background.highest'}
+          overflow="hidden"
         >
           {lines.length > 0 && (
             <VirtualList

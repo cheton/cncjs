@@ -179,7 +179,7 @@ const migrateStore = () => {
     config.unset('widgets.connection.baudrate');
   }
 
-  if (semverLt(cnc.version, '2.0.0')) {
+  if (semverLt(cnc.version, '2.0.0-0')) {
     log.info(`Migrating configuration settings from v${cnc.version} to v2.0.0`);
 
     // appearance

@@ -488,7 +488,7 @@ function Connection() {
 
               return (
                 <Box mb="4x">
-                  <ButtonGroup variant="default">
+                  <ButtonGroup size="sm" variant="default" width="100%" sx={{ '& > button': { flex: 1, minWidth: 0, px: '2x' } }}>
                     {canSelectGrbl && (
                       <Button
                         disabled={isGrblDisabled}
@@ -1179,6 +1179,7 @@ function SerialBaudSelector({ id, label, options, value, disabled, placeholder, 
       items={options}
       value={value}
       matchWidth
+      slotProps={{ root: { width: '100%' } }}
       renderItem={item => item?.label ?? placeholder}
       renderToggle={({ renderItem, value: selected }) => (
         <DropdownButton

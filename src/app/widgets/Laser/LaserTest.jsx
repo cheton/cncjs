@@ -1,19 +1,22 @@
 import {
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionItem,
   Box,
   Button,
-  Collapse,
   Flex,
-  Input,
+  InputControl,
   InputGroup,
   InputGroupAddon,
-  Text,
+  InputGroupAppend,
+  InputGroupPrepend,
   TextLabel,
 } from '@tonic-ui/react';
 import { ensurePositiveNumber } from 'ensure-type';
 import _get from 'lodash/get';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import Slider from 'rc-slider';
 import {
   CONNECTION_STATE_CONNECTED,
 } from '@app/constants/connection';
@@ -21,6 +24,28 @@ import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
 
+const powerTrackSx = {
+  height: '8px',
+  border: 1,
+  borderColor: 'border.primary',
+  borderRadius: 'full',
+  background: 'linear-gradient(to right, var(--tonic-colors-info-icon) var(--laser-power), var(--tonic-colors-border-secondary) var(--laser-power))',
+};
+
+const powerThumbSx = {
+  appearance: 'none',
+  width: '16px',
+  height: '16px',
+  borderRadius: '50%',
+  border: '2px solid',
+  borderColor: 'background.highest',
+  backgroundColor: 'info.icon',
+  boxShadow: '0 0 0 1px var(--tonic-colors-border-primary)',
+};
+
+/**
+ * @param {{ isConnected: boolean }} props
+ */
 function LaserTest({
   isConnected,
 }) {
@@ -34,9 +59,7 @@ function LaserTest({
   const [maxSDraft, setMaxSDraft] = useState(() => (
     String(ensurePositiveNumber(config.get('test.maxS', 1000)))
   ));
-  const [expanded, setExpanded] = useState(() => Boolean(
-    config.get('panel.laserTest.expanded')
-  ));
+  const expanded = config.get('panel.laserTest.expanded');
 
   const numericPower = powerDraft === '' ? null : Number(powerDraft);
   const numericDuration = durationDraft === '' ? null : Number(durationDraft);
@@ -54,123 +77,137 @@ function LaserTest({
     config.set(path, ensurePositiveNumber(value));
   };
 
-  const toggleExpanded = () => {
-    const nextExpanded = !expanded;
-    setExpanded(nextExpanded);
-    config.set('panel.laserTest.expanded', nextExpanded);
-  };
-
   return (
-    <Box
-      width="100%"
-      border={1}
-      borderColor="gray.200"
-    >
-      <Flex
-        alignItems="center"
-        justifyContent="space-between"
-        padding="2x"
+    <Accordion border={1} borderColor="border.secondary">
+      <AccordionItem
+        isExpanded={Boolean(expanded)}
+        onToggle={({ isExpanded }) => config.set('panel.laserTest.expanded', isExpanded)}
       >
-        <TextLabel>{i18n._('Laser Test')}</TextLabel>
-        <Button
-          type="button"
-          variant="ghost"
-          aria-label={i18n._(expanded ? 'Collapse' : 'Expand')}
-          aria-expanded={expanded}
-          onClick={toggleExpanded}
-        >
-          {expanded ? '−' : '+'}
-        </Button>
-      </Flex>
-      <Collapse in={expanded}>
-        <Box padding="2x">
-          <Flex alignItems="center" mb="2x">
-            <Box width="35%">
-              <TextLabel>{i18n._('Power (%)')}</TextLabel>
-            </Box>
-            <Box width="65%" textAlign="center">
-              <Text>{powerDraft}%</Text>
-              <Box sx={{ '& .rc-slider': { padding: 0 } }}>
-                <Slider
-                  ariaLabelForHandle="Laser power"
+        <AccordionHeader aria-label={i18n._(expanded ? 'Collapse' : 'Expand')}>
+          {i18n._('Laser Test')}
+        </AccordionHeader>
+        <AccordionBody>
+          <Box p="3x">
+            <Flex alignItems="center" mb="2x">
+              <Box width="35%">
+                <TextLabel>{i18n._('Power (%)')}</TextLabel>
+              </Box>
+              <Box width="65%" textAlign="center">
+                <Box
+                  as="output"
+                  display="inline-block"
+                  mb="2x"
+                >
+                  {powerDraft}%
+                </Box>
+                <Box
+                  as="input"
+                  type="range"
+                  aria-label="Laser power"
+                  aria-valuetext={`${powerDraft}%`}
                   value={numericPower === null ? 0 : numericPower}
                   min={0}
                   max={100}
                   step={1}
-                  onChange={value => updateDraft('test.power', setPowerDraft, value)}
+                  onChange={event => updateDraft('test.power', setPowerDraft, event.target.value)}
+                  style={{ '--laser-power': `${numericPower === null ? 0 : numericPower}%` }}
+                  sx={{
+                    appearance: 'none',
+                    display: 'block',
+                    width: '100%',
+                    height: '24px',
+                    margin: 0,
+                    padding: 0,
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    borderRadius: 'sm',
+                    '&::-webkit-slider-runnable-track': powerTrackSx,
+                    '&::-moz-range-track': powerTrackSx,
+                    '&::-webkit-slider-thumb': { ...powerThumbSx, marginTop: '-5px' },
+                    '&::-moz-range-thumb': powerThumbSx,
+                    _focusVisible: { outline: '2px solid', outlineColor: 'info.border', outlineOffset: '2px' },
+                  }}
                 />
               </Box>
-            </Box>
-          </Flex>
-          <Flex alignItems="center" mb="2x">
-            <Box width="35%">
-              <TextLabel>{i18n._('Test duration')}</TextLabel>
-            </Box>
-            <Box width="65%">
-              <InputGroup size="sm">
-                <Input
-                  aria-label="Test duration in milliseconds"
-                  type="number"
-                  value={durationDraft}
-                  min={0}
-                  step={1}
-                  onChange={event => updateDraft(
-                    'test.duration',
-                    setDurationDraft,
-                    event.target.value
-                  )}
-                />
-                <InputGroupAddon>{i18n._('ms')}</InputGroupAddon>
-              </InputGroup>
-            </Box>
-          </Flex>
-          <Flex alignItems="center" mb="2x">
-            <Box width="35%">
-              <TextLabel>{i18n._('Maximum value')}</TextLabel>
-            </Box>
-            <Box width="65%">
-              <InputGroup size="sm">
-                <InputGroupAddon>S</InputGroupAddon>
-                <Input
-                  aria-label="Maximum S value"
-                  type="number"
-                  value={maxSDraft}
-                  min={0}
-                  step={1}
-                  onChange={event => updateDraft(
-                    'test.maxS',
-                    setMaxSDraft,
-                    event.target.value
-                  )}
-                />
-              </InputGroup>
-            </Box>
-          </Flex>
-          <Flex>
-            <Button
-              type="button"
-              disabled={!isLaserTestReady}
-              onClick={() => controller.command(
-                'laser_test',
-                numericPower,
-                numericDuration,
-                numericMaxS
-              )}
-            >
-              {i18n._('Laser Test')}
-            </Button>
-            <Button
-              type="button"
-              ml="2x"
-              disabled={!isConnected}
-              onClick={() => controller.command('laser_test', 0)}
-            >
-              {i18n._('Laser Off')}
-            </Button>
-          </Flex>
-        </Box>
-      </Collapse>
-    </Box>
+            </Flex>
+            <Flex alignItems="center" mb="2x">
+              <Box width="35%">
+                <TextLabel>{i18n._('Test duration')}</TextLabel>
+              </Box>
+              <Box width="65%">
+                <InputGroup>
+                  <InputControl
+                    flex="1"
+                    minWidth="0"
+                    type="number"
+                    value={durationDraft}
+                    min={0}
+                    step={1}
+                    slotProps={{ input: { 'aria-label': 'Test duration in milliseconds' } }}
+                    onChange={event => updateDraft(
+                      'test.duration',
+                      setDurationDraft,
+                      event.target.value
+                    )}
+                  />
+                  <InputGroupAppend>
+                    <InputGroupAddon>{i18n._('ms')}</InputGroupAddon>
+                  </InputGroupAppend>
+                </InputGroup>
+              </Box>
+            </Flex>
+            <Flex alignItems="center" mb="2x">
+              <Box width="35%">
+                <TextLabel>{i18n._('Maximum value')}</TextLabel>
+              </Box>
+              <Box width="65%">
+                <InputGroup>
+                  <InputGroupPrepend>
+                    <InputGroupAddon>S</InputGroupAddon>
+                  </InputGroupPrepend>
+                  <InputControl
+                    flex="1"
+                    minWidth="0"
+                    type="number"
+                    value={maxSDraft}
+                    min={0}
+                    step={1}
+                    slotProps={{ input: { 'aria-label': 'Maximum S value' } }}
+                    onChange={event => updateDraft(
+                      'test.maxS',
+                      setMaxSDraft,
+                      event.target.value
+                    )}
+                  />
+                </InputGroup>
+              </Box>
+            </Flex>
+            <Flex>
+              <Button
+                type="button"
+                disabled={!isLaserTestReady}
+                onClick={() => controller.command(
+                  'laser_test',
+                  numericPower,
+                  numericDuration,
+                  numericMaxS
+                )}
+              >
+                {i18n._('Laser Test')}
+              </Button>
+              <Button
+                type="button"
+                ml="2x"
+                disabled={!isConnected}
+                onClick={() => controller.command('laser_test', 0)}
+              >
+                {i18n._('Laser Off')}
+              </Button>
+            </Flex>
+          </Box>
+        </AccordionBody>
+      </AccordionItem>
+    </Accordion>
   );
 }
 

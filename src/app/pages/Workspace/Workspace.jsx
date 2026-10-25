@@ -511,12 +511,12 @@ const Workspace = ({
               </Flex>
             )}
             {/* The app header is 48px tall — keep in sync with $navbar-height (styles/variables.styl). */}
-            <Box height="calc(100vh - 48px)">
+            <Box height="calc(100vh - 48px)" overflowX="auto">
               <Flex height="calc(100vh - 48px)" minHeight="0">
                 <Box
                   flex="0 1 360px"
                   width="360px"
-                  minWidth="160px"
+                  minWidth="320px"
                   minHeight="0"
                   display={hidePrimaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
@@ -537,13 +537,14 @@ const Workspace = ({
                       </Button>
                       <Button
                         aria-label={i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
-                        flex="auto"
+                        flex="1"
+                        minWidth="0"
                         onClick={updateWidgetsForPrimaryContainer}
                         size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                         <Space width={8} />
-                        <Box className={styles.panelActionLabel}>
+                        <Box className={styles.panelActionLabel} minWidth="0" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                           {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         </Box>
                       </Button>
@@ -632,7 +633,7 @@ const Workspace = ({
                 <Box
                   flex="0 1 360px"
                   width="360px"
-                  minWidth="160px"
+                  minWidth="320px"
                   minHeight="0"
                   display={hideSecondaryContainer ? 'none' : 'flex'}
                   flexDirection="column"
@@ -662,13 +663,14 @@ const Workspace = ({
                       </ButtonGroup>
                       <Button
                         aria-label={i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
-                        flex="auto"
+                        flex="1"
+                        minWidth="0"
                         onClick={updateWidgetsForSecondaryContainer}
                         size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
                         <Space width={8} />
-                        <Box className={styles.panelActionLabel}>
+                        <Box className={styles.panelActionLabel} minWidth="0" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                           {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         </Box>
                       </Button>

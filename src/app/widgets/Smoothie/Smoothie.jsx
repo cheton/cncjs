@@ -79,7 +79,7 @@ function Smoothie({ controllerState = {}, panel, setPanelExpanded }) {
  */
 function ReportSection({ children, isExpanded, onToggle, title }) {
   return (
-    <Accordion>
+    <Accordion border={1} borderColor="border.secondary">
       <AccordionItem isExpanded={isExpanded} onToggle={onToggle}>
         <AccordionHeader>{title}</AccordionHeader>
         <AccordionBody>{children}</AccordionBody>
@@ -102,7 +102,7 @@ function ReportRow({ children, label }) {
       </Box>
       <Box
         bg="background.high"
-        border="1px solid"
+        border={1}
         borderColor="border.secondary"
         borderRadius="sm"
         minHeight="22px"

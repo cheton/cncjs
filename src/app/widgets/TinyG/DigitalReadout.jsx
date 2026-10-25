@@ -6,22 +6,26 @@ import React from 'react';
  */
 function DigitalReadout({ children, label, value }) {
   return (
-    <Box alignItems="center" display="flex" mb="2x">
-      <Text fontSize="2xl" width="8%">{label}</Text>
+    <Box
+      alignItems="center"
+      display="grid"
+      gap="1x"
+      gridTemplateColumns="16px 45px minmax(0, 1fr)"
+      mb="2x"
+    >
+      <Text fontFamily="mono" fontSize="1.5rem">{label}</Text>
       <Box
-        mr="2x"
         sx={{
           backgroundColor: 'actions.hovered',
-          borderRadius: '.25rem',
-          fontSize: '.875rem',
-          padding: '.25rem .375rem',
+          fontSize: '.75rem',
+          fontWeight: 'bold',
+          padding: '.25rem',
           textAlign: 'right',
         }}
-        width="17%"
       >
         {value}
       </Box>
-      <Box display="flex" sx={{ '> *': { minWidth: 0 } }} width="75%">
+      <Box alignItems="center" display="flex" gap="1x" minWidth="0">
         {children}
       </Box>
     </Box>

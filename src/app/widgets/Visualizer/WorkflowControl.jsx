@@ -5,6 +5,8 @@ import {
   Dropdown,
   DropdownButton,
   Flex,
+  InputGroup,
+  InputGroupAppend,
   Space,
 } from '@tonic-ui/react';
 import get from 'lodash/get';
@@ -34,7 +36,6 @@ import {
 import {
   MODAL_WATCH_DIRECTORY,
 } from './constants';
-import styles from './workflow-control.styl';
 
 /**
  * @param {{ state?: object, actions?: object }} props
@@ -100,7 +101,7 @@ function WorkflowControl({ state = {}, actions = {} }) {
   }, [actions]);
 
   return (
-    <Box className={styles.workflowControl}>
+    <Box flex="none" padding="10px" backgroundColor="background.highest">
       <Box
         ref={fileInputRef}
         as="input"
@@ -109,57 +110,76 @@ function WorkflowControl({ state = {}, actions = {} }) {
         multiple={false}
         onChange={handleChangeFile}
       />
-      <Flex alignItems="center" gap="2x">
-        <ButtonGroup>
+      <Flex
+        aria-label="G-code workflow toolbar"
+        role="toolbar"
+        alignItems="center"
+        flexWrap="wrap"
+        gap="2x"
+      >
+        <InputGroup width="auto" flex="none">
           <Button
             variant="primary"
             title={i18n._('Upload G-code')}
             onClick={handleClickUpload}
             disabled={!canUpload}
+            borderTopRightRadius="0"
+            borderBottomRightRadius="0"
           >
             {i18n._('Upload G-code')}
           </Button>
-          <Dropdown
-            items={[
-              {
-                value: 'watch-directory-heading',
-                type: 'custom',
-                content: (
-                  <Box px="3x" py="2x" fontWeight="bold">
-                    {i18n._('Watch Directory')}
-                  </Box>
-                ),
-              },
-              {
-                value: 'browse',
-                content: (
-                  <>
-                    <i aria-hidden="true" className="fa fa-search" />
-                    <Space width={8} />
-                    {i18n._('Browse...')}
-                  </>
-                ),
-                props: {
-                  onClick: () => {
-                    if (typeof actions.openModal === 'function') {
-                      actions.openModal(MODAL_WATCH_DIRECTORY);
-                    }
+          <InputGroupAppend>
+            <Dropdown
+              slotProps={{ root: { display: 'inline-flex', flex: 'none' } }}
+              items={[
+                {
+                  value: 'watch-directory-heading',
+                  type: 'custom',
+                  content: (
+                    <Box px="3x" py="2x" fontWeight="bold">
+                      {i18n._('Watch Directory')}
+                    </Box>
+                  ),
+                },
+                {
+                  value: 'browse',
+                  content: (
+                    <>
+                      <i aria-hidden="true" className="fa fa-search" />
+                      <Space width={8} />
+                      {i18n._('Browse...')}
+                    </>
+                  ),
+                  props: {
+                    onClick: () => {
+                      if (typeof actions.openModal === 'function') {
+                        actions.openModal(MODAL_WATCH_DIRECTORY);
+                      }
+                    },
                   },
                 },
-              },
-            ]}
-            renderItem={item => item?.content}
-            renderToggle={() => (
-              <DropdownButton
-                id="upload-dropdown"
-                aria-label={i18n._('Upload G-code options')}
-                variant="primary"
-                disabled={!canUpload}
-              />
-            )}
-          />
-        </ButtonGroup>
-        <ButtonGroup>
+              ]}
+              renderItem={item => item?.content}
+              renderToggle={() => (
+                <DropdownButton
+                  id="upload-dropdown"
+                  aria-label={i18n._('Upload G-code options')}
+                  variant="primary"
+                  disabled={!canUpload}
+                  width="32px"
+                  minWidth="32px"
+                  px="0"
+                  columnGap="0"
+                  justifyContent="center"
+                  borderTopLeftRadius="0"
+                  borderBottomLeftRadius="0"
+                  borderLeftColor="border.secondary"
+                />
+              )}
+            />
+          </InputGroupAppend>
+        </InputGroup>
+        <ButtonGroup variant="secondary" flex="none">
           <Button
             aria-label={i18n._('Run')}
             variant="default"

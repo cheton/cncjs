@@ -28,7 +28,7 @@ function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} })
         <Text className={styles.pathDescription} color="text.secondary">
           {i18n._('Set up the probe area and probe the work surface to generate height compensation data.')}
         </Text>
-        <Button onClick={onStartNewProbe} variant="ghost">
+        <Button onClick={onStartNewProbe} variant="secondary">
           {i18n._('Start New Probe')}
         </Button>
       </Box>
@@ -44,7 +44,7 @@ function LandingView({ onStartNewProbe = () => {}, onLoadProbeFile = () => {} })
         <Text className={styles.pathDescription} color="text.secondary">
           {i18n._('Load a previously saved .probe file and apply it to your G-code.')}
         </Text>
-        <Button onClick={onLoadProbeFile} variant="ghost">
+        <Button onClick={onLoadProbeFile} variant="secondary">
           {i18n._('Load Probe Data')}
         </Button>
       </Box>

@@ -2,6 +2,8 @@ import {
   Box,
   Button,
   Dropdown,
+  InputGroup,
+  InputGroupAppend,
   DropdownButton,
   Flex,
   Space,
@@ -9,7 +11,7 @@ import {
 import classNames from 'classnames';
 import colornames from 'colornames';
 import _get from 'lodash/get';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import * as WebGL from '@app/lib/three/WebGL';
@@ -87,6 +89,25 @@ const workCoordinateSystems = [
  * @param {{ state?: object, actions?: object }} props
  */
 function PrimaryToolbar({ state = {}, actions = {} }) {
+  const optionsRef = useRef(null);
+  const optionsMenuRef = useRef(null);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOptionsOpen) {
+      return undefined;
+    }
+    // Canvas controls prevent focus changes, so blur alone cannot dismiss this menu.
+    const handleOutsidePointerDown = event => {
+      if (!optionsRef.current?.contains(event.target) && !optionsMenuRef.current?.contains(event.target)) {
+        setIsOptionsOpen(false);
+      }
+    };
+    const document = optionsRef.current.ownerDocument;
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true);
+    return () => document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
+  }, [isOptionsOpen]);
+
   const connected = Boolean(state.connected);
   const controllerData = state.controller || {};
   const workflow = state.workflow || {};
@@ -107,18 +128,24 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
   const sendWorkCoordinateSystem = code => controller.command('gcode', code);
 
   return (
-    <Flex alignItems="center">
+    <Flex
+      aria-label="Visualizer status toolbar"
+      role="toolbar"
+      alignItems="center"
+      flexWrap="wrap"
+      gap="2x"
+    >
       <Box
         display="inline-block"
         fontSize="14px"
         fontWeight="bold"
-        marginRight="10px"
+        whiteSpace="nowrap"
         padding="4px 0"
       >
         {controllerData.type}
       </Box>
       <ControllerState state={controllerData} />
-      <Flex alignItems="center" marginLeft="auto" gap="1x">
+      <Flex alignItems="center" flexWrap="wrap" gap="2x" ml="auto">
         <Dropdown
           items={[
             {
@@ -147,6 +174,14 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
           )}
         />
         <Dropdown
+          ref={optionsRef}
+          isOpen={isOptionsOpen}
+          onOpen={() => setIsOptionsOpen(true)}
+          onClose={() => setIsOptionsOpen(false)}
+          slotProps={{ content: { ref: optionsMenuRef } }}
+          placement="bottom-end"
+          portalled
+          closeOnSelect={false}
           items={[
             {
               value: 'webgl-status',
@@ -254,25 +289,36 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
           ]}
           renderItem={item => item?.content}
           renderToggle={() => (
-            <Flex alignItems="center">
+            <InputGroup width="auto">
               <Button
                 aria-label={i18n._('3D View')}
                 title={(!webGLAvailable || disabled)
                   ? i18n._('Enable 3D View')
                   : i18n._('Disable 3D View')}
                 onClick={actions.toggle3DView}
-                variant="default"
+                variant="secondary"
+                borderTopRightRadius="0"
+                borderBottomRightRadius="0"
               >
                 <i aria-hidden="true" className={webGLAvailable && !disabled ? 'fa fa-toggle-on' : 'fa fa-toggle-off'} />
                 <Space width={8} />
                 {i18n._('3D View')}
               </Button>
-              <DropdownButton
-                aria-label={i18n._('3D View options')}
-                title={i18n._('3D View options')}
-                variant="default"
-              />
-            </Flex>
+              <InputGroupAppend>
+                <DropdownButton
+                  aria-label={i18n._('3D View options')}
+                  title={i18n._('3D View options')}
+                  variant="secondary"
+                  width="32px"
+                  minWidth="32px"
+                  px="0"
+                  columnGap="0"
+                  justifyContent="center"
+                  borderTopLeftRadius="0"
+                  borderBottomLeftRadius="0"
+                />
+              </InputGroupAppend>
+            </InputGroup>
           )}
         />
       </Flex>
@@ -382,7 +428,11 @@ function ControllerState({ state = {} }) {
 
   return (
     <Box
-      display="inline-block"
+      display="inline-flex"
+      alignItems="center"
+      justifyContent="center"
+      flexShrink="0"
+      minHeight="32px"
       minWidth="50px"
       textAlign="center"
       padding="4px 12px"

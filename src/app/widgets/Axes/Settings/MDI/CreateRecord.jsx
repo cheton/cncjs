@@ -1,46 +1,30 @@
 import {
-  Box,
-  Button,
-  Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Space,
-  Text,
-  Textarea,
-  TextLabel,
+  Box, Button, FormControl, FormErrorMessage, FormInput, FormLabel, FormTextarea,
+  Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Space,
 } from '@tonic-ui/react';
 import Slider from 'rc-slider';
-import React, { useState } from 'react';
+import React from 'react';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import i18n from '@app/lib/i18n';
+import sliderStyles from '../sliderStyles';
 
 /**
  * @param {{ onSave: (record: object) => void, onCancel: () => void }} props
  * @returns {JSX.Element}
  */
 function CreateRecord({ onSave, onCancel }) {
-  const [name, setName] = useState('');
-  const [command, setCommand] = useState('');
-  const [grid, setGrid] = useState(6);
-  const [error, setError] = useState(false);
-  const submit = () => {
-    if (!name.trim() || !command.trim()) {
-      setError(true);
-      return;
-    }
-
-    onSave({ name, command, grid: { xs: grid } });
-  };
+  const form = useForm({
+    mode: 'onSubmit',
+    defaultValues: { name: '', command: '', grid: 6 },
+  });
+  const { register, control, formState: { errors } } = form;
+  const required = value => Boolean(value.trim()) || i18n._('This field is required.');
+  const submit = ({ name, command, grid }) => onSave({ name, command, grid: { xs: grid } });
 
   return (
     <Modal
-      closeOnInteractOutside={false}
-      isClosable
-      isOpen
-      onClose={onCancel}
+      autoFocus ensureFocus closeOnInteractOutside={false}
+      isClosable isOpen onClose={onCancel}
       size="sm"
     >
       <ModalOverlay />
@@ -52,45 +36,42 @@ function CreateRecord({ onSave, onCancel }) {
           <Space width="2x" />
           {i18n._('New')}
         </ModalHeader>
-        <ModalBody>
-          {error && <Text color="error.text">{i18n._('This field is required.')}</Text>}
-          <Box>
-            <Box mb="3x">
-              <TextLabel mb="2x">{i18n._('Name')}</TextLabel>
-              <Input
-                aria-label={i18n._('Name')}
-                value={name}
-                onChange={event => setName(event.target.value)}
-              />
-            </Box>
-            <Box mb="3x">
-              <TextLabel mb="2x">{i18n._('Command')}</TextLabel>
-              <Textarea
-                aria-label={i18n._('Command')}
-                value={command}
-                rows={5}
-                onChange={event => setCommand(event.target.value)}
-              />
-            </Box>
-            <Box>
-              <TextLabel mb="2x">{i18n._('Button Width')}</TextLabel>
-              <Slider
-                ariaLabelForHandle={i18n._('Button width')}
-                value={grid}
-                min={1}
-                max={12}
-                step={1}
-                dots
-                included={false}
-                onChange={setGrid}
-              />
-            </Box>
+        <FormProvider {...form}>
+          <Box as="form" noValidate onSubmit={form.handleSubmit(submit)}>
+            <ModalBody>
+              <FormControl error={Boolean(errors.name)} mb="4x">
+                <FormLabel>{i18n._('Name')}</FormLabel>
+                <FormInput aria-label={i18n._('Name')} {...register('name', { validate: required })} />
+                <FormErrorMessage errors={errors.name ? [errors.name.message] : []} />
+              </FormControl>
+              <FormControl error={Boolean(errors.command)} mb="4x">
+                <FormLabel>{i18n._('Command')}</FormLabel>
+                <FormTextarea aria-label={i18n._('Command')} rows={5} {...register('command', { validate: required })} />
+                <FormErrorMessage errors={errors.command ? [errors.command.message] : []} />
+              </FormControl>
+              <FormControl>
+                <FormLabel>{i18n._('Button Width')}</FormLabel>
+                <Box sx={sliderStyles}>
+                  <Controller
+                    name="grid"
+                    control={control}
+                    render={({ field }) => (
+                      <Slider
+                        ariaLabelForHandle={i18n._('Button width')} value={field.value} min={1}
+                        max={12} step={1} dots
+                        included={false} onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </Box>
+              </FormControl>
+            </ModalBody>
+            <ModalFooter gap="2x">
+              <Button type="button" onClick={onCancel}>{i18n._('Cancel')}</Button>
+              <Button type="submit" variant="primary">{i18n._('OK')}</Button>
+            </ModalFooter>
           </Box>
-        </ModalBody>
-        <ModalFooter>
-          <Button onClick={onCancel}>{i18n._('Cancel')}</Button>
-          <Button variant="primary" onClick={submit}>{i18n._('OK')}</Button>
-        </ModalFooter>
+        </FormProvider>
       </ModalContent>
     </Modal>
   );

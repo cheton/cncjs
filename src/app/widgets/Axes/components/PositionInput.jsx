@@ -4,7 +4,7 @@ import {
   Button,
   Input,
   InputGroup,
-  InputGroupAddon,
+  InputGroupAppend,
 } from '@tonic-ui/react';
 import i18n from '@app/lib/i18n';
 
@@ -33,16 +33,14 @@ function PositionInput({
   return (
     <InputGroup
       className={className}
-      size="sm"
       style={{ ...style, width: '100%' }}
     >
       <Input
         aria-label={i18n._('Position value')}
         ref={node}
         type="number"
-        className="form-control"
-        placeholder=""
-        style={{ borderRight: 'none' }}
+        flex="1"
+        minWidth="0"
         value={value}
         onChange={(event) => {
           const nextValue = event.target.value;
@@ -64,9 +62,10 @@ function PositionInput({
           }
         }}
       />
-      <InputGroupAddon>
+      <InputGroupAppend>
         <Button
           aria-label={i18n._('Save position')}
+          variant="secondary"
           disabled={!isNumber}
           onClick={() => {
             onSave(value);
@@ -74,15 +73,18 @@ function PositionInput({
         >
           <i aria-hidden="true" className="fa fa-fw fa-check" />
         </Button>
+      </InputGroupAppend>
+      <InputGroupAppend>
         <Button
           aria-label={i18n._('Cancel')}
+          variant="secondary"
           onClick={() => {
             onCancel();
           }}
         >
           <i aria-hidden="true" className="fa fa-fw fa-close" />
         </Button>
-      </InputGroupAddon>
+      </InputGroupAppend>
     </InputGroup>
   );
 }

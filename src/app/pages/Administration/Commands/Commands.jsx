@@ -74,6 +74,9 @@ const Commands = () => {
     setRowSelection({});
   }, []);
 
+  // manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const queryClient = useQueryClient();
   const fetchCommandsQuery = useFetchCommandsQuery({
     meta: {
@@ -118,7 +121,10 @@ const Commands = () => {
   const portal = usePortalManager();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchCommandsQuery.isFetching;
-  const isLoadingData = fetchCommandsQuery.isFetching;
+  // Show the full-table loading overlay for the initial fetch and explicit
+  // refreshes only; background fetches (e.g. mutation invalidations) keep the
+  // rendered records visible. React Query v4 `isLoading` means "no data yet".
+  const isLoadingData = fetchCommandsQuery.isLoading || isRefreshing;
   const data = ensureArray(fetchCommandsQuery.data?.records);
   const totalCount = fetchCommandsQuery.data?.pagination?.totalRecords ?? 0;
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -175,8 +181,15 @@ const Commands = () => {
     clearRowSelection();
   }, [rowSelection, bulkDisableCommandsMutation, clearRowSelection]);
 
-  const handleClickRefresh = useCallback(() => {
-    fetchCommandsQuery.refetch();
+  const handleClickRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Join an in-flight fetch instead of cancelling it so the overlay stays
+      // visible until the request settles, whether it succeeds or fails.
+      await fetchCommandsQuery.refetch({ cancelRefetch: false });
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchCommandsQuery]);
 
   const handleClickViewCommandDetailsById = useCallback((id) => () => {
@@ -565,7 +578,7 @@ const Commands = () => {
                     gap="2x"
                   >
                     <Text>{i18n._('An unexpected error has occurred.')}</Text>
-                    <Button onClick={() => fetchCommandsQuery.refetch()}>{i18n._('Retry')}</Button>
+                    <Button onClick={handleClickRefresh}>{i18n._('Retry')}</Button>
                   </Flex>
                 )}
                 {!isLoadingData && !fetchCommandsQuery.isError && data.length === 0 && (

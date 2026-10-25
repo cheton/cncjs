@@ -1,14 +1,13 @@
-import { keyframes } from '@emotion/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
   Button,
   ButtonGroup,
   Flex,
-  Image,
   Input,
   InputGroup,
   InputGroupAddon,
+  InputGroupAppend,
   Space,
   TextLabel,
 } from '@tonic-ui/react';
@@ -31,12 +30,6 @@ import {
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
-import iconFan from './images/fan.svg';
-
-const coolantSpin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(359deg); }
-`;
 
 /**
  * @param {{ isActionable: boolean, mistCoolant: boolean, floodCoolant: boolean, spindle: string }} props
@@ -87,16 +80,7 @@ function Spindle({
                 title={i18n._('Mist Coolant On (M7)', { ns: 'gcode' })}
                 disabled={isDisabled}
               >
-                <Image
-                  src={iconFan}
-                  sx={{
-                    width: '16px',
-                    height: '16px',
-                    display: 'inline-block',
-                    verticalAlign: '-0.125em',
-                    animation: mistCoolant ? `${coolantSpin} 2s infinite linear` : undefined,
-                  }}
-                />
+                <FontAwesomeIcon icon="fan" spin={mistCoolant} fixedWidth />
                 <Space width={8} />
                 M7
               </Button>
@@ -107,16 +91,7 @@ function Spindle({
                 title={i18n._('Flood Coolant On (M8)', { ns: 'gcode' })}
                 disabled={isDisabled}
               >
-                <Image
-                  src={iconFan}
-                  sx={{
-                    width: '16px',
-                    height: '16px',
-                    display: 'inline-block',
-                    verticalAlign: '-0.125em',
-                    animation: floodCoolant ? `${coolantSpin} 2s infinite linear` : undefined,
-                  }}
-                />
+                <FontAwesomeIcon icon="fan" spin={floodCoolant} fixedWidth />
                 <Space width={8} />
                 M8
               </Button>
@@ -182,9 +157,11 @@ function Spindle({
         </TextLabel>
         <Flex>
           <Box width="66.66666667%">
-            <InputGroup size="sm">
+            <InputGroup>
               <Input
                 aria-label={i18n._('Spindle Speed')}
+                flex="1"
+                minWidth="0"
                 type="number"
                 value={speedDraft}
                 min={0}
@@ -195,9 +172,9 @@ function Spindle({
                   config.set('speed', ensurePositiveNumber(value));
                 }}
               />
-              <InputGroupAddon>
-                {i18n._('RPM')}
-              </InputGroupAddon>
+              <InputGroupAppend>
+                <InputGroupAddon>{i18n._('RPM')}</InputGroupAddon>
+              </InputGroupAppend>
             </InputGroup>
           </Box>
         </Flex>

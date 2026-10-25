@@ -4,7 +4,6 @@ import {
   Button,
   ButtonGroup,
   Flex,
-  Space,
   Text,
   TextLabel,
 } from '@tonic-ui/react';
@@ -21,7 +20,6 @@ import {
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
 import { none } from '@app/lib/utils';
-import OverrideReadout from './components/OverrideReadout';
 
 const REPEAT_DELAY = 500;
 const REPEAT_INTERVAL = Math.floor(1000 / 15);
@@ -132,6 +130,9 @@ function RepeatableButton({
   );
 }
 
+/**
+ * @param {{ value: number, disabled?: boolean }} props
+ */
 function LaserIntensityOverride({
   value,
   disabled = false,
@@ -141,14 +142,30 @@ function LaserIntensityOverride({
       <TextLabel mb="2x">
         {i18n._('Laser Intensity Control')}
       </TextLabel>
-      <Flex alignItems="center">
-        <FontAwesomeIcon icon="bolt" fixedWidth />
-        <Space width={8} />
-        <OverrideReadout>
-          <Text>{(value >= 0) ? `${value}%` : none}</Text>
-        </OverrideReadout>
-        <Space width={8} />
-        <ButtonGroup size="sm">
+      <Flex alignItems="center" gap="2x">
+        <Box
+          as="output"
+          aria-label={i18n._('Laser Intensity Control')}
+          border={1}
+          borderColor="border.secondary"
+          display="flex"
+          alignItems="center"
+          justifyContent="flex-end"
+          flex="none"
+          width="45px"
+          height="24px"
+          px="1x"
+          fontSize="sm"
+        >
+          {(value >= 0) ? `${value}%` : none}
+        </Box>
+        <ButtonGroup
+          size="sm"
+          variant="secondary"
+          flex="1"
+          minWidth="0"
+          sx={{ '& > button': { flex: 1, minWidth: 0, px: '1x' } }}
+        >
           <RepeatableButton
             disabled={disabled}
             onClick={() => controller.command('spindle_override', -10)}
@@ -185,17 +202,15 @@ function LaserIntensityOverride({
             <FontAwesomeIcon icon="arrow-up" fixedWidth />
             <Text>{i18n._('10%')}</Text>
           </RepeatableButton>
+          <Button
+            type="button"
+            aria-label="Reset"
+            disabled={disabled}
+            onClick={() => controller.command('spindle_override', 0)}
+          >
+            <FontAwesomeIcon icon="undo" fixedWidth />
+          </Button>
         </ButtonGroup>
-        <Space width={8} />
-        <Button
-          type="button"
-          variant="ghost"
-          aria-label="Reset"
-          disabled={disabled}
-          onClick={() => controller.command('spindle_override', 0)}
-        >
-          <FontAwesomeIcon icon="undo" fixedWidth />
-        </Button>
       </Flex>
     </Box>
   );

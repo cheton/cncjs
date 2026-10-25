@@ -54,6 +54,8 @@ import * as user from '@app/lib/user';
 import { signoutAndClearSession } from '@app/queries/session';
 import config from '@app/store/config';
 import Avatar from './components/Avatar';
+import CommandsMenu from './components/CommandsMenu';
+import QuickAccessToolbar from './components/QuickAccessToolbar';
 import { ensureColorMode, getColorScheme, mapDisplayLanguageToLocaleString } from './utils';
 
 const supportedLanguages = ensureArray(env.LANGUAGES)
@@ -402,6 +404,8 @@ const Header = forwardRef((
       <Flex
         alignItems="center"
         px="4x"
+        flex="none"
+        sx={{ '@media (max-width: 799px)': { px: '1x', '& [data-header-detail]': { display: 'none' } } }}
       >
         <ButtonBase
           aria-label={i18n._('Toggle navigation')}
@@ -448,6 +452,7 @@ const Header = forwardRef((
               height="8x"
             />
             <Text
+              data-header-detail
               fontWeight="semibold"
               fontSize="lg"
               lineHeight="lg"
@@ -457,6 +462,7 @@ const Header = forwardRef((
           </Flex>
         </ButtonBase>
         <Text
+          data-header-detail
           color="text.tertiary"
           fontFamily="mono"
           fontSize="xs"
@@ -466,15 +472,19 @@ const Header = forwardRef((
         >
           {i18next.language}
         </Text>
-        <Divider orientation="vertical" height="5x" mx="2x" />
-        <Text>
+        <Divider data-header-detail orientation="vertical" height="5x" mx="2x" />
+        <Text data-header-detail>
           {mapRoutePathToPageTitle(location.pathname)}
         </Text>
       </Flex>
+      {location.pathname === '/workspace' && <QuickAccessToolbar />}
       <Flex
         alignItems="center"
         px="4x"
+        flex="none"
+        gap="2x"
       >
+        <CommandsMenu />
         <Dropdown
           placement="bottom-end"
           onOpen={() => {
@@ -528,7 +538,7 @@ const Header = forwardRef((
             },
           }}
           renderToggle={() => (
-            <DropdownToggle>
+            <DropdownToggle aria-label="Application menu">
               <Avatar
                 backgroundColor="background.medium"
                 color="text.secondary"

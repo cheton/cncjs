@@ -43,11 +43,11 @@ function ControllerModal({
         <ModalHeader>Grbl</ModalHeader>
         <ModalBody>
           <Tabs>
-            <TabList aria-label={i18n._('Grbl controller data')} mb="2x">
+            <TabList aria-label={i18n._('Grbl controller data')}>
               <Tab>{i18n._('Controller State')}</Tab>
               <Tab>{i18n._('Controller Settings')}</Tab>
             </TabList>
-            <TabPanels>
+            <TabPanels px="3x" py="2x">
               <TabPanel>
                 <Box sx={previewSx}>
                   <PreviewCode>{stringifiedControllerState}</PreviewCode>

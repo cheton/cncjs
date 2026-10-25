@@ -55,6 +55,10 @@ const ORTHOGRAPHIC_FAR = 2000;
 const CAMERA_DISTANCE = 200; // Move the camera out a bit from the origin (0, 0, 0)
 const TRACKBALL_CONTROLS_MIN_DISTANCE = 1;
 const TRACKBALL_CONTROLS_MAX_DISTANCE = 2000;
+const COORDINATE_COLORS = {
+  light: { x: '#ff0000', y: '#008000', z: '#0000ff', grid: '#707070' },
+  dark: { x: '#ff8080', y: '#80d49a', z: '#8badff', grid: '#b0b0b0' },
+};
 
 const DEFAULT_OBJECTS = {
   coordinateSystem: { visible: false },
@@ -90,6 +94,7 @@ const normalizeObjects = objects => ({
 
 const normalizeViewState = (viewState = {}) => ({
   show: viewState.show !== false,
+  colorMode: viewState.colorMode === 'dark' ? 'dark' : 'light',
   cameraPosition: viewState.cameraPosition,
   projection: viewState.projection || 'perspective',
   cameraMode: viewState.cameraMode || CAMERA_MODE_ROTATE,
@@ -175,7 +180,7 @@ class VisualizerEngine {
       // as later profile changes. Starting with a null profile makes that first
       // update observable even when the store already contains a profile.
       const initialState = normalizeViewState(viewState);
-      this.viewState = emptyViewState();
+      this.viewState = { ...emptyViewState(), colorMode: initialState.colorMode };
       this.update(initialState);
     } catch (error) {
       this.dispose();
@@ -294,6 +299,11 @@ class VisualizerEngine {
       needUpdateScene = true;
     }
 
+    if (previousState.colorMode !== state.colorMode) {
+      this.rebuildCoordinateSystems();
+      needUpdateScene = true;
+    }
+
     if ((previousState.units !== state.units) ||
             (previousState.objects.coordinateSystem.visible !== state.objects.coordinateSystem.visible)) {
       const visible = state.objects.coordinateSystem.visible;
@@ -407,7 +417,7 @@ class VisualizerEngine {
     });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.setClearColor(new THREE.Color(colornames('white')), 1);
+    this.renderer.setClearColor(0x000000, 0);
     this.renderer.setPixelRatio(getRenderPixelRatio());
     this.renderer.setSize(width, height);
     this.renderer.clear();
@@ -677,6 +687,7 @@ class VisualizerEngine {
     const { minX, maxX, minY, maxY, minZ, maxZ, gridSpacing } = this.getCoordinateBounds(units);
     const labelOffset = gridSpacing * 2;
     const group = new THREE.Group();
+    const colors = COORDINATE_COLORS[this.viewState.colorMode];
 
     const gridLine = new GridLine(
       minX,
@@ -685,18 +696,18 @@ class VisualizerEngine {
       minY,
       maxY,
       gridSpacing,
-      colornames('blue'),
-      colornames('gray 44')
+      colors.z,
+      colors.grid
     );
     _each(gridLine.children, object => {
-      object.material.opacity = 0.15;
+      object.material.opacity = this.viewState.colorMode === 'dark' ? 0.22 : 0.15;
       object.material.transparent = true;
       object.material.depthWrite = false;
     });
     gridLine.name = 'GridLine';
     group.add(gridLine);
 
-    const coordinateAxes = new CoordinateAxes({ minX, maxX, minY, maxY, minZ, maxZ });
+    const coordinateAxes = new CoordinateAxes({ minX, maxX, minY, maxY, minZ, maxZ, colors });
     coordinateAxes.name = 'CoordinateAxes';
     group.add(coordinateAxes);
 
@@ -706,7 +717,7 @@ class VisualizerEngine {
       z: 0,
       size: 20,
       text: 'X',
-      color: colornames('red')
+      color: colors.x
     }));
     group.add(new TextSprite({
       x: 0,
@@ -714,7 +725,7 @@ class VisualizerEngine {
       z: 0,
       size: 20,
       text: 'Y',
-      color: colornames('green')
+      color: colors.y
     }));
     group.add(new TextSprite({
       x: 0,
@@ -722,7 +733,7 @@ class VisualizerEngine {
       z: maxZ + labelOffset,
       size: 20,
       text: 'Z',
-      color: colornames('blue')
+      color: colors.z
     }));
 
     return group;
@@ -733,6 +744,8 @@ class VisualizerEngine {
     const textSize = (units === IMPERIAL_UNITS) ? (25.4 / 3) : (10 / 3);
     const textOffset = (units === IMPERIAL_UNITS) ? (25.4 / 5) : (10 / 5);
     const group = new THREE.Group();
+    const colors = COORDINATE_COLORS[this.viewState.colorMode];
+    const opacity = this.viewState.colorMode === 'dark' ? 0.85 : 0.5;
 
     for (let x = minX; x <= maxX; x += gridSpacing) {
       if (x !== 0) {
@@ -744,8 +757,8 @@ class VisualizerEngine {
           text: mapValueToUnits(x, units),
           textAlign: 'center',
           textBaseline: 'bottom',
-          color: colornames('red'),
-          opacity: 0.5
+          color: colors.x,
+          opacity
         }));
       }
     }
@@ -760,8 +773,8 @@ class VisualizerEngine {
           text: mapValueToUnits(y, units),
           textAlign: 'right',
           textBaseline: 'middle',
-          color: colornames('green'),
-          opacity: 0.5
+          color: colors.y,
+          opacity
         }));
       }
     }
@@ -872,6 +885,9 @@ class VisualizerEngine {
 
     const width = this.getVisibleWidth();
     const height = this.getVisibleHeight();
+    if (this.container.clientWidth === 0 || height === 0) {
+      return;
+    }
 
     this.camera.setSize(width, height);
     this.camera.aspect = height > 0 ? width / height : 1;

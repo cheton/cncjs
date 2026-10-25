@@ -23,25 +23,25 @@
         bottom: 0;
         margin: 0;
         z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--tonic-colors-background-high);
+        color: var(--tonic-colors-text-primary);
 
         .widget-sortable {
             display: none;
         }
     }
     &.widget-fullscreen {
-        .widget-content {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
+        .widget-header,
+        .widget-footer {
+            flex: none;
         }
-        .widget-header + .widget-content {
-            position: absolute;
-            top: 34px; // .widget-header height
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .widget-content {
+            position: relative;
+            flex: 1 1 0;
+            min-height: 0;
+            overflow: auto;
         }
     }
 

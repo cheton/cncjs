@@ -36,6 +36,27 @@ const resources = [
   ['commands', Commands], ['events', Events], ['machines', Machines],
   ['macros', Macros], ['users', Users],
 ];
+
+// Resource lists that scope the full-table loading overlay to the initial fetch
+// and explicit refreshes, keeping records visible for background refetches.
+const refreshResources = resources.filter(([resource]) => resource !== 'machines');
+
+const triggerListMutation = {
+  commands: async (user) => {
+    await user.click(screen.getAllByRole('switch')[0]);
+  },
+  events: async (user) => {
+    await user.click(screen.getAllByRole('switch')[0]);
+  },
+  macros: async (user) => {
+    await user.click(screen.getByRole('checkbox', { name: 'Select row r1' }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
+  },
+  users: async (user) => {
+    await user.click(screen.getAllByRole('switch')[0]);
+  },
+};
 const records = [
   { id: 'r1', name: 'Zulu', title: 'Zulu', commands: 'G28', content: 'G28', mtime: 1700000000000, enabled: true },
   { id: 'r2', name: 'Alpha', title: 'Alpha', commands: 'G0 X1', content: 'G0 X1', mtime: 1700000000000, enabled: false },
@@ -92,12 +113,64 @@ test.each(resources)('%s distinguishes loading, empty and error and can retry', 
     await screen.findByText('No data to display');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDisabled();
-    axios.get.mockRejectedValueOnce(new Error('List unavailable'));
+    let rejectRefresh;
+    axios.get.mockImplementationOnce(() => new Promise((resolve, reject) => {
+      rejectRefresh = reject;
+    }));
     await user.click(screen.getByRole('button', { name: 'Refresh' }));
+    await waitFor(() => expect(rejectRefresh).toBeDefined());
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Loading...'));
+    rejectRefresh(new Error('List unavailable'));
     await screen.findByRole('alert');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
     axios.get.mockResolvedValueOnce({ data: { records, pagination: { totalRecords: 2 } } });
     await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Retry' }));
     await screen.findByRole('checkbox', { name: 'Select row r1' });
+  } finally {
+    view.dispose();
+  }
+});
+
+test.each(refreshResources)('%s keeps records visible without the loading overlay during a mutation refetch', async (resource, Component) => {
+  const user = userEvent.setup();
+  let resolveRefetch;
+  axios.post.mockResolvedValue({ data: {} });
+  axios.get.mockImplementationOnce(() => Promise.resolve({ data: { records, pagination: { totalRecords: 2 } } }));
+  axios.get.mockImplementationOnce(() => new Promise(resolve => {
+    resolveRefetch = resolve;
+  }));
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('button', { name: 'Zulu' });
+    await triggerListMutation[resource](user);
+    await waitFor(() => expect(resolveRefetch).toBeDefined());
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Zulu' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument();
+    resolveRefetch({ data: { records, pagination: { totalRecords: 2 } } });
+    await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Select row r1' })).toBeEnabled());
+  } finally {
+    view.dispose();
+  }
+});
+
+test.each(refreshResources)('%s shows the loading overlay until an explicit refresh settles', async (resource, Component) => {
+  const user = userEvent.setup();
+  let resolveRefresh;
+  axios.get.mockImplementationOnce(() => Promise.resolve({ data: { records, pagination: { totalRecords: 2 } } }));
+  axios.get.mockImplementationOnce(() => new Promise(resolve => {
+    resolveRefresh = resolve;
+  }));
+  const view = renderAppUI(<ToastManager><PortalManager><Component /></PortalManager></ToastManager>);
+  try {
+    await screen.findByRole('button', { name: 'Zulu' });
+    await user.click(screen.getByRole('button', { name: 'Refresh' }));
+    await waitFor(() => expect(resolveRefresh).toBeDefined());
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Loading...'));
+    expect(screen.getByRole('button', { name: 'Zulu' })).toBeInTheDocument();
+    resolveRefresh({ data: { records, pagination: { totalRecords: 2 } } });
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Zulu' })).toBeInTheDocument();
   } finally {
     view.dispose();
   }

@@ -6,7 +6,6 @@ import {
   Dropdown,
   DropdownButton,
   Flex,
-  Image,
   Space,
   Tooltip,
 } from '@tonic-ui/react';
@@ -117,6 +116,28 @@ function useRepeatable(onAction, disabled) {
 }
 
 /**
+ * @param {{ src: string }} props
+ */
+function CameraIcon({ src }) {
+  return (
+    <Box
+      as="span"
+      role="img"
+      aria-hidden="true"
+      display="inline-block"
+      flexShrink={0}
+      width="20px"
+      height="20px"
+      sx={{
+        backgroundColor: 'currentColor',
+        mask: `url("${src}") center / contain no-repeat`,
+        WebkitMask: `url("${src}") center / contain no-repeat`,
+      }}
+    />
+  );
+}
+
+/**
  * @param {{ children?: React.ReactNode, label: string, onClick: Function, selected?: boolean }} props
  */
 function CameraIconButton({ children, label, onClick, selected = false }) {
@@ -125,20 +146,15 @@ function CameraIconButton({ children, label, onClick, selected = false }) {
       <Button
         aria-label={label}
         onClick={onClick}
-        selected={selected}
+        aria-pressed={selected}
         variant="ghost"
         sx={{
-          display: 'inline-block',
-          filter: selected ? 'invert(100%)' : 'invert(40%)',
-          height: '36px',
-          minWidth: '36px',
-          padding: '8px',
-          width: '36px',
-          _hover: {
-            backgroundColor: selected ? 'actions.selected' : 'actions.enabled',
-            color: 'text.primary',
-            filter: 'invert(0%)',
-          },
+          display: 'inline-flex',
+          backgroundColor: selected ? '_foreground.subtle.selected' : 'transparent',
+          height: '32px',
+          minWidth: '32px',
+          padding: '6px',
+          width: '32px',
         }}
       >
         {children}
@@ -167,17 +183,11 @@ function RepeatableCameraButton({ children, label, onClick }) {
         onKeyDown={handleKeyDown}
         variant="ghost"
         sx={{
-          display: 'inline-block',
-          filter: 'invert(40%)',
-          height: '36px',
-          minWidth: '36px',
-          padding: '8px',
-          width: '36px',
-          _hover: {
-            backgroundColor: 'actions.hovered',
-            color: 'text.primary',
-            filter: 'invert(0%)',
-          },
+          display: 'inline-flex',
+          height: '32px',
+          minWidth: '32px',
+          padding: '6px',
+          width: '32px',
         }}
       >
         {children}
@@ -243,103 +253,71 @@ function SecondaryToolbar({
   }, [changeMachineProfileById, clearMachineProfile]);
 
   return (
-    <Flex justifyContent="space-between" flexWrap="nowrap">
+    <Flex
+      aria-label="Visualizer camera toolbar"
+      role="toolbar"
+      alignItems="center"
+      justifyContent="space-between"
+      flexWrap="wrap"
+      gap="2x"
+      sx={{ '& button:focus-visible': { color: 'text.accent' } }}
+    >
       <Box width="auto">
         {is3DView && (
-          <Flex alignItems="center">
+          <Flex alignItems="center" gap="1x">
             <ButtonGroup>
               <CameraIconButton
                 label={i18n._('Top View')}
                 selected={cameraPosition === 'top'}
                 onClick={camera.toTopView}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconTopView}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconTopView} />
               </CameraIconButton>
               <CameraIconButton
                 label={i18n._('Front View')}
                 selected={cameraPosition === 'front'}
                 onClick={camera.toFrontView}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconFrontView}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconFrontView} />
               </CameraIconButton>
               <CameraIconButton
                 label={i18n._('Right Side View')}
                 selected={cameraPosition === 'right'}
                 onClick={camera.toRightSideView}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconRightSideView}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconRightSideView} />
               </CameraIconButton>
               <CameraIconButton
                 label={i18n._('Left Side View')}
                 selected={cameraPosition === 'left'}
                 onClick={camera.toLeftSideView}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconLeftSideView}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconLeftSideView} />
               </CameraIconButton>
               <CameraIconButton
                 label={i18n._('3D View')}
                 selected={cameraPosition === '3d'}
                 onClick={camera.to3DView}
               >
-                <Image
-                  aria-hidden="true"
-                  src={icon3DView}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={icon3DView} />
               </CameraIconButton>
               <RepeatableCameraButton
                 label={i18n._('Zoom to Fit')}
                 onClick={camera.zoomFit}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconZoomFit}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconZoomFit} />
               </RepeatableCameraButton>
               <RepeatableCameraButton
                 label={i18n._('Zoom In')}
                 onClick={camera.zoomIn}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconZoomIn}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconZoomIn} />
               </RepeatableCameraButton>
               <RepeatableCameraButton
                 label={i18n._('Zoom Out')}
                 onClick={camera.zoomOut}
               >
-                <Image
-                  aria-hidden="true"
-                  src={iconZoomOut}
-                  width={20}
-                  height={20}
-                />
+                <CameraIcon src={iconZoomOut} />
               </RepeatableCameraButton>
             </ButtonGroup>
             <Dropdown
@@ -349,7 +327,7 @@ function SecondaryToolbar({
                   value: 'pan',
                   content: (
                     <>
-                      <Image src={iconMoveCamera} width={20} height={20} />
+                      <CameraIcon src={iconMoveCamera} />
                       <Space width={4} />
                       {i18n._('Move the camera')}
                     </>
@@ -360,7 +338,7 @@ function SecondaryToolbar({
                   value: 'rotate',
                   content: (
                     <>
-                      <Image src={iconRotateCamera} width={20} height={20} />
+                      <CameraIcon src={iconRotateCamera} />
                       <Space width={4} />
                       {i18n._('Rotate the camera')}
                     </>
@@ -373,14 +351,9 @@ function SecondaryToolbar({
                 <DropdownButton
                   aria-label={cameraMode === CAMERA_MODE_PAN ? i18n._('Camera mode: Pan') : i18n._('Camera mode: Rotate')}
                   variant="ghost"
-                  sx={{ minWidth: '36px', padding: '8px' }}
+                  sx={{ minWidth: '56px', width: '56px', height: '32px', padding: '6px' }}
                 >
-                  <Image
-                    aria-hidden="true"
-                    src={cameraMode === CAMERA_MODE_PAN ? iconMoveCamera : iconRotateCamera}
-                    width={20}
-                    height={20}
-                  />
+                  <CameraIcon src={cameraMode === CAMERA_MODE_PAN ? iconMoveCamera : iconRotateCamera} />
                 </DropdownButton>
               )}
             />

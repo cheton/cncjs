@@ -221,7 +221,8 @@ describe('Axes MDI record form accessibility', () => {
       submit.focus();
       await user.keyboard('{Enter}');
 
-      expect(screen.getByText('This field is required.')).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true');
+      expect(screen.getByRole('textbox', { name: 'Command' })).toHaveAttribute('aria-invalid', 'true');
       expect(onSave).not.toHaveBeenCalled();
     } finally {
       view.dispose();

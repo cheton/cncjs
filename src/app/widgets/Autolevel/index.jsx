@@ -754,6 +754,10 @@ function AutolevelWidget({
           left: '60px',
           margin: 0,
           zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: 'background.high',
+          color: 'text.primary',
           '& [data-sortable-handle]': { display: 'none' },
         }),
       }}
@@ -768,6 +772,7 @@ function AutolevelWidget({
           borderColor: 'border.secondary',
           color: 'text.primary',
           position: 'relative',
+          flex: 'none',
         }}
       >
         <Box
@@ -852,11 +857,10 @@ function AutolevelWidget({
         aria-hidden={isCollapsed}
         data-widget-content
         sx={{
-          position: isFullscreen ? 'absolute' : 'relative',
-          top: isFullscreen ? '34px' : undefined,
-          right: isFullscreen ? 0 : undefined,
-          bottom: isFullscreen ? 0 : undefined,
-          left: isFullscreen ? 0 : undefined,
+          position: 'relative',
+          flex: isFullscreen ? '1 1 0' : undefined,
+          minHeight: isFullscreen ? 0 : undefined,
+          overflow: isFullscreen ? 'auto' : undefined,
           display: isCollapsed ? 'none' : undefined,
           padding: '10px',
           border: '1px solid',

@@ -78,3 +78,20 @@ test('real config startup emits after localStorage hydration', async () => {
   expect(changes[0].widgets.axes.minimized).toBe(true);
   expect(config.get('workspace.container.primary.widgets')).toBeDefined();
 });
+
+test.each(['light', 'dark'])('preserves explicit %s appearance and language for the current prerelease', async appearance => {
+  localStorage.setItem('cnc', JSON.stringify({
+    version: '2.0.0-dev',
+    state: { settings: { appearance, language: 'de' } },
+  }));
+  let config;
+  jest.isolateModules(() => {
+    config = require('../index').default;
+  });
+  await new Promise(resolve => {
+    config.once('change', resolve);
+  });
+
+  expect(config.get('settings.appearance')).toBe(appearance);
+  expect(config.get('settings.language')).toBe('de');
+});

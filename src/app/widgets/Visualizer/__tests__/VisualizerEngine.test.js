@@ -175,6 +175,37 @@ describe('VisualizerEngine', () => {
     }
   });
 
+  test('switching color mode preserves the toolpath, pivot, camera and scene visibility', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { value: 640 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+    const engine = createVisualizerEngine({ container, viewState });
+    engine.load({ name: 'rectangle.gcode', content: rectangularFixture });
+    const toolpath = engine.group.getObjectByName('Visualizer');
+    const pivot = { ...engine.pivotPoint.get() };
+    const cameraPosition = engine.camera.position.clone();
+    const previousGrid = engine.group.getObjectByName('MetricCoordinateSystem');
+    const dispose = jest.spyOn(previousGrid.children[0].children[0].geometry, 'dispose');
+
+    engine.update({ colorMode: 'dark' });
+
+    expect(engine.group.getObjectByName('Visualizer')).toBe(toolpath);
+    expect(engine.pivotPoint.get()).toEqual(pivot);
+    expect(engine.camera.position).toEqual(cameraPosition);
+    const darkGrid = engine.group.getObjectByName('MetricCoordinateSystem');
+    expect(darkGrid.visible).toBe(false);
+    expect(darkGrid.position).toMatchObject({ x: -pivot.x, y: -pivot.y, z: -pivot.z });
+    expect(dispose).toHaveBeenCalledTimes(1);
+    const darkAxisColor = darkGrid.getObjectByName('CoordinateAxes').children[0].material.color;
+
+    engine.update({ colorMode: 'light' });
+
+    const lightGrid = engine.group.getObjectByName('MetricCoordinateSystem');
+    expect(lightGrid.getObjectByName('CoordinateAxes').children[0].material.color).not.toEqual(darkAxisColor);
+    expect(engine.group.getObjectByName('Visualizer')).toBe(toolpath);
+    engine.dispose();
+  });
+
   test('applies the top-level sent view-state field to the rendered toolpath', () => {
     const container = document.createElement('div');
     Object.defineProperty(container, 'clientWidth', { value: 640 });
@@ -223,6 +254,32 @@ describe('VisualizerEngine', () => {
 
     expect(mockRenderer.setSize).toHaveBeenLastCalledWith(180, 480);
     expect(engine.camera.aspect).toBeCloseTo(180 / 480);
+    engine.dispose();
+  });
+
+  test('retains a usable projection when the workspace host is hidden and shown again', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 640 });
+    Object.defineProperty(container, 'clientHeight', { configurable: true, value: 480 });
+    const engine = createVisualizerEngine({
+      container,
+      viewState: { ...viewState, projection: 'orthographic' },
+    });
+    const visibleZoom = engine.camera.zoom;
+    expect(visibleZoom).toBeGreaterThan(0);
+
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 0 });
+    Object.defineProperty(container, 'clientHeight', { configurable: true, value: 0 });
+    engine.resize();
+    engine.viewport.update();
+    expect(engine.camera.zoom).toBe(visibleZoom);
+
+    Object.defineProperty(container, 'clientWidth', { configurable: true, value: 640 });
+    Object.defineProperty(container, 'clientHeight', { configurable: true, value: 480 });
+    engine.resize();
+    engine.viewport.update();
+    expect(engine.camera.zoom).toBeGreaterThan(0);
+    expect(Number.isFinite(engine.camera.projectionMatrix.elements[0])).toBe(true);
     engine.dispose();
   });
 

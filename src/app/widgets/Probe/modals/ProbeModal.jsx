@@ -25,10 +25,12 @@ const PROBE_SETTER_WCS = 'wcs';
 
 /**
  * @param {object} props
+ * @param {boolean} [props.isOpen]
  * @param {Function} props.onClose
  * @param {object} props.probeData
  */
 function ProbeModal({
+  isOpen = true,
   onClose,
   probeData,
 }) {
@@ -59,7 +61,7 @@ function ProbeModal({
       closeOnInteractOutside={false}
       ensureFocus
       isClosable
-      isOpen
+      isOpen={isOpen}
       size="sm"
       onClose={onClose}
     >

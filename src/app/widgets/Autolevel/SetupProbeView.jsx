@@ -4,6 +4,9 @@ import {
   FormControl,
   FormLabel,
   Input,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupAppend,
   LinearProgress,
   Text,
 } from '@tonic-ui/react';
@@ -36,11 +39,13 @@ function NumberField({
   onBlur,
 }) {
   return (
-    <FormControl>
+    <FormControl minWidth="0">
       <FormLabel htmlFor={id}>{label}</FormLabel>
-      <Box alignItems="center" display="flex" gap="1x">
+      <InputGroup>
         <Input
           aria-label={label}
+          flex="1"
+          minWidth="0"
           disabled={disabled}
           id={id}
           min={min}
@@ -52,8 +57,12 @@ function NumberField({
           type="number"
           value={value}
         />
-        {unit && <Text color="text.secondary">{unit}</Text>}
-      </Box>
+        {unit && (
+          <InputGroupAppend>
+            <InputGroupAddon>{unit}</InputGroupAddon>
+          </InputGroupAppend>
+        )}
+      </InputGroup>
       {error && <Text color="error.text" fontSize="sm">{error}</Text>}
     </FormControl>
   );

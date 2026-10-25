@@ -41,11 +41,11 @@ function Controller({ controllerSettings = {}, controllerState = {}, onClose }) 
         <ModalHeader>Smoothie</ModalHeader>
         <ModalBody>
           <Tabs>
-            <TabList aria-label={i18n._('Smoothie controller data')} mb="2x">
+            <TabList aria-label={i18n._('Smoothie controller data')}>
               <Tab>{i18n._('Controller State')}</Tab>
               <Tab>{i18n._('Controller Settings')}</Tab>
             </TabList>
-            <TabPanels>
+            <TabPanels px="3x" py="2x">
               <TabPanel>
                 <PreviewCode>{JSON.stringify(controllerState, null, 2)}</PreviewCode>
               </TabPanel>
@@ -93,7 +93,7 @@ function PreviewCode({ children }) {
 
 const previewSx = {
   background: 'background._fixed.dark.low',
-  border: '1px solid',
+  border: 1,
   borderColor: 'border.secondary',
   color: 'text._fixed.dark.primary',
   height: 'max(50vh, 200px)',

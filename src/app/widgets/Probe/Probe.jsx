@@ -8,6 +8,7 @@ import {
   Input,
   InputGroup,
   InputGroupAddon,
+  InputGroupAppend,
   Space,
   TextLabel,
   Tooltip,
@@ -16,7 +17,7 @@ import { useConst } from '@tonic-ui/react-hooks';
 import _get from 'lodash/get';
 import _includes from 'lodash/includes';
 import _isEqual from 'lodash/isEqual';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { connect } from 'react-redux';
 import { IMPERIAL_UNITS, METRIC_UNITS } from '@app/constants';
@@ -24,7 +25,6 @@ import { CONNECTION_STATE_CONNECTED } from '@app/constants/connection';
 import { MACHINE_STATE_NONE, REFORMED_MACHINE_STATE_IDLE } from '@app/constants/controller';
 import { WORKFLOW_STATE_IDLE } from '@app/constants/workflow';
 import i18n from '@app/lib/i18n';
-import portal from '@app/lib/portal';
 import { in2mm, mapValueToUnits } from '@app/lib/units';
 import useWidgetConfig from '@app/widgets/shared/useWidgetConfig';
 import { composeValidators, minValue, required } from '@app/widgets/shared/validations';
@@ -67,10 +67,14 @@ function Probe({ isActionable, units, wcs }) {
   const displayUnits = units === METRIC_UNITS ? i18n._('mm') : i18n._('in');
   const feedrateUnits = units === METRIC_UNITS ? i18n._('mm/min') : i18n._('in/min');
   const step = units === METRIC_UNITS ? 1 : 0.1;
+  // Render the modal inside this widget's provider subtree instead of a separate
+  // React root, so `WidgetConfigProvider` and the tracked config state stay available.
+  const [probeModal, setProbeModal] = useState({ isOpen: false, probeData: null });
   const openProbeModal = probeData => {
-    portal(({ onClose }) => (
-      <ProbeModal onClose={onClose} probeData={probeData} />
-    ));
+    setProbeModal({ isOpen: true, probeData });
+  };
+  const closeProbeModal = () => {
+    setProbeModal(prevState => ({ ...prevState, isOpen: false }));
   };
   const methods = useForm({
     defaultValues,
@@ -131,12 +135,14 @@ function Probe({ isActionable, units, wcs }) {
     const registerProps = register(name, { validate: validateNumberField });
 
     return (
-      <FormControl>
+      <FormControl minWidth="0">
         <TextLabel htmlFor={name} mb="2x">{label}</TextLabel>
-        <InputGroup size="sm">
+        <InputGroup>
           <Input
             {...registerProps}
             aria-label={label}
+            flex="1"
+            minWidth="0"
             id={name}
             min={0}
             step={step}
@@ -144,7 +150,9 @@ function Probe({ isActionable, units, wcs }) {
             value={_get(values, name) ?? ''}
             onChange={changeValue}
           />
-          <InputGroupAddon>{unit}</InputGroupAddon>
+          <InputGroupAppend>
+            <InputGroupAddon>{unit}</InputGroupAddon>
+          </InputGroupAppend>
         </InputGroup>
         {(error && touched) && <FormHelperText>{error}</FormHelperText>}
       </FormControl>
@@ -225,10 +233,15 @@ function Probe({ isActionable, units, wcs }) {
             }}
           />
         </Box>
-        <Box mb="4x">{renderNumberField({ name: 'probeDepth', label: i18n._('Probe Depth'), unit: displayUnits })}</Box>
-        <Box mb="4x">{renderNumberField({ name: 'probeFeedrate', label: i18n._('Probe Feedrate'), unit: feedrateUnits })}</Box>
-        <Box mb="4x">{renderNumberField({ name: 'touchPlateHeight', label: i18n._('Touch Plate Thickness'), unit: displayUnits })}</Box>
-        <Box mb="4x">{renderNumberField({ name: 'retractionDistance', label: i18n._('Retraction Distance'), unit: displayUnits })}</Box>
+        <Box
+          display="grid" gridTemplateColumns="repeat(2, minmax(0, 1fr))" gap="3x"
+          mb="4x"
+        >
+          {renderNumberField({ name: 'probeDepth', label: i18n._('Probe Depth'), unit: displayUnits })}
+          {renderNumberField({ name: 'probeFeedrate', label: i18n._('Probe Feedrate'), unit: feedrateUnits })}
+          {renderNumberField({ name: 'touchPlateHeight', label: i18n._('Touch Plate Thickness'), unit: displayUnits })}
+          {renderNumberField({ name: 'retractionDistance', label: i18n._('Retraction Distance'), unit: displayUnits })}
+        </Box>
         <Box mb="2x">
           <Button
             disabled={!isActionable || isInvalid}
@@ -240,6 +253,13 @@ function Probe({ isActionable, units, wcs }) {
           </Button>
         </Box>
       </Box>
+      {probeModal.probeData && (
+        <ProbeModal
+          isOpen={probeModal.isOpen}
+          onClose={closeProbeModal}
+          probeData={probeModal.probeData}
+        />
+      )}
     </FormProvider>
   );
 }

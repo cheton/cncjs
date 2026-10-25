@@ -182,7 +182,7 @@ function TinyG({ controllerData }) {
  */
 function ReportSection({ children, isExpanded, onToggle, title }) {
   return (
-    <Accordion>
+    <Accordion border={1} borderColor="border.secondary">
       <AccordionItem isExpanded={isExpanded} onToggle={onToggle}>
         <AccordionHeader>{title}</AccordionHeader>
         <AccordionBody>{children}</AccordionBody>

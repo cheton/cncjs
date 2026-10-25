@@ -1,10 +1,35 @@
-import { Button, Space, Text } from '@tonic-ui/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Text,
+} from '@tonic-ui/react';
 import React from 'react';
 import controller from '@app/lib/controller';
+import i18n from '@app/lib/i18n';
 import RepeatableButton from '@app/components/RepeatableButton';
 import DigitalReadout from './DigitalReadout';
 
-const adjustmentSx = { flex: 1, px: '1x' };
+const overrideSteps = [
+  { fontSize: '.75rem', icon: 'arrow-down', value: -10 },
+  { fontSize: '.66rem', icon: 'arrow-down', value: -1 },
+  { fontSize: '.66rem', icon: 'arrow-up', value: 1 },
+  { fontSize: '.75rem', icon: 'arrow-up', value: 10 },
+];
+
+const trajectorySteps = [
+  { className: 'fa-battery-full', value: 100 },
+  { className: 'fa-battery-half', value: 50 },
+  { className: 'fa-battery-quarter', value: 25 },
+];
+
+const buttonGroupSx = {
+  flex: 1,
+  '& > button': { flex: 1, minWidth: 0, px: '1x' },
+};
+
+const resetButtonSx = { minWidth: '24px', width: '24px', p: 0 };
 
 /**
  * @param {{ ovF?: number, ovS?: number, ovT?: number }} props
@@ -15,7 +40,7 @@ function Overrides({ ovF = 0, ovS = 0, ovT = 0 }) {
   }
 
   return (
-    <>
+    <Box>
       {!!ovF && (
         <OverrideButtons
           commandName="feed_override"
@@ -34,25 +59,22 @@ function Overrides({ ovF = 0, ovS = 0, ovT = 0 }) {
       )}
       {!!ovT && (
         <DigitalReadout label="T" value={`${ovT}%`}>
-          {[
-            ['fa-battery-full', 100],
-            ['fa-battery-half', 50],
-            ['fa-battery-quarter', 25],
-          ].map(([icon, value]) => (
-            <Button
-              aria-label={`Trajectory planner ${value}%`}
-              key={value}
-              onClick={() => controller.command('rapid_override', value)}
-              sx={adjustmentSx}
-            >
-              <i aria-hidden="true" className={`fa ${icon}`} />
-              <Space width="2x" />
-              {value}%
-            </Button>
-          ))}
+          <ButtonGroup size="sm" minWidth="0" sx={buttonGroupSx}>
+            {trajectorySteps.map(({ className, value }) => (
+              <Button
+                aria-label={`Trajectory planner ${value}%`}
+                key={value}
+                onClick={() => controller.command('rapid_override', value)}
+                sx={{ fontSize: '.75rem' }}
+              >
+                <i aria-hidden="true" className={`fa ${className}`} />
+                <Text>{`${value}%`}</Text>
+              </Button>
+            ))}
+          </ButtonGroup>
         </DigitalReadout>
       )}
-    </>
+    </Box>
   );
 }
 
@@ -62,26 +84,26 @@ function Overrides({ ovF = 0, ovS = 0, ovT = 0 }) {
 function OverrideButtons({ commandName, label, resetLabel, value }) {
   return (
     <DigitalReadout label={label} value={`${value}%`}>
-      {[-10, -1, 1, 10].map(adjustment => (
-        <RepeatableButton
-          key={adjustment}
-          onClick={() => controller.command(commandName, adjustment)}
-          sx={adjustmentSx}
-        >
-          <i
-            aria-hidden="true"
-            className={`fa fa-arrow-${adjustment < 0 ? 'down' : 'up'}`}
-          />
-          <Space width="1x" />
-          <Text>{adjustment}%</Text>
-        </RepeatableButton>
-      ))}
+      <ButtonGroup size="sm" minWidth="0" sx={buttonGroupSx}>
+        {overrideSteps.map(step => (
+          <RepeatableButton
+            key={step.value}
+            onClick={() => controller.command(commandName, step.value)}
+            sx={{ fontSize: step.fontSize }}
+          >
+            <FontAwesomeIcon icon={step.icon} fixedWidth />
+            <Text>{i18n._(`${step.value}%`)}</Text>
+          </RepeatableButton>
+        ))}
+      </ButtonGroup>
       <Button
         aria-label={resetLabel}
+        variant="ghost"
+        size="sm"
+        sx={resetButtonSx}
         onClick={() => controller.command(commandName, 0)}
-        sx={{ px: '1x' }}
       >
-        <i aria-hidden="true" className="fa fa-undo fa-fw" />
+        <FontAwesomeIcon icon="undo" fixedWidth />
       </Button>
     </DigitalReadout>
   );

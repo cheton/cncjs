@@ -72,6 +72,9 @@ const Events = () => {
     setRowSelection({});
   }, []);
 
+  // manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const queryClient = useQueryClient();
   const fetchEventsQuery = useFetchEventsQuery({
     meta: {
@@ -115,7 +118,10 @@ const Events = () => {
   const portal = usePortalManager();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchEventsQuery.isFetching;
-  const isLoadingData = fetchEventsQuery.isFetching;
+  // Show the full-table loading overlay for the initial fetch and explicit
+  // refreshes only; background fetches (e.g. mutation invalidations) keep the
+  // rendered records visible. React Query v4 `isLoading` means "no data yet".
+  const isLoadingData = fetchEventsQuery.isLoading || isRefreshing;
   const data = ensureArray(fetchEventsQuery.data?.records);
   const totalCount = fetchEventsQuery.data?.pagination?.totalRecords ?? 0;
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -172,8 +178,15 @@ const Events = () => {
     clearRowSelection();
   }, [rowSelection, bulkDisableEventsMutation, clearRowSelection]);
 
-  const handleClickRefresh = useCallback(() => {
-    fetchEventsQuery.refetch();
+  const handleClickRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Join an in-flight fetch instead of cancelling it so the overlay stays
+      // visible until the request settles, whether it succeeds or fails.
+      await fetchEventsQuery.refetch({ cancelRefetch: false });
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchEventsQuery]);
 
   const handleClickViewEventDetailsById = useCallback((id) => () => {
@@ -545,7 +558,7 @@ const Events = () => {
                     gap="2x"
                   >
                     <Text>{i18n._('An unexpected error has occurred.')}</Text>
-                    <Button onClick={() => fetchEventsQuery.refetch()}>{i18n._('Retry')}</Button>
+                    <Button onClick={handleClickRefresh}>{i18n._('Retry')}</Button>
                   </Flex>
                 )}
                 {!isLoadingData && !fetchEventsQuery.isError && data.length === 0 && (

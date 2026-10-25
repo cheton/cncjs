@@ -9,7 +9,6 @@ import { renderAppUI } from '@app/test/render';
 
 const mockCommand = jest.fn();
 const mockConfigSet = jest.fn();
-const mockPortal = jest.fn();
 const mockStore = {
   connection: { state: CONNECTION_STATE_CONNECTED },
   controller: {
@@ -44,11 +43,6 @@ jest.mock('@app/lib/i18n', () => ({
   default: {
     _: (value, variables = {}) => value.replace(/{{(.*?)}}/g, (_, key) => variables[key]),
   },
-}));
-
-jest.mock('@app/lib/portal', () => ({
-  __esModule: true,
-  default: mockPortal,
 }));
 
 jest.mock('@app/widgets/shared/useWidgetConfig', () => ({
@@ -148,18 +142,10 @@ describe('Probe modal command contract', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Probe Axis X' }));
 
-    await waitFor(() => expect(mockPortal).toHaveBeenCalledTimes(1));
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('G38.3 X-12 F100');
+    expect(dialog).toHaveTextContent('G10 L20 P1 X1');
     expect(mockCommand).not.toHaveBeenCalled();
-    const modal = mockPortal.mock.calls[0][0]({ onClose: jest.fn() });
-    expect(modal.props.probeData).toEqual({
-      probeAxis: 'X',
-      probeCommand: 'G38.3',
-      probeDepth: '12',
-      probeFeedrate: 100,
-      touchPlateHeight: 1,
-      retractionDistance: 2,
-      wcs: 'G54',
-    });
     expect(mockConfigSet).toHaveBeenCalledWith('probeAxis', 'X');
     expect(mockConfigSet).toHaveBeenCalledWith('probeCommand', 'G38.3');
     expect(mockConfigSet).toHaveBeenCalledWith('probeDepth', 12);
@@ -178,7 +164,7 @@ describe('Probe modal command contract', () => {
     openPreview.focus();
     await user.keyboard('{Enter}');
 
-    await waitFor(() => expect(mockPortal).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(mockConfigSet).toHaveBeenCalledWith('probeDepth', 12);
     expect(mockCommand).not.toHaveBeenCalled();
   });
@@ -189,14 +175,14 @@ describe('Probe modal command contract', () => {
 
     expect(screen.getByRole('button', { name: 'Probe Axis Z' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Probe Axis Z' }));
-    expect(mockPortal).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
     mockStore.connection.state = CONNECTION_STATE_CONNECTED;
     mockStore.controller.workflow.state = 'running';
     rerender(<Probe />);
 
     expect(screen.getByRole('button', { name: 'Probe Axis Z' })).toBeDisabled();
-    expect(mockPortal).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   test('does not open a probe preview from an invalid draft', () => {
@@ -208,7 +194,7 @@ describe('Probe modal command contract', () => {
 
     expect(screen.getByRole('button', { name: 'Probe Axis Z' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Probe Axis Z' }));
-    expect(mockPortal).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(mockCommand).not.toHaveBeenCalled();
   });
 });

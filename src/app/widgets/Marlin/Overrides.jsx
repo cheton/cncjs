@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Space,
   Text,
 } from '@tonic-ui/react';
 import React from 'react';
@@ -21,31 +20,37 @@ function Overrides({ ovF, ovS }) {
   }
 
   return (
-    <Box mb="3x" sx={{ '> :not(:first-child)': { marginTop: '8px' } }}>
+    <Box mb="3x">
       {!!ovF && (
         <DigitalReadout label="F" value={`${ovF}%`}>
-          <OverrideButtons command="feed_override" />
-          <Space width="2x" />
-          <Button
-            aria-label="Reset feed rate override"
-            variant="ghost"
-            onClick={() => controller.command('feed_override', 0)}
-          >
-            <FontAwesomeIcon icon="undo" fixedWidth />
-          </Button>
+          <Box alignItems="center" display="flex" gap="1x" minWidth="0">
+            <OverrideButtons command="feed_override" />
+            <Button
+              aria-label="Reset feed rate override"
+              variant="ghost"
+              size="sm"
+              sx={{ minWidth: '24px', width: '24px', p: 0 }}
+              onClick={() => controller.command('feed_override', 0)}
+            >
+              <FontAwesomeIcon icon="undo" fixedWidth />
+            </Button>
+          </Box>
         </DigitalReadout>
       )}
       {!!ovS && (
         <DigitalReadout label="E" value={`${ovS}%`}>
-          <OverrideButtons command="spindle_override" />
-          <Space width="2x" />
-          <Button
-            aria-label="Reset spindle override"
-            variant="ghost"
-            onClick={() => controller.command('spindle_override', 0)}
-          >
-            <FontAwesomeIcon icon="undo" fixedWidth />
-          </Button>
+          <Box alignItems="center" display="flex" gap="1x" minWidth="0">
+            <OverrideButtons command="spindle_override" />
+            <Button
+              aria-label="Reset spindle override"
+              variant="ghost"
+              size="sm"
+              sx={{ minWidth: '24px', width: '24px', p: 0 }}
+              onClick={() => controller.command('spindle_override', 0)}
+            >
+              <FontAwesomeIcon icon="undo" fixedWidth />
+            </Button>
+          </Box>
         </DigitalReadout>
       )}
     </Box>
@@ -57,7 +62,7 @@ function Overrides({ ovF, ovS }) {
  */
 function OverrideButtons({ command }) {
   return (
-    <ButtonGroup size="sm">
+    <ButtonGroup size="sm" minWidth="0" sx={{ flex: 1, '& > button': { flex: 1, minWidth: 0, px: '1x' } }}>
       {[
         { icon: 'arrow-down', label: '-10%', value: -10 },
         { icon: 'arrow-down', label: '-1%', value: -1 },

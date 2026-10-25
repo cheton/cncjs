@@ -1,3 +1,4 @@
+import { useTheme } from '@tonic-ui/react';
 import React from 'react';
 import i18n from '@app/lib/i18n';
 import { toDisplayUnits } from '@app/lib/units';
@@ -21,6 +22,7 @@ const ProbeAreaDiagram = ({
   stepY,
   units,
 }) => {
+  const theme = useTheme();
   const displayUnits = toDisplayUnits(units);
   const width = endX - startX;
   const height = endY - startY;
@@ -47,15 +49,19 @@ const ProbeAreaDiagram = ({
   const dotRadius = Math.max(0.6, Math.min(2, 30 / Math.max(displayX, displayY)));
 
   return (
-    <svg viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
+    <svg
+      role="img"
+      aria-label={i18n._('Probe area diagram')}
+      viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+    >
       {/* Probe area rectangle */}
       <rect
         x={AREA_LEFT}
         y={AREA_TOP}
         width={AREA_WIDTH}
         height={AREA_HEIGHT}
-        fill="#f5f0e0"
-        stroke="#b8a070"
+        fill={theme.get('colors.background.high')}
+        stroke={theme.get('colors.border.primary')}
         strokeWidth="1"
       />
 
@@ -66,7 +72,7 @@ const ProbeAreaDiagram = ({
           cx={dot.x}
           cy={dot.y}
           r={dotRadius}
-          fill="#cc0000"
+          fill={theme.get('colors.error.icon')}
           opacity="0.5"
         />
       ))}
@@ -76,8 +82,8 @@ const ProbeAreaDiagram = ({
         cx={AREA_LEFT}
         cy={AREA_TOP + AREA_HEIGHT}
         r="4"
-        fill="#0066cc"
-        stroke="#fff"
+        fill={theme.get('colors.info.icon')}
+        stroke={theme.get('colors.background.highest')}
         strokeWidth="1"
       />
       <text
@@ -85,7 +91,7 @@ const ProbeAreaDiagram = ({
         y={AREA_TOP + AREA_HEIGHT + 12}
         textAnchor="middle"
         fontSize="8"
-        fill="#0066cc"
+        fill={theme.get('colors.info._onOverlay.text')}
       >
         {i18n._('START')}
       </text>
@@ -95,8 +101,8 @@ const ProbeAreaDiagram = ({
         cx={AREA_LEFT + AREA_WIDTH}
         cy={AREA_TOP}
         r="4"
-        fill="#cc0000"
-        stroke="#fff"
+        fill={theme.get('colors.error.icon')}
+        stroke={theme.get('colors.background.highest')}
         strokeWidth="1"
       />
       <text
@@ -104,7 +110,7 @@ const ProbeAreaDiagram = ({
         y={AREA_TOP - 4}
         textAnchor="middle"
         fontSize="8"
-        fill="#cc0000"
+        fill={theme.get('colors.error.text')}
       >
         {i18n._('END')}
       </text>
@@ -115,7 +121,7 @@ const ProbeAreaDiagram = ({
         y={AREA_TOP + AREA_HEIGHT + 12}
         textAnchor="middle"
         fontSize="9"
-        fill="#666"
+        fill={theme.get('colors.text.secondary')}
       >
         {i18n._('{{value}} {{- units}}', { value: width, units: displayUnits })}
       </text>
@@ -127,7 +133,7 @@ const ProbeAreaDiagram = ({
         textAnchor="start"
         dominantBaseline="central"
         fontSize="9"
-        fill="#666"
+        fill={theme.get('colors.text.secondary')}
       >
         {i18n._('{{value}} {{- units}}', { value: height, units: displayUnits })}
       </text>

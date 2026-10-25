@@ -65,6 +65,9 @@ const Macros = () => {
     setRowSelection({});
   }, []);
 
+  // manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const fetchMacrosQuery = useFetchMacrosQuery({
     meta: {
       query: qs.stringify({
@@ -78,7 +81,10 @@ const Macros = () => {
   const portal = usePortalManager();
   const selectedRowCount = Object.keys(rowSelection).length;
   const isRowSelectionDisabled = fetchMacrosQuery.isFetching;
-  const isLoadingData = fetchMacrosQuery.isFetching;
+  // Show the full-table loading overlay for the initial fetch and explicit
+  // refreshes only; background fetches (e.g. mutation invalidations) keep the
+  // rendered records visible. React Query v4 `isLoading` means "no data yet".
+  const isLoadingData = fetchMacrosQuery.isLoading || isRefreshing;
   const data = ensureArray(fetchMacrosQuery.data?.records);
   const totalCount = fetchMacrosQuery.data?.pagination?.totalRecords ?? 0;
   const totalPages = Math.ceil(totalCount / rowsPerPage);
@@ -113,8 +119,15 @@ const Macros = () => {
     ));
   }, [portal, rowSelection, bulkDeleteMacrosMutation, clearRowSelection]);
 
-  const handleClickRefresh = useCallback(() => {
-    fetchMacrosQuery.refetch();
+  const handleClickRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      // Join an in-flight fetch instead of cancelling it so the overlay stays
+      // visible until the request settles, whether it succeeds or fails.
+      await fetchMacrosQuery.refetch({ cancelRefetch: false });
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchMacrosQuery]);
 
   const handleClickViewMacroDetailsById = useCallback((id) => () => {
@@ -412,7 +425,7 @@ const Macros = () => {
                     gap="2x"
                   >
                     <Text>{i18n._('An unexpected error has occurred.')}</Text>
-                    <Button onClick={() => fetchMacrosQuery.refetch()}>{i18n._('Retry')}</Button>
+                    <Button onClick={handleClickRefresh}>{i18n._('Retry')}</Button>
                   </Flex>
                 )}
                 {!isLoadingData && !fetchMacrosQuery.isError && data.length === 0 && (

@@ -39,11 +39,11 @@ function Controller({ controllerData, onClose }) {
         <ModalHeader>TinyG</ModalHeader>
         <ModalBody>
           <Tabs>
-            <TabList aria-label={i18n._('TinyG controller data')} mb="2x">
+            <TabList aria-label={i18n._('TinyG controller data')}>
               <Tab>{i18n._('Controller State')}</Tab>
               <Tab>{i18n._('Controller Settings')}</Tab>
             </TabList>
-            <TabPanels>
+            <TabPanels px="3x" py="2x">
               <TabPanel>
                 <ControllerData>{JSON.stringify(controllerData.state, null, 2)}</ControllerData>
               </TabPanel>
@@ -68,7 +68,7 @@ function ControllerData({ children }) {
       as="pre"
       sx={{
         background: 'background._fixed.dark.low',
-        border: '1px solid',
+        border: 1,
         borderColor: 'border.secondary',
         color: 'text._fixed.dark.primary',
         fontFamily: 'Consolas, Menlo, Monaco, monospace',
