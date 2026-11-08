@@ -38,11 +38,13 @@ import styles from './index.styl';
 
 const taskbarButtonSx = {
   display: 'inline-block',
-  m: '4px',
-  p: '2px 5px',
+  m: '2px 1px',
+  p: 0,
   border: 0,
-  minWidth: 0,
-  height: 'auto',
+  minWidth: '24px',
+  width: '24px',
+  height: '32px',
+  flexShrink: 0,
   fontWeight: 'normal',
   lineHeight: 0,
   textAlign: 'center',
@@ -285,6 +287,7 @@ function AxisCommandMenu({ children, disabled = false, onSelect }) {
   return (
     <TonicDropdown
       ref={rootRef}
+      portalled
       isOpen={isOpen}
       onOpen={() => setIsOpen(true)}
       onClose={() => setIsOpen(false)}
@@ -1396,8 +1399,9 @@ function DisplayPanel() {
         <td className={styles.machinePosition}>
           <PositionLabel value={mpos} />
           <Taskbar>
-            <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <Tooltip
+                portalled
                 label={i18n._('Zero Out Machine')}
                 disabled={!canZeroOutMachine}
                 closeOnClick
@@ -1406,7 +1410,7 @@ function DisplayPanel() {
               >
                 <Button
                   variant="ghost" sx={taskbarButtonSx}
-                  aria-label={`Go to zero: ${axisLabel}`}
+                  aria-label={`${i18n._('Zero Out Machine')}: ${axisLabel}`}
                   disabled={!canZeroOutMachine}
                   onClick={() => {
                     controller.command('gcode', `G28.3 ${axisLabel}0`);
@@ -1416,6 +1420,7 @@ function DisplayPanel() {
                 </Button>
               </Tooltip>
               <Tooltip
+                portalled
                 label={i18n._('Home Machine')}
                 disabled={!canClick}
                 closeOnClick
@@ -1452,8 +1457,9 @@ function DisplayPanel() {
           {!isPositionInputVisible &&
             <PositionLabel value={wpos} />}
           <Taskbar>
-            <Box style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <Tooltip
+                portalled
                 label={i18n._('Move Backward')}
                 disabled={!canMoveBackward}
                 closeOnClick
@@ -1473,6 +1479,7 @@ function DisplayPanel() {
                 </Button>
               </Tooltip>
               <Tooltip
+                portalled
                 label={i18n._('Move Forward')}
                 disabled={!canMoveForward}
                 closeOnClick
@@ -1492,6 +1499,7 @@ function DisplayPanel() {
                 </Button>
               </Tooltip>
               <Tooltip
+                portalled
                 label={i18n._('Zero Out Work Offsets')}
                 disabled={!canZeroOutWorkOffsets}
                 closeOnClick
@@ -1510,6 +1518,7 @@ function DisplayPanel() {
                 </Button>
               </Tooltip>
               <Tooltip
+                portalled
                 label={i18n._('Set Work Offsets')}
                 disabled={!canModifyWorkPosition}
                 closeOnClick
@@ -1556,31 +1565,33 @@ function DisplayPanel() {
         '& th, & td': { border: 1, borderColor: 'border.secondary' },
       }}
     >
-      <table style={{ width: '100%', tableLayout: 'fixed' }}>
-        <thead>
-          <tr>
-            <th scope="col" className={styles.coordinate} title={i18n._('Axis')}>{i18n._('Axis')}</th>
-            <th scope="col" className={styles.positionHeading} title={i18n._('Machine Position')}>
-              <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Machine Position')}</Box>
-            </th>
-            <th scope="col" className={styles.positionHeading} title={i18n._('Work Position')}>
-              <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Work Position')}</Box>
-            </th>
-            <th scope="col" className={styles.action}>
-              {renderActionDropdown({ wcs })}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {hasAxisE && renderAxis(AXIS_E)}
-          {hasAxisX && renderAxis(AXIS_X)}
-          {hasAxisY && renderAxis(AXIS_Y)}
-          {hasAxisZ && renderAxis(AXIS_Z)}
-          {hasAxisA && renderAxis(AXIS_A)}
-          {hasAxisB && renderAxis(AXIS_B)}
-          {hasAxisC && renderAxis(AXIS_C)}
-        </tbody>
-      </table>
+      <Box overflowX="auto">
+        <table style={{ width: '100%', minWidth: '240px', tableLayout: 'fixed' }}>
+          <thead>
+            <tr>
+              <th scope="col" className={styles.coordinate} title={i18n._('Axis')}>{i18n._('Axis')}</th>
+              <th scope="col" className={styles.positionHeading} title={i18n._('Machine Position')}>
+                <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Machine Position')}</Box>
+              </th>
+              <th scope="col" className={styles.positionHeading} title={i18n._('Work Position')}>
+                <Box as="span" sx={{ display: 'inline-block', maxWidth: '6em' }}>{i18n._('Work Position')}</Box>
+              </th>
+              <th scope="col" className={styles.action}>
+                {renderActionDropdown({ wcs })}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {hasAxisE && renderAxis(AXIS_E)}
+            {hasAxisX && renderAxis(AXIS_X)}
+            {hasAxisY && renderAxis(AXIS_Y)}
+            {hasAxisZ && renderAxis(AXIS_Z)}
+            {hasAxisA && renderAxis(AXIS_A)}
+            {hasAxisB && renderAxis(AXIS_B)}
+            {hasAxisC && renderAxis(AXIS_C)}
+          </tbody>
+        </table>
+      </Box>
     </Box>
   );
 }

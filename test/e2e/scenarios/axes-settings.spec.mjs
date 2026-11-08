@@ -1,5 +1,5 @@
-import { mkdir } from 'node:fs/promises';
 import { test, expect, openWorkspace, widget } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const openSettings = async page => {
   await openWorkspace(page);
@@ -32,8 +32,7 @@ test('Axes nested command editors validate, cancel, create and update drafts wit
   let editor = page.getByRole('dialog').last();
   await expectFooterGap(editor);
   await editor.getByRole('button', { name: 'OK', exact: true }).click();
-  await mkdir(`output/e2e/screenshots/${testInfo.project.name}`, { recursive: true });
-  await editor.screenshot({ path: `output/e2e/screenshots/${testInfo.project.name}/axes-command-new.png` });
+  await capture(editor, testInfo, 'axes-command-new');
   await expect(editor.getByText('This field is required.', { exact: true })).toHaveCount(2);
   await editor.getByRole('textbox', { name: 'Name', exact: true }).fill('Draft command');
   await editor.getByRole('textbox', { name: 'Command', exact: true }).fill('G0 X10');
@@ -66,8 +65,7 @@ test('ShuttleXpress range handles remain ordered and keyboard adjustable, and ca
   await settings.getByRole('tab', { name: 'ShuttleXpress', exact: true }).click();
   const minimum = settings.getByRole('slider', { name: 'Minimum feed rate', exact: true });
   const maximum = settings.getByRole('slider', { name: 'Maximum feed rate', exact: true });
-  await mkdir(`output/e2e/screenshots/${testInfo.project.name}`, { recursive: true });
-  await settings.screenshot({ path: `output/e2e/screenshots/${testInfo.project.name}/axes-shuttlexpress.png` });
+  await capture(settings, testInfo, 'axes-shuttlexpress');
   const original = await minimum.getAttribute('aria-valuenow');
   await minimum.focus();
   await page.keyboard.press('ArrowRight');

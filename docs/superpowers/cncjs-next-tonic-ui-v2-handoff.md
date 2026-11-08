@@ -1,5 +1,39 @@
 # CNCjs next → Tonic UI v2 — 交接入口
 
+Latest checkpoint (2026-11-08): V3-T, FIX-003, FIX-004, and I1–I6 are completed. FIX-004's authenticated visual gate passed on an isolated local account; [light/dark Axes captures](plans/2026-09-07-tonic-ui-v2/artifacts/browser/axes-auth-20261108/) were reviewed, with disconnected controls and no physical hardware. The user waived I2's pre-change RED evidence; no baseline is claimed. The full frontend passed 80 suites / 532 tests, the integrated icon browser selection passed 28/28 light/dark executions, and the final post-I1–I6 18-spec light/dark E2E run passed 298/298 in 40.6 minutes (one worker, no retries). Reports/screenshots were enabled in the isolated copy at `/tmp/cncjs-final-e2e.CqoaUK/output/e2e/`. No physical controller execution or new authenticated application pass is claimed.
+
+Header controller actions right-align with a `4x` gap to adjacent actions when space permits. At 800px and 390px the toolbar remains a single horizontally scrollable row. [Viewport captures](plans/2026-09-07-tonic-ui-v2/artifacts/browser/header-20261108/) and light/dark browser checks are available.
+
+## Full-app E2E plan and verification — 2026-11-08
+
+The user approved this order. Functionality and safety take precedence over visual artifacts. Keep the existing light/dark Playwright projects and classify each scenario by its actual evidence: mocked UI, controller snapshot, or real loopback simulator execution. Do not represent mock or snapshot results as controller execution.
+
+1. **Safety and isolation:** establish the Socket.IO, allowed API write, and simulator boundaries first. In particular, `POST /api/gcode` can change a controller sender and is not a read-only request. Never connect physical hardware or request cameras.
+2. **Functional scenario audit and gaps:** map existing assertions by bootstrap/navigation, workspace/layout, widgets/settings, controller snapshots, simulator execution, Visualizer, and Administration. Prioritize loaded Visualizer toolpaths, simulator commands and state, and settings validation/cancellation. Add behavioral coverage only for identified gaps; preserve existing assertions.
+3. **Screenshot contract:** screenshots are optional per test and disabled runs write no screenshots. Use shared naming and manifests that distinguish tests, light/dark, and repeated runs; do not overwrite previous runs. Capture meaningful intermediate interaction states explicitly rather than relying only on teardown screenshots. Screenshots supplement, never replace, functional assertions.
+4. **Layered verification:** run affected individual scenarios, then their suites, then the full light/dark E2E run. Review captures and report only observed evidence and its fixture boundary.
+
+Reference: Tonic One `test/e2e/` and package E2E architecture for runner and screenshot patterns; CNCjs remains a full application with distinct simulator and safety needs. The post-I1–I6 18-spec light/dark run passed 298/298; the separate FIX-004 authenticated visual gate passed. Existing coverage and limitations are in [test/e2e/README.md](../../test/e2e/README.md); no physical controller run is claimed.
+
+### Scenario allocation
+
+Assign each scenario by the evidence it can produce, not by widget ownership. Keep existing spec files; a scenario moves or splits only when its fixture boundary changes.
+
+| Class | Scope | Evidence boundary |
+| --- | --- | --- |
+| Bootstrap and navigation | startup appearance, header, menus, routes | isolated browser context |
+| Workspace and layout | panels, widget managers, fullscreen, responsive widths | local settings only |
+| Widgets and settings | Connection, Axes, Probe, Autolevel, Tool, forms | mocked UI or captured commands |
+| Controller snapshots | Marlin, Smoothie, TinyG, alarm/error surfaces | isolated Socket.IO fixture, no controller |
+| Simulator execution | Grbl connection, G-code, jog, workflow | ephemeral loopback simulator |
+| Visualizer | toolpath, camera, display options, theme switching | simulator plus renderer metrics |
+| Administration | tables, drawers, settings, accounts | mocks by default; real writes only on an isolated backend |
+| Safety regressions | Socket.IO and API policy | private HTTP servers, no CNCjs backend |
+
+Status: safety guards, socket-safety regressions, the shared screenshot contract, and Visualizer/simulator assertion strengthening are implemented. The post-I1–I6 full 18-spec light/dark run passed 298/298 in 40.6 minutes with one worker and no retries; screenshots and reports were enabled. Remaining behavior and physical-execution gaps are listed in the E2E README; they are not claims of passing physical hardware or backend authentication.
+
+Use the default OMP role without assigning a model. Earlier model-specific instructions in EXECUTION and historical checkpoints are superseded by the user's 2026-11-08 direction.
+
 Latest checkpoint (2026-10-09): **RHF completed**. All Administration, login, and widget forms use React Hook Form 7.89.0; `react-final-form` and `final-form` are removed. Frontend 80 suites / 515 tests pass; full lint exits 0 (13 ESLint and 28 Stylint warnings); UI migration has zero violations and 68 passing contract tests. See [STATUS](plans/2026-09-07-tonic-ui-v2/STATUS.md) and the [RHF plan and verification](plans/2026-10-08-react-hook-form/PLAN.md). Existing visual gates remain pending.
 
 本檔是**唯一**的跨 session 交接入口：bootstrap、現況、hard rules、恢復 prompt 都在這裡。
@@ -142,7 +176,7 @@ Historical Connection selectors used Tonic Menu in `9f56e397`. V3-DS subsequentl
 
 完整執行規則見 [EXECUTION](plans/2026-09-07-tonic-ui-v2/EXECUTION.md)；以下是接手時最容易違反的摘要。
 
-1. **R6 browser authorized：** 2026-10-01 使用者指示 “Go R6” 並指定 GPT-6-Luna extra-high；先前 browser deferral 對 R6 已解除。未執行的 gate 仍不得宣稱 passed。
+1. **Browser evidence：** R6 的 browser deferral 已解除。未執行的 gate 仍不得宣稱 passed；後續工作使用 OMP 預設角色，不指定模型。
 2. **Project rules：** 修改 React interface、Tonic UI 或 runtime boundary 時，先讀取 [`.omp/RULES.md`](../../.omp/RULES.md)。
 3. **Browser 環境：** 用 Playwright bundled Chromium，不用 system Chrome screenshot channel。以 `SUPPRESS_WEBGL_WARNING=1` 啟動 dev build；production 永遠強制 `0`。
 4. **測試 config：** 唯一受版本控制的 reference 是 [`docs/testing/configs/browser-test.cncrc`](../testing/configs/browser-test.cncrc)。先複製到唯一 `/tmp` 路徑，再以 `CONFIG_PATH=/tmp/cncjs-browser-test.cncrc SUPPRESS_WEBGL_WARNING=1 yarn dev` 啟動。不可用 repo 內檔案或使用者的 `~/.cncrc` 作 active config，不可提交 token／password／machine-specific config。
@@ -173,20 +207,20 @@ Historical Connection selectors used Tonic Menu in `9f56e397`. V3-DS subsequentl
 - Autolevel uses Tonic `MenuIcon`, `MoreIcon`, chevrons, and `CloseIcon`. Only unavailable equivalents use explicit Font Awesome definitions: `faExpand`, `faCompress`, and `faCodeBranch`; do not depend on app-root Font Awesome library registration from an isolated widget.
 - No browser tooling, simulator browser procedure, or build was run. The mock controller fixture covers unavailable probe events; browser and simulator evidence remain deferred to R6. The protected Prettier paths `.prettierrc.json`, `package.json`, and `yarn.lock` are not changed or staged.
 
-## Deferred widget icon migration TODO
+## Widget icon migration record
 
-This is a follow-up inventory, not an authorization to batch-edit widgets or change the task ledger. Each item is a separate, test-first slice: add a consumer-visible icon contract, record RED against current markup, then replace only that slice and run its focused regression tests.
+The user authorized I3–I6 and requested focus on post-change behavior rather than a pre-change comparison. I2's previously required pre-change RED evidence is explicitly waived; I3–I6 records below report only observed post-change verification, not test-first evidence.
 
 **Icon rule:** prefer `@tonic-ui/react-icons` when it has a semantic equivalent. If it does not, use `FontAwesomeIcon` with a direct imported icon definition (for example `faExpand`), not a raw `<i className="fa …">` and not a string name that requires app-root library registration. Preserve Font Awesome when the Tonic catalogue has no equivalent or the UI needs a deliberate legacy visual distinction.
 
-- [ ] **I1 — Autolevel child views:** replace raw icons in `ApplyView.jsx`, `SetupProbeView.jsx`, and `StopProbeModal.jsx`. Tonic equivalents exist for chevrons, download, folder-open, close, play, and stop.
-- [ ] **I2 — Axes:** replace raw icons in `DisplayPanel.jsx`, `Keypad.jsx`, `KeypadOverlay.jsx`, `components/PositionInput.jsx`. Preserve rotation, spinning, and fixed-width behavior in the component props or `sx`; assess circular-arrow icons individually rather than substituting a non-equivalent arrow.
-- [ ] **I3 — Tool:** replace raw widget header controls and action icons in `index.jsx` and `Tool.jsx`; cover refresh's pending/spinning state as well as menu/collapse behavior.
-- [ ] **I4 — controller widgets:** replace raw icons in Grbl (`index.jsx`, `modals/ControllerModal.jsx`), Marlin (`index.jsx`, `Controller.jsx`, `Marlin.jsx`), Smoothie (`index.jsx`, `Controller.jsx`), and TinyG (`index.jsx`, `TinyG.jsx`, `Overrides.jsx`). Treat controller command grids, refresh, status, and battery indicators as distinct behavior contracts.
-- [ ] **I5 — Visualizer:** replace raw icons in `Loading.jsx`, `PrimaryToolbar.jsx`, `Rendering.jsx`, `WatchDirectory.jsx`, `WorkflowControl.jsx`, and the legacy renderer tree. Preserve busy/spinner state, file-tree icon semantics, toggles, and workflow action meaning.
-- [ ] **I6 — existing Font Awesome widget header controls:** audit the currently migrated string-based `FontAwesomeIcon` use in Axes, Connection, Console, Custom, GCode, Grbl, Laser, Macro, Marlin, Probe, Smoothie, Spindle, TinyG, and Webcam. Convert Tonic-equivalent menu/more/chevron/close icons; retain direct Font Awesome definitions only where no Tonic equivalent exists. Do not assume the app-root icon library is mounted in widget tests.
+- [x] **I1 — Autolevel child views:** Tonic icons replace the raw icons in `ApplyView.jsx`, `SetupProbeView.jsx`, and `StopProbeModal.jsx`; full frontend and isolated light/dark browser checks pass.
+- [x] **I2 — Axes:** raw icons in `Keypad.jsx`, `KeypadOverlay.jsx`, and `components/PositionInput.jsx` were replaced; `DisplayPanel.jsx` already had no raw icons. Diagonal arrows retain directly imported Font Awesome circle icons and their rotation; equivalent controls use Tonic icons. Axes unit tests 23/23 and eight isolated light/dark browser cases pass. The user explicitly waived the missing pre-change RED/comparison evidence and accepted post-change verification; this is not a claim that a baseline was tested. Existing string-based DisplayPanel FontAwesomeIcon uses remain in I6 scope.
+- [x] **I3 — Tool:** header, refresh, collapse, menu, edit, and copy icons use Tonic equivalents or a directly imported Font Awesome copy icon. The pending refresh spinner is unchanged and covered by a delayed-response unit test. Tool unit tests 14/14, twelve light/dark browser cases, and targeted lint passed; [captures](plans/2026-09-07-tonic-ui-v2/artifacts/browser/tool-icons-20261108/) were reviewed. Existing test fixtures mock configuration and controller events; no physical tool-change execution is claimed.
+- [x] **I4 — controller widgets:** migrated raw icons in the listed Grbl, Marlin, Smoothie and TinyG files. TinyG trajectory battery levels retain distinct directly imported definitions. Four controller unit suites passed 31 tests; integrated light/dark simulator and controller snapshot scenarios passed within the 28-case run. Snapshots and captured commands do not prove physical controller execution.
+- [x] **I5 — Visualizer:** migrated raw icon-font markup in PrimaryToolbar, WatchDirectory, WorkflowControl and the legacy renderer; Loading and Rendering already used Tonic spinners. Projection checkmark spacing, toggles, tree states and pending spinners were retained. Three Visualizer unit suites passed 29 tests; light/dark toggle, Watch Directory and simulator preview scenarios passed within the 28-case run.
+- [x] **I6 — widget-header audit:** migrated string-based FontAwesomeIcon controls in the fourteen named widget headers to Tonic equivalents or directly imported Font Awesome definitions. Light/dark shell collapse, menu and widget capture scenarios passed within the 28-case run; [workspace and TinyG captures](plans/2026-09-07-tonic-ui-v2/artifacts/browser/icon-migration-20261108/) were reviewed.
 
-Static inventory date: 2026-09-21. The raw-markup scan is limited to `src/app/widgets/**/*.jsx`; re-run it before each slice because source may change. Browser evidence remains deferred to R6.
+The original raw-markup inventory dated from 2026-09-21; each completed slice was rescanned. Browser results are bounded to the scenarios described above and do not imply physical hardware verification.
 
 ## Deferred Tonic UI v3 reference
 
@@ -200,7 +234,6 @@ The original v2 checkpoint deferred v3 APIs until the major components migrated.
 
 ```text
 請從 docs/superpowers/cncjs-next-tonic-ui-v2-handoff.md 接手。
-請以 GPT-6-Sol 當 main conversation；deterministic 或 implementation subagent 使用 GPT-6-Luna extra-high/max。不得 fallback 至 GPT-5.6 models。
 先讀 EXECUTION.md、STATUS.md、00-design.md，核對 git status/HEAD（不要 reset 未知差異）。
 不要自行 push，除非本次另有授權。
 P1–P6、B3、R6、W3、V3、V3-V、V3-GV、V3-DS、V3-DS-F、V3-UI-C 與 RHF 已完成。RHF 計畫在 plans/2026-10-08-react-hook-form/PLAN.md；frontend 80 suites/515 tests、lint 0 errors（13 ESLint/28 Stylint warnings）、guard 0 violations/68 tests 通過。react-final-form/final-form 已移除，不再安排 v7 升級或已完成的 selector 評估。V3-T、FIX-003、FIX-004 的 visual gates 及 V3-DS-F user confirmation 仍待確認；RHF browser evidence 僅為 fixture-backed component surfaces，不代表新的 authenticated application、CI、hardware 或 R6 performance pass。
@@ -208,9 +241,9 @@ G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）�
 不可跨越的邊界：src/server/**、CNCJSController、現有 Socket.IO protocol、Redux reducer/saga/action。被否決的 server operation ID / connectionLifecycleMeta / cancellation event 方案不要重提。
 開始前記 in_progress；結束同步 STATUS、execution-log、plan checkboxes、本檔。
 依實際 evidence 標 completed 或 blocking；保留未完成 diff 與下一個精確步驟。
-主控先固定每個 task 的 contract；若使用 subagent，依實際複雜度使用 GPT-6-Luna extra-high/max，記錄選擇理由。
+主控先固定每個 task 的 contract；若使用 subagent，依實際複雜度選擇角色與 effort，記錄選擇理由。
 再按四個維度核對實際子任務，勿以整個 widget 固定 effort；調整 task 預設需記理由，父 task 的整合 gate 不變。
-架構、ownership、command 語義由 GPT-6-Sol 主控決策；需要第二意見時先暫停 implementation worker。
+架構、ownership、command 語義由主控決策；需要第二意見時先暫停 implementation worker。
 複雜不等於 blocking；只有明確缺少解阻條件、輸入、環境或可行方案時記 blocker。
 主控 review 實際 diff 與驗證證據後才 completed；worker 不改 ledger，不派更多代理。
 一個 task 通過後繼續本階段下一個 eligible task，階段完成或遇停止條件就交接。
@@ -238,7 +271,7 @@ G1 留下的可沿用 pattern：單一 frontend hook owner（useConnection()）�
 - `superpowers:executing-plans`：依單一 task 實作。
 - `superpowers:verification-before-completion`：狀態改 `completed` 前核對證據。
 - `handoff`：session 結束產生 /tmp 便攜交接，引用本檔；長期 state 仍留 repo。
-- `vercel:agent-browser`：需要 browser regression 時才使用（仍受 hard rule 1 的模型限制）。
+- `vercel:agent-browser`：需要 browser regression 時才使用。
 
 ## 不要從本檔推定的事
 

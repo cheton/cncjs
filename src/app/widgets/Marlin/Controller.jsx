@@ -13,6 +13,7 @@ import {
   TabPanels,
   Tabs,
 } from '@tonic-ui/react';
+import { RefreshIcon } from '@tonic-ui/react-icons';
 import React from 'react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
@@ -59,7 +60,7 @@ function Controller({ controllerSettings, controllerState, onClose }) {
                         controller.writeln('$$');
                       }}
                     >
-                      <i className="fa fa-refresh" />
+                      <RefreshIcon aria-hidden="true" size="1em" />
                       {i18n._('Refresh')}
                     </Button>
                   </Box>

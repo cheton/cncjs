@@ -1,3 +1,6 @@
+import { faLongArrowAltDown, faLongArrowAltUp } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AngleDownIcon, AngleLeftIcon, AngleRightIcon, AngleUpIcon } from '@tonic-ui/react-icons';
 import {
   Box,
   Space,
@@ -41,49 +44,49 @@ const keypadInfotip = () => {
         <Box>
           <Box sx={styles.axisDirection}>X+</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-angle-right" style={styles.icon} />
+            <AngleRightIcon aria-hidden="true" size="1em" style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Right')}
         </Box>
         <Box>
           <Box sx={styles.axisDirection}>X-</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-angle-left" style={styles.icon} />
+            <AngleLeftIcon aria-hidden="true" size="1em" style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Left')}
         </Box>
         <Box>
           <Box sx={styles.axisDirection}>Y+</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-angle-up" style={styles.icon} />
+            <AngleUpIcon aria-hidden="true" size="1em" style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Up')}
         </Box>
         <Box>
           <Box sx={styles.axisDirection}>Y-</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-angle-down" style={styles.icon} />
+            <AngleDownIcon aria-hidden="true" size="1em" style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Down')}
         </Box>
         <Box>
           <Box sx={styles.axisDirection}>Z+</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-long-arrow-up" style={styles.icon} />
+            <FontAwesomeIcon aria-hidden="true" icon={faLongArrowAltUp} style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Page Up')}
         </Box>
         <Box>
           <Box sx={styles.axisDirection}>Z-</Box>
           <kbd style={styles.kbd}>
-            <i className="fa fa-long-arrow-down" style={styles.icon} />
+            <FontAwesomeIcon aria-hidden="true" icon={faLongArrowAltDown} style={styles.icon} />
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Page Down')}
         </Box>
         <Box>
@@ -91,7 +94,7 @@ const keypadInfotip = () => {
           <kbd style={styles.kbd}>
             {' ] '}
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Right Square Bracket')}
         </Box>
         <Box>
@@ -99,7 +102,7 @@ const keypadInfotip = () => {
           <kbd style={styles.kbd}>
             {' [ '}
           </kbd>
-          <Space width={8} />
+          <Space width="2x" />
           {i18n._('Left Square Bracket')}
         </Box>
       </Box>

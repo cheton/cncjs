@@ -488,7 +488,7 @@ function Connection() {
 
               return (
                 <Box mb="4x">
-                  <ButtonGroup size="sm" variant="default" width="100%" sx={{ '& > button': { flex: 1, minWidth: 0, px: '2x' } }}>
+                  <ButtonGroup variant="default" width="100%" flexWrap="wrap" sx={{ '& > button': { flex: '1 0 5em', minWidth: 0, px: '2x' } }}>
                     {canSelectGrbl && (
                       <Button
                         disabled={isGrblDisabled}
@@ -553,7 +553,7 @@ function Connection() {
                       onClick={handleChangeByValue(CONNECTION_TYPE_SERIAL)}
                     >
                       <FontAwesomeIcon icon={['fab', 'usb']} fixedWidth />
-                      <Space width={8} />
+                      <Space width="2x" />
                       {i18n._('Serial Port')}
                     </Button>
                     <Button
@@ -562,7 +562,7 @@ function Connection() {
                       onClick={handleChangeByValue(CONNECTION_TYPE_SOCKET)}
                     >
                       <FontAwesomeIcon icon="network-wired" fixedWidth />
-                      <Space width={8} />
+                      <Space width="2x" />
                       {i18n._('Wi-Fi')}
                     </Button>
                   </ButtonGroup>
@@ -582,7 +582,7 @@ function Connection() {
                         {i18n._('Serial port')}
                       </TextLabel>
                       <Flex align="center">
-                        <Box flex="auto">
+                        <Box flex="auto" minWidth={0}>
                           <Controller
                             name="connection.serial.path" control={methods.control} render={({ field: input }) => {
                               const canSelectSerialPort = isDisconnected && !isFetchingSerialPorts;
@@ -615,7 +615,6 @@ function Connection() {
                             }}
                           />
                         </Box>
-                        <Space width={8} />
                         <Button
                           aria-label={i18n._('Refresh')}
                           variant="ghost"
@@ -638,7 +637,7 @@ function Connection() {
                         {i18n._('Baud rate')}
                       </TextLabel>
                       <Flex align="center">
-                        <Box flex="auto">
+                        <Box flex="auto" minWidth={0}>
                           <Controller
                             name="connection.serial.baudRate" control={methods.control} render={({ field: input }) => {
                               const canSelectSerialBaudRate = isDisconnected && !isFetchingSerialBaudRates;
@@ -668,7 +667,6 @@ function Connection() {
                             }}
                           />
                         </Box>
-                        <Space width={8} />
                         <Button
                           aria-label={i18n._('Refresh')}
                           variant="ghost"
@@ -705,7 +703,6 @@ function Connection() {
                                 config.set('connection.serial.pin.dtr', checked ? true : null);
                               }}
                             >
-                              <Space width={8} />
                               {i18n._('Set DTR line status upon opening')}
                             </Checkbox>
                           );
@@ -773,7 +770,6 @@ function Connection() {
                                 config.set('connection.serial.pin.rts', checked ? true : null);
                               }}
                             >
-                              <Space width={8} />
                               {i18n._('Set RTS line status upon opening')}
                             </Checkbox>
                           );
@@ -839,7 +835,6 @@ function Connection() {
                                 config.set('connection.serial.rtscts', checked);
                               }}
                             >
-                              <Space width={8} />
                               {i18n._('Use RTS/CTS flow control')}
                             </Checkbox>
                           );
@@ -959,7 +954,6 @@ function Connection() {
                       config.set('autoReconnect', checked);
                     }}
                   >
-                    <Space width={8} />
                     {i18n._('Connect automatically')}
                   </Checkbox>
                 );
@@ -1066,7 +1060,7 @@ function Connection() {
                     {isConnecting
                       ? <FontAwesomeIcon icon="circle-notch" spin />
                       : <FontAwesomeIcon icon="toggle-off" />}
-                    <Space width={8} />
+                    <Space width="2x" />
                     {i18n._('Open')}
                   </Button>
                 )}
@@ -1082,7 +1076,7 @@ function Connection() {
                     {isDisconnecting
                       ? <FontAwesomeIcon icon="circle-notch" spin />
                       : <FontAwesomeIcon icon="toggle-on" />}
-                    <Space width={8} />
+                    <Space width="2x" />
                     {i18n._('Close')}
                   </Button>
                 )}

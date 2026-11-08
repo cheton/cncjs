@@ -31,10 +31,10 @@ function QuickAccessToolbar() {
   const connection = useConnection();
 
   return (
-    <Box minWidth="0" flex="1" alignSelf="center" overflowX="auto" mx="2x">
-      <Flex role="toolbar" aria-label="Quick access toolbar" gap="2x" width="max-content" py="1x">
+    <Box minWidth="0" flex="1" alignSelf="center" overflowX="auto" ml="2x" mr="4x">
+      <Flex role="toolbar" aria-label="Quick access toolbar" gap="2x" width="max-content" ml="auto" py="1x">
         {commandGroups.map((group, index) => (
-          <ButtonGroup key={index} size="sm" disabled={connection.state !== CONNECTION_STATE_CONNECTED}>
+          <ButtonGroup key={index} size="md" disabled={connection.state !== CONNECTION_STATE_CONNECTED}>
             {group.map(({ command, label, icon, color = 'neutral' }) => (
               <Button
                 key={command}

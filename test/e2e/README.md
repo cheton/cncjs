@@ -4,7 +4,8 @@ Run against the existing `yarn dev` application. The runner does not start, stop
 
 Browser scenarios live in root `test/e2e/scenarios/`; shared fixtures live in `test/e2e/support/`. These flows cross the application, HTTP and Socket.IO boundaries, so they are not split between `src/app` and `src/server`. Existing colocated unit tests remain unchanged. Generated reports and screenshots stay in `output/e2e/`.
 
-Migration verification: `yarn test:e2e all --list` discovers 290 light/dark tests across 17 spec files. Screenshot-enabled layout and isolated Grbl preview/execution smoke passed 4/4, with all 17 widget captures per theme and toolpath screenshots under root `output/e2e/screenshots/`. The earlier 9/10 migration smoke exposed a dark Marlin Socket.IO teardown race, now repaired and verified by the 16/16 bootstrap/controller run below. All 22 E2E modules passed Node syntax checks. The complete E2E tree now passes `eslint test/e2e --ext .mjs --max-warnings 0`; sequential browser interaction loops and the PNG decoder's bitwise operations have documented, scoped exceptions rather than altered test behavior.
+Migration verification: `yarn test:e2e all --list` discovers 298 light/dark tests across 18 spec files, including the Socket.IO/API guard regressions in `socket-safety.spec.mjs`. Screenshot-enabled layout and isolated Grbl preview/execution smoke passed 4/4, with all 17 widget captures per theme and toolpath screenshots under root `output/e2e/screenshots/`. The earlier 9/10 migration smoke exposed a dark Marlin Socket.IO teardown race, now repaired and verified by the 16/16 bootstrap/controller run below. All 22 E2E modules passed Node syntax checks. The complete E2E tree now passes `eslint test/e2e --ext .mjs --max-warnings 0`; sequential browser interaction loops and the PNG decoder's bitwise operations have documented, scoped exceptions rather than altered test behavior.
+Final post-I1–I6 verification: the full 18-spec light/dark E2E run passed 298/298 in 40.6 minutes with one worker and no retries. Reports and screenshots were enabled in the isolated source copy; the 17 per-widget captures and full workspace views were reviewed in both themes. No physical controller or camera pass is claimed.
 
 ```sh
 yarn test:e2e
@@ -28,6 +29,7 @@ yarn test:e2e visualizer
 yarn test:e2e navigation
 yarn test:e2e administration
 yarn test:e2e workspace
+yarn test:e2e safety
 yarn test:e2e all --project=dark
 yarn test:e2e all --grep "simulator:"
 yarn test:e2e all --list
@@ -36,9 +38,10 @@ yarn test:e2e all --list
 | Suite | Coverage |
 | --- | --- |
 | Widgets | Disconnected rendering, local interactions, menus, collapse/fullscreen, fork/remove and mocked Axes Settings save; read-only Marlin/Smoothie/TinyG snapshots and controller tabs. Connected Grbl/G-code flows belong to the Visualizer suite. |
-| Visualizer | Camera views, zoom, camera mode, projection/display options that remain open while toggling, 3D toggle and compact G-code dashboard; real simulator connection, G-code preview/run/pause/resume/stop, work coordinates, watch directory, Grbl reports and overrides |
+| Visualizer | Camera views, zoom, camera mode, projection/display options that remain open while toggling, 3D toggle and compact G-code dashboard; real simulator connection, G-code preview/run/pause/resume/stop, loaded-toolpath renderer metrics and clear-on-unload, work coordinates, watch directory, Grbl reports and overrides |
 | Navigation | Pre-React loading appearance and refresh, saved/system appearance precedence, application menu, language, navigation, About, external entry points; all seven Administration pages; mutation/background fetches versus explicit Refresh table loading |
 | Workspace | Panel toggles, widget managers, collapse/expand, local layout persistence and widget lifecycle; responsive card bounds at 1440, 1280, 1024, 800, and 390px; actual WebGL transparency and themed surface |
+| Safety | Socket.IO polling and WebSocket packet policies, and the G-code upload identity rule, against private HTTP fixtures without a CNCjs backend |
 
 Administration includes Commands, Events, Macros, Machine Profiles, General Settings, User Accounts, and Workspace Settings. Validated entry/cancel paths do not create, update, or delete server records.
 
@@ -131,13 +134,13 @@ All 17 registry widgets have disconnected rendering and responsive layout covera
 | Spindle | Local speed and disabled actions | Spindle/coolant execution |
 | Laser | Local slider/settings, simulator override readout | Fire/test commands |
 | Webcam | Media-source settings without requesting a camera | Real stream, intentionally excluded |
-| Visualizer | Camera/display controls, simulator upload/run, workflow buttons, dashboard; mocked Watch Directory traversal/load/upload | Watch-directory refresh/add/error/change/drag branches, rendered toolpath assertions, execution failure paths |
+| Visualizer | Camera/display controls, simulator upload/run, workflow buttons, dashboard, rendered-toolpath metrics (geometry, pivot, load sample, unload); mocked Watch Directory traversal/load/upload | Watch-directory refresh/add/error/change/drag branches, orbit/pan persistence, alarms and execution failure paths |
 
 ### Remaining coverage gaps
 
 These are unverified behavior, not confirmed product defects. Keep them separate from failing-test records. Passing shared-component checks, mock responses, snapshots or captured commands do not certify these application flows.
 
-- **Visualizer and workflow:** assert rendered toolpath content; exercise orbit/pan/wheel/fit and persisted view state, mid-run transitions, alarms, malformed/large G-code and execution failure paths. Existing simulator pause/resume/stop and override checks do not certify every transition or physical machine behavior.
+- **Visualizer and workflow:** rendered toolpath content is asserted from development renderer metrics after load and cleared after unload; exercise orbit/pan/wheel/fit and persisted view state, mid-run transitions, alarms, malformed/large G-code and execution failure paths. Existing simulator pause/resume/stop and override checks do not certify every transition or physical machine behavior.
 - **Probe, Autolevel and Tool:** execute probing, compensation and tool-change flows; verify imperial units, errors and generated/downloaded results. Current modal safety gates and captured commands prove UI intent only.
 - **Controller and actuation:** real serial inventory/baud failures/reconnect, physical motion, Spindle/coolant and Laser firing remain unverified. Marlin/Smoothie/TinyG snapshots and command captures are not controller execution.
 - **Embedded content and media:** Custom iframe rendering/token/postMessage and real Webcam streams remain unverified. Camera access and physical actuation are intentionally excluded from the current local suite; do not enable them merely to close a coverage gap.
@@ -151,9 +154,9 @@ Focused Marlin screenshot review in both themes found no overlapping controls or
 
 ### Observed full audit
 
-Final stable verification: `E2E_SCREENSHOTS=1 E2E_REPORTS=1 yarn test:e2e all` completed with **290/290 passes in 40.8 minutes**, one worker and no retries. This unified run includes all ten startup cases, controller snapshot cleanup, all 17 widgets and the modal/drawer/menu scenarios in both themes. `eslint test/e2e --ext .mjs --max-warnings 0` also passed. Reports and screenshots are under `output/e2e/`.
+Latest full application verification: the explicit 18-spec light/dark run passed **298/298 tests in 42.2 minutes**, with one worker and no retries. Screenshots and reports were enabled. The 1024px Axes captures in both themes were reviewed and preserved at [axes-20261108](../../docs/superpowers/plans/2026-09-07-tonic-ui-v2/artifacts/browser/axes-20261108/). Tests used isolated local fixtures and the loopback simulator; snapshots and mocked requests do not represent physical controller execution.
 
-Visual review of all 34 per-widget light/dark captures found no obvious overlapping controls, unreadable text, incorrect theme surfaces or error overlays in those captured states. Disconnected controller headers and disabled controls are intentional. Additional toolpath, dashboard, ShuttleXpress and Marlin captures were inspected in both themes: Marlin's heated-bed label remains ellipsized; long Console lines are clipped at the right edge in workspace toolpath captures, and lower panels extend beyond the viewport. These observations remain review limitations, not proof of scroll reachability or measured contrast compliance. The coverage gaps above remain applicable despite the green run.
+The previous 290-test run's visual review of 34 per-widget captures found no obvious overlapping controls, unreadable text, incorrect theme surfaces or error overlays in those captured states. Disconnected controller headers and disabled controls are intentional. Additional toolpath, dashboard, ShuttleXpress and Marlin captures were inspected in both themes: Marlin's heated-bed label remains ellipsized; long Console lines are clipped at the right edge in workspace toolpath captures, and lower panels extend beyond the viewport. These observations remain review limitations, not proof of scroll reachability or measured contrast compliance. The coverage gaps above remain applicable despite the green run.
 
 The preceding post-migration 290-execution light/dark run completed with 286 passes and four failures (42.7 minutes). The two failures per theme were Axes `Home`/`Enter` activation before requestAnimationFrame focus settled, and ShuttleXpress Repeat Rate selection before dropdown focus/Collapse readiness. Tests now assert actual focused menuitems after Home/ArrowDown and wait for the Repeat Rate menu's focus and visible overflow. The original keyboard input, command evidence, 15Hz assertion, no-retry policy and thresholds remain unchanged. The focused four-execution run passed 4/4 before the final unified run above.
 
@@ -167,7 +170,9 @@ The later stable seven-file widget/controller/Visualizer/simulator/layout/Axes/w
 - Automatic connection is disabled. Disconnected scenarios do not open serial ports or request a camera.
 - Simulator scenarios start a fresh instance of the repository's real Grbl simulator on an ephemeral TCP port. They connect only to that instance, close the CNCjs connection, and terminate the instance afterward. They require a local CNCjs backend. No physical controller is used.
 - Controller snapshot scenarios proxy only Socket.IO traffic to an isolated local fixture that publishes Marlin, Smoothie, and TinyG state. They exercise the real application UI without connecting a controller or simulating command success. Grbl execution remains covered by the real simulator.
-- The shared fixture aborts unexpected API writes and fails the scenario. It allows sign-in, simulator G-code loading, and read-only watch-directory POST requests. CRUD success, destructive actions, real camera access, and real hardware operation are deliberately not executed against the existing server.
+- Every scenario installs a fail-closed Socket.IO guard (`support/socket-guard.mjs`). It permits only `getPorts`/`getBaudRates` plus, while a test-owned loopback simulator is explicitly approved, that simulator's `open`/`close`/`command`/`write`/`writeln` traffic with allowlisted command names. Unrecognized packets, other controller identifiers, binary/JSONP frames, and unsupported transports abort and fail the scenario. `support/socket-safety.spec.mjs` covers the polling, WebSocket, and upload policies without a CNCjs backend.
+- The shared API fixture aborts unexpected writes. It permits `POST /api/gcode` only for the simulator's repository-derived controller identity while the simulator fixture is active; non-simulator uploads are blocked unless a scenario mocks them. Watch-directory POSTs remain allowed because they list or read the configured directory; `PUT` writes are blocked.
+- These guards limit what the browser can do, not what the backend may already be doing: opening and closing a connection can trigger configured system events, and approved commands still run on the target controller. Use an isolated local backend with a task-owned configuration and watch directory, and never connect physical hardware. CRUD success and destructive actions are not exercised against a user's server.
 - One worker and no retries prevent simultaneous simulator/controller operations and do not hide flaky failures.
 - Uncaught page exceptions fail a scenario.
 
@@ -185,10 +190,12 @@ E2E_SCREENSHOTS=1 E2E_REPORTS=1 yarn test:e2e
 
 Generated files are under the ignored `output/e2e/` directory:
 
-- `screenshots/light/` and `screenshots/dark/`: scenario screenshots, per-widget captures in `widgets/`, and the loaded Visualizer toolpath. These are review artifacts, not automatically approved pixel baselines.
+- `screenshots/<light|dark>/<case>-<hash>/<run>/`: every capture goes through `support/screenshots.mjs`. Each test run gets its own run directory, so different tests, color modes, and repeated runs never overwrite each other. `manifest.json` lists the shots for that case with the source file and test title path. Shots cover widgets, fullscreen frames, controller cards, bootstrap loading, Axes dialogs, the loaded Visualizer toolpath and dashboard, and a `final-page` capture taken before teardown. These are review artifacts, not automatically approved pixel baselines.
 - `results.json`: machine-readable results for both modes.
 - `results/`: retained failure artifacts when reports are enabled; Playwright names each result directory with its project (`light` or `dark`).
 - `report/`: HTML report, enabled with `E2E_REPORTS=1`. Traces are retained only for failures.
+
+Without `E2E_SCREENSHOTS=1` no screenshots are written. Captures are supplemental: each scenario still asserts behavior, and a capture failure is recorded as an annotation instead of hiding the scenario result.
 
 The layout scenarios assert usable card widths, no widget horizontal overflow, no document-level overflow, reachable panel controls, the applied application theme, and a transparent WebGL clear color over the correct light/dark surface. On narrow screens the workspace scrolls horizontally instead of crushing CNC controls. Screenshots still require visual review; passing geometry assertions do not prove all visual details are correct.
 

@@ -3,6 +3,7 @@
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { test, expect, openWorkspace } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const require = createRequire(import.meta.url);
 const socketIO = require('socket.io');
@@ -69,7 +70,7 @@ test('custom commands menu shows an empty state and HTTP execution failures', as
   await expect(page.getByRole('menuitem', { name: 'Inspect machine', exact: true })).toBeEnabled();
 });
 
-test('custom commands menu tracks task completion before HTTP responses and refreshes changed configuration', async ({ context, page }) => {
+test('custom commands menu tracks task completion before HTTP responses and refreshes changed configuration', async ({ page, socketGuard }, testInfo) => {
   const update = await mockCommands(page);
   const server = createServer();
   const io = socketIO(server, { transports: ['polling'], allowUpgrades: false });
@@ -81,13 +82,7 @@ test('custom commands menu tracks task completion before HTTP responses and refr
   await new Promise(resolve => {
     server.listen(0, '127.0.0.1', resolve);
   });
-  await context.route('**/socket.io/**', async route => {
-    const url = new URL(route.request().url());
-    url.hostname = '127.0.0.1';
-    url.port = String(server.address().port);
-    url.searchParams.delete('token');
-    await route.fulfill({ response: await route.fetch({ url: url.toString() }) });
-  });
+  socketGuard.usePollingProxy(server);
   let pending;
   let requests = 0;
   await page.route('**/api/commands/enabled/run', route => {
@@ -117,6 +112,8 @@ test('custom commands menu tracks task completion before HTTP responses and refr
     await expect(page.getByRole('menuitem', { name: 'Updated command', exact: true })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: 'Inspect machine', exact: true })).toHaveCount(0);
   } finally {
+    await capture(page, testInfo, 'final-page', { fullPage: true });
+    await page.close();
     await new Promise(resolve => {
       io.close(resolve);
     });

@@ -1,5 +1,7 @@
+import { faCodeBranch, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Box, Button, Dropdown, DropdownToggle, Space } from '@tonic-ui/react';
+import { AppIcon, ChevronDownIcon, ChevronUpIcon, CloseIcon, InfoIcon, MenuIcon, MoreIcon } from '@tonic-ui/react-icons';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Widget from '@app/components/Widget';
 import widgetStyles from '@app/components/Widget/index.styl';
@@ -112,16 +114,16 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <FontAwesomeIcon icon="bars" fixedWidth />
+              <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
               <Space width="1x" />
             </Widget.Sortable>
-            {isForkedWidget && <FontAwesomeIcon icon="code-branch" fixedWidth />}
+            {isForkedWidget && <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
             Smoothie
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             {isReady && (
               <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} aria-label="Smoothie controller info" onClick={() => setIsControllerModalOpen(true)}>
-                <i aria-hidden="true" className="fa fa-info" />
+                <InfoIcon aria-hidden="true" size="1em" />
               </Button>
             )}
             {isReady && (
@@ -157,7 +159,7 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                 onChange={(item) => item.action?.()}
                 renderToggle={() => (
                   <DropdownToggle aria-label="Smoothie commands" className={widgetStyles.widgetButton}>
-                    <i aria-hidden="true" className="fa fa-th-large" />
+                    <AppIcon aria-hidden="true" size="1em" />
                   </DropdownToggle>
                 )}
               />
@@ -173,12 +175,12 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                 title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')}
                 onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
               >
-                <FontAwesomeIcon icon={isCollapsed ? 'chevron-down' : 'chevron-up'} fixedWidth />
+                {isCollapsed ? <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" /> : <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
               </Button>
             )}
             {isFullscreen && (
               <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}>
-                <FontAwesomeIcon icon="compress" fixedWidth />
+                <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
               </Button>
             )}
             <Dropdown
@@ -188,7 +190,7 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                   value: 'fullscreen',
                   label: (
                     <>
-                      <FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth />
+                      <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} fixedWidth aria-hidden="true" />
                       <Space width="2x" />
                       {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
                     </>
@@ -199,7 +201,7 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                   value: 'fork',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="code-branch" fixedWidth />
+                      <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
                       <Space width="2x" />
                       {i18n._('Fork Widget')}
                     </>
@@ -209,7 +211,7 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
                   value: 'remove',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="times" fixedWidth />
+                      <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
                       <Space width="2x" />
                       {i18n._('Remove Widget')}
                     </>
@@ -227,7 +229,7 @@ function SmoothieWidget({ onFork, onRemove, onViewChange, sortable, view, widget
               }}
               renderToggle={() => (
                 <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                 </DropdownToggle>
               )}
             />

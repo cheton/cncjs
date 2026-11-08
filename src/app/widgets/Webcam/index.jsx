@@ -1,3 +1,4 @@
+import { faCodeBranch, faCompress, faExpand, faToggleOff, faToggleOn } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Button,
@@ -5,6 +6,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon, MenuIcon, MoreIcon, RefreshIcon, SettingsIcon } from '@tonic-ui/react-icons';
 import React, { useState } from 'react';
 import Widget from '@app/components/Widget';
 import widgetStyles from '@app/components/Widget/index.styl';
@@ -42,10 +44,10 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
       <Widget.Header>
         <Widget.Title>
           <Widget.Sortable className={sortable.handleClassName}>
-            <FontAwesomeIcon icon="bars" fixedWidth />
-            <Space width={4} />
+            <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+            <Space width="1x" />
           </Widget.Sortable>
-          {isForkedWidget && <FontAwesomeIcon icon="code-branch" fixedWidth />}
+          {isForkedWidget && <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
           {i18n._('Webcam')}
         </Widget.Title>
         <Widget.Controls className={sortable.filterClassName}>
@@ -65,7 +67,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
             title={disabled ? i18n._('Enable') : i18n._('Disable')}
             onClick={() => config.set('disabled', !disabled)}
           >
-            <FontAwesomeIcon icon={disabled ? 'toggle-off' : 'toggle-on'} fixedWidth />
+            <FontAwesomeIcon icon={disabled ? faToggleOff : faToggleOn} fixedWidth aria-hidden="true" />
           </Button>
           <Button
             className={widgetStyles.widgetButton}
@@ -97,7 +99,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
               emitter.emit('refresh');
             }}
           >
-            <FontAwesomeIcon icon="sync-alt" fixedWidth />
+            <RefreshIcon aria-hidden="true" size="1em" width="1.25em" />
           </Button>
           <Button
             className={widgetStyles.widgetButton}
@@ -130,7 +132,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
               onViewChange(isCollapsed ? 'normal' : 'collapsed');
             }}
           >
-            <FontAwesomeIcon icon={isCollapsed ? 'chevron-down' : 'chevron-up'} fixedWidth />
+            {isCollapsed ? <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" /> : <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
           </Button>
           {isFullscreen && (
             <Button
@@ -148,7 +150,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
               title={i18n._('Exit Full Screen')}
               onClick={() => onViewChange('normal')}
             >
-              <FontAwesomeIcon icon="compress" fixedWidth />
+              <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
             </Button>
           )}
           <Dropdown
@@ -158,8 +160,8 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
                 value: 'settings',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="cog" fixedWidth />
-                    <Space width={8} />
+                    <SettingsIcon aria-hidden="true" size="1em" width="1.25em" />
+                    <Space width="2x" />
                     {i18n._('Settings')}
                   </>
                 ),
@@ -168,8 +170,8 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
                 value: 'fullscreen',
                 label: (
                   <>
-                    <FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth />
-                    <Space width={8} />
+                    <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} fixedWidth aria-hidden="true" />
+                    <Space width="2x" />
                     {i18n._(isFullscreen ? 'Exit Full Screen' : 'Enter Full Screen')}
                   </>
                 ),
@@ -178,8 +180,8 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
                 value: 'fork',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="code-branch" fixedWidth />
-                    <Space width={8} />
+                    <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
+                    <Space width="2x" />
                     {i18n._('Fork Widget')}
                   </>
                 ),
@@ -188,8 +190,8 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
                 value: 'remove',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="times" fixedWidth />
-                    <Space width={8} />
+                    <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
+                    <Space width="2x" />
                     {i18n._('Remove Widget')}
                   </>
                 ),
@@ -202,7 +204,7 @@ function WebcamWidgetBody({ widgetId, onFork, onRemove, view, onViewChange, sort
                 aria-label="More options"
                 title={i18n._('More')}
               >
-                <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
               </DropdownToggle>
             )}
           />

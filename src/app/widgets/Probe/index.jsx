@@ -1,3 +1,4 @@
+import { faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -6,6 +7,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, MenuIcon, MoreIcon } from '@tonic-ui/react-icons';
 import React from 'react';
 import Widget from '@app/components/Widget';
 import widgetStyles from '@app/components/Widget/index.styl';
@@ -44,11 +46,11 @@ function ProbeWidget({
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <FontAwesomeIcon icon="bars" fixedWidth />
-              <Space width={4} />
+              <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+              <Space width="1x" />
             </Widget.Sortable>
             {isForkedWidget && (
-              <FontAwesomeIcon icon="code-branch" fixedWidth />
+              <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
             )}
             {i18n._('Probe')}
           </Widget.Title>
@@ -84,10 +86,7 @@ function ProbeWidget({
                 onViewChange(isCollapsed ? 'normal' : 'collapsed');
               }}
             >
-              <FontAwesomeIcon
-                icon={isCollapsed ? 'chevron-down' : 'chevron-up'}
-                fixedWidth
-              />
+              {isCollapsed ? <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" /> : <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
             </Button>
             <Dropdown
               style={{ display: 'flex', alignSelf: 'stretch' }}
@@ -112,7 +111,7 @@ function ProbeWidget({
                   aria-label={i18n._('More options')}
                   title={i18n._('More')}
                 >
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                 </DropdownToggle>
               )}
             />

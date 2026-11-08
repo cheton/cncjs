@@ -1,6 +1,7 @@
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { test as base, expect } from '@playwright/test';
+import { installApiGuard } from './api-guard.mjs';
+import { installSocketGuard } from './socket-guard.mjs';
+import { capture } from './screenshots.mjs';
 
 export { expect };
 export const widget = (page, id) => {
@@ -12,6 +13,9 @@ export async function openWorkspace(page) {
   await expect(widget(page, 'connection')).toBeVisible();
   await expect(widget(page, 'visualizer')).toBeVisible();
 }
+
+// Only the simulator fixture may enable an upload for its controller identity.
+// Page-specific mocks retain precedence over this context-level guard.
 
 export const test = base.extend({
   // Playwright requires a destructured first argument even without dependencies.
@@ -45,7 +49,21 @@ export const test = base.extend({
     }
     await use({ enabled: result.enabled, name: result.name, token: result.token });
   }, { scope: 'worker' }],
-  isolatedWorkspace: [async ({ context, page, baseURL, authenticatedSession }, use, testInfo) => {
+  // eslint-disable-next-line no-empty-pattern
+  gcodeUploadPolicy: async ({}, use) => {
+    await use({ ident: null });
+  },
+  socketGuard: async ({ context, page, baseURL }, use) => {
+    const guard = await installSocketGuard(context, baseURL);
+    await use(guard);
+    if (!page.isClosed()) {
+      await page.close();
+    }
+    await context.unrouteAll({ behavior: 'wait' });
+    guard.assertSafe();
+  },
+  // eslint-disable-next-line no-unused-vars
+  isolatedWorkspace: [async ({ context, page, baseURL, authenticatedSession, gcodeUploadPolicy, socketGuard }, use, testInfo) => {
     const mode = testInfo.project.use.colorScheme;
     // Seed each context once. Reloads must preserve the user's local changes.
     await context.addInitScript(({ mode, origin, session }) => {
@@ -73,26 +91,12 @@ export const test = base.extend({
         },
       }));
     }, { mode, origin: new URL(baseURL).origin, session: authenticatedSession });
-    const forbiddenWrites = [];
-    await context.route('**/api/**', route => {
-      const request = route.request();
-      const path = new URL(request.url()).pathname;
-      if (['GET', 'HEAD', 'OPTIONS'].includes(request.method()) ||
-          (request.method() === 'POST' &&
-          ['/api/signin', '/api/gcode', '/api/watch/files', '/api/watch/file'].includes(path))) {
-        return route.continue();
-      }
-      forbiddenWrites.push(`${request.method()} ${path}`);
-      return route.abort('blockedbyclient');
-    });
+    const forbiddenWrites = await installApiGuard(context, baseURL, gcodeUploadPolicy);
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
     await use();
-    if (process.env.E2E_SCREENSHOTS === '1' && !page.isClosed()) {
-      const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${mode}/`, import.meta.url));
-      await mkdir(directory, { recursive: true });
-      const name = testInfo.titlePath.slice(1).join('--').replace(/[^a-z0-9._-]+/gi, '-');
-      await page.screenshot({ path: `${directory}/${name}.png`, fullPage: true });
+    if (!page.isClosed()) {
+      await capture(page, testInfo, 'final-page', { fullPage: true });
     }
     expect(pageErrors, 'Uncaught browser errors').toEqual([]);
     expect(forbiddenWrites, 'Scenarios must not modify server settings or records').toEqual([]);

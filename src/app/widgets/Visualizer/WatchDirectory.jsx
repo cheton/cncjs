@@ -18,6 +18,7 @@ import {
   TreeItemToggle,
   TreeItemToggleIcon,
 } from '@tonic-ui/react';
+import { AddIcon, FileOIcon, FolderOIcon, RefreshIcon, UploadIcon } from '@tonic-ui/react-icons';
 import { format } from 'date-fns';
 import { ensureArray } from 'ensure-type';
 import path from 'path';
@@ -98,7 +99,7 @@ function DirectoryChildren({
     return (
       <Box role="status" px="3x" py="2x">
         <Spinner size="sm" />
-        <Space width={8} />
+        <Space width="2x" />
         {i18n._('Loading...')}
       </Box>
     );
@@ -197,11 +198,8 @@ function WatchDirectoryNode({
             minWidth={0}
             sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           >
-            <i
-              aria-hidden="true"
-              className={isDirectory ? 'fa fa-folder-o' : 'fa fa-file-o'}
-            />
-            <Space width={8} />
+            {isDirectory ? <FolderOIcon aria-hidden="true" size="1em" /> : <FileOIcon aria-hidden="true" size="1em" />}
+            <Space width="2x" />
             {node.name}
           </Box>
           <Box
@@ -471,8 +469,8 @@ function WatchDirectory({ state = {}, actions = {} }) {
                 }
               }}
             >
-              <i aria-hidden="true" className="fa fa-plus" />
-              <Space width={4} />
+              <AddIcon aria-hidden="true" size="1em" />
+              <Space width="1x" />
               {i18n._('Add')}
             </Button>
             {uploading && <Spinner size="sm" ml="2x" />}
@@ -482,7 +480,7 @@ function WatchDirectory({ state = {}, actions = {} }) {
               marginLeft="auto"
               onClick={() => rootQuery.refetch()}
             >
-              {rootQuery.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <i aria-hidden="true" className="fa fa-refresh" />}
+              {rootQuery.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <RefreshIcon aria-hidden="true" size="1em" />}
             </Button>
           </Flex>
           <Box
@@ -511,7 +509,7 @@ function WatchDirectory({ state = {}, actions = {} }) {
                 style={{ height: 240 }}
               >
                 <Spinner />
-                <Space width={8} />
+                <Space width="2x" />
                 {i18n._('Loading...')}
               </Flex>
             )}
@@ -561,8 +559,8 @@ function WatchDirectory({ state = {}, actions = {} }) {
             )}
             {dragging && (
               <Box className={watchDirectoryStyles.dropzoneHint}>
-                <i aria-hidden="true" className="fa fa-upload" />
-                <Space width={8} />
+                <UploadIcon aria-hidden="true" size="1em" />
+                <Space width="2x" />
                 {i18n._('Upload G-code')}
               </Box>
             )}
@@ -570,7 +568,7 @@ function WatchDirectory({ state = {}, actions = {} }) {
               <Box className={watchDirectoryStyles.dropzoneHint}>
                 <Box className={watchDirectoryStyles.progressLabel}>
                   <Spinner size="xs" aria-hidden="true" />
-                  <Space width={8} />
+                  <Space width="2x" />
                   {i18n._('Upload G-code')} {uploadProgress}%
                 </Box>
                 <LinearProgress

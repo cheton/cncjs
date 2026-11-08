@@ -1,8 +1,7 @@
 /* Panel toggles and widget screenshots must settle before the next iteration. */
 /* eslint-disable no-await-in-loop */
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { test, expect, openWorkspace, widget } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const ids = ['connection', 'console', 'custom', 'grbl', 'marlin', 'smoothie', 'tinyg', 'webcam', 'axes', 'gcode', 'macro', 'autolevel', 'probe', 'tool', 'spindle', 'laser', 'visualizer'];
 
@@ -39,6 +38,11 @@ for (const width of [1440, 1280, 1024, 800, 390]) {
     expect(geometry.documentWidth).toBeLessThanOrEqual(geometry.viewport);
     expect(geometry.workflowBottom, 'Workflow controls stay above the coordinate canvas').toBeLessThanOrEqual(geometry.canvasTop);
     expect(Math.abs(geometry.baud.button - geometry.baud.field), 'Baud selector fills its field').toBeLessThanOrEqual(1);
+    const controllerButton = await widget(page, 'connection').getByRole('button', { name: 'Grbl', exact: true }).boundingBox();
+    const axisButton = await widget(page, 'axes').getByRole('button', { name: 'Move X forward', exact: true }).boundingBox();
+    expect(controllerButton.height, 'Controller selection remains easy to hit').toBeGreaterThanOrEqual(32);
+    expect(axisButton.height, 'Axis action target height').toBeGreaterThanOrEqual(32);
+    expect(axisButton.width, 'Axis action target width').toBeGreaterThanOrEqual(24);
     for (const border of geometry.axisBorders) {
       expect(border, 'Axes table cell divider').toBeGreaterThanOrEqual(1);
     }
@@ -92,17 +96,11 @@ test('layout: rendered WebGL canvas inherits the selected surface, not an opaque
 
 test('layout: every widget has a mode-separated review screenshot', async ({ page }, testInfo) => {
   await openWorkspace(page);
-  const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/widgets/`, import.meta.url));
-  if (process.env.E2E_SCREENSHOTS === '1') {
-    await mkdir(directory, { recursive: true });
-  }
   for (const id of ids) {
     const card = widget(page, id);
     await card.scrollIntoViewIfNeeded();
     const bounds = await card.boundingBox();
     expect(bounds.width, `${id}: usable widget width`).toBeGreaterThanOrEqual(294);
-    if (process.env.E2E_SCREENSHOTS === '1') {
-      await card.screenshot({ path: `${directory}/${id}.png` });
-    }
+    await capture(card, testInfo, id);
   }
 });

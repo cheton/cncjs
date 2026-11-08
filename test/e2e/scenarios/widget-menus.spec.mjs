@@ -4,6 +4,7 @@ import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { test as base, expect, widget } from '../support/simulator.mjs';
 import { openWorkspace } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const require = createRequire(import.meta.url);
 const socketIO = require('socket.io');
@@ -178,7 +179,7 @@ const openPortListbox = async portInput => {
  * a real connection unless a scenario asks for one.
  */
 const test = base.extend({
-  serialEndpoints: async ({ page, context, baseURL }, use) => {
+  serialEndpoints: async ({ page, context, baseURL, socketGuard }, use, testInfo) => {
     if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(baseURL).hostname)) {
       throw new Error('Widget menu scenarios require a local CNCjs application.');
     }
@@ -213,15 +214,7 @@ const test = base.extend({
     await new Promise(resolve => {
       server.listen(0, '127.0.0.1', resolve);
     });
-    const proxy = async route => {
-      const url = new URL(route.request().url());
-      url.hostname = '127.0.0.1';
-      url.port = String(server.address().port);
-      url.searchParams.delete('token');
-      const response = await route.fetch({ url: url.toString() });
-      await route.fulfill({ response });
-    };
-    await context.route('**/socket.io/**', proxy);
+    socketGuard.usePollingProxy(server);
 
     try {
       await use({
@@ -254,6 +247,7 @@ const test = base.extend({
         },
       });
     } finally {
+      await capture(page, testInfo, 'final-page', { fullPage: true });
       await page.close();
       await context.unrouteAll({ behavior: 'wait' });
       await new Promise(resolve => {

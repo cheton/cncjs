@@ -1,3 +1,6 @@
+import { faCircleArrowDown, faCircleArrowUp } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AddIcon, MinusIcon } from '@tonic-ui/react-icons';
 import {
   Box,
   Button,
@@ -105,7 +108,7 @@ function Keypad() {
 
   return (
     <Box className={styles.keypad}>
-      <Flex gap="1x" alignItems="stretch">
+      <Flex className={styles.keypadControls} gap="1x" alignItems="stretch">
         <Box flex="8 1 0%" minWidth={0}>
           <Box className={styles.rowSpace}>
             <Flex gap="1x">
@@ -122,7 +125,12 @@ function Keypad() {
                     disabled={!canClickXY}
                     title={i18n._('Move X- Y+')}
                   >
-                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
+                    <FontAwesomeIcon
+                      aria-hidden="true"
+                      icon={faCircleArrowUp}
+                      className={styles['rotate--45deg']}
+                      style={{ fontSize: 16 }}
+                    />
                   </Button>
                 </Box>
               </Box>
@@ -160,7 +168,12 @@ function Keypad() {
                     disabled={!canClickXY}
                     title={i18n._('Move X+ Y+')}
                   >
-                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-up', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
+                    <FontAwesomeIcon
+                      aria-hidden="true"
+                      icon={faCircleArrowUp}
+                      className={styles['rotate-45deg']}
+                      style={{ fontSize: 16 }}
+                    />
                   </Button>
                 </Box>
               </Box>
@@ -278,7 +291,12 @@ function Keypad() {
                     disabled={!canClickXY}
                     title={i18n._('Move X- Y-')}
                   >
-                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate-45deg'])} style={{ fontSize: 16 }} />
+                    <FontAwesomeIcon
+                      aria-hidden="true"
+                      icon={faCircleArrowDown}
+                      className={styles['rotate-45deg']}
+                      style={{ fontSize: 16 }}
+                    />
                   </Button>
                 </Box>
               </Box>
@@ -316,7 +334,12 @@ function Keypad() {
                     disabled={!canClickXY}
                     title={i18n._('Move X+ Y-')}
                   >
-                    <i aria-hidden="true" className={cx('fa', 'fa-arrow-circle-down', styles['rotate--45deg'])} style={{ fontSize: 16 }} />
+                    <FontAwesomeIcon
+                      aria-hidden="true"
+                      icon={faCircleArrowDown}
+                      className={styles['rotate--45deg']}
+                      style={{ fontSize: 16 }}
+                    />
                   </Button>
                 </Box>
               </Box>
@@ -347,6 +370,7 @@ function Keypad() {
         <Box flex="4 1 0%" minWidth={0}>
           <Box className={styles.rowSpace}>
             <Dropdown
+              portalled
               items={unitItems}
               value={unitItems.find(item => item.value === units) || null}
               slotProps={{ root: { style: { width: '100%' } } }}
@@ -382,6 +406,7 @@ function Keypad() {
           <Box className={styles.rowSpace}>
             {units === IMPERIAL_UNITS && (
               <Dropdown
+                portalled
                 items={imperialStepItems}
                 value={imperialStepItems[jog.imperial.step] || null}
                 slotProps={{
@@ -391,7 +416,7 @@ function Keypad() {
                 renderItem={(item) => (
                   <>
                     {item?.step}
-                    <Space width={4} />
+                    <Space width="1x" />
                     <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('in')}</Box>
                   </>
                 )}
@@ -425,6 +450,7 @@ function Keypad() {
             )}
             {units === METRIC_UNITS && (
               <Dropdown
+                portalled
                 items={metricStepItems}
                 value={metricStepItems[jog.metric.step] || null}
                 slotProps={{
@@ -434,7 +460,7 @@ function Keypad() {
                 renderItem={(item) => (
                   <>
                     {item?.step}
-                    <Space width={4} />
+                    <Space width="1x" />
                     <Box as="sub" sx={{ display: 'inline', fontSize: '80%', lineHeight: 0 }}>{i18n._('mm')}</Box>
                   </>
                 )}
@@ -476,7 +502,7 @@ function Keypad() {
                   width="100%"
                   onClick={onStepBackward}
                 >
-                  <i aria-hidden="true" className="fa fa-minus" />
+                  <MinusIcon aria-hidden="true" size="1em" />
                 </RepeatableButton>
               </Box>
               <Box flex="1 1 0%">
@@ -486,7 +512,7 @@ function Keypad() {
                   width="100%"
                   onClick={onStepForward}
                 >
-                  <i aria-hidden="true" className="fa fa-plus" />
+                  <AddIcon aria-hidden="true" size="1em" />
                 </RepeatableButton>
               </Box>
             </Flex>

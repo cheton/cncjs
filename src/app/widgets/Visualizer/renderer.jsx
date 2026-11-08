@@ -2,6 +2,7 @@ import {
   Space,
   Spinner,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronRightIcon, FileOIcon, FolderOIcon, FolderOpenOIcon } from '@tonic-ui/react-icons';
 import path from 'path';
 import cx from 'classnames';
 import { format } from 'date-fns';
@@ -74,17 +75,11 @@ function TreeNodeToggler({ show, expanded }) {
         styles.treeToggler
       )}
     >
-      <i
-        className={cx(
-          'fa',
-          'fa-fw',
-          { 'fa-chevron-down': expanded },
-          { 'fa-chevron-right': !expanded }
-        )}
-        style={{
-          opacity: expanded ? 1 : 0.5
-        }}
-      />
+      {expanded ? (
+        <ChevronDownIcon aria-hidden="true" size="1em" style={{ opacity: 1 }} />
+      ) : (
+        <ChevronRightIcon aria-hidden="true" size="1em" style={{ opacity: 0.5 }} />
+      )}
     </span>
   );
 }
@@ -157,15 +152,10 @@ const renderer = (node, treeOptions) => {
             show={more || loadOnDemand}
             expanded={more && open}
           />
-          <i
-            className={cx(
-              'fa',
-              { 'fa-folder-open-o': more && open },
-              { 'fa-folder-o': more && !open },
-              { 'fa-file-o': !more }
-            )}
-          />
-          <Space width={8} />
+          {more && open && <FolderOpenOIcon aria-hidden="true" size="1em" />}
+          {more && !open && <FolderOIcon aria-hidden="true" size="1em" />}
+          {!more && <FileOIcon aria-hidden="true" size="1em" />}
+          <Space width="2x" />
           {node.name}
           <TreeNodeLoader show={loading} />
         </div>

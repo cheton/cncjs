@@ -204,7 +204,7 @@ function Probe({ isActionable, units, wcs }) {
                 <FormControl>
                   <Box alignItems="center" display="flex" mb="2x">
                     <TextLabel>{i18n._('Probe Command: {{probeCommand}}', { probeCommand: input.value })}</TextLabel>
-                    <Space width={8} />
+                    <Space width="2x" />
                     <Tooltip label={mapProbeCommandToDescription(input.value)} shouldWrapChildren>
                       <Box
                         as="span"

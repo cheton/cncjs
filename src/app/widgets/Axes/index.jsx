@@ -1,5 +1,7 @@
+import { faCodeBranch, faCompress, faExpand, faKeyboard } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button, Dropdown, DropdownToggle, Space } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon, MenuIcon, MoreIcon, SettingsIcon } from '@tonic-ui/react-icons';
 import cx from 'classnames';
 import { ensureArray } from 'ensure-type';
 import get from 'lodash/get';
@@ -445,10 +447,10 @@ export function AxesWidgetContent({
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <FontAwesomeIcon icon="bars" fixedWidth />
-              <Space width={4} />
+              <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+              <Space width="1x" />
             </Widget.Sortable>
-            {isForkedWidget && <FontAwesomeIcon icon="code-branch" fixedWidth />}
+            {isForkedWidget && <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
             {i18n._('Axes')}
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
@@ -458,7 +460,7 @@ export function AxesWidgetContent({
                 aria-label="Toggle keypad jogging" title={i18n._('Keypad jogging')} onClick={onToggleKeypadJogging}
                 aria-pressed={displayState.jog.keypad} disabled={!displayState.canClick}
               >
-                <FontAwesomeIcon icon="keyboard" fixedWidth />
+                <FontAwesomeIcon icon={faKeyboard} fixedWidth aria-hidden="true" />
               </Button>
             </KeypadOverlay>
             <Button
@@ -466,7 +468,7 @@ export function AxesWidgetContent({
               aria-label="Toggle manual data input mode" title={i18n._('Manual Data Input')} onClick={onToggleMDIMode}
               aria-pressed={!displayState.mdi.disabled}
             >
-              <Space width={8} />{i18n._('MDI')}<Space width={8} />
+              <Space width="2x" />{i18n._('MDI')}<Space width="2x" />
             </Button>
             <Button
               variant="ghost"
@@ -475,34 +477,34 @@ export function AxesWidgetContent({
               aria-label={isCollapsed ? 'Expand' : 'Collapse'} aria-expanded={!isCollapsed} disabled={isFullscreen}
               title={isCollapsed ? i18n._('Expand') : i18n._('Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
             >
-              {isCollapsed && <FontAwesomeIcon icon="chevron-down" fixedWidth />}
-              {!isCollapsed && <FontAwesomeIcon icon="chevron-up" fixedWidth />}
+              {isCollapsed && <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" />}
+              {!isCollapsed && <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
             </Button>
-            {isFullscreen && <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}><FontAwesomeIcon icon="compress" fixedWidth /></Button>}
+            {isFullscreen && <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} title={i18n._('Exit Full Screen')} onClick={() => onViewChange('normal')}><FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" /></Button>}
             <Dropdown
               style={{ display: 'flex', alignSelf: 'stretch' }}
               items={[
                 {
                   value: 'settings',
-                  label: (<><FontAwesomeIcon icon="cog" fixedWidth /><Space width={8} />{i18n._('Settings')}</>),
+                  label: (<><SettingsIcon aria-hidden="true" size="1em" width="1.25em" /><Space width="2x" />{i18n._('Settings')}</>),
                 },
                 {
                   value: 'fullscreen',
-                  label: (<><FontAwesomeIcon icon={isFullscreen ? 'compress' : 'expand'} fixedWidth /><Space width={8} />{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</>),
+                  label: (<><FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} fixedWidth aria-hidden="true" /><Space width="2x" />{isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}</>),
                 },
                 {
                   value: 'fork',
-                  label: (<><FontAwesomeIcon icon="code-branch" fixedWidth /><Space width={8} />{i18n._('Fork Widget')}</>),
+                  label: (<><FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" /><Space width="2x" />{i18n._('Fork Widget')}</>),
                 },
                 {
                   value: 'remove',
-                  label: (<><FontAwesomeIcon icon="times" fixedWidth /><Space width={8} />{i18n._('Remove Widget')}</>),
+                  label: (<><CloseIcon aria-hidden="true" size="1em" width="1.25em" /><Space width="2x" />{i18n._('Remove Widget')}</>),
                 },
               ]}
               onChange={(item) => onMoreOptionsSelect(item.value)}
               renderToggle={() => (
                 <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                 </DropdownToggle>
               )}
             />

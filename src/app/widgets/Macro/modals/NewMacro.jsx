@@ -135,7 +135,7 @@ function NewMacro({
                     renderToggle={() => (
                       <DropdownButton variant="ghost">
                         <FontAwesomeIcon icon="plus" fixedWidth />
-                        <Space width={8} />
+                        <Space width="2x" />
                         {i18n._('Macro Variables')}
                       </DropdownButton>
                     )}

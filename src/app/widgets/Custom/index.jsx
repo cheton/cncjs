@@ -1,3 +1,4 @@
+import { faCodeBranch, faCompress, faExpand, faToggleOff, faToggleOn } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Button,
@@ -5,6 +6,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon, MenuIcon, MoreIcon, RefreshIcon, SettingsIcon } from '@tonic-ui/react-icons';
 import React, { useState } from 'react';
 import Widget from '@app/components/Widget';
 import widgetStyles from '@app/components/Widget/index.styl';
@@ -52,11 +54,11 @@ function CustomWidgetBody({
       <Widget.Header>
         <Widget.Title title={title}>
           <Widget.Sortable className={sortable.handleClassName}>
-            <FontAwesomeIcon icon="bars" fixedWidth />
-            <Space width={4} />
+            <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+            <Space width="1x" />
           </Widget.Sortable>
           {isForkedWidget && (
-            <FontAwesomeIcon icon="code-branch" fixedWidth />
+            <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
           )}
           {title}
         </Widget.Title>
@@ -78,8 +80,9 @@ function CustomWidgetBody({
             onClick={() => config.set('disabled', !disabled)}
           >
             <FontAwesomeIcon
-              icon={disabled ? 'toggle-off' : 'toggle-on'}
+              icon={disabled ? faToggleOff : faToggleOn}
               fixedWidth
+              aria-hidden="true"
             />
           </Button>
           <Button
@@ -112,7 +115,7 @@ function CustomWidgetBody({
               emitter.emit('refresh', true);
             }}
           >
-            <FontAwesomeIcon icon="redo-alt" fixedWidth />
+            <RefreshIcon aria-hidden="true" size="1em" width="1.25em" />
           </Button>
           <Button
             className={widgetStyles.widgetButton}
@@ -145,10 +148,7 @@ function CustomWidgetBody({
               onViewChange(isCollapsed ? 'normal' : 'collapsed');
             }}
           >
-            <FontAwesomeIcon
-              icon={isCollapsed ? 'chevron-down' : 'chevron-up'}
-              fixedWidth
-            />
+            {isCollapsed ? <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" /> : <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
           </Button>
           {isFullscreen && (
             <Button
@@ -166,7 +166,7 @@ function CustomWidgetBody({
               title={i18n._('Exit Full Screen')}
               onClick={() => onViewChange('normal')}
             >
-              <FontAwesomeIcon icon="compress" fixedWidth />
+              <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
             </Button>
           )}
           <Dropdown
@@ -176,8 +176,8 @@ function CustomWidgetBody({
                 value: 'settings',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="cog" fixedWidth />
-                    <Space width={8} />
+                    <SettingsIcon aria-hidden="true" size="1em" width="1.25em" />
+                    <Space width="2x" />
                     {i18n._('Settings')}
                   </>
                 ),
@@ -187,10 +187,11 @@ function CustomWidgetBody({
                 label: (
                   <>
                     <FontAwesomeIcon
-                      icon={isFullscreen ? 'compress' : 'expand'}
+                      icon={isFullscreen ? faCompress : faExpand}
                       fixedWidth
+                      aria-hidden="true"
                     />
-                    <Space width={8} />
+                    <Space width="2x" />
                     {isFullscreen ? i18n._('Exit Full Screen') : i18n._('Enter Full Screen')}
                   </>
                 ),
@@ -199,8 +200,8 @@ function CustomWidgetBody({
                 value: 'fork',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="code-branch" fixedWidth />
-                    <Space width={8} />
+                    <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
+                    <Space width="2x" />
                     {i18n._('Fork Widget')}
                   </>
                 ),
@@ -209,8 +210,8 @@ function CustomWidgetBody({
                 value: 'remove',
                 label: (
                   <>
-                    <FontAwesomeIcon icon="times" fixedWidth />
-                    <Space width={8} />
+                    <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
+                    <Space width="2x" />
                     {i18n._('Remove Widget')}
                   </>
                 ),
@@ -223,7 +224,7 @@ function CustomWidgetBody({
                 aria-label={i18n._('More options')}
                 title={i18n._('More')}
               >
-                <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
               </DropdownToggle>
             )}
           />

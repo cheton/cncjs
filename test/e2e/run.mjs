@@ -11,6 +11,7 @@ const suites = {
   navigation: ['bootstrap.spec.mjs', 'navigation.spec.mjs', 'commands-menu.spec.mjs', 'table-refresh.spec.mjs', 'app-drawers.spec.mjs', 'app-menus.spec.mjs'],
   administration: ['navigation.spec.mjs', 'table-refresh.spec.mjs', 'app-drawers.spec.mjs', 'app-menus.spec.mjs', '--grep', 'administration (routes|table loading|modal|dropdown:)'],
   workspace: ['workspace.spec.mjs', 'layout.spec.mjs', 'workspace-modals.spec.mjs'],
+  safety: ['socket-safety.spec.mjs'],
 };
 const suite = args[0] && !args[0].startsWith('-') ? args.shift() : 'all';
 if (!Object.hasOwn(suites, suite)) {

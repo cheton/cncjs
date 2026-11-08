@@ -17,6 +17,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useColorMode,
+  useTheme,
 } from '@tonic-ui/react';
 import {
   UPDATE_BOUNDING_BOX,
@@ -58,6 +59,7 @@ import Notifications from './Notifications';
 import Loading from './Loading';
 import Rendering from './Rendering';
 import WatchDirectory from './WatchDirectory';
+import { getVisualizerColors } from './GCodeVisualizer';
 import useVisualizer from './useVisualizer';
 import { isWebGLWarningSuppressed } from './webglWarning';
 import {
@@ -324,6 +326,8 @@ const getIsAgitated = state => {
  */
 function VisualizerWidget({ widgetId }) {
   const [colorMode] = useColorMode();
+  const theme = useTheme();
+  const visualizerColors = useMemo(() => getVisualizerColors(theme), [theme]);
   const config = useMemo(() => new WidgetConfig(widgetId), [widgetId]);
   const [state, setState] = useState(() => getInitialState(config));
   const stateRef = useRef(state);
@@ -350,6 +354,7 @@ function VisualizerWidget({ widgetId }) {
 
   const viewState = {
     colorMode,
+    visualizerColors,
     cameraPosition: state.cameraPosition,
     cameraMode: state.cameraMode,
     isAgitated,

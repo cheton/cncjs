@@ -20,7 +20,7 @@ import CuttingPointer from './CuttingPointer';
 import GridLine from './GridLine';
 import PivotPoint3 from './PivotPoint3';
 import TextSprite from './TextSprite';
-import GCodeVisualizer from './GCodeVisualizer';
+import GCodeVisualizer, { getDefaultVisualizerColors } from './GCodeVisualizer';
 import ProbeVisualization from './ProbeVisualization';
 import {
   beginVisualizerLoad,
@@ -55,10 +55,6 @@ const ORTHOGRAPHIC_FAR = 2000;
 const CAMERA_DISTANCE = 200; // Move the camera out a bit from the origin (0, 0, 0)
 const TRACKBALL_CONTROLS_MIN_DISTANCE = 1;
 const TRACKBALL_CONTROLS_MAX_DISTANCE = 2000;
-const COORDINATE_COLORS = {
-  light: { x: '#ff0000', y: '#008000', z: '#0000ff', grid: '#707070' },
-  dark: { x: '#ff8080', y: '#80d49a', z: '#8badff', grid: '#b0b0b0' },
-};
 
 const DEFAULT_OBJECTS = {
   coordinateSystem: { visible: false },
@@ -95,6 +91,7 @@ const normalizeObjects = objects => ({
 const normalizeViewState = (viewState = {}) => ({
   show: viewState.show !== false,
   colorMode: viewState.colorMode === 'dark' ? 'dark' : 'light',
+  visualizerColors: viewState.visualizerColors || getDefaultVisualizerColors(viewState.colorMode === 'dark' ? 'dark' : 'light'),
   cameraPosition: viewState.cameraPosition,
   projection: viewState.projection || 'perspective',
   cameraMode: viewState.cameraMode || CAMERA_MODE_ROTATE,
@@ -243,6 +240,11 @@ class VisualizerEngine {
         ...previousState.objects,
         ..._get(nextViewState, 'objects', {}),
       },
+      visualizerColors: nextViewState.visualizerColors || (
+        nextViewState.colorMode && nextViewState.colorMode !== previousState.colorMode
+          ? getDefaultVisualizerColors(nextViewState.colorMode === 'dark' ? 'dark' : 'light')
+          : previousState.visualizerColors
+      ),
     });
     this.viewState = state;
     if (process.env.NODE_ENV === 'development') {
@@ -274,6 +276,13 @@ class VisualizerEngine {
 
     if (this.gcodeVisualizer) {
       this.gcodeVisualizer.setFrameIndex(state.sent);
+      if (previousState.sent !== state.sent) {
+        needUpdateScene = true;
+      }
+      if (!_isEqual(previousState.visualizerColors.toolpath, state.visualizerColors.toolpath)) {
+        this.gcodeVisualizer.setColors(state.visualizerColors.toolpath);
+        needUpdateScene = true;
+      }
     }
 
     if (previousState.projection !== state.projection) {
@@ -299,7 +308,8 @@ class VisualizerEngine {
       needUpdateScene = true;
     }
 
-    if (previousState.colorMode !== state.colorMode) {
+    if (previousState.colorMode !== state.colorMode ||
+        !_isEqual(previousState.visualizerColors.coordinate, state.visualizerColors.coordinate)) {
       this.rebuildCoordinateSystems();
       needUpdateScene = true;
     }
@@ -687,7 +697,7 @@ class VisualizerEngine {
     const { minX, maxX, minY, maxY, minZ, maxZ, gridSpacing } = this.getCoordinateBounds(units);
     const labelOffset = gridSpacing * 2;
     const group = new THREE.Group();
-    const colors = COORDINATE_COLORS[this.viewState.colorMode];
+    const colors = this.viewState.visualizerColors.coordinate;
 
     const gridLine = new GridLine(
       minX,
@@ -700,7 +710,7 @@ class VisualizerEngine {
       colors.grid
     );
     _each(gridLine.children, object => {
-      object.material.opacity = this.viewState.colorMode === 'dark' ? 0.22 : 0.15;
+      object.material.opacity = this.viewState.colorMode === 'dark' ? 0.5 : 1;
       object.material.transparent = true;
       object.material.depthWrite = false;
     });
@@ -744,7 +754,7 @@ class VisualizerEngine {
     const textSize = (units === IMPERIAL_UNITS) ? (25.4 / 3) : (10 / 3);
     const textOffset = (units === IMPERIAL_UNITS) ? (25.4 / 5) : (10 / 5);
     const group = new THREE.Group();
-    const colors = COORDINATE_COLORS[this.viewState.colorMode];
+    const colors = this.viewState.visualizerColors.coordinate;
     const opacity = this.viewState.colorMode === 'dark' ? 0.85 : 0.5;
 
     for (let x = minX; x <= maxX; x += gridSpacing) {
@@ -1180,7 +1190,7 @@ class VisualizerEngine {
     this.unload();
 
     beginVisualizerLoad(this, name);
-    this.gcodeVisualizer = new GCodeVisualizer();
+    this.gcodeVisualizer = new GCodeVisualizer(this.viewState.visualizerColors.toolpath);
     let object;
     try {
       object = this.gcodeVisualizer.render(content);
@@ -1189,6 +1199,7 @@ class VisualizerEngine {
       cancelVisualizerLoad(this);
       throw error;
     }
+    this.gcodeVisualizer.setFrameIndex(this.viewState.sent);
     object.name = 'Visualizer';
     this.group.add(object);
     updateVisualizerEngineMetrics(this, { hasGCode: true });

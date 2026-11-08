@@ -1,5 +1,6 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import { PortalManager, ToastManager } from '@tonic-ui/react';
 import { MemoryRouter } from 'react-router-dom';
 import { renderAppUI } from '@app/test/render';
 
@@ -39,6 +40,8 @@ jest.mock('@app/lib/controller', () => ({
   __esModule: true,
   default: {
     connect: jest.fn(),
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
     disconnect: jest.fn(),
   },
 }));
@@ -46,7 +49,7 @@ jest.mock('@app/lib/controller', () => ({
 jest.mock('@app/api/axios', () => ({
   __esModule: true,
   default: {
-    get: jest.fn(() => Promise.resolve({ data: {} })),
+    get: jest.fn(() => Promise.resolve({ data: { records: [] } })),
   },
 }));
 
@@ -125,9 +128,13 @@ const navShowsChildRoutes = (nav) => [...nav.querySelectorAll('*')].some(
 );
 
 const renderMain = () => renderAppUI(
-  <MemoryRouter initialEntries={['/about']}>
-    <MainPage />
-  </MemoryRouter>
+  <ToastManager placement="bottom-right">
+    <PortalManager>
+      <MemoryRouter initialEntries={['/about']}>
+        <MainPage />
+      </MemoryRouter>
+    </PortalManager>
+  </ToastManager>
 );
 
 describe('MainPage responsive navigation layout', () => {

@@ -8,6 +8,7 @@ import {
   LinearProgress,
   Text,
 } from '@tonic-ui/react';
+import { BoltIcon, CloseIcon } from '@tonic-ui/react-icons';
 import { ensureArray, ensurePositiveNumber } from 'ensure-type';
 import get from 'lodash/get';
 import mapValues from 'lodash/mapValues';
@@ -97,7 +98,7 @@ function TinyG({ controllerData }) {
                     controller.command('gcode', '{pwr:n}');
                   }}
                 >
-                  <i aria-hidden="true" className="fa fa-flash" />
+                  <BoltIcon aria-hidden="true" size="1em" />
                   {i18n._('Enable Motors')}
                 </Button>
                 <Button
@@ -106,7 +107,7 @@ function TinyG({ controllerData }) {
                     controller.command('gcode', '{pwr:n}');
                   }}
                 >
-                  <i aria-hidden="true" className="fa fa-remove" />
+                  <CloseIcon aria-hidden="true" size="1em" />
                   {i18n._('Disable Motors')}
                 </Button>
               </Box>

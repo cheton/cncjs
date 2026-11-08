@@ -1,4 +1,5 @@
 import { Button, Dropdown, DropdownToggle, Space, Spinner } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, MenuIcon, MoreIcon, RefreshIcon } from '@tonic-ui/react-icons';
 import classNames from 'classnames';
 import { ensureNumber, ensureString } from 'ensure-type';
 import produce from 'immer';
@@ -238,14 +239,14 @@ function ToolWidget({
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <i aria-hidden="true" className="fa fa-bars" />
-              <Space width={4} />
+              <MenuIcon aria-hidden="true" size="1em" />
+              <Space width="1x" />
             </Widget.Sortable>
             {i18n._('Tool')}
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
             <Button variant="ghost" className={widgetStyles.widgetButton} sx={widgetActionSx} aria-label={i18n._('Refresh tool configuration')} title={i18n._('Refresh')} onClick={refresh}>
-              {query.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <i aria-hidden="true" className="fa fa-refresh" />}
+              {query.isFetching ? <Spinner size="xs" aria-hidden="true" /> : <RefreshIcon aria-hidden="true" size="1em" />}
             </Button>
             <Button
               variant="ghost"
@@ -254,7 +255,7 @@ function ToolWidget({
               aria-label={i18n._(isCollapsed ? 'Expand' : 'Collapse')} aria-expanded={!isCollapsed} disabled={isFullscreen}
               title={i18n._(isCollapsed ? 'Expand' : 'Collapse')} onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
             >
-              <i aria-hidden="true" className={classNames('fa', isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up')} />
+              {isCollapsed ? <ChevronDownIcon aria-hidden="true" size="1em" /> : <ChevronUpIcon aria-hidden="true" size="1em" />}
             </Button>
             <Dropdown
               style={{ display: 'flex', alignSelf: 'stretch' }}
@@ -278,7 +279,7 @@ function ToolWidget({
               }}
               renderToggle={() => (
                 <DropdownToggle aria-label={i18n._('More options')} title={i18n._('More')} className={widgetStyles.widgetButton}>
-                  <i aria-hidden="true" className="fa fa-ellipsis-v" />
+                  <MoreIcon aria-hidden="true" size="1em" />
                 </DropdownToggle>
               )}
             />

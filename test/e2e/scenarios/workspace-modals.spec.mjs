@@ -1,11 +1,12 @@
 import { createServer } from 'node:http';
 import { createRequire } from 'node:module';
 import { test, expect, openWorkspace } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const require = createRequire(import.meta.url);
 const socketIO = require('socket.io');
 
-async function isolatedEvents(context) {
+async function isolatedEvents(socketGuard) {
   const server = createServer();
   const io = socketIO(server, { transports: ['polling'], allowUpgrades: false });
   let client;
@@ -16,13 +17,7 @@ async function isolatedEvents(context) {
   await new Promise(resolve => {
     server.listen(0, '127.0.0.1', resolve);
   });
-  await context.route('**/socket.io/**', async route => {
-    const url = new URL(route.request().url());
-    url.hostname = '127.0.0.1';
-    url.port = String(server.address().port);
-    url.searchParams.delete('token');
-    await route.fulfill({ response: await route.fetch({ url: url.toString() }) });
-  });
+  socketGuard.usePollingProxy(server);
   return {
     client: () => client,
     emit: (...args) => client.emit(...args),
@@ -32,8 +27,8 @@ async function isolatedEvents(context) {
   };
 }
 
-test('workspace runtime modals show feeder pause, error and wait states without dismissing safety prompts on Escape', async ({ context, page }) => {
-  const events = await isolatedEvents(context);
+test('workspace runtime modals show feeder pause, error and wait states without dismissing safety prompts on Escape', async ({ page, socketGuard }, testInfo) => {
+  const events = await isolatedEvents(socketGuard);
   try {
     await openWorkspace(page);
     await expect.poll(() => Boolean(events.client())).toBe(true);
@@ -62,13 +57,14 @@ test('workspace runtime modals show feeder pause, error and wait states without 
     events.emit('feeder:status', { hold: false });
     await expect(dialog).toHaveCount(0);
   } finally {
+    await capture(page, testInfo, 'final-page', { fullPage: true });
     await page.close();
     await events.close();
   }
 });
 
-test('workspace server-disconnected modal requires Reload and reconnects only to the isolated event server', async ({ context, page }) => {
-  const events = await isolatedEvents(context);
+test('workspace server-disconnected modal requires Reload and reconnects only to the isolated event server', async ({ page, socketGuard }, testInfo) => {
+  const events = await isolatedEvents(socketGuard);
   try {
     await openWorkspace(page);
     await expect.poll(() => Boolean(events.client())).toBe(true);
@@ -84,6 +80,7 @@ test('workspace server-disconnected modal requires Reload and reconnects only to
     await expect(dialog).toHaveCount(0);
     await expect(page.locator('[data-widget-id="connection"]')).toBeVisible();
   } finally {
+    await capture(page, testInfo, 'final-page', { fullPage: true });
     await page.close();
     await events.close();
   }

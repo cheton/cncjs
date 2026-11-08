@@ -815,7 +815,7 @@ function AutolevelWidget({
                 content: (
                   <>
                     <FontAwesomeIcon fixedWidth icon={isFullscreen ? faCompress : faExpand} />
-                    <Space width={4} />
+                    <Space width="1x" />
                     {i18n._(isFullscreen ? 'Exit Full Screen' : 'Enter Full Screen')}
                   </>
                 ),
@@ -826,7 +826,7 @@ function AutolevelWidget({
                 content: (
                   <>
                     <FontAwesomeIcon fixedWidth icon={faCodeBranch} />
-                    <Space width={4} />
+                    <Space width="1x" />
                     {i18n._('Fork Widget')}
                   </>
                 ),
@@ -837,7 +837,7 @@ function AutolevelWidget({
                 content: (
                   <>
                     <CloseIcon />
-                    <Space width={4} />
+                    <Space width="1x" />
                     {i18n._('Remove Widget')}
                   </>
                 ),

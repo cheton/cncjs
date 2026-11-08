@@ -1,3 +1,5 @@
+import { faToggleOff, faToggleOn } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
   Button,
@@ -8,7 +10,7 @@ import {
   Flex,
   Space,
 } from '@tonic-ui/react';
-import classNames from 'classnames';
+import { CheckIcon } from '@tonic-ui/react-icons';
 import colornames from 'colornames';
 import _get from 'lodash/get';
 import React, { useEffect, useRef, useState } from 'react';
@@ -212,8 +214,13 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'perspective',
               content: (
                 <>
-                  <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection !== 'orthographic' })} />
-                  <Space width={8} />
+                  <CheckIcon
+                    aria-hidden="true"
+                    size="1em"
+                    width="1.25em"
+                    visibility={state.projection !== 'orthographic' ? 'visible' : 'hidden'}
+                  />
+                  <Space width="2x" />
                   {i18n._('Perspective Projection')}
                 </>
               ),
@@ -223,8 +230,13 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'orthographic',
               content: (
                 <>
-                  <i aria-hidden="true" className={classNames('fa', 'fa-fw', { 'fa-check': state.projection === 'orthographic' })} />
-                  <Space width={8} />
+                  <CheckIcon
+                    aria-hidden="true"
+                    size="1em"
+                    width="1.25em"
+                    visibility={state.projection === 'orthographic' ? 'visible' : 'hidden'}
+                  />
+                  <Space width="2x" />
                   {i18n._('Orthographic Projection')}
                 </>
               ),
@@ -235,8 +247,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'filename',
               content: (
                 <>
-                  <i aria-hidden="true" className={gcode.displayName ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-                  <Space width={8} />
+                  <FontAwesomeIcon aria-hidden="true" fixedWidth icon={gcode.displayName ? faToggleOn : faToggleOff} />
+                  <Space width="2x" />
                   {i18n._('Display G-code Filename')}
                 </>
               ),
@@ -246,8 +258,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'limits',
               content: (
                 <>
-                  <i aria-hidden="true" className={limitsVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-                  <Space width={8} />
+                  <FontAwesomeIcon aria-hidden="true" fixedWidth icon={limitsVisible ? faToggleOn : faToggleOff} />
+                  <Space width="2x" />
                   {limitsVisible ? i18n._('Hide Limits') : i18n._('Show Limits')}
                 </>
               ),
@@ -257,8 +269,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'coordinate-system',
               content: (
                 <>
-                  <i aria-hidden="true" className={coordinateSystemVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-                  <Space width={8} />
+                  <FontAwesomeIcon aria-hidden="true" fixedWidth icon={coordinateSystemVisible ? faToggleOn : faToggleOff} />
+                  <Space width="2x" />
                   {coordinateSystemVisible ? i18n._('Hide Coordinate System') : i18n._('Show Coordinate System')}
                 </>
               ),
@@ -268,8 +280,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'grid-line-numbers',
               content: (
                 <>
-                  <i aria-hidden="true" className={gridLineNumbersVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-                  <Space width={8} />
+                  <FontAwesomeIcon aria-hidden="true" fixedWidth icon={gridLineNumbersVisible ? faToggleOn : faToggleOff} />
+                  <Space width="2x" />
                   {gridLineNumbersVisible ? i18n._('Hide Grid Line Numbers') : i18n._('Show Grid Line Numbers')}
                 </>
               ),
@@ -279,8 +291,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
               value: 'cutting-tool',
               content: (
                 <>
-                  <i aria-hidden="true" className={cuttingToolVisible ? 'fa fa-toggle-on fa-fw' : 'fa fa-toggle-off fa-fw'} />
-                  <Space width={8} />
+                  <FontAwesomeIcon aria-hidden="true" fixedWidth icon={cuttingToolVisible ? faToggleOn : faToggleOff} />
+                  <Space width="2x" />
                   {cuttingToolVisible ? i18n._('Hide Cutting Tool') : i18n._('Show Cutting Tool')}
                 </>
               ),
@@ -300,8 +312,8 @@ function PrimaryToolbar({ state = {}, actions = {} }) {
                 borderTopRightRadius="0"
                 borderBottomRightRadius="0"
               >
-                <i aria-hidden="true" className={webGLAvailable && !disabled ? 'fa fa-toggle-on' : 'fa fa-toggle-off'} />
-                <Space width={8} />
+                <FontAwesomeIcon aria-hidden="true" icon={webGLAvailable && !disabled ? faToggleOn : faToggleOff} />
+                <Space width="2x" />
                 {i18n._('3D View')}
               </Button>
               <InputGroupAppend>

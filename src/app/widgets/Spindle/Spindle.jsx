@@ -81,7 +81,7 @@ function Spindle({
                 disabled={isDisabled}
               >
                 <FontAwesomeIcon icon="fan" spin={mistCoolant} fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M7
               </Button>
               <Button
@@ -92,7 +92,7 @@ function Spindle({
                 disabled={isDisabled}
               >
                 <FontAwesomeIcon icon="fan" spin={floodCoolant} fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M8
               </Button>
               <Button
@@ -103,7 +103,7 @@ function Spindle({
                 disabled={isDisabled}
               >
                 <FontAwesomeIcon icon="power-off" fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M9
               </Button>
             </ButtonGroup>
@@ -126,7 +126,7 @@ function Spindle({
                 title={i18n._('Spindle On, CW (M3)', { ns: 'gcode' })}
               >
                 <FontAwesomeIcon icon="redo-alt" spin={spindle === 'M3'} fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M3
               </Button>
               <Button
@@ -135,7 +135,7 @@ function Spindle({
                 title={i18n._('Spindle On, CCW (M4)', { ns: 'gcode' })}
               >
                 <FontAwesomeIcon icon="undo-alt" spinReverse={spindle === 'M4'} fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M4
               </Button>
               <Button
@@ -144,7 +144,7 @@ function Spindle({
                 disabled={isDisabled}
               >
                 <FontAwesomeIcon icon="power-off" fixedWidth />
-                <Space width={8} />
+                <Space width="2x" />
                 M5
               </Button>
             </ButtonGroup>

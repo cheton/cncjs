@@ -1,7 +1,5 @@
 /* Widget menus, frames and screenshots must settle between iterations. */
 /* eslint-disable no-await-in-loop */
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { inflateSync } from 'node:zlib';
 import {
   test,
@@ -9,6 +7,7 @@ import {
   openWorkspace,
   widget,
 } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const ALL_WIDGET_IDS = [
   'autolevel',
@@ -655,11 +654,7 @@ test.describe('widget registry and shell', () => {
           return { right: Math.round(box.x + box.width), bottom: Math.round(box.y + box.height) };
         }).toEqual({ right: 1024, bottom: 700 });
         await page.setViewportSize(viewport);
-        if (process.env.E2E_SCREENSHOTS === '1') {
-          const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/fullscreen/`, import.meta.url));
-          await mkdir(directory, { recursive: true });
-          await page.screenshot({ path: `${directory}/${id}.png` });
-        }
+        await capture(page, testInfo, `fullscreen-${id}`);
 
         const collapse = region.locator('button[aria-label="Collapse"][title="Collapse"]');
         if (await collapse.count()) {
@@ -905,6 +900,12 @@ test.describe('axes and macro', () => {
         expect(icon.contrast, icon.label).toBeGreaterThan(3);
       }
       for (const button of await table.getByRole('button').all()) {
+        const visible = await button.evaluate(element => {
+          const buttonBounds = element.getBoundingClientRect();
+          const scrollBounds = element.closest('table').parentElement.getBoundingClientRect();
+          return buttonBounds.left >= scrollBounds.left && buttonBounds.right <= scrollBounds.right;
+        });
+        expect(visible, 'Action button is fully visible inside the table viewport').toBe(true);
         await expect(button).toBeDisabled();
       }
     };
@@ -1066,11 +1067,7 @@ test.describe('autolevel and probe', () => {
           expect(paints.areaLuminance).toBeGreaterThan(0.7);
         }
       }
-      if (process.env.E2E_SCREENSHOTS === '1') {
-        const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/`, import.meta.url));
-        await mkdir(directory, { recursive: true });
-        await diagram.screenshot({ path: `${directory}/${name.replaceAll(' ', '-')}.png` });
-      }
+      await capture(diagram, testInfo, name);
     }
   });
 
@@ -1202,6 +1199,19 @@ test.describe('autolevel and probe', () => {
 
 test.describe('tool, spindle and laser', () => {
   test('tool shows policy options and refreshes without changing configuration', async ({ page }) => {
+    await page.route('**/api/tool*', route => route.fulfill({ json: {
+      toolChangePolicy: 0,
+      toolChangeX: 0,
+      toolChangeY: 0,
+      toolChangeZ: 0,
+      toolProbeX: 0,
+      toolProbeY: 0,
+      toolProbeZ: 0,
+      toolProbeCommand: 'G38.2',
+      toolProbeDistance: 1,
+      toolProbeFeedrate: 10,
+      touchPlateHeight: 0,
+    } }));
     await openAllWidgets(page);
     const root = widget(page, 'tool');
 

@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import TrackballControls from '@app/lib/three/TrackballControls';
+import theme from '@app/config/theme';
+import { getVisualizerColors } from '../GCodeVisualizer';
 import { createVisualizerEngine } from '../VisualizerEngine';
 import Visualizer from '../Visualizer';
 import { rectangularFixture } from './fixtures';
@@ -197,12 +199,89 @@ describe('VisualizerEngine', () => {
     expect(darkGrid.position).toMatchObject({ x: -pivot.x, y: -pivot.y, z: -pivot.z });
     expect(dispose).toHaveBeenCalledTimes(1);
     const darkAxisColor = darkGrid.getObjectByName('CoordinateAxes').children[0].material.color;
+    const darkColors = getVisualizerColors(theme.toColorMode('dark'));
+    expect(darkAxisColor).toEqual(new THREE.Color(darkColors.coordinate.x));
+    expect(darkGrid.getObjectByName('GridLine').children[0].geometry.colors[0]).toEqual(new THREE.Color(darkColors.coordinate.grid));
 
     engine.update({ colorMode: 'light' });
 
     const lightGrid = engine.group.getObjectByName('MetricCoordinateSystem');
+    const lightColors = getVisualizerColors(theme.toColorMode('light'));
+    expect(lightGrid.getObjectByName('GridLine').children[0].geometry.colors[0]).toEqual(new THREE.Color(lightColors.coordinate.grid));
     expect(lightGrid.getObjectByName('CoordinateAxes').children[0].material.color).not.toEqual(darkAxisColor);
     expect(engine.group.getObjectByName('Visualizer')).toBe(toolpath);
+    engine.dispose();
+  });
+
+  test('recolors loaded motions and completed progress without reparsing or moving the scene', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { value: 640 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+    const light = getVisualizerColors(theme.toColorMode('light'));
+    const dark = getVisualizerColors(theme.toColorMode('dark'));
+    const engine = createVisualizerEngine({ container, viewState: { ...viewState, visualizerColors: light } });
+    engine.load({
+      name: 'motions.gcode',
+      content: ['G17', 'G0 X0 Y20', 'G1 X10 Y20 F200', 'G2 X20 Y10 I0 J-10', 'G3 X10 Y0 I-10 J0'].join('\n'),
+    });
+    const model = engine.gcodeVisualizer;
+    const object = engine.group.getObjectByName('Visualizer');
+    const workpiece = object.children[0];
+    const geometry = workpiece.geometry;
+    const vertices = geometry.vertices.slice();
+    const frames = model.frames;
+    const pivot = { ...engine.pivotPoint.get() };
+    const cameraPosition = engine.camera.position.clone();
+    const render = jest.spyOn(model, 'render');
+    const motionIndexes = Object.fromEntries(['G0', 'G1', 'G2', 'G3'].map(motion => [motion, model.geometry.colors.indexOf(model.motionColors[motion])]));
+    Object.entries(motionIndexes).forEach(([motion, index]) => {
+      expect(index).toBeGreaterThanOrEqual(0);
+      expect(geometry.colors[index]).toEqual(new THREE.Color(light.toolpath[motion]));
+    });
+
+    engine.update({ sent: 1 });
+    expect(geometry.colors[motionIndexes.G0]).toEqual(new THREE.Color(light.toolpath.completed));
+    mockRenderer.render.mockClear();
+    engine.update({ colorMode: 'dark', visualizerColors: dark });
+
+    expect(mockRenderer.render).toHaveBeenCalled();
+    expect(geometry.colors[motionIndexes.G0]).toEqual(new THREE.Color(dark.toolpath.completed));
+    ['G1', 'G2', 'G3'].forEach(motion => {
+      expect(geometry.colors[motionIndexes[motion]]).toEqual(new THREE.Color(dark.toolpath[motion]));
+    });
+    expect(new Set(['G0', 'G1', 'G2', 'G3'].map(motion => dark.toolpath[motion])).size).toBe(4);
+    expect(engine.group.getObjectByName('Visualizer')).toBe(object);
+    expect(workpiece.geometry).toBe(geometry);
+    expect(geometry.vertices).toEqual(vertices);
+    expect(model.frames).toBe(frames);
+    expect(engine.pivotPoint.get()).toEqual(pivot);
+    expect(engine.camera.position).toEqual(cameraPosition);
+    expect(render).not.toHaveBeenCalled();
+
+    engine.update({ sent: 0 });
+    expect(geometry.colors[motionIndexes.G0]).toEqual(new THREE.Color(dark.toolpath.G0));
+    engine.update({ sent: 1, colorMode: 'light', visualizerColors: light });
+    expect(geometry.colors[motionIndexes.G0]).toEqual(new THREE.Color(light.toolpath.completed));
+    engine.update({ sent: 0 });
+    expect(geometry.colors[motionIndexes.G0]).toEqual(new THREE.Color(light.toolpath.G0));
+    expect(geometry.colors[motionIndexes.G2]).toEqual(new THREE.Color(light.toolpath.G2));
+    engine.dispose();
+  });
+
+  test('applies existing progress when loading a toolpath', () => {
+    const container = document.createElement('div');
+    Object.defineProperty(container, 'clientWidth', { value: 640 });
+    Object.defineProperty(container, 'clientHeight', { value: 480 });
+    const colors = getVisualizerColors(theme.toColorMode('dark'));
+    const engine = createVisualizerEngine({
+      container,
+      viewState: { ...viewState, colorMode: 'dark', visualizerColors: colors, sent: 3 },
+    });
+    engine.load({ name: 'rectangle.gcode', content: rectangularFixture });
+    const workpiece = engine.group.getObjectByName('Visualizer').children[0];
+    expect(workpiece.geometry.colors[0]).toEqual(new THREE.Color(colors.toolpath.completed));
+    engine.update({ sent: 0 });
+    expect(workpiece.geometry.colors[0]).toEqual(new THREE.Color(colors.toolpath.G0));
     engine.dispose();
   });
 

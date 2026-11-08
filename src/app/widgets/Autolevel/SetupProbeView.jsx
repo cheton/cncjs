@@ -8,8 +8,10 @@ import {
   InputGroupAddon,
   InputGroupAppend,
   LinearProgress,
+  Space,
   Text,
 } from '@tonic-ui/react';
+import { ChevronLeftIcon, PlayIcon, StopIcon } from '@tonic-ui/react-icons';
 import React from 'react';
 import i18n from '@app/lib/i18n';
 import { METRIC_UNITS } from '@app/constants';
@@ -126,7 +128,7 @@ function SetupProbeView({
           aria-label={i18n._('Back')} disabled={!canGoBack} onClick={onBack}
           size="sm" variant="ghost"
         >
-          <i aria-hidden="true" className="fa fa-chevron-left" />
+          <ChevronLeftIcon aria-hidden="true" size="1em" />
         </Button>
         {i18n._('PROBE NEW SURFACE')}
       </Box>
@@ -305,11 +307,15 @@ function SetupProbeView({
         )}
         {!isProbing ? (
           <Button disabled={!canClick} onClick={onShowStartProbeConfirmation} variant="primary">
-            <i aria-hidden="true" className="fa fa-play" /> {i18n._('Start Probing')}
+            <PlayIcon aria-hidden="true" size="1em" />
+            <Space width="1x" />
+            {i18n._('Start Probing')}
           </Button>
         ) : (
           <Button onClick={onShowStopProbeConfirmation} variant="danger">
-            <i aria-hidden="true" className="fa fa-stop" /> {i18n._('Stop Probing')}
+            <StopIcon aria-hidden="true" size="1em" />
+            <Space width="1x" />
+            {i18n._('Stop Probing')}
           </Button>
         )}
       </Box>

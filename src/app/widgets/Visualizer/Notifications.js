@@ -115,7 +115,7 @@ function Notifications({
             )}
             <Box>
               {i18n._('Run a tool change macro to change the tool and adjust the Z-axis offset. Afterwards, click the Resume button to resume program execution.')}
-              <Space width={8} />
+              <Space width="2x" />
               <Link
                 target="_blank"
                 href="https://github.com/cncjs/cncjs/wiki/Tool-Change"

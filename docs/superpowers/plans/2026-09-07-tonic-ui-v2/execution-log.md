@@ -2006,3 +2006,100 @@ Final validation on the migration working tree:
 Browser evidence: real component surfaces with query/mutation/config fixtures verified neutral New Command borders on open, validation after failed Add, delayed Edit loading without invalid flashes, pinned GeneralSettings footer/body scrolling, login validation and failure draft retention, probe safety confirmation, Tool keyboard saves, and invalid/valid socket submission. This is not a new authenticated application, simulator/hardware, production/CI, or full R6 performance pass. V3-T, FIX-003, FIX-004, and V3-DS-F visual/user-confirmation gaps remain unchanged. Browser tabs are closed; the task-owned smoke server is stopped.
 
 Delivery: user explicitly requested “commit and push” and “update handoffs as well”. Include RHF source/tests/dependencies/rules, its completed plan, CHANGELOG, STATUS, this log, and the handoff entry in one commit on `feat/tonic-ui-v2-migration`; push to `origin/feat/tonic-ui-v2-migration`. Resolve the resulting commit and remote state from Git rather than this pre-commit record. This authorization does not carry into a later session.
+
+### 2026-11-08 — pending visual checks
+
+User requested the pending visual checks and directed future handoffs to use the default OMP role without assigning a model. Start HEAD: `ca0bb7d592fa9d2946394e05b98f846dd8aa5921`; 17 locale files were already modified and were preserved. The normal `yarn dev` build deletes `output/*` and runs i18next scanners, so the application was built and served from an isolated copy with the repository browser-test configuration copied into that copy. Browser: Playwright bundled Chromium; local anonymous configuration, no credential-authenticated session.
+
+- `yarn test:e2e all --project=light --grep 'mini-navigation administration hover|serial port and baud rate dropdowns|layout: 1440px|layout: every widget'`: exit 0, 4 passed. Connection selector inventory was fixture-backed; no port opened.
+- `yarn test:e2e all handoff-visual.spec.mjs --project=light`: exit 0, 1 passed. At 1439×900 the MiniNav measured 72px, the Administration hover menu opened, and both scroll regions moved. Browser geometry measured an 8px gap beside both Connection selectors and Axes header column widths of 30/120/120/30px. Screenshots were reviewed for the light theme, Connection, Axes, and settled flyout.
+- [Evidence](artifacts/browser/visual-20261108/): 1439px workspace and flyout screenshots, Connection and Axes captures, and the focused script. To rerun the script, copy it into `test/e2e/scenarios/` in an isolated checkout and use the command above against the isolated development server.
+- Limits: user visual confirmation remains outstanding; V3-T, FIX-003 and FIX-004 remain in progress and V3-DS-F's user confirmation remains pending. No credential-authenticated app, physical hardware, dark-theme, performance or full R6 rerun is claimed. No application source was changed. The task-owned browser and server were stopped; ports 8000/8080 and `/tmp/ttyGRBL` were clear. The isolated temporary copy is retained.
+
+### 2026-11-08 — Connection spacing follow-up
+
+The user found the 8px gaps too large. Removed both explicit spacers from `Connection.jsx`, allowing the selectors to extend closer to the refresh icons without shrinking the buttons. The [new capture](artifacts/browser/visual-20261108/connection-after.png) was reviewed; the earlier `connection.png` is the before state.
+
+`yarn test:frontend src/app/widgets/Connection/__tests__/Connection.test.jsx --runInBand --silent` passed 11 tests (Jest reported an existing output/package naming collision). In the isolated working copy, two light Playwright scenarios passed: widget screenshots and Connection selector/refresh interactions with fixture-backed serial inventory. No port was opened. The isolated server was stopped; ports 8000/8080 and `/tmp/ttyGRBL` were clear. FIX-003 remains in progress pending user visual confirmation.
+
+### 2026-11-08 — checkbox and spacing token audit
+
+Installed Tonic Checkbox supplies `ml="2x"` to its label. All checkbox call sites were reviewed; only the four Connection checkboxes added another 8px spacer. Those spacers were removed. The browser measured the remaining checkbox-to-label gap at 8px in light and dark mode, and the flow-control label toggled its checkbox. [Connection capture](artifacts/browser/visual-20261108/connection-checkboxes.png).
+
+The user directed use of spacing tokens: replaced 76 `Space width={8}` instances with `2x` and 19 `Space width={4}` instances with `1x`. No numeric Space width/height instances remain in `src`.
+
+Five focused frontend suites passed 66 tests on the final source. Four browser cases passed in light/dark mode (1440px workspace and Connection checkbox gap/label interaction). A full frontend run begun before the final 4px conversions failed two `MainPage.test.jsx` cases because `CommandsMenu` called `useToastManager` outside `ToastManager`; 79 suites passed, 1 failed. This unrelated provider failure was not changed. The isolated server was stopped; no physical device was opened.
+
+### 2026-11-08 — header, Visualizer theme, and accessibility
+
+User requested a taller header first, theme-aware loaded paths and semantic-token dark hierarchy next, then an accessibility-focused Connection/Axes density review without imitating the PR's smaller controls. Header controller buttons use Tonic `md` (32px). Dark widget headers use `background.highest`; light headers retain `background.high`.
+
+Visualizer colors resolve from installed Tonic semantic chart, status and border tokens. Existing color objects are updated in place, preserving loaded geometry, progress and camera without reparsing or per-vertex motion metadata. Connection controller buttons are 32px and wrap as needed; Axes action targets are at least 24×32px with scrollable narrow layouts and portalled menus.
+
+Verification: six focused frontend suites / 108 tests passed; ESLint exited 0 with 31 warnings. Bundled Chromium against an isolated local development copy: 12 theme/layout/Connection/menu cases, six Axes interaction cases, and four additional target-size/layout cases passed in light and dark. Loaded G-code theme switching used an ephemeral Grbl simulator; no physical controller was used. [Captured workspace and same-scene toolpath](artifacts/browser/theme-20261108/) require user visual review. The isolated server was stopped; ports 8000/8080 and `/tmp/ttyGRBL` were clear.
+
+One browser command was accidentally started from the main workspace and cancelled. Playwright may have cleared the pre-existing generated `output/e2e/results/` contents; the existing report, results JSON, and screenshots remain. No full fresh frontend suite is claimed; the previous full run's two `MainPage`/`ToastManager` failures remain recorded above.
+
+### 2026-11-08 — accepted visuals, I1, and responsive header
+
+The user accepted the presented visual captures. V3-T and FIX-003 are complete on the recorded anonymous browser evidence; FIX-004 retains its previously recorded authenticated visual gate. MainPage's test fixture now supplies the production ToastManager/PortalManager context and suitable isolated controller/query mocks. `yarn test:frontend --runInBand --silent` passed 80 suites / 530 tests.
+
+I1 replaced the raw icons in the three Autolevel child views with Tonic icons while retaining accessible labels and actions. Two light/dark Autolevel browser scenarios passed, including safety confirmation via an isolated mock controller; no physical probing was performed.
+
+At the user's request the quick-access toolbar aligns right with a `4x` margin before adjacent actions. It stays a single scrollable row when narrow: at widths 800px and 390px the measured toolbar viewport was 399px and 173px for 616px content. Existing browser interaction checks verify each button remains reachable at 1440px, 800px, and 390px in both themes; [header captures](artifacts/browser/header-20261108/) show both ends. Scoped ESLint exited 0 with three existing toolbar warnings. An isolated app server was used.
+
+### 2026-11-08 — full-app E2E safety, coverage, and screenshot contract
+
+The user approved the ordered E2E plan (safety, functional coverage, screenshots, layered verification) recorded in the [handoff](../../cncjs-next-tonic-ui-v2-handoff.md).
+
+Safety: `support/socket-guard.mjs` is a context-wide, fail-closed Socket.IO 2 / Engine.IO 3 guard. It permits `getPorts`/`getBaudRates` and, only while a test-owned loopback simulator is explicitly approved, that simulator's `open`/`close`/`command`/`write`/`writeln` packets with allowlisted command names. Other identifiers, unknown events, binary/JSONP frames, and unsupported transports abort and fail the scenario. Existing polling fixtures now hand their listening server to `usePollingProxy` instead of installing their own Socket.IO routes, which Playwright precedence could otherwise bypass. `support/api-guard.mjs` allows `POST /api/gcode` only for the simulator's repository-derived controller identity while that fixture is active; watch-directory reads remain allowed and `PUT` writes stay blocked. `GrblServer.start(host)` adds a supported loopback bind, and the simulator fixture uses `127.0.0.1`.
+
+Coverage: `scenarios/socket-safety.spec.mjs` covers polling blocking, WebSocket blocking, and the G-code upload policy against private HTTP servers. The simulator preview scenario now asserts rendered toolpath state from development renderer metrics (`hasGCode`, geometry count, pivot at the 5/2.5 mm bbox centre, load-sample fixture name) and that unload clears the toolpath without a new load sample; simulator command evidence matches the logged `CMD: <line> ->` / `E2E RT:` forms instead of loose substrings.
+
+Screenshots: `support/screenshots.mjs` is the single capture path. Each test writes to `output/e2e/screenshots/<mode>/<case>-<hash>/<run>/` with a `manifest.json`, so tests, themes, and repeated runs never overwrite each other; without `E2E_SCREENSHOTS=1` nothing is written. The previously ungated Axes writes now go through it, and fixtures that close their page capture `final-page` first.
+
+Verification (isolated local backend on a task-owned configuration, no physical controller or camera): `eslint test/e2e --ext .mjs --max-warnings 0` exits 0. Layered runs against the same server, one suite at a time: `safety` 6/6, `visualizer` 30/30, `workspace` 30/30, `navigation` 114/114 — 180 light/dark executions, all passing. Capture contract checks: repeated runs of the same case created three distinct run directories with their own `manifest.json`, and a run without `E2E_SCREENSHOTS=1` wrote no screenshots at all. `yarn test:e2e all --list` reports 298 tests across 18 spec files.
+
+One timeout appeared while two Playwright runs shared the backend simultaneously (`axes: header menu executes every Grbl work, temporary and machine action`, 58.2s against the 45s test timeout). The same scenario passed in 11.6s when run alone; its jog/offset assertions depend on `gcode` packets the guard explicitly allows, so the guard is not the cause. Re-running the same three specs sequentially gave 28/28 passing light/dark executions (that scenario: 13.0s). Remaining `widget-menus`, `widget-modals`, and `widgets` specs are recorded below.
+
+### 2026-11-08 — compact Axes table and Tool fixture
+
+In a 269px Axes panel, the position table's 280px minimum caused horizontal scrolling and partially obscured four action buttons. Reduced the minimum to 240px, retaining horizontal scrolling for narrower panels. The Tool policy scenario now supplies a read-only mocked configuration instead of depending on an anonymous server response.
+
+The Axes padding, action-button viewport visibility, and Tool policy/refresh scenarios passed in both light and dark modes (4 executions) against an isolated local development server. The full `widgets.spec.mjs` file passed 44/44 executions. The explicit 18-spec light/dark E2E run passed 298/298 in 42.2 minutes, one worker, no retries. I reviewed the 1024px Axes captures in both themes: the position table, keypad buttons, and widget header fit the visible panel; captures are preserved at [axes-20261108](artifacts/browser/axes-20261108/). The Tool configuration was mocked; controller snapshots and captured commands are not physical execution. No credential-authenticated visual pass is claimed. Scoped E2E ESLint passed. The task-owned isolated server was stopped; ports 8000/8080 have no listeners and `/tmp/ttyGRBL` is absent. The earlier standalone widget-suite attempt was cancelled; the complete run supersedes it.
+
+### 2026-11-08 — I2 Axes icon migration, in progress
+
+Replaced raw icon-font markup in Axes keypad, keyboard help, and position input with Tonic equivalents where available. The four diagonal jog controls retain direct Font Awesome circle-arrow definitions and their existing rotations; keyboard help uses directly imported long arrows. DisplayPanel already had no raw icon markup; its string-based FontAwesomeIcon calls belong to the I6 audit.
+
+Verification: Axes unit tests 23/23, including four diagonal jog-sign assertions; changed-file ESLint passed. Eight isolated light/dark browser cases passed for keypad unit/step selections and Axes layout/positions. Reviewed [light and dark captures](artifacts/browser/axes-icons-20261108/). Controller emissions were fixture-backed; no physical motion or credential-authenticated browser pass was performed. The required pre-change RED icon contract was not recorded, so I2 remains in progress. The task-owned server was stopped.
+
+### 2026-11-08 — FIX-004 authenticated visual gate
+
+Created a task-scoped local configuration with an enabled test account; no real controller or camera was used. Confirmed authentication was enabled: invalid credentials received HTTP 401 and valid credentials returned the expected signed-in identity. The authenticated fixture seeded the session in isolated browser contexts.
+
+The Axes padding/fullscreen/visibility scenario and widget screenshot scenario passed in light and dark (4 executions). Reviewed [authenticated Axes widget captures](artifacts/browser/axes-auth-20261108/): position headings, header controls and keypad grid render in both themes. Axes controls were disabled because no controller was connected. User had already accepted the earlier visual captures; FIX-004 is completed on this bounded evidence.
+
+### 2026-11-08 — I2 pre-change evidence waiver
+
+The user explicitly requested verification of the changed behavior only, with no pre-change comparison. The I2 pre-change RED gate is waived, not passed; there is no claim of a test-first run or baseline result. The existing post-change evidence remains Axes 23/23 unit tests, eight isolated light/dark browser cases and targeted ESLint; physical-controller execution is outside this evidence. If the waiver is revoked, reconstruct the earlier markup and run a consumer-visible icon regression against both versions, recognizing that this cannot restore the original test-first timing.
+
+### 2026-11-08 — I3 Tool widget icons
+
+Replaced six raw icon-font uses in the Tool widget with Tonic icons or a directly imported Font Awesome copy icon. Refresh continues to display the existing Spinner during a pending query. A delayed-response unit test verifies the refresh progress indicator appears and clears.
+
+Verification: Tool unit tests 14/14; changed-file ESLint zero errors and one existing header formatting warning. Eight light/dark Tool configuration, custom-editor and preview cases plus four light/dark shell collapse/menu cases passed against isolated fixtures. Reviewed [Tool captures](artifacts/browser/tool-icons-20261108/). Fixture-backed controller events do not prove physical machine or tool-change execution.
+
+### 2026-11-08 — I4–I6 implementation verification
+
+Migrated controller raw icons, Visualizer icon-font controls, and the fourteen named widget headers to Tonic icons or directly imported Font Awesome definitions. Existing loading spinners, controller command handlers, tree states, toggle states and widget controls were retained. The full frontend suite passed 80 suites / 532 tests; changed-file ESLint reported zero errors and nine existing formatting warnings. The isolated development bundle compiled with warnings.
+
+The first controller browser run passed four cases and failed ten at workspace setup after a separate process began listening on `127.0.0.1:8000`, overlapping the wildcard-bound isolated server. A second run on port 18000 failed all 28 cases because another process was also bound to that loopback port; the failure screenshot showed a different application. Neither run is passing evidence. A new isolated backend was started on a checked loopback port; a CNCjs workspace smoke passed there before integrated verification.
+
+After moving the isolated backend to an unoccupied loopback port and verifying its workspace identity, the integrated browser selection passed 28/28 in light and dark. This included controller snapshots and menu actions, Grbl simulator commands and preview, Visualizer projection/toggles, Watch Directory mocks, widget collapse/menu behavior, and per-widget captures. Reviewed [workspace and TinyG captures](artifacts/browser/icon-migration-20261108/). Snapshots, mocked writes and captured events do not prove physical hardware behavior. The earlier 298-case run predates I3–I6; the final post-I1–I6 rerun is recorded below.
+
+### 2026-11-08 — final post-I1–I6 full-app E2E verification
+
+The final 18-spec light/dark Playwright run used an isolated source copy and exited 0: 298 passed, zero skipped, unexpected, or flaky tests; one worker, no retries; 40.6 minutes. Reports and screenshots were enabled. The report, `results.json`, and `screenshots/{light,dark}/` are in `/tmp/cncjs-final-e2e.CqoaUK/output/e2e/`.
+
+I reviewed all 17 widget captures and full workspace captures in both themes, plus the loaded Visualizer toolpath captures. The default widget and toolpath views show no visible layout regression. The camera-icon test's final capture includes multiple tooltip labels after its hover/focus sequence; this is limited to that post-interaction capture. The suite used isolated fixtures and the loopback simulator; no physical controller, camera, or newly authenticated application pass is claimed.

@@ -6,6 +6,7 @@ import {
   openWorkspace,
   widget,
 } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const require = createRequire(import.meta.url);
 const socketIO = require('socket.io');
@@ -63,7 +64,7 @@ const setChecked = async (checkbox, checked) => {
  * touching a controller, the file system, or the application server.
  */
 const test = base.extend({
-  mockController: async ({ page, context, baseURL }, use) => {
+  mockController: async ({ page, context, baseURL, socketGuard }, use, testInfo) => {
     if (!['localhost', '127.0.0.1', '[::1]'].includes(new URL(baseURL).hostname)) {
       throw new Error('Widget modal scenarios require a local CNCjs application.');
     }
@@ -153,15 +154,7 @@ const test = base.extend({
     await new Promise(resolve => {
       server.listen(0, '127.0.0.1', resolve);
     });
-    const proxy = async route => {
-      const url = new URL(route.request().url());
-      url.hostname = '127.0.0.1';
-      url.port = String(server.address().port);
-      url.searchParams.delete('token');
-      const response = await route.fetch({ url: url.toString() });
-      await route.fulfill({ response });
-    };
-    await context.route('**/socket.io/**', proxy);
+    socketGuard.usePollingProxy(server);
     try {
       await use({
         commands,
@@ -215,6 +208,7 @@ const test = base.extend({
         },
       });
     } finally {
+      await capture(page, testInfo, 'final-page', { fullPage: true });
       await page.close();
       await context.unrouteAll({ behavior: 'wait' });
       await new Promise(resolve => {

@@ -1,3 +1,4 @@
+import { faCodeBranch, faCompress, faCopy, faEraser, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Button,
@@ -5,6 +6,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon, DeleteIcon, MenuIcon, MoreIcon, RefreshIcon } from '@tonic-ui/react-icons';
 import cx from 'classnames';
 import React from 'react';
 import Widget from '@app/components/Widget';
@@ -33,11 +35,11 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
             <Widget.Header>
               <Widget.Title>
                 <Widget.Sortable className={sortable.handleClassName}>
-                  <FontAwesomeIcon icon="bars" fixedWidth />
-                  <Space width={4} />
+                  <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+                  <Space width="1x" />
                 </Widget.Sortable>
                 {isForkedWidget &&
-                <FontAwesomeIcon icon="code-branch" fixedWidth />}
+                <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
                 {i18n._('Console')}
               </Widget.Title>
               <Widget.Controls className={sortable.filterClassName}>
@@ -57,7 +59,7 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                   title={i18n._('Clear all')}
                   onClick={() => emitter.emit('terminal:clear')}
                 >
-                  <FontAwesomeIcon icon="trash-alt" fixedWidth />
+                  <DeleteIcon aria-hidden="true" size="1em" width="1.25em" />
                 </Button>
                 <Button
                   className={widgetStyles.widgetButton}
@@ -91,9 +93,9 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                   }}
                 >
                   {isCollapsed &&
-                  <FontAwesomeIcon icon="chevron-down" fixedWidth />}
+                  <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" />}
                   {!isCollapsed &&
-                  <FontAwesomeIcon icon="chevron-up" fixedWidth />}
+                  <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
                 </Button>
                 <Button
                   className={widgetStyles.widgetButton}
@@ -112,9 +114,9 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                   onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
                 >
                   {isFullscreen &&
-                  <FontAwesomeIcon icon="compress" fixedWidth />}
+                  <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />}
                   {!isFullscreen &&
-                  <FontAwesomeIcon icon="expand" fixedWidth />}
+                  <FontAwesomeIcon icon={faExpand} fixedWidth aria-hidden="true" />}
                 </Button>
                 <Dropdown
                   style={{ display: 'flex', alignSelf: 'stretch' }}
@@ -123,8 +125,8 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       value: 'refresh',
                       label: (
                         <>
-                          <FontAwesomeIcon icon="undo-alt" fixedWidth />
-                          <Space width={8} />
+                          <RefreshIcon aria-hidden="true" size="1em" width="1.25em" />
+                          <Space width="2x" />
                           {i18n._('Refresh')}
                         </>
                       ),
@@ -134,12 +136,13 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       label: (
                         <>
                           <i
+                            aria-hidden="true"
                             className={cx(
                               styles.icon,
                               styles.selectAll
                             )}
                           />
-                          <Space width={8} />
+                          <Space width="2x" />
                           {i18n._('Select All')}
                         </>
                       ),
@@ -148,8 +151,8 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       value: 'copySelection',
                       label: (
                         <>
-                          <FontAwesomeIcon icon="copy" fixedWidth />
-                          <Space width={8} />
+                          <FontAwesomeIcon icon={faCopy} fixedWidth aria-hidden="true" />
+                          <Space width="2x" />
                           {i18n._('Copy Selection')}
                         </>
                       ),
@@ -158,8 +161,8 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       value: 'clearSelection',
                       label: (
                         <>
-                          <FontAwesomeIcon icon="eraser" fixedWidth />
-                          <Space width={8} />
+                          <FontAwesomeIcon icon={faEraser} fixedWidth aria-hidden="true" />
+                          <Space width="2x" />
                           {i18n._('Clear Selection')}
                         </>
                       ),
@@ -169,12 +172,12 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       label: (
                         <>
                           {!isFullscreen && (
-                            <FontAwesomeIcon icon="expand" fixedWidth />
+                            <FontAwesomeIcon icon={faExpand} fixedWidth aria-hidden="true" />
                           )}
                           {isFullscreen && (
-                            <FontAwesomeIcon icon="compress" fixedWidth />
+                            <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
                           )}
-                          <Space width={8} />
+                          <Space width="2x" />
                           {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
                         </>
                       ),
@@ -183,8 +186,8 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       value: 'fork',
                       label: (
                         <>
-                          <FontAwesomeIcon icon="code-branch" fixedWidth />
-                          <Space width={8} />
+                          <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
+                          <Space width="2x" />
                           {i18n._('Fork Widget')}
                         </>
                       ),
@@ -193,8 +196,8 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       value: 'remove',
                       label: (
                         <>
-                          <FontAwesomeIcon icon="times" fixedWidth />
-                          <Space width={8} />
+                          <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
+                          <Space width="2x" />
                           {i18n._('Remove Widget')}
                         </>
                       ),
@@ -225,7 +228,7 @@ function ConsoleWidget({ widgetId, view, onViewChange, onFork, onRemove, sortabl
                       aria-label="More options"
                       title={i18n._('More')}
                     >
-                      <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                      <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                     </DropdownToggle>
                   )}
                 />

@@ -1,3 +1,4 @@
+import { faCodeBranch, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -6,6 +7,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { AppIcon, ChevronDownIcon, ChevronUpIcon, CloseIcon, InfoIcon, MenuIcon, MoreIcon } from '@tonic-ui/react-icons';
 import _get from 'lodash/get';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
@@ -70,11 +72,11 @@ function GrblWidget({
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <FontAwesomeIcon icon="bars" fixedWidth />
+              <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
               <Space width="1x" />
             </Widget.Sortable>
             {isForkedWidget &&
-            <FontAwesomeIcon icon="code-branch" fixedWidth />}
+            <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
             Grbl
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
@@ -88,7 +90,7 @@ function GrblWidget({
                   setIsControllerModalOpen(true);
                 }}
               >
-                <i className="fa fa-info" />
+                <InfoIcon aria-hidden="true" size="1em" />
               </Button>
             )}
             {isReady && (
@@ -144,7 +146,7 @@ function GrblWidget({
                 onChange={(item) => item.action?.()}
                 renderToggle={() => (
                   <DropdownToggle aria-label="Grbl commands" className={widgetStyles.widgetButton}>
-                    <i className="fa fa-th-large" />
+                    <AppIcon aria-hidden="true" size="1em" />
                   </DropdownToggle>
                 )}
               />
@@ -161,9 +163,9 @@ function GrblWidget({
                 onClick={() => onViewChange(isCollapsed ? 'normal' : 'collapsed')}
               >
                 {isCollapsed &&
-                <FontAwesomeIcon icon="chevron-down" fixedWidth />}
+                <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" />}
                 {!isCollapsed &&
-                <FontAwesomeIcon icon="chevron-up" fixedWidth />}
+                <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
               </Button>
             )}
             {isFullscreen && (
@@ -174,7 +176,7 @@ function GrblWidget({
                 title={i18n._('Exit Full Screen')}
                 onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
               >
-                <FontAwesomeIcon icon="compress" fixedWidth />
+                <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
               </Button>
             )}
             <Dropdown
@@ -185,10 +187,10 @@ function GrblWidget({
                   label: (
                     <>
                       {!isFullscreen && (
-                        <FontAwesomeIcon icon="expand" fixedWidth />
+                        <FontAwesomeIcon icon={faExpand} fixedWidth aria-hidden="true" />
                       )}
                       {isFullscreen && (
-                        <FontAwesomeIcon icon="compress" fixedWidth />
+                        <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
                       )}
                       <Space width="2x" />
                       {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
@@ -200,7 +202,7 @@ function GrblWidget({
                   value: 'fork',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="code-branch" fixedWidth />
+                      <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
                       <Space width="2x" />
                       {i18n._('Fork Widget')}
                     </>
@@ -210,7 +212,7 @@ function GrblWidget({
                   value: 'remove',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="times" fixedWidth />
+                      <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
                       <Space width="2x" />
                       {i18n._('Remove Widget')}
                     </>
@@ -228,7 +230,7 @@ function GrblWidget({
               }}
               renderToggle={() => (
                 <DropdownToggle aria-label="More options" title={i18n._('More')} className={widgetStyles.widgetButton}>
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                 </DropdownToggle>
               )}
             />

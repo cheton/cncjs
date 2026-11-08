@@ -99,11 +99,24 @@ test.describe('application header and account menu', () => {
     for (const width of [1440, 800, 390]) {
       await page.setViewportSize({ width, height: 823 });
       const header = await page.locator('header').boundingBox();
+      if (width === 1440) {
+        const bounds = await toolbar.evaluate(element => ({
+          toolbar: element.getBoundingClientRect().toJSON(),
+          container: element.parentElement.getBoundingClientRect().toJSON(),
+        }));
+        const commands = await page.getByRole('button', { name: 'Commands', exact: true }).boundingBox();
+        expect(Math.abs(bounds.toolbar.right - bounds.container.right)).toBeLessThanOrEqual(1);
+        expect(commands.x - bounds.toolbar.right).toBeGreaterThanOrEqual(16);
+      }
       for (const name of ['Cycle Start', 'Feedhold', 'Homing', 'Sleep', 'Unlock', 'Reset']) {
         const button = toolbar.getByRole('button', { name, exact: true });
         await expect(button).toBeDisabled();
         await button.scrollIntoViewIfNeeded();
         const box = await button.boundingBox();
+        const scroller = await toolbar.evaluate(element => element.parentElement.getBoundingClientRect().toJSON());
+        expect(box.x).toBeGreaterThanOrEqual(scroller.left - 1);
+        expect(box.x + box.width).toBeLessThanOrEqual(scroller.right + 1);
+        expect(box.height).toBeGreaterThanOrEqual(32);
         expect(box.x).toBeGreaterThanOrEqual(0);
         expect(box.x + box.width).toBeLessThanOrEqual(width);
         expect(Math.abs(box.y + box.height / 2 - header.y - header.height / 2)).toBeLessThanOrEqual(1);

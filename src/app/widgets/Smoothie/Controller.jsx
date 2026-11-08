@@ -13,6 +13,7 @@ import {
   TabPanels,
   Tabs,
 } from '@tonic-ui/react';
+import { RefreshIcon } from '@tonic-ui/react-icons';
 import React from 'react';
 import controller from '@app/lib/controller';
 import i18n from '@app/lib/i18n';
@@ -53,7 +54,7 @@ function Controller({ controllerSettings = {}, controllerState = {}, onClose }) 
                 <Box sx={previewSx}>
                   <Box sx={{ position: 'absolute', right: 10, top: 10 }}>
                     <Button size="xs" onClick={() => controller.writeln('$#')}>
-                      <i aria-hidden="true" className="fa fa-refresh" />
+                      <RefreshIcon aria-hidden="true" size="1em" />
                       {i18n._('Refresh')}
                     </Button>
                   </Box>

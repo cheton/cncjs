@@ -396,6 +396,49 @@ describe('Axes keypad', () => {
     }
   });
 
+  test('sends the correct X and Y signs for each diagonal jog', () => {
+    const onJog = jest.fn();
+    const view = renderAppUI(
+      <AxesProvider value={{
+        state: {
+          canClick: true,
+          units: 'mm',
+          axes: ['x', 'y', 'z'],
+          jog: {
+            axis: '',
+            keypad: false,
+            imperial: { step: 0, distances: [] },
+            metric: { step: 0, distances: [] },
+          },
+        },
+        onGetJogDistance: () => 0.25,
+        onJog,
+        onMove: jest.fn(),
+        onSelectStep: jest.fn(),
+        onStepBackward: jest.fn(),
+        onStepForward: jest.fn(),
+      }}
+      >
+        <Keypad />
+      </AxesProvider>
+    );
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Move X negative Y positive' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move X positive Y positive' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move X negative Y negative' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move X positive Y negative' }));
+      expect(onJog.mock.calls).toEqual([
+        [{ X: -0.25, Y: 0.25 }],
+        [{ X: 0.25, Y: 0.25 }],
+        [{ X: -0.25, Y: -0.25 }],
+        [{ X: 0.25, Y: -0.25 }],
+      ]);
+    } finally {
+      view.dispose();
+    }
+  });
+
   test('selects a metric step through the native menu', () => {
     const onSelectStep = jest.fn();
     const view = renderAppUI(

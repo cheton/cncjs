@@ -27,6 +27,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 1000 },
     locale: 'en-US',
     reducedMotion: 'reduce',
+    serviceWorkers: 'block',
     trace: reports && !authenticated ? 'retain-on-failure' : 'off',
     screenshot: 'only-on-failure',
     video: 'off',

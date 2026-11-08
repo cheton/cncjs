@@ -328,7 +328,7 @@ function SecondaryToolbar({
                   content: (
                     <>
                       <CameraIcon src={iconMoveCamera} />
-                      <Space width={4} />
+                      <Space width="1x" />
                       {i18n._('Move the camera')}
                     </>
                   ),
@@ -339,7 +339,7 @@ function SecondaryToolbar({
                   content: (
                     <>
                       <CameraIcon src={iconRotateCamera} />
-                      <Space width={4} />
+                      <Space width="1x" />
                       {i18n._('Rotate the camera')}
                     </>
                   ),

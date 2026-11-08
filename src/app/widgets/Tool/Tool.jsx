@@ -1,3 +1,6 @@
+import { faCopy } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { EditIcon } from '@tonic-ui/react-icons';
 import {
   Box, Button, ButtonGroup, FormControl, FormInput, FormLabel, FormTextarea,
   InputGroup, InputGroupAddon, InputGroupAppend, InputGroupPrepend,
@@ -338,7 +341,7 @@ function Tool({
                         setCustomCommands(ensureString(value.toolProbeCustomCommands)); setEditable(true);
                       }} size="sm"
                       variant="ghost"
-                    ><i aria-hidden="true" className="fa fa-fw fa-edit" />
+                    ><EditIcon aria-hidden="true" size="1em" />
                     </Button>
                   )}
                 </Box>
@@ -474,7 +477,7 @@ function Tool({
                           size="sm"
                           variant="ghost"
                         >
-                          <i aria-hidden="true" className="fa fa-copy" />
+                          <FontAwesomeIcon aria-hidden="true" icon={faCopy} />
                         </Button>
                       </Tooltip>
                     )}

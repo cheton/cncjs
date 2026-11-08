@@ -543,7 +543,7 @@ const Workspace = ({
                         size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
-                        <Space width={8} />
+                        <Space width="2x" />
                         <Box className={styles.panelActionLabel} minWidth="0" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                           {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         </Box>
@@ -669,7 +669,7 @@ const Workspace = ({
                         size="sm"
                       >
                         <FontAwesomeIcon aria-hidden="true" icon="list-alt" />
-                        <Space width={8} />
+                        <Space width="2x" />
                         <Box className={styles.panelActionLabel} minWidth="0" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                           {i18n._('Manage Widgets ({{inactiveCount}})', { inactiveCount })}
                         </Box>

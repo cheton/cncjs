@@ -7,8 +7,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Space,
   Text,
 } from '@tonic-ui/react';
+import { StopIcon } from '@tonic-ui/react-icons';
 import React, { useRef, useState } from 'react';
 import i18n from '@app/lib/i18n';
 
@@ -45,7 +47,9 @@ function StopProbeModal({ onCancel = () => {}, onConfirm = () => {} }) {
         <ModalFooter>
           <Button onClick={onCancel} variant="secondary">{i18n._('Continue Probing')}</Button>
           <Button disabled={isSubmitting} onClick={submit} variant="primary">
-            <i aria-hidden="true" className="fa fa-stop" /> {i18n._('Stop Probing')}
+            <StopIcon aria-hidden="true" size="1em" />
+            <Space width="1x" />
+            {i18n._('Stop Probing')}
           </Button>
         </ModalFooter>
       </ModalContent>

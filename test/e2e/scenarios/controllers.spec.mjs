@@ -1,8 +1,7 @@
 /* Controller panels must settle sequentially before the next panel is inspected. */
 /* eslint-disable no-await-in-loop */
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { test, expect, widget } from '../support/controller-snapshot.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const snapshots = [
   {
@@ -118,10 +117,6 @@ for (const snapshot of snapshots) {
     await assertPanelSpacing();
     await expect(dialog.getByRole('tabpanel')).toContainText(Object.keys(snapshot.settings)[0]);
     await dialog.getByRole('button', { name: 'Close', exact: true }).first().click();
-    if (process.env.E2E_SCREENSHOTS === '1') {
-      const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/controllers/`, import.meta.url));
-      await mkdir(directory, { recursive: true });
-      await card.screenshot({ path: `${directory}/${snapshot.id}.png` });
-    }
+    await capture(card, testInfo, snapshot.id);
   });
 }

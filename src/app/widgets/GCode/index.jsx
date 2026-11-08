@@ -1,3 +1,4 @@
+import { faCodeBranch, faCompress, faExpand } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -6,6 +7,7 @@ import {
   DropdownToggle,
   Space,
 } from '@tonic-ui/react';
+import { ChevronDownIcon, ChevronUpIcon, CloseIcon, MenuIcon, MoreIcon } from '@tonic-ui/react-icons';
 import PropTypes from 'prop-types';
 import React from 'react';
 import Widget from '@app/components/Widget';
@@ -32,11 +34,11 @@ function GCodeWidget({
         <Widget.Header>
           <Widget.Title>
             <Widget.Sortable className={sortable.handleClassName}>
-              <FontAwesomeIcon icon="bars" fixedWidth />
-              <Space width={4} />
+              <MenuIcon aria-hidden="true" size="1em" width="1.25em" />
+              <Space width="1x" />
             </Widget.Sortable>
             {isForkedWidget &&
-              <FontAwesomeIcon icon="code-branch" fixedWidth />}
+              <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />}
             {i18n._('G-code')}
           </Widget.Title>
           <Widget.Controls className={sortable.filterClassName}>
@@ -72,9 +74,9 @@ function GCodeWidget({
               }}
             >
               {isCollapsed &&
-                <FontAwesomeIcon icon="chevron-down" fixedWidth />}
+                <ChevronDownIcon aria-hidden="true" size="1em" width="1.25em" />}
               {!isCollapsed &&
-                <FontAwesomeIcon icon="chevron-up" fixedWidth />}
+                <ChevronUpIcon aria-hidden="true" size="1em" width="1.25em" />}
             </Button>
             {isFullscreen && (
               <Button
@@ -92,7 +94,7 @@ function GCodeWidget({
                 title={i18n._('Exit Full Screen')}
                 onClick={() => onViewChange(isFullscreen ? 'normal' : 'fullscreen')}
               >
-                <FontAwesomeIcon icon="compress" fixedWidth />
+                <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
               </Button>
             )}
             <Dropdown
@@ -103,12 +105,12 @@ function GCodeWidget({
                   label: (
                     <>
                       {!isFullscreen && (
-                        <FontAwesomeIcon icon="expand" fixedWidth />
+                        <FontAwesomeIcon icon={faExpand} fixedWidth aria-hidden="true" />
                       )}
                       {isFullscreen && (
-                        <FontAwesomeIcon icon="compress" fixedWidth />
+                        <FontAwesomeIcon icon={faCompress} fixedWidth aria-hidden="true" />
                       )}
-                      <Space width={8} />
+                      <Space width="2x" />
                       {!isFullscreen ? i18n._('Enter Full Screen') : i18n._('Exit Full Screen')}
                     </>
                   ),
@@ -117,8 +119,8 @@ function GCodeWidget({
                   value: 'fork',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="code-branch" fixedWidth />
-                      <Space width={8} />
+                      <FontAwesomeIcon icon={faCodeBranch} fixedWidth aria-hidden="true" />
+                      <Space width="2x" />
                       {i18n._('Fork Widget')}
                     </>
                   ),
@@ -127,8 +129,8 @@ function GCodeWidget({
                   value: 'remove',
                   label: (
                     <>
-                      <FontAwesomeIcon icon="times" fixedWidth />
-                      <Space width={8} />
+                      <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
+                      <Space width="2x" />
                       {i18n._('Remove Widget')}
                     </>
                   ),
@@ -149,7 +151,7 @@ function GCodeWidget({
                   aria-label={i18n._('More options')}
                   title={i18n._('More')}
                 >
-                  <FontAwesomeIcon icon="ellipsis-v" fixedWidth />
+                  <MoreIcon aria-hidden="true" size="1em" width="1.25em" />
                 </DropdownToggle>
               )}
             />

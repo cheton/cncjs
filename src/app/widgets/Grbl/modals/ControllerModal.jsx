@@ -14,6 +14,7 @@ import {
   TabPanels,
   Tabs,
 } from '@tonic-ui/react';
+import { RefreshIcon } from '@tonic-ui/react-icons';
 import React from 'react';
 import { connect } from 'react-redux';
 import controller from '@app/lib/controller';
@@ -63,7 +64,7 @@ function ControllerModal({
                         controller.writeln('$$'); // Settings
                       }}
                     >
-                      <i className="fa fa-refresh" />
+                      <RefreshIcon aria-hidden="true" size="1em" />
                       {i18n._('Refresh')}
                     </Button>
                   </Box>

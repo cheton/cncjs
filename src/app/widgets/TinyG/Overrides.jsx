@@ -1,3 +1,4 @@
+import { faBatteryFull, faBatteryHalf, faBatteryQuarter } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   Box,
@@ -19,9 +20,9 @@ const overrideSteps = [
 ];
 
 const trajectorySteps = [
-  { className: 'fa-battery-full', value: 100 },
-  { className: 'fa-battery-half', value: 50 },
-  { className: 'fa-battery-quarter', value: 25 },
+  { icon: faBatteryFull, value: 100 },
+  { icon: faBatteryHalf, value: 50 },
+  { icon: faBatteryQuarter, value: 25 },
 ];
 
 const buttonGroupSx = {
@@ -60,14 +61,14 @@ function Overrides({ ovF = 0, ovS = 0, ovT = 0 }) {
       {!!ovT && (
         <DigitalReadout label="T" value={`${ovT}%`}>
           <ButtonGroup size="sm" minWidth="0" sx={buttonGroupSx}>
-            {trajectorySteps.map(({ className, value }) => (
+            {trajectorySteps.map(({ icon, value }) => (
               <Button
                 aria-label={`Trajectory planner ${value}%`}
                 key={value}
                 onClick={() => controller.command('rapid_override', value)}
                 sx={{ fontSize: '.75rem' }}
               >
-                <i aria-hidden="true" className={`fa ${className}`} />
+                <FontAwesomeIcon aria-hidden="true" icon={icon} />
                 <Text>{`${value}%`}</Text>
               </Button>
             ))}

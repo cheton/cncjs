@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderAppUI } from '@app/test/render';
 import Tool, { getToolProbeCommands } from '../Tool';
@@ -349,6 +349,32 @@ describe('Tool draft normalization', () => {
 });
 
 describe('Tool widget draft ownership', () => {
+  test('shows refresh progress until the configuration request finishes', async () => {
+    let finishRefresh;
+    mockGetToolConfig.mockReset();
+    mockGetToolConfig.mockResolvedValueOnce({ body: { toolProbeCommand: 'G38.2' } });
+    mockGetToolConfig.mockImplementationOnce(() => new Promise(resolve => {
+      finishRefresh = resolve;
+    }));
+    mockGetToolConfig.mockResolvedValue({ body: { toolProbeCommand: 'G38.2' } });
+    const view = renderAppUI(
+      <ToolWidget widgetId="tool" view="normal" onViewChange={jest.fn()} />,
+    );
+
+    try {
+      await screen.findByRole('button', { name: 'Tool Change Policy' });
+      const refresh = screen.getByRole('button', { name: 'Refresh tool configuration' });
+      expect(within(refresh).queryByRole('progressbar', { hidden: true })).not.toBeInTheDocument();
+      fireEvent.click(refresh);
+      await waitFor(() => expect(within(refresh).getByRole('progressbar', { hidden: true })).toBeInTheDocument());
+      finishRefresh({ body: { toolProbeCommand: 'G38.3' } });
+      await waitFor(() => expect(within(refresh).queryByRole('progressbar', { hidden: true })).not.toBeInTheDocument());
+      expect(mockGetToolConfig).toHaveBeenCalledTimes(2);
+    } finally {
+      view.dispose();
+    }
+  });
+
   test('does not save while hydrating the initial query response', async () => {
     const view = renderAppUI(
       <ToolWidget

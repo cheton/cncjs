@@ -2,7 +2,20 @@ All notable changes are described on the [Releases](https://github.com/cheton/cn
 
 ## Unreleased
 
+- Increase workspace quick-access controller button height, right-align the toolbar with space for adjacent actions, and keep it scrollable on narrow screens.
+- Distinguish dark-mode widget headers using Tonic semantic surfaces.
+- Improve Connection controller selection and Axes control targets and overflow handling for compact layouts.
+- Fit the Axes position table within compact workspace panels while retaining horizontal scrolling for narrower widths.
+- Recolor loaded Visualizer toolpaths and coordinate grids with Tonic semantic tokens when the appearance changes, preserving progress and camera state.
+- Replace Axes keypad and position-editor font icons with Tonic icons or directly imported Font Awesome icons, preserving diagonal jog directions.
+- Replace Tool widget icon-font controls with Tonic icons and a directly imported copy icon; keep refresh progress and widget actions unchanged.
+- Migrate controller, Visualizer, and widget-header icons to Tonic or directly imported Font Awesome definitions while preserving control and loading states.
+- Replace legacy Autolevel child-view icons with Tonic icons.
+- Bring Connection serial-port and baud-rate refresh icons closer to their selectors without reducing the button hit areas.
+- Use Tonic's default checkbox label spacing in the Connection widget.
+- Use Tonic `1x` and `2x` spacing tokens for existing 4px and 8px `Space` components.
 - Add Playwright E2E scenarios for workspace widgets, the Visualizer, and Administration in both light and dark modes. Keep review screenshots in separate color-mode folders.
+- Guard browser E2E Socket.IO and API traffic so only an approved loopback simulator can open a connection or load G-code, and write review screenshots per test run with a manifest so tests, themes, and reruns never overwrite each other.
 - Move browser scenarios and fixtures to root `test/e2e/`, rename the scenario directory to `scenarios/`, and use `yarn test:e2e`; keep generated artifacts in `output/e2e/`.
 - Keep widget controls inside usable-width panels on narrow screens; wrap Laser and Grbl overrides instead of overflowing their cards.
 - Match the Visualizer canvas, grid, coordinate labels, and G-code filename to the application color mode.

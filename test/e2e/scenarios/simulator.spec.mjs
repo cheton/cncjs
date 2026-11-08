@@ -1,10 +1,26 @@
 /* Simulator commands must be issued and observed sequentially. */
 /* eslint-disable no-await-in-loop */
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { test, expect, widget } from '../support/simulator.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 const toolpath = 'G21\nG90\nG1 X10 Y5 F600\nG1 X0 Y0 F600\n';
+
+const readVisualizer = page => page.evaluate(() => {
+  const metrics = window.__CNCJS_VISUALIZER_METRICS__;
+  const engine = metrics?.engines?.[0];
+  if (!engine) {
+    return null;
+  }
+  return {
+    hasGCode: engine.hasGCode,
+    geometryCount: engine.geometryCount,
+    pivotX: engine.pivotX,
+    pivotY: engine.pivotY,
+    loadCount: metrics.loadCount,
+    lastFixtureId: metrics.loadSamples.at(-1)?.fixtureId,
+  };
+});
+
 async function upload(page, content = toolpath) {
   await widget(page, 'visualizer').locator('input[type="file"]').setInputFiles({
     name: 'e2e-toolpath.nc', mimeType: 'text/plain', buffer: Buffer.from(content),
@@ -16,16 +32,35 @@ async function upload(page, content = toolpath) {
 test('simulator: quick access toolbar sends controller commands to the isolated simulator', async ({ page, simulator }) => {
   const toolbar = page.getByRole('toolbar', { name: 'Quick access toolbar' });
   for (const [name, output] of [
-    ['Feedhold', 'RT: !'],
-    ['Cycle Start', 'RT: ~'],
-    ['Homing', 'CMD: $H'],
-    ['Unlock', 'CMD: $X'],
-    ['Sleep', 'CMD: $SLP'],
-    ['Reset', 'RT: Ctrl-X'],
+    ['Feedhold', 'E2E RT: !'],
+    ['Cycle Start', 'E2E RT: ~'],
+    ['Homing', 'CMD: $H ->'],
+    ['Unlock', 'CMD: $X ->'],
+    ['Sleep', 'CMD: $SLP ->'],
+    ['Reset', 'E2E RT: Ctrl-X'],
   ]) {
     await toolbar.getByRole('button', { name, exact: true }).click();
     await expect.poll(() => simulator.commands.some(line => line.includes(output))).toBe(true);
   }
+});
+
+test('simulator: loaded toolpath stays visible when appearance changes', async ({ page, simulator }, testInfo) => {
+  const visualizer = widget(page, 'visualizer');
+  await upload(page, 'G21\nG90\nG0 X0 Y0\nG1 X40 Y20 F600\nG1 X0 Y0 F600\n');
+  const canvas = visualizer.locator('[aria-label="3D Visualizer"] canvas');
+  await expect(canvas).toBeVisible();
+  const initial = testInfo.project.use.colorScheme;
+  const opposite = initial === 'dark' ? 'light' : 'dark';
+  await capture(visualizer, testInfo, 'toolpath-before-theme-switch');
+  await page.getByRole('button', { name: 'Application menu' }).click();
+  await page.getByRole('menuitem', { name: /^Appearance:/ }).click();
+  await page.getByRole('menuitem', { name: opposite === 'dark' ? 'Dark theme' : 'Light theme' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-color-scheme', opposite);
+  await expect(visualizer).toContainText('e2e-toolpath.nc');
+  await expect(canvas).toBeVisible();
+  await expect(visualizer.getByRole('button', { name: 'Run', exact: true })).toBeEnabled();
+  expect(simulator.commands.filter(line => / CMD: G(?:0|1|2|3)(?:\s|$)/.test(line))).toEqual([]);
+  await capture(visualizer, testInfo, 'toolpath-after-theme-switch');
 });
 
 test('simulator: previews dimensions, executes G-code and clears the loaded file', async ({ page, simulator }, testInfo) => {
@@ -35,18 +70,23 @@ test('simulator: previews dimensions, executes G-code and clears the loaded file
   await expect(gcode).toContainText('10.000 mm');
   await expect(gcode).toContainText('5.000 mm');
   await expect(visualizer).toContainText('e2e-toolpath.nc');
-  if (process.env.E2E_SCREENSHOTS === '1') {
-    const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/`, import.meta.url));
-    await mkdir(directory, { recursive: true });
-    await page.screenshot({ path: `${directory}/visualizer-toolpath.png`, fullPage: true });
-  }
+  await expect.poll(() => readVisualizer(page)).toEqual(expect.objectContaining({ hasGCode: true }));
+  const loaded = await readVisualizer(page);
+  expect(loaded.geometryCount).toBeGreaterThan(0);
+  expect(loaded.pivotX).toBeCloseTo(5, 2);
+  expect(loaded.pivotY).toBeCloseTo(2.5, 2);
+  expect(loaded.lastFixtureId).toBe('e2e-toolpath.nc');
+  const loadCount = loaded.loadCount;
+  await capture(page, testInfo, 'visualizer-toolpath', { fullPage: true });
   await visualizer.getByRole('button', { name: 'Run', exact: true }).click();
-  await expect.poll(() => simulator.commands.some(line => line.includes('CMD: G1 X10 Y5 F600'))).toBe(true);
+  await expect.poll(() => simulator.commands.some(line => line.includes('CMD: G1 X10 Y5 F600 ->'))).toBe(true);
   await expect(visualizer.getByRole('button', { name: 'Close G-code file', exact: true })).toBeEnabled();
-  await expect.poll(() => simulator.commands.some(line => line.includes('CMD: G1 X0 Y0 F600'))).toBe(true);
+  await expect.poll(() => simulator.commands.some(line => line.includes('CMD: G1 X0 Y0 F600 ->'))).toBe(true);
   await visualizer.getByRole('button', { name: 'Close G-code file', exact: true }).click();
   await expect(gcode).toContainText('G-code not loaded');
   await expect(visualizer.getByRole('button', { name: 'Run', exact: true })).toBeDisabled();
+  await expect.poll(() => readVisualizer(page)).toEqual(expect.objectContaining({ hasGCode: false }));
+  expect((await readVisualizer(page)).loadCount).toBe(loadCount);
 });
 
 test('simulator: 3D-off dashboard keeps progress labels inside a full-height track', async ({ page, simulator }, testInfo) => {
@@ -75,11 +115,7 @@ test('simulator: 3D-off dashboard keeps progress labels inside a full-height tra
   const bounds = await dashboard.boundingBox();
   const toolbar = await visualizer.getByRole('toolbar', { name: 'G-code workflow toolbar' }).boundingBox();
   expect(bounds.y - toolbar.y - toolbar.height).toBeLessThanOrEqual(16);
-  if (process.env.E2E_SCREENSHOTS === '1') {
-    const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${testInfo.project.name}/`, import.meta.url));
-    await mkdir(directory, { recursive: true });
-    await visualizer.screenshot({ path: `${directory}/visualizer-dashboard.png` });
-  }
+  await capture(visualizer, testInfo, 'visualizer-dashboard');
   await visualizer.getByRole('button', { name: 'Run', exact: true }).click();
   await expect(progress).toHaveAttribute('aria-valuenow', total);
   await expect(dashboard.getByText(`${total} / ${total}`, { exact: true })).toBeVisible();

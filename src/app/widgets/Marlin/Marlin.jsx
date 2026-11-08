@@ -14,6 +14,7 @@ import {
   useTheme,
   Text,
 } from '@tonic-ui/react';
+import { CheckIcon, CloseIcon } from '@tonic-ui/react-icons';
 import { ensureArray, ensurePositiveNumber } from 'ensure-type';
 import _get from 'lodash/get';
 import _mapValues from 'lodash/mapValues';
@@ -267,14 +268,14 @@ function HeaterInput({ icon, label, onCancel, onChange, onSubmit, submitTitle, v
         disabled={!Number.isFinite(value)} size="xs" title={submitTitle}
         onClick={onSubmit}
       >
-        <i aria-hidden="true" className="fa fa-fw fa-check" />
+        <CheckIcon aria-hidden="true" size="1em" width="1.25em" />
       </Button>
       <Space width="2x" />
       <Button
         size="xs" title={i18n._('Cancel')} variant="ghost"
         onClick={onCancel}
       >
-        <i aria-hidden="true" className="fa fa-fw fa-close" />
+        <CloseIcon aria-hidden="true" size="1em" width="1.25em" />
       </Button>
     </Box>
   );

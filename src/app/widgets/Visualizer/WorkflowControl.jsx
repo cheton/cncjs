@@ -9,6 +9,7 @@ import {
   InputGroupAppend,
   Space,
 } from '@tonic-ui/react';
+import { CloseIcon, PauseIcon, PlayIcon, SearchOIcon, StopIcon } from '@tonic-ui/react-icons';
 import get from 'lodash/get';
 import includes from 'lodash/includes';
 import pick from 'lodash/pick';
@@ -145,8 +146,8 @@ function WorkflowControl({ state = {}, actions = {} }) {
                   value: 'browse',
                   content: (
                     <>
-                      <i aria-hidden="true" className="fa fa-search" />
-                      <Space width={8} />
+                      <SearchOIcon aria-hidden="true" size="1em" />
+                      <Space width="2x" />
                       {i18n._('Browse...')}
                     </>
                   ),
@@ -187,7 +188,7 @@ function WorkflowControl({ state = {}, actions = {} }) {
             onClick={actions.handleRun}
             disabled={!canRun}
           >
-            <i aria-hidden="true" className="fa fa-play" />
+            <PlayIcon aria-hidden="true" size="1em" />
           </Button>
           <Button
             aria-label={i18n._('Pause')}
@@ -196,7 +197,7 @@ function WorkflowControl({ state = {}, actions = {} }) {
             onClick={actions.handlePause}
             disabled={!canPause}
           >
-            <i aria-hidden="true" className="fa fa-pause" />
+            <PauseIcon aria-hidden="true" size="1em" />
           </Button>
           <Button
             aria-label={i18n._('Stop')}
@@ -205,7 +206,7 @@ function WorkflowControl({ state = {}, actions = {} }) {
             onClick={actions.handleStop}
             disabled={!canStop}
           >
-            <i aria-hidden="true" className="fa fa-stop" />
+            <StopIcon aria-hidden="true" size="1em" />
           </Button>
           <Button
             aria-label={i18n._('Close G-code file')}
@@ -214,7 +215,7 @@ function WorkflowControl({ state = {}, actions = {} }) {
             onClick={actions.handleClose}
             disabled={!canClose}
           >
-            <i aria-hidden="true" className="fa fa-close" />
+            <CloseIcon aria-hidden="true" size="1em" />
           </Button>
         </ButtonGroup>
       </Flex>

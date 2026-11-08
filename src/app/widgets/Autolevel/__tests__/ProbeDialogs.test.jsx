@@ -6,6 +6,8 @@ import StartProbeModal from '../StartProbeModal';
 import StopProbeModal from '../StopProbeModal';
 import TestProbeModal from '../TestProbeModal';
 import ApplyView from '../ApplyView';
+import SetupProbeView from '../SetupProbeView';
+import { PROBE_STATE_RUNNING } from '../constants';
 
 const mockSubscribe = jest.fn();
 const mockUnsubscribe = jest.fn();
@@ -152,10 +154,70 @@ describe('Autolevel probe dialogs', () => {
   });
 });
 
+describe('Autolevel setup actions', () => {
+  test('keeps back and probe actions accessible across probe states', () => {
+    const onBack = jest.fn();
+    const onStart = jest.fn();
+    const onStop = jest.fn();
+    const props = {
+      canClick: true,
+      onBack,
+      onShowStartProbeConfirmation: onStart,
+      onShowStopProbeConfirmation: onStop,
+      value,
+    };
+    const view = renderAppUI(<SetupProbeView {...props} />);
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Start Probing' }));
+      expect(onBack).toHaveBeenCalledTimes(1);
+      expect(onStart).toHaveBeenCalledTimes(1);
+
+      view.rerender(<SetupProbeView {...props} value={{ ...value, probeState: PROBE_STATE_RUNNING }} />);
+      expect(screen.getByRole('button', { name: 'Back' })).toBeDisabled();
+      fireEvent.click(screen.getByRole('button', { name: 'Stop Probing' }));
+      expect(onStop).toHaveBeenCalledTimes(1);
+    } finally {
+      view.dispose();
+    }
+  });
+});
+
 describe('Autolevel ApplyView lifecycle', () => {
   beforeEach(() => {
     mockSubscribe.mockReset();
     mockUnsubscribe.mockReset();
+  });
+
+  test('keeps back, probe export, and file selection actions accessible', () => {
+    const onBack = jest.fn();
+    const onSaveProbeData = jest.fn();
+    const view = renderAppUI(
+      <ApplyView
+        onBack={onBack}
+        onSaveProbeData={onSaveProbeData}
+        value={{
+          probeStats: { points: 3, minZ: -1, maxZ: 0, maxDeviation: 1 },
+          probedPositions: [{}, {}, {}],
+          units: 'mm',
+        }}
+      />,
+    );
+    const fileInput = view.container.querySelector('input[type="file"]');
+    const chooseFile = jest.spyOn(fileInput, 'click').mockImplementation(() => {});
+
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Export Probe Data' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Load G-code file' }));
+      expect(onBack).toHaveBeenCalledTimes(1);
+      expect(onSaveProbeData).toHaveBeenCalledTimes(1);
+      expect(chooseFile).toHaveBeenCalledTimes(1);
+    } finally {
+      chooseFile.mockRestore();
+      view.dispose();
+    }
   });
 
   test('subscribes to each G-code event once and cleans both subscriptions on unmount', () => {

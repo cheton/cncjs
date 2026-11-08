@@ -1,5 +1,7 @@
 # 多週執行與恢復規則
 
+**2026-11-08 override:** Use the default OMP role without assigning a model. Earlier model and reasoning-effort assignments below are historical; task contracts, evidence, and safety requirements remain in effect.
+
 ## 狀態與唯一來源
 
 [STATUS.md](STATUS.md) 是唯一任務 ledger。plan 的 checkboxes 只代表該 task 的步驟，不是另一份獨立狀態。handoff 連到 ledger 與證據，不複製整份計畫。

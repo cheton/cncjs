@@ -117,7 +117,7 @@ function Macro({
             onClick={handleNewMacro}
           >
             <FontAwesomeIcon icon="plus" fixedWidth />
-            <Space width={8} />
+            <Space width="2x" />
             {i18n._('New')}
           </Button>
         </Box>
@@ -127,7 +127,7 @@ function Macro({
             onClick={handleExportMacros}
           >
             <FontAwesomeIcon icon="file-export" fixedWidth />
-            <Space width={8} />
+            <Space width="2x" />
             {i18n._('Export')}
           </Button>
           <Button
@@ -221,7 +221,7 @@ function Macro({
                     >
                       <FontAwesomeIcon icon="play" fixedWidth />
                     </Button>
-                    <Space width={8} />
+                    <Space width="2x" />
                     {macro.name}
                   </Box>
                   <Box>

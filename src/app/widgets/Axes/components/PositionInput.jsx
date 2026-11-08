@@ -1,3 +1,4 @@
+import { CheckIcon, CloseIcon } from '@tonic-ui/react-icons';
 import noop from 'lodash/noop';
 import React, { useEffect, useRef } from 'react';
 import {
@@ -71,7 +72,7 @@ function PositionInput({
             onSave(value);
           }}
         >
-          <i aria-hidden="true" className="fa fa-fw fa-check" />
+          <CheckIcon aria-hidden="true" size="1em" />
         </Button>
       </InputGroupAppend>
       <InputGroupAppend>
@@ -82,7 +83,7 @@ function PositionInput({
             onCancel();
           }}
         >
-          <i aria-hidden="true" className="fa fa-fw fa-close" />
+          <CloseIcon aria-hidden="true" size="1em" />
         </Button>
       </InputGroupAppend>
     </InputGroup>

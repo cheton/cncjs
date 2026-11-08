@@ -15,6 +15,8 @@ node grbl-server.js 8080
 telnet localhost 3000
 ```
 
+When using `GrblServer` programmatically, `start('127.0.0.1')` restricts the listener to loopback. Calling `start()` retains the default listener behavior.
+
 ## Usage with CNCjs
 
 `yarn dev` starts the simulator automatically on Linux and macOS. Do not run

@@ -1,4 +1,5 @@
-import { Box, Button, Spinner, Text } from '@tonic-ui/react';
+import { Box, Button, Space, Spinner, Text } from '@tonic-ui/react';
+import { ChevronLeftIcon, CloseIcon, DownloadIcon, FolderOpenIcon } from '@tonic-ui/react-icons';
 import pubsub from 'pubsub-js';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import i18n from '@app/lib/i18n';
@@ -163,7 +164,7 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
           aria-label={i18n._('Back')} onClick={onBack} size="sm"
           variant="ghost"
         >
-          <i aria-hidden="true" className="fa fa-chevron-left" />
+          <ChevronLeftIcon aria-hidden="true" size="1em" />
         </Button>
         {i18n._('APPLY COMPENSATION')}
       </Box>
@@ -186,7 +187,9 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
               ))}
             </Box>
             <Button onClick={onSaveProbeData} variant="secondary">
-              <i aria-hidden="true" className="fa fa-download" /> {i18n._('Export Probe Data')}
+              <DownloadIcon aria-hidden="true" size="1em" />
+              <Space width="1x" />
+              {i18n._('Export Probe Data')}
             </Button>
           </Box>
         )}
@@ -198,7 +201,9 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
             {!hasProbeData && <Text color="error.text">{i18n._('Insufficient probe data. At least 3 points are required for surface compensation.')}</Text>}
             {hasProbeData && (
               <Button onClick={() => fileInputRef.current?.click()} variant="secondary">
-                <i aria-hidden="true" className="fa fa-folder-open" /> {i18n._('Load G-code file')}
+                <FolderOpenIcon aria-hidden="true" size="1em" />
+                <Space width="1x" />
+                {i18n._('Load G-code file')}
               </Button>
             )}
           </Box>
@@ -220,7 +225,7 @@ function ApplyView({ value = {}, onApply = () => {}, onBack = () => {}, onClear 
               }}
               variant="ghost"
             >
-              <i aria-hidden="true" className="fa fa-close" />
+              <CloseIcon aria-hidden="true" size="1em" />
             </Button>
             <Button disabled={!pipeline.compensatedGcode} onClick={handleExport} variant="secondary">
               {i18n._('Export Compensated G-code')}

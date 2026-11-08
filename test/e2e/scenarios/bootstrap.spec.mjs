@@ -1,6 +1,5 @@
-import { mkdir } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { test, expect, widget } from '../support/fixtures.mjs';
+import { capture } from '../support/screenshots.mjs';
 
 async function expectLoadingTheme(page, mode) {
   await expect(page.locator('#loading')).toBeVisible();
@@ -75,11 +74,7 @@ for (const storage of ['saved', 'auto', 'missing', 'invalid', 'unavailable']) {
     await expectLoadingTheme(page, mode);
     await page.reload();
     await expectLoadingTheme(page, mode);
-    if (process.env.E2E_SCREENSHOTS === '1') {
-      const directory = fileURLToPath(new URL(`../../../output/e2e/screenshots/${mode}/`, import.meta.url));
-      await mkdir(directory, { recursive: true });
-      await page.screenshot({ path: `${directory}/bootstrap-${storage}.png` });
-    }
+    await capture(page, testInfo, `bootstrap-${storage}`);
     if (storage === 'saved') {
       await page.unroute('**/*.bundle.js');
       await page.reload();
